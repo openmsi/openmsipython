@@ -40,22 +40,29 @@ concurrent_chunks = 10
 # process chunk function
 def process_chunk():
   global chunk_queue
+  n = 1
   while True:
+    print("processing chunk ", n, " \n")
+    n = n + 1
     token = chunk_queue.get()
     if token is None:
       break
-    token = msgpack.unpackb(token,raw=True)
+    token = msgpack.unpackb(token, raw=True)
 ##      topic_dir = token[0].rsplit("/")[0]
 ##      file_name = "/output/"
 ##      if not os.path.exists(topic_dir):
 ##        os.makedirs(topic_dir)
-    file = "/home/sam/Desktop/output_file.txt"
+    if len(token) == 6:
+      file = "/home/sam/Desktop/test-directory/" + "/" + token[5].decode()
+      print(token[4].decode())
       #with open(os.path.join(topic_dir,file_name), "rb+", opener=lambda a,b: os.open(a,b|os.O_CREAT)) as f:
-    with open(file, "a") as f:
-       f.seek(token[3],0)
-       f.write(token[4].decode())
-##        os.fsync(f.fileno())
-##      chunk_queue.task_done()
+      with open(file, "w") as f:
+         f.seek(token[3],0)
+         f.write(token[4].decode())
+         f.flush()
+         os.fsync(f.fileno())
+         f.close()
+      chunk_queue.task_done()
     
 
 # setup chunk queue and chunk processing threads

@@ -16,7 +16,7 @@ chunk_size = 4096
 concurrent_chunks = 10
 upload_queue = Queue()
 
-os.path.isfile
+#os.path.isfile
 consumer = Consumer({
     'bootstrap.servers': 'pkc-ep9mm.us-east-2.aws.confluent.cloud:9092',
     'sasl.mechanism': 'PLAIN',
@@ -52,6 +52,7 @@ def upload_file(file):
     logging.info("  Processing File %s", file)
     file_hash = sha512()
     chunks = []
+    file_name = file.rsplit('/')[-1]
     with open(file, "rb") as f:
         chunk_offset = 0
         chunk = f.read(chunk_size)
@@ -76,7 +77,7 @@ def upload_file(file):
     # And add to upload queue
     #
     for c in chunks:
-        upload_queue.put([file_hash,file,c[0],c[1],c[2]])
+        upload_queue.put([file_hash,file,c[0],c[1],c[2], file_name])
     #upload_queue.put(['metadata',file_hash])
   #
   # Inform client of location
@@ -98,7 +99,7 @@ def upload_worker():
             break
             print("all done")
         else:
-            #print("chunk # ", n)
+            print("chunk # ", n)
             n = n+1
             # chunk message:
             # 0 = file hash
@@ -111,6 +112,7 @@ def upload_worker():
             chunk_hash = token[2]
             chunk_offset = token[3]
             chunk_len = token[4]
+            file_name = token[5]
             with open(file, "rb") as f:
                 f.seek(chunk_offset)
                 data = f.read(chunk_len)
@@ -123,7 +125,7 @@ def upload_worker():
             if chunk_hash != hash:
                 logging.warning("hash %s != expected hash %s on file %s, offset %i, length %i", hash, chunk_hash, file, chunk_offset, chunk_len)
                 raise ValueError
-            producer.produce(topic='lecroy_files',value=msgpack.packb([file,file_hash,chunk_hash,chunk_offset,data], use_bin_type=True))
+            producer.produce(topic='lecroy_files',value=msgpack.packb([file,file_hash,chunk_hash,chunk_offset,data,file_name], use_bin_type=True))
             producer.poll(0)
 
 file = input("input file path \n")
@@ -138,82 +140,82 @@ for i in range(concurrent_chunks):
   t.start()
   upload_threads.append(t)
 
-upload_worker()
+##upload_worker()
 
 ### Open local server for commands
-conn = socket(AF_INET, SOCK_STREAM)
-conn.bind(('localhost',listen_port))
-conn.listen(1)
-
-# Enter processing loop
-threads = []
-try:
-  while True:
-    client,_ = conn.accept()
-    try:
-      client.settimeout(2.0)
-      cmd = ''
-      cmd_part = ''
-      metadata = {}
-      while cmd_part != None:
-        threads = list(filter(lambda a: a.is_alive(), threads))
-        if len(threads) > 0:
-          logging.info("Currently %i files being prepared for upload.", len(threads))
-        upload_threads = list(filter(lambda a: a.is_alive(), upload_threads))
-        if not upload_queue.empty():
-          logging.info("Currently %i chunks and metadata left to upload by %i workers.", upload_queue.qsize(), len(upload_threads))
-        if len(threads) == 0 and upload_queue.empty():
-          logging.info("No current uploads.")
-        while cmd_part != None and cmd.find('\r') == -1 and cmd.find('\n') == -1:
-          try:
-            with toreply_lock:
-              for reply in toreply:
-                if (isinstance(reply,(str))):
-                  client.send(reply.encode('utf-8'))
-                else:
-                  client.send(reply)
-              toreply = []
-            cmd_part = client.recv(4096).decode('utf-8')
-            if len(cmd_part) == 0:
-              cmd_part = None
-          except timeout:
-            cmd_part = ""
-          if cmd_part != None:
-            cmd += cmd_part
-        lines = cmd.splitlines()
-        if not cmd.endswith('\r') and not cmd.endswith('\n') and len(lines) > 0:
-          # last entry is a partial line, remove it and save for next time
-          cmd = lines.pop()
-        else:
-          cmd = ''
-        for l in lines:
-          sl = l.strip()
-          if sl.lower().startswith('upload') and len(sl) > 7:
-            file = sl[7:]
-            logging.info("Uploading %s", file)
-            # dispatch new thread for processing
-            ut = Thread(target=upload_file, args=(file,metadata))
-            ut.daemon = True
-            ut.start()
-            threads.append(ut)
-            metadata = {}
-          elif sl.lower().startswith('metadata') and sl.find('=') != -1:
-            bp = sl.find('=')
-            if bp>9 and bp+1<len(l):
-              lhs = sl[9:bp].strip()
-              rhs = sl[bp+1:].strip()
-              if len(lhs) > 0:
-                if len(rhs) > 0:
-                  metadata[lhs] = rhs
-                else:
-                  metadata.pop(lhs,None)
-              else:
-                logging.warning("Invalid metadata key in command %s", sl)
-            else:
-              logging.warning("Invalid metadata command %s", sl)
-          elif len(sl) > 0:
-            logging.warning("Unknown Command: %s",sl)
-    finally:
-      client.close()
-finally:
-  conn.close()
+##conn = socket(AF_INET, SOCK_STREAM)
+##conn.bind(('localhost',listen_port))
+##conn.listen(1)
+##
+### Enter processing loop
+##threads = []
+##try:
+##  while True:
+##    client,_ = conn.accept()
+##    try:
+##      client.settimeout(2.0)
+##      cmd = ''
+##      cmd_part = ''
+##      metadata = {}
+##      while cmd_part != None:
+##        threads = list(filter(lambda a: a.is_alive(), threads))
+##        if len(threads) > 0:
+##          logging.info("Currently %i files being prepared for upload.", len(threads))
+##        upload_threads = list(filter(lambda a: a.is_alive(), upload_threads))
+##        if not upload_queue.empty():
+##          logging.info("Currently %i chunks and metadata left to upload by %i workers.", upload_queue.qsize(), len(upload_threads))
+##        if len(threads) == 0 and upload_queue.empty():
+##          logging.info("No current uploads.")
+##        while cmd_part != None and cmd.find('\r') == -1 and cmd.find('\n') == -1:
+##          try:
+##            with toreply_lock:
+##              for reply in toreply:
+##                if (isinstance(reply,(str))):
+##                  client.send(reply.encode('utf-8'))
+##                else:
+##                  client.send(reply)
+##              toreply = []
+##            cmd_part = client.recv(4096).decode('utf-8')
+##            if len(cmd_part) == 0:
+##              cmd_part = None
+##          except timeout:
+##            cmd_part = ""
+##          if cmd_part != None:
+##            cmd += cmd_part
+##        lines = cmd.splitlines()
+##        if not cmd.endswith('\r') and not cmd.endswith('\n') and len(lines) > 0:
+##          # last entry is a partial line, remove it and save for next time
+##          cmd = lines.pop()
+##        else:
+##          cmd = ''
+##        for l in lines:
+##          sl = l.strip()
+##          if sl.lower().startswith('upload') and len(sl) > 7:
+##            file = sl[7:]
+##            logging.info("Uploading %s", file)
+##            # dispatch new thread for processing
+##            ut = Thread(target=upload_file, args=(file,metadata))
+##            ut.daemon = True
+##            ut.start()
+##            threads.append(ut)
+##            metadata = {}
+##          elif sl.lower().startswith('metadata') and sl.find('=') != -1:
+##            bp = sl.find('=')
+##            if bp>9 and bp+1<len(l):
+##              lhs = sl[9:bp].strip()
+##              rhs = sl[bp+1:].strip()
+##              if len(lhs) > 0:
+##                if len(rhs) > 0:
+##                  metadata[lhs] = rhs
+##                else:
+##                  metadata.pop(lhs,None)
+##              else:
+##                logging.warning("Invalid metadata key in command %s", sl)
+##            else:
+##              logging.warning("Invalid metadata command %s", sl)
+##          elif len(sl) > 0:
+##            logging.warning("Unknown Command: %s",sl)
+##    finally:
+##      client.close()
+##finally:
+##  conn.close()
