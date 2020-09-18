@@ -70,9 +70,9 @@ def upload_file(file):
     #
     # Now write values to file for future uploading. We do metadata last.
     #
-    kvs = []
-    for c in chunks:
-        kvs.append([c[0],msgpack.packb([file,file_hash,c[0],c[1],c[2]], use_bin_type=True)])
+##    kvs = []
+##    for c in chunks:
+##        kvs.append([c[0],msgpack.packb([file,file_hash,c[0],c[1],c[2]], use_bin_type=True)])
     #
     # And add to upload queue
     #
