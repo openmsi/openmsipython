@@ -55,13 +55,21 @@ def process_chunk():
     if len(token) == 6:
       file = "/home/sam/Desktop/test-directory/" + "/" + token[5].decode()
       print(token[4].decode())
+      if not os.path.isfile(file):
       #with open(os.path.join(topic_dir,file_name), "rb+", opener=lambda a,b: os.open(a,b|os.O_CREAT)) as f:
-      with open(file, "w") as f:
-         f.seek(token[3],0)
-         f.write(token[4].decode())
-         f.flush()
-         os.fsync(f.fileno())
-         f.close()
+        with open(file, "w+") as f:
+           f.seek(token[3],0)
+           f.write(token[4].decode())
+           f.flush()
+  ##         os.fsync(f.fileno())
+           f.close()
+      else:
+        with open(file, "r+") as f:
+           f.seek(token[3],0)
+           f.write(token[4].decode())
+           f.flush()
+  ##         os.fsync(f.fileno())
+           f.close()
       chunk_queue.task_done()
     
 
