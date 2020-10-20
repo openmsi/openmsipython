@@ -1,4 +1,5 @@
 import uuid
+import time
 
 from confluent_kafka import Producer, Consumer
 
@@ -20,13 +21,13 @@ def acked(err, msg):
         print("produced to: {} [{}] @ {}".format(msg.topic(), msg.partition(), msg.offset()))
 
 while True:
-    filename = input("Enter file name ")
+    # filename = input("Enter file name ")
+    filename = "/home/sam/Desktop/test_file"
     with open(filename, 'r') as file:
         data = file.read()
     data = data.encode()
-    
     p.produce('users', value = data, callback=acked)
-
+    time.sleep(2)
 # flush() is typically called when the producer is done sending messages to wait
 # for outstanding messages to be transmitted to the broker and delivery report
 # callbacks to get called. For continous producing you should call p.poll(0)

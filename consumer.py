@@ -32,7 +32,8 @@ try:
         # write message to file instead of printing
         # print(msg.value())
         filecontents = msg.value().decode()
-        file = open("output_test", 'w')
+        file_deliniation = filecontents.split("\n")
+        file = open(file_deliniation[0], 'w')
         file.write(filecontents)
         print('consumed: {}'.format(msg.value()))
         
