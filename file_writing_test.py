@@ -13,7 +13,7 @@ from queue import Queue
 from threading import Thread, Lock
 from sys import argv
 from time import time,sleep
-from kafkacrypto import KafkaCrypto, KafkaConsumer, KafkaProducer, KafkaCryptoStore, OffsetAndMetadata
+#from kafkacrypto import KafkaCrypto, KafkaConsumer, KafkaProducer, KafkaCryptoStore, OffsetAndMetadata
 from confluent_kafka import Consumer
 import uuid
 
@@ -53,7 +53,7 @@ def process_chunk():
 ##      if not os.path.exists(topic_dir):
 ##        os.makedirs(topic_dir)
     if len(token) == 6:
-      file = "/home/sam/Desktop/test-directory/" + "/" + token[5].decode()
+      file = "./" + token[5].decode()
       print(token[4].decode())
       if not os.path.isfile(file):
       #with open(os.path.join(topic_dir,file_name), "rb+", opener=lambda a,b: os.open(a,b|os.O_CREAT)) as f:
