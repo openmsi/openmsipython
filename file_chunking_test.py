@@ -2,7 +2,7 @@ from queue import Queue
 from threading import Thread, Lock
 from time import sleep
 from socket import socket, AF_INET, SOCK_STREAM, timeout
-from kafkacrypto import KafkaCryptoStore, KafkaConsumer, KafkaProducer, KafkaCrypto
+#from kafkacrypto import KafkaCryptoStore, KafkaConsumer, KafkaProducer, KafkaCrypto
 from confluent_kafka import Consumer, Producer
 from sys import argv
 from hashlib import sha512
@@ -128,8 +128,8 @@ def upload_worker():
             producer.produce(topic='lecroy_files',value=msgpack.packb([file,file_hash,chunk_hash,chunk_offset,data,file_name], use_bin_type=True))
             producer.poll(0)
 
-file = input("input file path \n")
-
+#file = input("input file path \n")
+file = argv[1]
 
 upload_file(file)
 
