@@ -56,3 +56,8 @@ This program consumes data sent by file_chunking_test.py and reconstructs the fi
 It checks to make sure the data format is correct so it won't write anything that isn't a file sent byfile_chunking_test so don't worry about sending other data down the pipeline while it is running.
 It prints the text of each file chunk it processes so you can check that and theresulting file against the input file to see if it is working correctly.
 
+### CasJobs_metadata_uploader.py
+Usage `python CasJobs_metadata_uploader.py /path/to/file`
+This program is an extremely barebones test of the sciscript python module. All it does is take a file path as a command line argument and execute a SQL query into a table in the CasJobs MyDB database.
+It also creates the table to insert into, so either comment that code out or drop the table if it already exists. I am going to work on a version that deletes and recreates the table if it exists. Really this is just a proof of concept test. For further detail read the python casjobs documentation, it's very straightforward and is what I used to get started.
+
