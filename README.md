@@ -61,3 +61,16 @@ Usage `python CasJobs_metadata_uploader.py /path/to/file`
 This program is an extremely barebones test of the sciscript python module. All it does is take a file path as a command line argument and execute a SQL query into a table in the CasJobs MyDB database.
 It also creates the table to insert into, so either comment that code out or drop the table if it already exists. I am going to work on a version that deletes and recreates the table if it exists. Really this is just a proof of concept test. For further detail read the python casjobs documentation, it's very straightforward and is what I used to get started.
 
+### upload_lecroy_file.py
+This module uploads a single specified text file's data to the `lecroy_files` topic on the `tutorial_cluster` by breaking it into chunks of a particular size and uploading those chunks in parallel threads. To run it in the most common use case, enter the following command and arguments:
+
+`python -m Python_code.producers.upload_lecroy_file [file_path]`
+
+where `[file_path]` is the path to the text file to upload. Running the code will produce all the chunks of the single file to the topic.
+
+Options for running the code include:
+1. Changing the number of parallel threads allowed to run at a time: add the `--n_threads [threads]` argument where `[threads]` is the desired number of parallel threads to allow (the default is 10 threads).
+1. Changing the size of the individual file chunks: add the `--chunk_size [n_bytes]` argument where `[n_bytes]` is the desired chunk size in bytes. `[n_bytes]` must be a nonzero power of two (the default is 4096).
+
+While the module can be run standalone as above to upload a single file, it also provides access to the `UploadLeCroyFile` class that can be used in other code to do the same thing.
+
