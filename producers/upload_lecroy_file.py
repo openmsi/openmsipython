@@ -3,7 +3,7 @@ from ..utilities.oscilloscope import LeCroyFileChunkInfo, upload_lecroy_file_chu
 from ..utilities.logging import Logger
 from ..config.oscilloscope import OSC_CONST
 from queue import Queue
-from threading import Thread
+from threading import Thread, Lock
 from hashlib import sha512
 from argparse import ArgumentParser
 import os, math
@@ -20,6 +20,7 @@ class UploadLeCroyFile() :
             logger_to_use = Logger()
         self._logger = logger_to_use
         self._producer = OSC_CONST.PRODUCER
+        self._thread_lock = Lock()
 
     #################### PUBLIC FUNCTIONS ####################
     
@@ -44,7 +45,8 @@ class UploadLeCroyFile() :
                                                                     n_tokens,
                                                                     self._producer,
                                                                     OSC_CONST.LECROY_FILE_TOPIC_NAME,
-                                                                    self._logger))
+                                                                    self._thread_lock,
+                                                                    self._logger,))
             t.start()
             upload_threads.append(t)
             if len(upload_threads)>=n_threads :
