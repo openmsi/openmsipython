@@ -75,12 +75,13 @@ class UploadLeCroyFile() :
                 chunks.append([chunk_hash,chunk_offset,chunk_length])
                 chunk_offset += chunk_length
                 chunk = fp.read(chunk_size)
+        n_chunks = len(chunks)
         self._file_hash = file_hash.digest()
-        self._logger.info(f'File {self._filepath} has hash {self._file_hash}, with a total of {len(chunks)} chunks')
+        self._logger.info(f'File {self._filepath} has hash {self._file_hash}, with a total of {n_chunks} chunks')
         #add all the chunks to the upload queue
         self._upload_queue = Queue()
         for c in chunks:
-            self._upload_queue.put(LeCroyFileChunkInfo(self._filepath,self._file_hash,c[0],c[1],c[2],self._filename))
+            self._upload_queue.put(LeCroyFileChunkInfo(self._filepath,self._file_hash,c[0],c[1],c[2],self._filename,n_chunks))
         self._upload_queue.put(None)
 
 #################### MAIN SCRIPT HELPER FUNCTIONS ####################
