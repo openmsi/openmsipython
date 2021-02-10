@@ -13,6 +13,7 @@ class LeCroyFileChunkInfo :
     chunk_offset : int
     chunk_size : int
     filename : str
+    n_total_chunks : int
 
     #return the file chunk as a packed message
     def packed_as_msg_with_data(self,data) :
@@ -23,6 +24,7 @@ class LeCroyFileChunkInfo :
         p_list.append(self.chunk_offset)
         p_list.append(data)
         p_list.append(self.filename)
+        p_list.append(self.n_total_chunks)
         return msgpack.packb(p_list,use_bin_type=True)
 
 #upload a single LeCroyFileChunkInfo token with its data to a given topic (meant to be run in parallel)
