@@ -28,7 +28,7 @@ class LeCroyFileChunkInfo :
         return msgpack.packb(p_list,use_bin_type=True)
 
 #upload a single LeCroyFileChunkInfo token with its data to a given topic (meant to be run in parallel)
-def upload_lecroy_file_chunk_worker(token,token_i,n_tokens,producer,topic_name,logger=None,print_every=1000) :
+def upload_lecroy_file_chunk_worker(token,token_i,n_tokens,producer,topic_name,thread_lock,logger=None,print_every=1000) :
     if logger is None :
         logger = Logger()
     filepath = token.filepath
@@ -51,5 +51,7 @@ def upload_lecroy_file_chunk_worker(token,token_i,n_tokens,producer,topic_name,l
     if chunk_hash != check_chunk_hash:
         msg = f'ERROR: chunk hash {check_chunk_hash} != expected hash {chunk_hash} in file {filepath}, offset {chunk_offset}'
         logger.error(msg,ValueError)
+    thread_lock.acquire()
     producer.produce(topic=topic_name,value=token.packed_as_msg_with_data(data))
     producer.poll(0)
+    thread_lock.release()
