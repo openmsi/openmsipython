@@ -3,6 +3,7 @@ from confluent_kafka import Consumer, Producer
 import uuid
 
 ########################## FILE SCOPE VARIABLES ##########################
+
 oscilloscope_consumer = Consumer({
     'bootstrap.servers': 'pkc-ep9mm.us-east-2.aws.confluent.cloud:9092',
     'sasl.mechanism': 'PLAIN',
@@ -35,5 +36,15 @@ class OscilloscopeConstants :
     @property
     def LECROY_FILE_TOPIC_NAME(self):
         return 'lecroy_files' #name of the topic to which oscilloscope files should be produced in the tutorial_cluster
+    @property
+    def FILE_HASH_MISMATCH_CODE(self):
+        return -1 # code indicating that a file's hashes didn't match
+    @property
+    def FILE_SUCCESSFULLY_RECONSTRUCTED_CODE(self):
+        return 1 # code indicating that a file was successfully fully reconstructed
+    @property
+    def FILE_IN_PROGRESS(self):
+        return 0 # code indicating that a file is in the process of being reconstructed
+    
     
 OSC_CONST=OscilloscopeConstants()
