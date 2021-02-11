@@ -133,6 +133,7 @@ def main(args=None) :
     file_reconstructor = LeCroyFileReconstructor(logger)
     #start the reconstructor running (returns total number of chunks read and total number of files completely reconstructed)
     run_start = datetime.datetime.now()
+    logger.info(f'Listening for files to reconstruct in {args.workingdir}')
     n_msgs,n_complete_files = file_reconstructor.run(args.workingdir,args.n_threads,args.update_seconds)
     run_stop = datetime.datetime.now()
     #shut down when that function returns
