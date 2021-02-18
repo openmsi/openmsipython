@@ -4,7 +4,6 @@ from ..config.oscilloscope import OSC_CONST
 from queue import Queue
 from threading import Thread, Lock
 from hashlib import sha512
-from argparse import ArgumentParser
 import os, msgpack
 
 #logger for this file scope 
@@ -22,7 +21,7 @@ class LeCroyFile() :
         if logger_to_use is None :
             logger_to_use = Logger()
         LOGGER = logger_to_use
-        self._chunks_added = 0
+        self._chunks_added = set()
         self._total_chunks = 0
 
     #################### PUBLIC FUNCTIONS ####################
@@ -55,30 +54,38 @@ class LeCroyFile() :
             if len(upload_threads)>=n_threads :
                 for ut in upload_threads :
                     ut.join()
+                OSC_CONST.PRODUCER.flush() #make sure the current batch has been sent before moving to the next
                 upload_threads = []
             token = self._upload_queue.get()
         for ut in upload_threads :
             ut.join()
+        OSC_CONST.PRODUCER.flush() #don't leave the function until every message has been sent/received
 
-    def add_file_chunk(self,fci,workingdir) :
+    def add_file_chunk(self,fci,workingdir,thread_lock) :
         """
         Add the data from a given file chunk to this file on disk in a given working directory
         fci = the LeCroyFileChunkInfo object whose data should be added
         workingdir = path to the directory where the reconstructed files should be saved
+        thread_lock = the lock object to acquire/release so that race conditions don't affect reconstruction of the files
         """
         reconstructed_filepath = os.path.join(workingdir,fci.filename)
         #lock the current thread while data is written to the file
         mode = 'r+b' if os.path.isfile(reconstructed_filepath) else 'w+b'
         with open(reconstructed_filepath,mode) as fp :
-            fp.seek(fci.chunk_offset)
-            fp.write(fci.data)
-        #increment how many chunks have been added to this file
-        self._chunks_added+=1
+            with thread_lock :
+                fp.seek(fci.chunk_offset)
+                fp.write(fci.data)
+                fp.flush()
+                os.fsync(fp.fileno())
+                fp.close()
+        #add the offset of the added chunk to the set of reconstructed file chunks
+        self._chunks_added.add(fci.chunk_offset)
         #if this chunk was the last that needed to be added, check the hashes to make sure the file is the same as it was originally
-        if self._chunks_added==fci.n_total_chunks :
+        if len(self._chunks_added)==fci.n_total_chunks :
             check_file_hash = sha512()
-            with open(reconstructed_filepath,'rb') as fp :
-                data = fp.read()
+            with thread_lock :
+                with open(reconstructed_filepath,'rb') as fp :
+                    data = fp.read()
             check_file_hash.update(data)
             check_file_hash = check_file_hash.digest()
             if check_file_hash!=fci.file_hash :
@@ -250,4 +257,4 @@ def upload_lecroy_file_chunk_worker(token,token_i,n_tokens,producer,topic_name,t
             logger.error(msg,ValueError)
     with thread_lock :
         producer.produce(topic=topic_name,key=f'{token.filename}_chunk_{token_i}_of_{n_tokens}',value=token.packed_as_msg_with_data(data),callback=producer_callback)
-        producer.poll(1) #wait up to 1 second for the call to register
+    producer.poll(0)
