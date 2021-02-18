@@ -19,7 +19,7 @@ class LeCroyFileReconstructor() :
             logger_to_use = Logger()
         self._logger = logger_to_use
         manager = Manager()
-        self._lecroy_file_dict = manager.dict()
+        self._lecroy_file_dict = {}
         self._queue = Queue()
         self._threads = []
 
@@ -95,9 +95,10 @@ class LeCroyFileReconstructor() :
             elif return_value==OSC_CONST.FILE_SUCCESSFULLY_RECONSTRUCTED_CODE :
                 self._logger.info(f'File {fci.filename} successfully reconstructed locally from stream')
                 with lock :
-                    self._n_msgs_read+=1
-                    self._n_files_completely_reconstructed+=1
-                    del self._lecroy_file_dict[fci.filename]
+                    if fci.filename in self._lecroy_file_dict :
+                        self._n_msgs_read+=1
+                        self._n_files_completely_reconstructed+=1
+                        del self._lecroy_file_dict[fci.filename]
             elif return_value==OSC_CONST.FILE_IN_PROGRESS :
                 with lock :
                     self._n_msgs_read+=1
