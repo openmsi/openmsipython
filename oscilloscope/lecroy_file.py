@@ -7,17 +7,21 @@ from hashlib import sha512
 from argparse import ArgumentParser
 import os, msgpack
 
+#logger for this file scope 
+LOGGER=None
+
 # LeCroyFile Class
 class LeCroyFile() :
     """
     Class for handling chunking and uploading of a single oscilloscope file to the LeCroy file topic of the LeCroy file cluster
     """
     def __init__(self,filepath,logger_to_use=None) :
+        global LOGGER
         self._filepath = filepath
         self._filename = os.path.basename(filepath)
         if logger_to_use is None :
             logger_to_use = Logger()
-        self._logger = logger_to_use
+        LOGGER = logger_to_use
         self._chunks_added = 0
         self._total_chunks = 0
 
@@ -29,11 +33,11 @@ class LeCroyFile() :
         n_threads  = the number of threads to run at once during uploading
         chunk_size = the size of each file chunk in bytes
         """
-        self._logger.info(f'Uploading file {self._filepath}....')
+        global LOGGER
+        LOGGER.info(f'Uploading file {self._filepath}....')
         #build the upload queue
         self._build_upload_queue(chunk_size)
         #upload all the objects in the queue in parallel threads
-        n_tokens = self._upload_queue.qsize()
         upload_threads = []
         token = self._upload_queue.get()
         token_i = 0
@@ -42,11 +46,10 @@ class LeCroyFile() :
             token_i+=1
             t = Thread(target=upload_lecroy_file_chunk_worker,args=(token,
                                                                     token_i,
-                                                                    n_tokens,
+                                                                    self._total_chunks,
                                                                     OSC_CONST.PRODUCER,
                                                                     OSC_CONST.LECROY_FILE_TOPIC_NAME,
-                                                                    lock,
-                                                                    self._logger,))
+                                                                    lock,))
             t.start()
             upload_threads.append(t)
             if len(upload_threads)>=n_threads :
@@ -89,6 +92,7 @@ class LeCroyFile() :
 
     #build the upload queue for this file path by breaking its binary data into chunks of the specified size
     def _build_upload_queue(self,chunk_size) :
+        global LOGGER
         #start a hash for the file and the list of chunks
         file_hash = sha512()
         chunks = []
@@ -107,7 +111,7 @@ class LeCroyFile() :
                 chunk = fp.read(chunk_size)
         self._total_chunks = len(chunks)
         file_hash = file_hash.digest()
-        self._logger.info(f'File {self._filepath} has hash {file_hash}, with a total of {self._total_chunks} chunks')
+        LOGGER.info(f'File {self._filepath} has hash {file_hash}, with a total of {self._total_chunks} chunks')
         #add all the chunks to the upload queue
         self._upload_queue = Queue()
         for c in chunks:
@@ -120,6 +124,7 @@ class LeCroyFileChunkInfo() :
     Class to deal with single chunks of file info
     """
     def __init__(self,*args) :
+        global LOGGER
         """
         *args = list of initializing arguments
         if len(args) is 7, the object can be instantiated from those values
@@ -139,7 +144,10 @@ class LeCroyFileChunkInfo() :
         else :
             msg = f'ERROR: {len(args)} arguments given to LeCroyFileChunkInfo, but this object must be '
             msg+= 'instantiated using either 7 specific arguments or a single token.'
-            raise ValueError(msg)
+            if LOGGER is not None :
+                LOGGER.error(msg,ValueError)
+            else :
+                raise ValueError(msg)
 
     #################### PUBLIC FUNCTIONS ####################
 
@@ -162,9 +170,14 @@ class LeCroyFileChunkInfo() :
 
     #helper function to instantiate the object by reading a token instead of from individual values
     def _init_from_token(self,token) :
+        global LOGGER
         p_list = msgpack.unpackb(token,raw=True)
         if len(p_list)!=7 :
-            raise ValueError(f'ERROR: unrecognized token passed to LeCroyFileChunkInfo. Expected 7 properties but found {len(p_list)}')
+            msg = f'ERROR: unrecognized token passed to LeCroyFileChunkInfo. Expected 7 properties but found {len(p_list)}'
+            if LOGGER is not None :
+                LOGGER.error(msg,ValueError)
+            else :
+                raise ValueError()
         else :
             try :
                 self.filepath = str(p_list[0].decode())
@@ -179,23 +192,43 @@ class LeCroyFileChunkInfo() :
                 raise ValueError(f'ERROR: unrecognized value(s) when instantiating LeCroyFileChunkInfo from token. Exception: {e}')
         if len(self.data)!=self.chunk_size :
             msg = f'ERROR: chunk {self.chunk_hash} size {len(self._data)} != expected size {self.chunk_size} in file {self.filename}, offset {self.chunk_offset}'
-            raise ValueError(msg)
+            if LOGGER is not None :
+                LOGGER.error(msg,ValueError)
+            else :
+                raise ValueError(msg)
         check_chunk_hash = sha512()
         check_chunk_hash.update(self.data)
         check_chunk_hash = check_chunk_hash.digest()
         if check_chunk_hash!=self.chunk_hash :
             msg = f'ERROR: chunk hash {check_chunk_hash} != expected hash {self.chunk_hash} in file {self.filename}, offset {self.chunk_offset}'
-            raise ValueError(msg)
+            if LOGGER is not None :
+                LOGGER.error(msg,ValueError)
+            else :
+                raise ValueError(msg)
 
 #################### FILE-SCOPE HELPER FUNCTIONS ####################
 
+#a callback function to use for testing whether a message has been successfully produced to the topic
+def producer_callback(err,msg) :
+    global LOGGER
+    if err is not None: #raise an error if the message wasn't sent successfully
+        logmsg=f'WARNING: Failed to deliver message with key {msg.key()}. Error: {err}'
+        if LOGGER is not None :
+            LOGGER.warning(logmsg)
+        else :
+            print(logmsg)
+
 #upload a single LeCroyFileChunkInfo token with its data to a given topic (meant to be run in parallel)
-def upload_lecroy_file_chunk_worker(token,token_i,n_tokens,producer,topic_name,thread_lock,logger=None,print_every=1000) :
-    if logger is None :
+def upload_lecroy_file_chunk_worker(token,token_i,n_tokens,producer,topic_name,thread_lock,print_every=1000) :
+    global LOGGER
+    if LOGGER is None :
         logger = Logger()
+    else :
+        logger = LOGGER
     filepath = token.filepath
     if (token_i-1)%print_every==0 :
-        logger.info(f'uploading {filepath} chunk {token_i} (out of {n_tokens})')
+        with thread_lock :
+            logger.info(f'uploading {filepath} chunk {token_i} (out of {n_tokens})')
     chunk_hash = token.chunk_hash
     chunk_offset = token.chunk_offset
     chunk_len = token.chunk_size
@@ -205,14 +238,16 @@ def upload_lecroy_file_chunk_worker(token,token_i,n_tokens,producer,topic_name,t
         data = fp.read(chunk_len)
     #make sure it's of the expected size
     if len(data) != chunk_len:
-        msg = f'ERROR: chunk {chunk_hash} size {len(data)} != expected size {chunk_len} in file {filepath}, offset {chunk_offset}'
-        logger.error(msg,ValueError)
+        with thread_lock :
+            msg = f'ERROR: chunk {chunk_hash} size {len(data)} != expected size {chunk_len} in file {filepath}, offset {chunk_offset}'
+            logger.error(msg,ValueError)
     check_chunk_hash = sha512()
     check_chunk_hash.update(data)
     check_chunk_hash = check_chunk_hash.digest()
     if chunk_hash != check_chunk_hash:
-        msg = f'ERROR: chunk hash {check_chunk_hash} != expected hash {chunk_hash} in file {filepath}, offset {chunk_offset}'
-        logger.error(msg,ValueError)
+        with thread_lock :
+            msg = f'ERROR: chunk hash {check_chunk_hash} != expected hash {chunk_hash} in file {filepath}, offset {chunk_offset}'
+            logger.error(msg,ValueError)
     with thread_lock :
-        producer.produce(topic=topic_name,value=token.packed_as_msg_with_data(data))
-        producer.poll(0)
+        producer.produce(topic=topic_name,key=f'{token.filename}_chunk_{token_i}_of_{n_tokens}',value=token.packed_as_msg_with_data(data),callback=producer_callback)
+        producer.poll(1) #wait up to 1 second for the call to register
