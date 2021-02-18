@@ -5,9 +5,8 @@ from ..utilities.logging import Logger
 from ..config.oscilloscope import OSC_CONST
 from queue import Queue
 from threading import Thread, Lock
-from multiprocessing import Manager
 from argparse import ArgumentParser
-import os, sys, time, datetime
+import os, time, datetime
 
 # LeCroyFileReconstructor class
 class LeCroyFileReconstructor() :
@@ -18,7 +17,6 @@ class LeCroyFileReconstructor() :
         if logger_to_use is None :
             logger_to_use = Logger()
         self._logger = logger_to_use
-        manager = Manager()
         self._lecroy_file_dict = {}
         self._queue = Queue()
         self._threads = []
@@ -88,8 +86,8 @@ class LeCroyFileReconstructor() :
             #add the chunk's data to the file that's being reconstructed
             if fci.filename not in self._lecroy_file_dict.keys() :
                 with lock :
-                    self._lecroy_file_dict[fci.filename] = LeCroyFile(fci.filepath,self._logger)
-            return_value = self._lecroy_file_dict[fci.filename].add_file_chunk(fci,workingdir)
+                    self._lecroy_file_dict[fci.filename] = (LeCroyFile(fci.filepath,self._logger),Lock())
+            return_value = self._lecroy_file_dict[fci.filename][0].add_file_chunk(fci,workingdir,self._lecroy_file_dict[fci.filename][1])
             if return_value==OSC_CONST.FILE_HASH_MISMATCH_CODE :
                 self._logger.error(f'ERROR: file hashes for file {fci.filename} not matched after reconstruction!',RuntimeError)
             elif return_value==OSC_CONST.FILE_SUCCESSFULLY_RECONSTRUCTED_CODE :
