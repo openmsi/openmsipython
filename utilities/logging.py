@@ -24,7 +24,7 @@ class Logger :
     #function to log an error message and optionally raise an exception with the same message
 
     def error(self,msg,exception_type=None) :
-        self._logger_obj(msg)
+        self._logger_obj.error(msg)
         if exception_type is not None :
             raise exception_type(msg)
 
