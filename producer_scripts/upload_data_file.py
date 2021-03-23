@@ -1,6 +1,7 @@
 #imports
-from ..oscilloscope.lecroy_file import LeCroyFile
+from ..data_file_io.data_file import DataFile
 from ..utilities.logging import Logger
+from ..utilities.config import RUN_OPT_CONST
 from argparse import ArgumentParser
 import os, math
 
@@ -23,19 +24,19 @@ def main(args=None) :
     #positional argument: filepath to upload
     parser.add_argument('filepath', help='Path to the file that should be uploaded')
     #optional arguments
-    parser.add_argument('--n_threads', default=10, type=int,
-                        help='Maximum number of threads to use (default=10)')
-    parser.add_argument('--chunk_size', default=4096, type=int,
-                        help='Size (in bytes) of chunks into which files should be broken as they are uploaded (default=4096)')
+    parser.add_argument('--n_threads', default=RUN_OPT_CONST.N_DEFAULT_UPLOAD_THREADS, type=int,
+                        help=f'Maximum number of threads to use (default={RUN_OPT_CONST.N_DEFAULT_UPLOAD_THREADS})')
+    parser.add_argument('--chunk_size', default=RUN_OPT_CONST.DEFAULT_CHUNK_SIZE, type=int,
+                        help=f'Size (in bytes) of chunks into which files should be broken as they are uploaded (default={RUN_OPT_CONST.DEFAULT_CHUNK_SIZE})')
     args = parser.parse_args(args=args)
-    #get the logger
+    #make a new logger
     logger = Logger()
     #check the arguments
     check_args(args,logger)
-    #make the LeCroyFile for the single specified file
-    upload_oscilloscope_file = LeCroyFile(args.filepath,logger)
+    #make the DataFile for the single specified file
+    upload_file = DataFile(args.filepath,logger=logger)
     #chunk and upload the file
-    upload_oscilloscope_file.upload(args.n_threads,args.chunk_size)
+    upload_file.upload_whole_file(n_threads=args.n_threads,chunk_size=args.chunk_size)
     logger.info(f'Done uploading {args.filepath}')
 
 if __name__=='__main__' :
