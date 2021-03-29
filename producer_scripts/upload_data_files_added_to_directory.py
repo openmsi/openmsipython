@@ -44,7 +44,7 @@ def main(args=None) :
     enqueued_filenames = upload_file_directory.upload_files_as_added(n_threads=args.n_threads,chunk_size=args.chunk_size,update_seconds=args.update_seconds)
     run_stop = datetime.datetime.now()
     logger.info(f'Done listening to {args.file_directory} for files to upload')
-    final_msg = f'The following {len(enqueued_filenames)} files were uploaded between {run_start} and {run_stop}:\n'
+    final_msg = f'The following {len(enqueued_filenames)} files were enqueued between {run_start} and {run_stop}:\n'
     for ef in enqueued_filenames :
         final_msg+=f'{ef}\n'
     logger.info(final_msg)

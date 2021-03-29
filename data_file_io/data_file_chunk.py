@@ -1,6 +1,6 @@
 #imports
 from hashlib import sha512
-import msgpack
+import msgpack, time
 
 # DataFileChunk Class 
 class DataFileChunk() :
@@ -69,7 +69,7 @@ class DataFileChunk() :
 
     #################### PUBLIC FUNCTIONS ####################
 
-    def upload_as_message(self,producer,topic_name,logger,thread_lock,print_every=10000) :
+    def upload_as_message(self,producer,topic_name,logger,thread_lock,print_every=1000) :
         """
         Upload the file chunk as a message to the specified topic using the specified producer
         Meant to be run in parallel
@@ -84,7 +84,7 @@ class DataFileChunk() :
         LOGGER = logger
         #log a line about this file chunk if applicable
         filepath = self.filepath
-        if (self.chunk_i-1)%print_every==0 :
+        if (self.chunk_i-1)%print_every==0 or self.chunk_i==self.n_total_chunks :
             with thread_lock :
                 logger.info(f'uploading {filepath} chunk {self.chunk_i} (out of {self.n_total_chunks})')
         #get this chunk's data from the file
@@ -107,9 +107,17 @@ class DataFileChunk() :
         #produce the message to the topic
         message_value = self._packed_as_message(data)
         with thread_lock :
-            producer.produce(topic=topic_name,
-                             key=f'{self.filename}_chunk_{self.chunk_i}_of_{self.n_total_chunks}',
-                             value=message_value,callback=producer_callback)
+            try :
+                producer.produce(topic=topic_name,
+                                 key=f'{self.filename}_chunk_{self.chunk_i}_of_{self.n_total_chunks}',
+                                 value=message_value,callback=producer_callback)
+            except BufferError :
+                logger.info(f'Flushing producer to empty local buffer queue (this may take a moment)...')
+                producer.flush()
+                logger.info(f'Done flushing producer.')
+                producer.produce(topic=topic_name,
+                                 key=f'{self.filename}_chunk_{self.chunk_i}_of_{self.n_total_chunks}',
+                                 value=message_value,callback=producer_callback)
         producer.poll(0)
 
 

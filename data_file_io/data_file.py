@@ -57,9 +57,9 @@ class DataFile() :
                 chunk_offset += chunk_length
                 chunk = fp.read(chunk_size)
         file_hash = file_hash.digest()
-        self._logger.info(f'File {self._filepath} has hash {file_hash}, with a total of {len(chunks)} chunks')
+        self._logger.info(f'File {self._filepath} has a total of {len(chunks)} chunks')
         #add all the chunks to the other list as DataFileChunk objects
-        for ic,c in enumerate(chunks) :
+        for ic,c in enumerate(chunks,start=1) :
             data_file_chunks.append(DataFileChunk(self._filepath,file_hash,c[0],c[1],c[2],self._filename,ic,len(chunks)))
         #return the list of DataFileChunks
         return data_file_chunks
