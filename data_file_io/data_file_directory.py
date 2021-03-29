@@ -98,8 +98,8 @@ class DataFileDirectory() :
                     enqueued_filenames.append(fn)
                     self._filenames_done.add(fn)
             else :
-                #wait for half the update time so we're not constantly checking for new files
-                time.sleep(kwargs['update_seconds']/2.)
+                #wait for 3 seconds so we're not constantly checking for new files
+                time.sleep(3)
         #stop the uploading threads by adding "None" to the queue 
         upload_queue.put(None)
         #join the upload thread

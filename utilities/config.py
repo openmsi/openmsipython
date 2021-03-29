@@ -44,15 +44,15 @@ DATA_FILE_HANDLING_CONST=DataFileHandlingConstants()
 class RunOptionConstants :
     @property
     def N_DEFAULT_UPLOAD_THREADS(self):
-        return 10 # default number of threads to use when uploading a file
+        return 5 # default number of threads to use when uploading a file
     @property
     def N_DEFAULT_DOWNLOAD_THREADS(self):
         return 5 # default number of threads to use when reconstructing files
     @property
     def DEFAULT_CHUNK_SIZE(self) :
-        return 4096 # default size in bytes of each file upload chunk
+        return 65536 #4096 # default size in bytes of each file upload chunk
     @property
     def DEFAULT_UPDATE_SECONDS(self) :
-        return 10 # how many seconds to wait by default between printing the "still alive" character/message for a running consumer
+        return 30 # how many seconds to wait by default between printing the "still alive" character/message for a running process
     
 RUN_OPT_CONST=RunOptionConstants()
