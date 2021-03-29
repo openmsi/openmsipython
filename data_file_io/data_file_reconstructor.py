@@ -8,7 +8,7 @@ from ..utilities.config import RUN_OPT_CONST, TUTORIAL_CLUSTER_CONST, DATA_FILE_
 from confluent_kafka import Consumer
 from queue import Queue
 from threading import Thread, Lock
-import time, uuid
+import os, time, uuid
 
 # DataFileReconstructor class
 class DataFileReconstructor() :
@@ -22,7 +22,7 @@ class DataFileReconstructor() :
         """
         self._logger = kwargs.get('logger')
         if self._logger is None :
-            self._logger = Logger()
+            self._logger = Logger(os.path.basename(__file__).split('.')[0])
         self._data_files_by_name = {}
         self._threads = []
         self._consumers = []

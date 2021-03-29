@@ -30,7 +30,7 @@ def main(args=None) :
                         help=f'Size (in bytes) of chunks into which files should be broken as they are uploaded (default={RUN_OPT_CONST.DEFAULT_CHUNK_SIZE})')
     args = parser.parse_args(args=args)
     #make a new logger
-    logger = Logger()
+    logger = Logger(os.path.basename(__file__).split('.')[0])
     #check the arguments
     check_args(args,logger)
     #make the DataFile for the single specified file

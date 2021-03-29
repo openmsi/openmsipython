@@ -27,7 +27,7 @@ class DataFileDirectory() :
         self._dirpath = dirpath
         self._logger = kwargs.get('logger')
         if self._logger is None :
-            self._logger = Logger()
+            self._logger = Logger(os.path.basename(__file__).split('.')[0])
 
     #################### PUBLIC FUNCTIONS ####################
 

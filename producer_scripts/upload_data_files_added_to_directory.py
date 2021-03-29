@@ -9,9 +9,9 @@ import os, math
 
 #make sure the command line arguments are valid
 def check_args(args,logger) :
-    #the given file must exist
-    if not os.path.isfile(args.filepath) :
-        logger.error(f'ERROR: file {args.filepath} does not exist!',FileNotFoundError)
+    #the given directory must exist
+    if not os.path.isdir(args.file_directory) :
+        logger.error(f'ERROR: directory {args.file_directory} does not exist!',FileNotFoundError)
     #the chunk size has to be a nonzero power of two
     if args.chunk_size==0 or math.ceil(math.log2(args.chunk_size))!=math.floor(math.log2(args.chunk_size)) :
         logger.error(f'ERROR: chunk size {args.chunk_size} is invalid. Must be a (nonzero) power of two!',ValueError)
@@ -30,14 +30,14 @@ def main(args=None) :
                         help=f'Size (in bytes) of chunks into which files should be broken as they are uploaded (default={RUN_OPT_CONST.DEFAULT_CHUNK_SIZE})')
     args = parser.parse_args(args=args)
     #make a new logger
-    logger = Logger()
+    logger = Logger(os.path.basename(__file__).split('.')[0])
     #check the arguments
     check_args(args,logger)
     #make the DataFileDirectory for the specified directory
     upload_file_directory = DataFileDirectory(args.file_directory,logger=logger)
     #listen for new files in the directory and run uploads as they come in until the process is shut down
     upload_file_directory.upload_files_as_added(n_threads=args.n_threads,chunk_size=args.chunk_size)
-    logger.info(f'Done uploading {args.filepath}')
+    logger.info(f'Done listening to {args.file_directory} for files to upload')
 
 if __name__=='__main__' :
     main()
