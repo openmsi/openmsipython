@@ -1,6 +1,6 @@
 import uuid
 
-from confluent_kafka import Producer, Consumer
+from confluent_kafka import Consumer
 
 
 

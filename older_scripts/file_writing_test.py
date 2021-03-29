@@ -7,13 +7,8 @@
 #
 import msgpack
 import os
-import logging
-import traceback
 from queue import Queue
-from threading import Thread, Lock
-from sys import argv
-from time import time,sleep
-#from kafkacrypto import KafkaCrypto, KafkaConsumer, KafkaProducer, KafkaCryptoStore, OffsetAndMetadata
+from threading import Thread
 from confluent_kafka import Consumer
 import uuid
 

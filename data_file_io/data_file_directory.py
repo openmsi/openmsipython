@@ -2,14 +2,12 @@
 from .data_file import DataFile
 from .utilities import produce_queue_of_file_chunks
 from ..my_kafka.my_producers import TutorialClusterProducer
-from ..utilities.misc import populated_kwargs
+from ..utilities.misc import add_user_input, populated_kwargs
 from ..utilities.logging import Logger
-from ..utilities.config import DATA_FILE_HANDLING_CONST, RUN_OPT_CONST, TUTORIAL_CLUSTER_CONST
+from ..utilities.config import RUN_OPT_CONST, TUTORIAL_CLUSTER_CONST
 from confluent_kafka import Producer
 from queue import Queue
-from threading import Thread, Lock
-from contextlib import nullcontext
-from hashlib import sha512
+from threading import Thread
 import os, glob, time
 
 # DataFileDirectory Class
@@ -52,7 +50,7 @@ class DataFileDirectory() :
                                   {'n_threads': RUN_OPT_CONST.N_DEFAULT_UPLOAD_THREADS,
                                    'chunk_size': RUN_OPT_CONST.DEFAULT_CHUNK_SIZE,
                                    'producer': (TutorialClusterProducer(),Producer),
-                                   'topic_name': TUTORIAL_CLUSTER_CONST.LECROY_FILE_TOPIC_NAME
+                                   'topic_name': TUTORIAL_CLUSTER_CONST.LECROY_FILE_TOPIC_NAME,
                                    'update_seconds':RUN_OPT_CONST.DEFAULT_UPDATE_SECONDS,
                                   },self._logger)
         #initialize variables for return values

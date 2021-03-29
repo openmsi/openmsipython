@@ -1,7 +1,6 @@
-import uuid
 import time
 
-from confluent_kafka import Producer, Consumer
+from confluent_kafka import Producer
 
 
 p = Producer({
