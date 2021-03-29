@@ -1,5 +1,6 @@
 #imports
 from .data_file_chunk import DataFileChunk
+from .utilities import produce_queue_of_file_chunks
 from ..my_kafka.my_producers import TutorialClusterProducer
 from ..utilities.misc import populated_kwargs
 from ..utilities.logging import Logger
@@ -29,10 +30,41 @@ class DataFile() :
         self._logger = kwargs.get('logger')
         if self._logger is None :
             self._logger = Logger(os.path.basename(__file__).split('.')[0])
-        self._total_chunks = 0
+        self._upload_queue = None
         self._chunk_offsets_added_this_run = set()
 
     #################### PUBLIC FUNCTIONS ####################
+
+    def get_list_of_file_chunks(self,chunk_size) :
+        """
+        Build and return a list of all DataFileChunk objects for this file
+        chunk_size = how many bytes of data should be in each DataFileChunk
+        """
+        #start a hash for the file and the lists of chunks
+        file_hash = sha512()
+        chunks = []
+        data_file_chunks = []
+        #read the binary data in the file as chunks of the given size, adding each chunk to the list 
+        with open(self._filepath, "rb") as fp :
+            chunk_offset = 0
+            chunk = fp.read(chunk_size)
+            while len(chunk) > 0:
+                chunk_length = len(chunk)
+                file_hash.update(chunk)
+                chunk_hash = sha512()
+                chunk_hash.update(chunk)
+                chunk_hash = chunk_hash.digest()
+                chunks.append([chunk_hash,chunk_offset,chunk_length])
+                chunk_offset += chunk_length
+                chunk = fp.read(chunk_size)
+        file_hash = file_hash.digest()
+        self._logger.info(f'File {self._filepath} has hash {file_hash}, with a total of {len(chunks)} chunks')
+        #add all the chunks to the other list as DataFileChunk objects
+        for ic,c in enumerate(chunks) :
+            data_file_chunks.append(DataFileChunk(self._filepath,file_hash,c[0],c[1],c[2],self._filename,ic,len(chunks)))
+        #return the list of DataFileChunks
+        return data_file_chunks
+
     
     def upload_whole_file(self,**kwargs) :
         """
@@ -56,31 +88,8 @@ class DataFile() :
         self._logger.info(startup_msg)
         #build the upload queue
         self._build_upload_queue(kwargs['chunk_size'])
-        #upload all the objects in the queue in parallel threads
-        upload_threads = []
-        file_chunk = self._upload_queue.get()
-        file_chunk_i = 0
-        lock = Lock()
-        while file_chunk is not None :
-            file_chunk_i+=1
-            t = Thread(target=file_chunk.upload_as_message,args=(file_chunk_i,
-                                                                 self._total_chunks,
-                                                                 kwargs['producer'],
-                                                                 kwargs['topic_name'],
-                                                                 self._logger,
-                                                                 lock,))
-            t.start()
-            upload_threads.append(t)
-            if len(upload_threads)>=kwargs['n_threads'] :
-                for ut in upload_threads :
-                    ut.join()
-                upload_threads = []
-            file_chunk = self._upload_queue.get()
-        for ut in upload_threads :
-            ut.join()
-        self._logger.info('Waiting for all enqueued messages to be delivered (this may take a moment)....')
-        kwargs['producer'].flush() #don't leave the function until every message has been sent/received
-        self._logger.info('Done!')
+        #produce all the messages in the queue
+        produce_queue_of_file_chunks(self._upload_queue,kwargs['producer'],kwargs['topic_name'],kwargs['n_threads'],self._logger)
 
     def write_chunk_to_disk(self,dfc,workingdir,thread_lock=nullcontext) :
         """
@@ -121,28 +130,11 @@ class DataFile() :
 
     #build the upload queue for this file path by breaking its binary data into chunks of the specified size
     def _build_upload_queue(self,chunk_size) :
-        #start a hash for the file and the list of chunks
-        file_hash = sha512()
-        chunks = []
-        #read the binary data in the file as chunks of the given size, adding each chunk to the list 
-        with open(self._filepath, "rb") as fp :
-            chunk_offset = 0
-            chunk = fp.read(chunk_size)
-            while len(chunk) > 0:
-                chunk_length = len(chunk)
-                file_hash.update(chunk)
-                chunk_hash = sha512()
-                chunk_hash.update(chunk)
-                chunk_hash = chunk_hash.digest()
-                chunks.append([chunk_hash,chunk_offset,chunk_length])
-                chunk_offset += chunk_length
-                chunk = fp.read(chunk_size)
-        self._total_chunks = len(chunks)
-        file_hash = file_hash.digest()
-        self._logger.info(f'File {self._filepath} has hash {file_hash}, with a total of {self._total_chunks} chunks')
+        #get the list of DataFileChunks for this file
+        dfcs = self.get_list_of_file_chunks(chunk_size)
         #add all the chunks to the upload queue
         self._upload_queue = Queue()
-        for c in chunks:
-            self._upload_queue.put(DataFileChunk(self._filepath,file_hash,c[0],c[1],c[2],self._filename,self._total_chunks))
+        for ic,c in enumerate(chunks) :
+            self._upload_queue.put(c)
         #add None to the queue as the final value
         self._upload_queue.put(None)

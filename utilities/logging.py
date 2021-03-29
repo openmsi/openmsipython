@@ -16,7 +16,7 @@ class Logger :
         self._logger_obj = logging.getLogger(self._name)
         self._logger_obj.setLevel(logging.DEBUG)
         handler = logging.StreamHandler()
-        handler.setFormatter(logging.Formatter("[%(asctime)s] %(message)s  [%(funcName)s]","%Y-%m-%d %H:%M:%S"))
+        handler.setFormatter(logging.Formatter('[%(asctime)s] %(message)s  [%(name)s : %(funcName)s]','%Y-%m-%d %H:%M:%S'))
         self._logger_obj.addHandler(handler)
 
     #functions for logging different levels of messages
