@@ -1,17 +1,5 @@
-from queue import Queue
-from threading import Thread, Lock
-from time import sleep
-from socket import socket, AF_INET, SOCK_STREAM, timeout
-from confluent_kafka import Consumer, Producer
 from sys import argv
-from hashlib import sha512
-import pysodium
-import msgpack
-import logging
-import traceback
 import os
-import uuid
-from itertools import islice
 from SciServer import CasJobs
 from SciServer import Authentication
 

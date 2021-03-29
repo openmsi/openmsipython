@@ -1,21 +1,10 @@
 from queue import Queue
-from threading import Thread, Lock
-from time import sleep
-from socket import socket, AF_INET, SOCK_STREAM, timeout
-from kafkacrypto import KafkaCryptoStore, KafkaConsumer, KafkaProducer, KafkaCrypto
-from confluent_kafka import Consumer, Producer
-from sys import argv
-from hashlib import sha512
-import pysodium
+from threading import Thread
+from confluent_kafka import Consumer
 import msgpack
-import logging
-import traceback
-import os
 import uuid
-import SciServer
-from itertools import islice
-from SciServer import Authentication, LoginPortal, Config, CasJobs
-##SkyQuery, SciDrive, SkyServer, Files, Jobs
+from SciServer import Authentication, CasJobs
+
 chunk_size = 4096
 concurrent_chunks = 10
 upload_queue = Queue()

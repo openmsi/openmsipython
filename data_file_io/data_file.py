@@ -7,7 +7,6 @@ from ..utilities.logging import Logger
 from ..utilities.config import DATA_FILE_HANDLING_CONST, RUN_OPT_CONST, TUTORIAL_CLUSTER_CONST
 from confluent_kafka import Producer
 from queue import Queue
-from threading import Thread, Lock
 from contextlib import nullcontext
 from hashlib import sha512
 import os
@@ -134,7 +133,7 @@ class DataFile() :
         dfcs = self.get_list_of_file_chunks(chunk_size)
         #add all the chunks to the upload queue
         self._upload_queue = Queue()
-        for ic,c in enumerate(chunks) :
+        for ic,c in enumerate(dfcs) :
             self._upload_queue.put(c)
         #add None to the queue as the final value
         self._upload_queue.put(None)

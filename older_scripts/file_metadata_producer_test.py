@@ -1,16 +1,7 @@
 from queue import Queue
-from threading import Thread, Lock
-from time import sleep
-from socket import socket, AF_INET, SOCK_STREAM, timeout
-from kafkacrypto import KafkaCryptoStore, KafkaConsumer, KafkaProducer, KafkaCrypto
+from threading import Thread
 from confluent_kafka import Consumer, Producer
-from sys import argv
-from hashlib import sha512
-import pysodium
 import msgpack
-import logging
-import traceback
-import os
 import uuid
 from itertools import islice
 chunk_size = 4096
@@ -80,7 +71,7 @@ def upload_file_metadata(file):
 
 
 def upload_worker():
-    n = 1
+    #n = 1
     while True:
         global upload_queue
         token = upload_queue.get()
@@ -89,8 +80,8 @@ def upload_worker():
             break
             print("all done")
         else:
-            file_name = token[0]
-            fields = token[1]
+            #file_name = token[0]
+            #fields = token[1]
             producer.produce(topic='lecroy_files',value=msgpack.packb(['metadata', token[0], token[1]], use_bin_type=True))
             producer.poll(0)
 
