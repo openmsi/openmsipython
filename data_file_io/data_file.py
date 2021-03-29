@@ -28,7 +28,7 @@ class DataFile() :
         self._filename = os.path.basename(filepath)
         self._logger = kwargs.get('logger')
         if self._logger is None :
-            self._logger = Logger()
+            self._logger = Logger(os.path.basename(__file__).split('.')[0])
         self._total_chunks = 0
         self._chunk_offsets_added_this_run = set()
 

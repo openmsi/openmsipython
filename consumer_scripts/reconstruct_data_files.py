@@ -28,7 +28,7 @@ def main(args=None) :
                                  (default={RUN_OPT_CONST.DEFAULT_UPDATE_SECONDS})""")
     args = parser.parse_args(args=args)
     #get the logger
-    logger = Logger()
+    logger = Logger(os.path.basename(__file__).split('.')[0])
     #check the arguments
     check_args(args,logger)
     #make the LeCroyFileReconstructor to use
