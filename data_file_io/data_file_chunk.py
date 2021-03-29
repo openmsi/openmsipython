@@ -19,9 +19,10 @@ class DataFileChunk() :
         self.chunk_offset = args[3]
         self.chunk_size = args[4]
         self.filename = args[5]
-        self.n_total_chunks = args[6]
-        if len(args)>7 :
-            self.data = args[7]
+        self.chunk_i = args[6]
+        self.n_total_chunks = args[7]
+        if len(args)>8 :
+            self.data = args[8]
         else :
             self.data=None
 
@@ -34,8 +35,8 @@ class DataFileChunk() :
         """
         logger = kwargs.get('logger')
         p_list = msgpack.unpackb(token,raw=True)
-        if len(p_list)!=7 :
-            msg = f'ERROR: unrecognized token passed to DataFileChunk.from_token(). Expected 7 properties but found {len(p_list)}'
+        if len(p_list)!=8 :
+            msg = f'ERROR: unrecognized token passed to DataFileChunk.from_token(). Expected 8 properties but found {len(p_list)}'
             if logger is None :
                 raise ValueError(msg)
             else :
@@ -54,6 +55,7 @@ class DataFileChunk() :
             filename = str(p_list[5].decode())
             args[5] = filename
             args[6] = int(p_list[6])
+            args[7] = int(p_list[7])
         except Exception as e :
             raise ValueError(f'ERROR: unrecognized value(s) when instantiating DataFileChunk from token. Exception: {e}')
         check_chunk_hash = sha512()
@@ -69,12 +71,10 @@ class DataFileChunk() :
 
     #################### PUBLIC FUNCTIONS ####################
 
-    def upload_as_message(self,chunk_i,total_chunks,producer,topic_name,logger,thread_lock,print_every=10000) :
+    def upload_as_message(self,producer,topic_name,logger,thread_lock,print_every=10000) :
         """
         Upload the file chunk as a message to the specified topic using the specified producer
         Meant to be run in parallel
-        chunk_i      = index of the chunk in the whole upload queue
-        total_chunks = total number of chunks that will eventually be uploaded from the file in question
         producer     = the producer to use
         topic_name   = the name of the topic to produce the message to
         logger       = the logger object to use
@@ -86,9 +86,9 @@ class DataFileChunk() :
         LOGGER = logger
         #log a line about this file chunk if applicable
         filepath = self.filepath
-        if (chunk_i-1)%print_every==0 :
+        if (self.chunk_i-1)%print_every==0 :
             with thread_lock :
-                logger.info(f'uploading {filepath} chunk {chunk_i} (out of {total_chunks})')
+                logger.info(f'uploading {filepath} chunk {self.chunk_i} (out of {self.n_total_chunks})')
         #get this chunk's data from the file
         with open(filepath, "rb") as fp:
             fp.seek(self.chunk_offset)
@@ -107,10 +107,11 @@ class DataFileChunk() :
                 msg = f'ERROR: chunk hash {check_chunk_hash} != expected hash {self.chunk_hash} in file {filepath}, offset {self.chunk_offset}'
                 logger.error(msg,ValueError)
         #produce the message to the topic
+        message_value = self._packed_as_message(data)
         with thread_lock :
             producer.produce(topic=topic_name,
-                             key=f'{self.filename}_chunk_{chunk_i}_of_{total_chunks}',
-                             value=self._packed_as_message(data),callback=producer_callback)
+                             key=f'{self.filename}_chunk_{self.chunk_i}_of_{self.n_total_chunks}',
+                             value=message_value,callback=producer_callback)
         producer.poll(0)
 
 
@@ -125,6 +126,7 @@ class DataFileChunk() :
         p_list.append(self.chunk_offset)
         p_list.append(data)
         p_list.append(self.filename)
+        p_list.append(self.chunk_i)
         p_list.append(self.n_total_chunks)
         return msgpack.packb(p_list,use_bin_type=True)
 
