@@ -1,13 +1,13 @@
 #imports
 from .data_file import DataFile
-from .utilities import produce_queue_of_file_chunks
+from .utilities import produce_from_queue_of_file_chunks
 from ..my_kafka.my_producers import TutorialClusterProducer
 from ..utilities.misc import add_user_input, populated_kwargs
 from ..utilities.logging import Logger
 from ..utilities.config import RUN_OPT_CONST, TUTORIAL_CLUSTER_CONST
 from confluent_kafka import Producer
 from queue import Queue
-from threading import Thread
+from threading import Thread, Lock
 import os, glob, time
 
 # DataFileDirectory Class
@@ -63,8 +63,16 @@ class DataFileDirectory() :
         #start the upload queue and thread
         self._logger.info(f'Will upload new files added to {self._dirpath} to the {kwargs["topic_name"]} topic using {kwargs["n_threads"]} threads')
         upload_queue = Queue()
-        upload_thread = Thread(target=produce_queue_of_file_chunks,args=(upload_queue,kwargs['producer'],kwargs['topic_name'],kwargs['n_threads'],self._logger))
-        upload_thread.start()
+        upload_threads = []
+        lock = Lock()
+        for ti in range(kwargs['n_threads']) :
+            t = Thread(target=produce_from_queue_of_file_chunks,args=(upload_queue,
+                                                                      kwargs['producer'],
+                                                                      kwargs['topic_name'],
+                                                                      self._logger,
+                                                                      lock))
+            t.start()
+            upload_threads.append(t)
         #loop until the user inputs a command to stop
         last_update = time.time()
         while True:
@@ -100,9 +108,13 @@ class DataFileDirectory() :
             else :
                 #wait for 3 seconds so we're not constantly checking for new files
                 time.sleep(3)
-        #stop the uploading threads by adding "None" to the queue 
-        upload_queue.put(None)
-        #join the upload thread
-        upload_thread.join()
+        #stop the uploading threads by adding "None"s to the queue and joining the threads
+        for ut in upload_threads :
+            upload_queue.put(None)
+        for ut in upload_threads :
+            ut.join()
+        self._logger.info('Waiting for all enqueued messages to be delivered (this may take a moment)....')
+        kwargs['producer'].flush() #don't leave the function until all messages have been sent/received
+        self._logger.info('Done!')
         #return the list of enqueued filenames
         return enqueued_filenames
