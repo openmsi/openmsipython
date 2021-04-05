@@ -118,7 +118,7 @@ class DataFileChunk() :
                 producer.produce(topic=topic_name,
                                  key=f'{self.filename}_chunk_{self.chunk_i}_of_{self.n_total_chunks}',
                                  value=message_value,callback=producer_callback)
-        producer.poll(0.0)
+        producer.poll(0.01)
 
 
     #################### PRIVATE HELPER FUNCTIONS ####################
@@ -145,8 +145,16 @@ LOGGER=None
 def producer_callback(err,msg) :
     global LOGGER
     if err is not None: #raise an error if the message wasn't sent successfully
-        logmsg=f'WARNING: Failed to deliver message with key {msg.key()}. Error: {err}'
-        if LOGGER is not None :
-            LOGGER.warning(logmsg)
-        else :
-            print(logmsg)
+        if err.fatal() :
+            logmsg=f'ERROR: fatally failed to deliver message with key {msg.key()}. Error reason: {err.str()}'
+            if LOGGER is not None :
+                LOGGER.error(logmsg,RuntimeError)
+            else :
+                raise RuntimeError(logmsg)
+        elif not err.retriable() :
+            logmsg=f'WARNING: Failed to deliver message with key {msg.key()}. Error reason: {err.str()}'
+            if LOGGER is not None :
+                LOGGER.warning(logmsg)
+            else :
+                print(logmsg)
+
