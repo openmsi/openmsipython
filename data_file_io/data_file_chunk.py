@@ -118,7 +118,7 @@ class DataFileChunk() :
                 producer.produce(topic=topic_name,
                                  key=f'{self.filename}_chunk_{self.chunk_i}_of_{self.n_total_chunks}',
                                  value=message_value,callback=producer_callback)
-        producer.poll(0.01)
+        producer.poll(0.05)
 
 
     #################### PRIVATE HELPER FUNCTIONS ####################
