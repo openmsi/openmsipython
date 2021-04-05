@@ -39,7 +39,7 @@ class DataFileChunk() :
                 raise ValueError(msg)
             else :
                 logger.error(msg,ValueError)
-        args = [None,None,None,None,None,None,None,None]
+        args = [None,None,None,None,None,None,None,None,None]
         try :
             args[0] = str(p_list[0].decode())
             args[1] = p_list[1]
@@ -48,7 +48,7 @@ class DataFileChunk() :
             chunk_offset = int(p_list[3])
             args[3] = chunk_offset
             data = p_list[4]
-            args[7] = data
+            args[8] = data
             args[4] = len(data)
             filename = str(p_list[5].decode())
             args[5] = filename
@@ -118,7 +118,7 @@ class DataFileChunk() :
                 producer.produce(topic=topic_name,
                                  key=f'{self.filename}_chunk_{self.chunk_i}_of_{self.n_total_chunks}',
                                  value=message_value,callback=producer_callback)
-        producer.poll(0)
+        producer.poll(0.0)
 
 
     #################### PRIVATE HELPER FUNCTIONS ####################
