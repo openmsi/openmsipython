@@ -1,11 +1,12 @@
 #imports
 from .data_file_chunk import DataFileChunk
-from .utilities import produce_queue_of_file_chunks
+from .utilities import produce_from_queue_of_file_chunks
 from ..my_kafka.my_producers import TutorialClusterProducer
 from ..utilities.misc import populated_kwargs
 from ..utilities.logging import Logger
 from ..utilities.config import DATA_FILE_HANDLING_CONST, RUN_OPT_CONST, TUTORIAL_CLUSTER_CONST
 from confluent_kafka import Producer
+from threading import Thread, Lock
 from queue import Queue
 from contextlib import nullcontext
 from hashlib import sha512
@@ -29,7 +30,6 @@ class DataFile() :
         self._logger = kwargs.get('logger')
         if self._logger is None :
             self._logger = Logger(os.path.basename(__file__).split('.')[0])
-        self._upload_queue = None
         self._chunk_offsets_added_this_run = set()
 
     #################### PUBLIC FUNCTIONS ####################
@@ -86,9 +86,31 @@ class DataFile() :
         startup_msg+=f"using {kwargs['n_threads']} threads...."
         self._logger.info(startup_msg)
         #build the upload queue
-        self._build_upload_queue(kwargs['chunk_size'])
-        #produce all the messages in the queue
-        produce_queue_of_file_chunks(self._upload_queue,kwargs['producer'],kwargs['topic_name'],kwargs['n_threads'],self._logger)
+        dfcs = self.get_list_of_file_chunks(kwargs['chunk_size'])
+        #add all the chunks to the upload queue
+        upload_queue = Queue()
+        for ic,c in enumerate(dfcs) :
+            upload_queue.put(c)
+        #add "None" to the queue for each thread as the final values
+        for ti in range(kwargs['n_threads']) :
+            upload_queue.put(None)
+        #produce all the messages in the queue using multiple threads
+        upload_threads = []
+        lock = Lock()
+        for ti in range(kwargs['n_threads']) :
+            t = Thread(target=produce_from_queue_of_file_chunks, args=(upload_queue,
+                                                                       kwargs['producer'],
+                                                                       kwargs['topic_name'],
+                                                                       self._logger,
+                                                                       lock))
+            t.start()
+            upload_threads.append(t)
+        #join the threads
+        for ut in upload_threads :
+            ut.join()
+        self._logger.info('Waiting for all enqueued messages to be delivered (this may take a moment)....')
+        kwargs['producer'].flush() #don't leave the function until all messages have been sent/received
+        self._logger.info('Done!')
 
     def write_chunk_to_disk(self,dfc,workingdir,thread_lock=nullcontext) :
         """
@@ -124,16 +146,3 @@ class DataFile() :
                 return DATA_FILE_HANDLING_CONST.FILE_SUCCESSFULLY_RECONSTRUCTED_CODE
         else :
             return DATA_FILE_HANDLING_CONST.FILE_IN_PROGRESS
-
-    #################### PRIVATE HELPER FUNCTIONS ####################
-
-    #build the upload queue for this file path by breaking its binary data into chunks of the specified size
-    def _build_upload_queue(self,chunk_size) :
-        #get the list of DataFileChunks for this file
-        dfcs = self.get_list_of_file_chunks(chunk_size)
-        #add all the chunks to the upload queue
-        self._upload_queue = Queue()
-        for ic,c in enumerate(dfcs) :
-            self._upload_queue.put(c)
-        #add None to the queue as the final value
-        self._upload_queue.put(None)

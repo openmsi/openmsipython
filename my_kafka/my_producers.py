@@ -15,14 +15,12 @@ class TutorialClusterProducer(Producer) :
         retries            : the number of times to retry sending any particular message before erroring out (default is 2)
         linger_ms          : how long (in ms) each batch of messages should wait to fill with mesages before being sent off (default is 100ms)
         compression_type   : the type of compression algorithm to use for compressing a batch of messages (default: lz4)
-        request_timeout_ms : how long (in ms) each message is allowed to wait in the queue before timing out (default=60,000)
         """
         kwargs = populated_kwargs(kwargs,
                                   {'batch_size':200000,
                                    'retries':2,
                                    'linger_ms':100,
                                    'compression_type':'lz4',
-                                   'request_timeout_ms':60000
                                   })
         config = {'bootstrap.servers'  : TUTORIAL_CLUSTER_CONST.SERVER,
                   'sasl.mechanism'     : TUTORIAL_CLUSTER_CONST.SASL_MECHANISM,
@@ -33,6 +31,5 @@ class TutorialClusterProducer(Producer) :
                   'retries'            : kwargs['retries'],
                   'linger.ms'          : kwargs['linger_ms'],
                   'compression.type'   : kwargs['compression_type'],
-                  'request.timeout.ms' : kwargs['request_timeout_ms']
                 }
         super().__init__(config)
