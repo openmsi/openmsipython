@@ -50,7 +50,7 @@ class RunOptionConstants :
         return 5 # default number of threads to use when reconstructing files
     @property
     def DEFAULT_CHUNK_SIZE(self) :
-        return 65536 #4096 # default size in bytes of each file upload chunk
+        return 4096 # default size in bytes of each file upload chunk
     @property
     def DEFAULT_UPDATE_SECONDS(self) :
         return 30 # how many seconds to wait by default between printing the "still alive" character/message for a running process
