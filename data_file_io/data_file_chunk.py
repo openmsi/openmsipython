@@ -105,19 +105,18 @@ class DataFileChunk() :
                 msg = f'ERROR: chunk hash {check_chunk_hash} != expected hash {self.chunk_hash} in file {filepath}, offset {self.chunk_offset}'
                 logger.error(msg,ValueError)
         #produce the message to the topic
+        message_key = f'{self.filename}_chunk_{self.chunk_i}_of_{self.n_total_chunks}'
         message_value = self._packed_as_message(data)
-        with thread_lock :
+        success=False; retries=0; sleep_secs=5; total_wait_secs=60 
+        if (not success) and retries<(1.0*total_wait_secs/sleep_secs) :
             try :
-                producer.produce(topic=topic_name,
-                                 key=f'{self.filename}_chunk_{self.chunk_i}_of_{self.n_total_chunks}',
-                                 value=message_value,callback=producer_callback)
+                producer.produce(topic=topic_name,key=message_key,value=message_value,callback=producer_callback)
+                success=True
             except BufferError :
-                logger.info(f'Flushing producer to empty local buffer queue (this may take a moment)...')
-                producer.flush()
-                logger.info(f'Done flushing producer.')
-                producer.produce(topic=topic_name,
-                                 key=f'{self.filename}_chunk_{self.chunk_i}_of_{self.n_total_chunks}',
-                                 value=message_value,callback=producer_callback)
+                time.sleep(sleep_secs)
+                retries+=1
+        if not success :
+            logger.warning(f'WARNING: message with key {message_key} failed to buffer for more than {total_wait_secs}s and was dropped!')
         producer.poll(0.05)
 
 

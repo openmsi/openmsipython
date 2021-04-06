@@ -21,16 +21,20 @@ class DataFileDirectory() :
         dirpath = path to the directory to listen in on
         
         Possible keyword arguments:
-        logger = the logger object to use (a new one will be created if none is supplied)
+        logger         = the logger object to use (a new one will be created if none is supplied)
+        new_files_only = set to True if any files that already exist in the directory should be assumed to have been produced
+                         i.e., if False (the default) then even files that are already in the directory will be enqueued to the producer
         """
+        kwargs = populated_kwargs(kwargs,{'new_files_only':False})
         self._dirpath = dirpath
         self._logger = kwargs.get('logger')
         if self._logger is None :
             self._logger = Logger(os.path.basename(__file__).split('.')[0])
         self._filenames_done = set()
-        for name in glob.glob(os.path.join(self._dirpath,'*')) :
-            if os.path.isfile(name) :
-                self._filenames_done.add(os.path.basename(name))
+        if kwargs['new_files_only'] :
+            for name in glob.glob(os.path.join(self._dirpath,'*')) :
+                if os.path.isfile(name) :
+                    self._filenames_done.add(os.path.basename(name))
 
     #################### PUBLIC FUNCTIONS ####################
 
@@ -54,7 +58,7 @@ class DataFileDirectory() :
                                    'update_seconds':RUN_OPT_CONST.DEFAULT_UPDATE_SECONDS,
                                   },self._logger)
         #initialize variables for return values
-        enqueued_filenames = []
+        chunks_to_upload_by_filename = {}
         #initialize a thread to listen for and get user input and a queue to put it into
         user_input_queue = Queue()
         user_input_thread = Thread(target=add_user_input,args=(user_input_queue,))
@@ -89,25 +93,51 @@ class DataFileDirectory() :
                     break
                 #log progress so far
                 elif cmd.lower() in ('c','check') :
-                    progress_msg = f'The following {len(enqueued_filenames)} files have been enqueued so far:\n'
-                    for ef in enqueued_filenames :
-                        progress_msg+=f'{ef}\n'
+                    progress_msg = f'The following {len(chunks_to_upload_by_filename.keys())} files have been recognized so far:\n'
+                    for fn,chunk_list in chunks_to_upload_by_filename.items() :
+                        progress_msg+=f'\t{fn}'
+                        if len(chunk_list)==1 and chunk_list[0]=='done' :
+                            progress_msg+=' (fully enqueued)'
+                        elif len(chunk_list)==0 :
+                            progress_msg+=' (waiting to enqueue)'
+                        else :
+                            progress_msg+=' (in progress)'
+                        progress_msg+='\n'
                     self._logger.info(progress_msg)
-            #check for new files in the directory
-            new_filenames = [os.path.basename(fp) for fp in glob.glob(os.path.join(self._dirpath,'*')) 
-                             if os.path.isfile(fp) and os.path.basename(fp) not in self._filenames_done]
-            #add each new file's chunks to the Queue
-            if len(new_filenames)>0 :
+            #check for new files in the directory if we haven't already found some to run
+            have_file = False
+            if len(chunks_to_upload_by_filename.keys())>0 :
+                for chunk_list in chunks_to_upload_by_filename.values() :
+                    if len(chunk_list)==0 :
+                        have_file=True
+            if not have_file :
+                new_filenames = [os.path.basename(fp) for fp in glob.glob(os.path.join(self._dirpath,'*')) 
+                                 if os.path.isfile(fp) and os.path.basename(fp) not in self._filenames_done
+                                 and os.path.basename(fp) not in chunks_to_upload_by_filename.keys()]
                 for fn in new_filenames :
+                    chunks_to_upload_by_filename[fn]=[]
+            #find a file to enqueue and get its list of chunks 
+            for fn,cl in chunks_to_upload_by_filename.items() :
+                if len(cl)==0 :
                     this_data_file = DataFile(os.path.join(self._dirpath,fn),logger=self._logger)
                     these_chunks = this_data_file.get_list_of_file_chunks(kwargs['chunk_size'])
-                    for c in these_chunks :
-                        upload_queue.put(c)
-                    enqueued_filenames.append(fn)
+                    chunks_to_upload_by_filename[fn]=these_chunks
+                    break
+            #pop some chunks from any file in progress and enqueue them
+            for fn,cl in chunks_to_upload_by_filename.items() :
+                if len(cl)==1 and cl[0]=='done' :
+                    continue
+                ic=0
+                while len(cl)>1 and ic in range(kwargs['n_threads']) :
+                    upload_queue.put(cl.pop(0))
+                    ic+=1
+                if len(cl)==1 :
+                    upload_queue.put(cl.pop(0))
+                    cl.append('done')
                     self._filenames_done.add(fn)
-            else :
-                #wait for 3 seconds so we're not constantly checking for new files
-                time.sleep(3)
+                    continue
+                else :
+                    break
         #stop the uploading threads by adding "None"s to the queue and joining the threads
         for ut in upload_threads :
             upload_queue.put(None)
@@ -116,5 +146,9 @@ class DataFileDirectory() :
         self._logger.info('Waiting for all enqueued messages to be delivered (this may take a moment)....')
         kwargs['producer'].flush() #don't leave the function until all messages have been sent/received
         self._logger.info('Done!')
-        #return the list of enqueued filenames
+        #return a list of filenames that have finished being enqueued
+        enqueued_filenames = []
+        for fn,cl in chunks_to_upload_by_filename.items() :
+            if len(cl)==1 and cl[0]=='done' :
+                enqueued_filenames.append(fn)
         return enqueued_filenames
