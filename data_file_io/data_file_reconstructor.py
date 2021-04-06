@@ -55,7 +55,7 @@ class DataFileReconstructor() :
                                  },self._logger)
         #initialize variables for return values
         self._n_msgs_read = 0
-        self._n_files_completely_reconstructed = 0
+        self._completely_reconstructed_filenames = set()
         #initialize a thread to listen for and get user input and a queue to put it into
         user_input_queue = Queue()
         user_input_thread = Thread(target=add_user_input,args=(user_input_queue,))
@@ -82,7 +82,7 @@ class DataFileReconstructor() :
                     user_input_queue.task_done()
                     break
                 elif cmd.lower() in ('c','check') :
-                    self._logger.info(f'{self._n_msgs_read} messages read, {self._n_files_completely_reconstructed} files completely reconstructed so far')
+                    self._logger.info(f'{self._n_msgs_read} messages read, {len(self._completely_reconstructed_filenames)} files completely reconstructed so far')
             for i in range(len(self._threads)) :
                 consumed_msg = self._consumers[i].poll(0)
                 if consumed_msg is not None and consumed_msg.error() is None :
@@ -96,7 +96,7 @@ class DataFileReconstructor() :
         #close all the consumers
         for consumer in self._consumers :
             consumer.close()
-        return self._n_msgs_read, self._n_files_completely_reconstructed
+        return self._n_msgs_read, self._completely_reconstructed_filenames
 
     #################### PRIVATE HELPER FUNCTIONS ####################
 
@@ -125,7 +125,7 @@ class DataFileReconstructor() :
                 with lock :
                     if dfc.filename in self._data_files_by_name :
                         self._n_msgs_read+=1
-                        self._n_files_completely_reconstructed+=1
+                        self._completely_reconstructed_filenames.add(dfc.filename)
                         del self._data_files_by_name[dfc.filename]
             elif return_value==DATA_FILE_HANDLING_CONST.FILE_IN_PROGRESS :
                 with lock :

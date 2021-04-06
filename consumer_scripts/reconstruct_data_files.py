@@ -36,11 +36,17 @@ def main(args=None) :
     #start the reconstructor running (returns total number of chunks read and total number of files completely reconstructed)
     run_start = datetime.datetime.now()
     logger.info(f'Listening for files to reconstruct in {args.workingdir}')
-    n_msgs,n_complete_files = file_reconstructor.run(args.workingdir,n_threads=args.n_threads,update_seconds=args.update_seconds)
+    n_msgs,complete_filenames = file_reconstructor.run(args.workingdir,n_threads=args.n_threads,update_seconds=args.update_seconds)
     run_stop = datetime.datetime.now()
     #shut down when that function returns
     logger.info(f'File reconstructor writing to {args.workingdir} shut down')
-    logger.info(f'{n_msgs} total messages were consumed and {n_complete_files} complete files were reconstructed from {run_start} to {run_stop}.')
+    msg = f'{n_msgs} total messages were consumed'
+    if len(complete_filenames)>0 :
+        msg+=f' and the following {len(complete_filenames)} files were reconstructed'
+    msg+=f' from {run_start} to {run_stop}'
+    for fn in complete_filenames :
+        msg+=f'\n\t{fn}'
+    logger.info(msg)
 
 if __name__=='__main__' :
     main()
