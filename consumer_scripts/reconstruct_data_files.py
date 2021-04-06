@@ -42,7 +42,7 @@ def main(args=None) :
     logger.info(f'File reconstructor writing to {args.workingdir} shut down')
     msg = f'{n_msgs} total messages were consumed'
     if len(complete_filenames)>0 :
-        msg+=f' and the following {len(complete_filenames)} files were reconstructed'
+        msg+=f' and the following {len(complete_filenames)} files were successfully reconstructed'
     msg+=f' from {run_start} to {run_stop}'
     for fn in complete_filenames :
         msg+=f'\n\t{fn}'
