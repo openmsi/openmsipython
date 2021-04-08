@@ -41,12 +41,12 @@ def main(args=None) :
     #listen for new files in the directory and run uploads as they come in until the process is shut down
     run_start = datetime.datetime.now()
     logger.info(f'Listening for files to be added to {args.file_directory}...')
-    enqueued_filenames = upload_file_directory.upload_files_as_added(n_threads=args.n_threads,chunk_size=args.chunk_size,update_seconds=args.update_seconds)
+    uploaded_filepaths = upload_file_directory.upload_files_as_added(n_threads=args.n_threads,chunk_size=args.chunk_size,update_seconds=args.update_seconds)
     run_stop = datetime.datetime.now()
     logger.info(f'Done listening to {args.file_directory} for files to upload')
-    final_msg = f'The following {len(enqueued_filenames)} files were fully enqueued between {run_start} and {run_stop}:\n'
-    for ef in enqueued_filenames :
-        final_msg+=f'\t{ef}\n'
+    final_msg = f'The following {len(uploaded_filepaths)} files were uploaded between {run_start} and {run_stop}:\n'
+    for fp in uploaded_filepaths :
+        final_msg+=f'\t{fp}\n'
     logger.info(final_msg)
 
 if __name__=='__main__' :
