@@ -113,7 +113,7 @@ class DataFileChunk() :
                 retries+=1
         if not success :
             logger.warning(f'WARNING: message with key {message_key} failed to buffer for more than {total_wait_secs}s and was dropped!')
-        producer.poll(0.05)
+        producer.poll(0.025)
 
 
     #################### PRIVATE HELPER FUNCTIONS ####################
