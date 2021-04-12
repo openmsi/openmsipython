@@ -31,8 +31,17 @@ class DataFile() :
     def fully_enqueued(self): #whether or not this file has had all of its chunks added to an upload queue somewhere
         return self._fully_enqueued
     @property
+    def waiting_to_upload(self): #whether or not this file is waiting for its upload to begin
+        if (not self._to_upload) or self._fully_enqueued :
+            return False
+        if len(self._chunks_to_upload)>0 :
+            return False
+        return True
+    @property
     def upload_in_progress(self): #whether this file is in the process of being enqueued to be uploaded
         if (not self._to_upload) or self._fully_enqueued :
+            return False
+        if len(self._chunks_to_upload)==0 :
             return False
         return True
     @property
@@ -42,10 +51,12 @@ class DataFile() :
             msg+='(will not be uploaded)'
         elif self._fully_enqueued :
             msg+='(fully enqueued)'
-        elif len(self._chunks_to_upload)>0 :
+        elif self.upload_in_progress :
             msg+='(in progress)'
-        else :
+        elif self.waiting_to_upload :
             msg+='(waiting to be enqueued)'
+        else :
+            msg+='(status unknown)'
         return msg
 
     #################### PUBLIC FUNCTIONS ####################
@@ -97,6 +108,7 @@ class DataFile() :
         ic = 0
         while len(self._chunks_to_upload)>0 and ic<n_chunks_to_add :
             queue.put(self._chunks_to_upload.pop(0))
+            ic+=1
         if len(self._chunks_to_upload)==0 :
             self._fully_enqueued = True
     

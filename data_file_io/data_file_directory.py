@@ -90,6 +90,9 @@ class DataFileDirectory() :
             #if the user has put something in the console
             if not user_input_queue.empty() :
                 cmd = user_input_queue.get()
+                for filepath in glob.glob(os.path.join(self._dirpath,'*')) :
+                    if filepath not in self._data_files_by_path.keys() :
+                        self._data_files_by_path[filepath]=DataFile(filepath,logger=self._logger)
                 progress_msg = 'The following files have been recognized so far:\n'
                 for datafile in self._data_files_by_path.values() :
                     if not datafile.to_upload :
@@ -107,18 +110,33 @@ class DataFileDirectory() :
             #check for new files in the directory if we haven't already found some to run
             have_file = False
             for datafile in self._data_files_by_path.values() :
-                if datafile.upload_in_progress :
+                if datafile.upload_in_progress or datafile.waiting_to_upload :
                     have_file=True
                     break
             if not have_file :
                 for filepath in glob.glob(os.path.join(self._dirpath,'*')) :
                     if filepath not in self._data_files_by_path.keys() :
                         self._data_files_by_path[filepath]=DataFile(filepath,logger=self._logger)
+                continue
             #find the first file that's running and add some of its chunks to the upload queue 
+            for datafile in self._data_files_by_path.values() :
+                if datafile.upload_in_progress or datafile.waiting_to_upload :
+                    datafile.add_chunks_to_upload_queue(upload_queue,**kwargs)
+                    break
+        #add the remainder of any files currently in progress
+        n_partially_done_files = len([df for df in self._data_files_by_path.values() if df.upload_in_progress])
+        if n_partially_done_files>0 :
+            partially_done_file_paths = [fp for fp,df in self._data_files_by_path.items() if df.upload_in_progress]
+            msg='Will finish queueing the remainder of the following files before flushing the producer and quitting:\n'
+            for pdfp in partially_done_file_paths :
+                msg+=f'\t{pdfp}\n'
+            self._logger.info(msg)
+        while n_partially_done_files>0 :
             for datafile in self._data_files_by_path.values() :
                 if datafile.upload_in_progress :
                     datafile.add_chunks_to_upload_queue(upload_queue,**kwargs)
                     break
+            n_partially_done_files = len([df for df in self._data_files_by_path.values() if df.upload_in_progress])
         #stop the uploading threads by adding "None"s to their queues and joining them
         for ut in upload_threads :
             upload_queue.put(None)
