@@ -52,6 +52,9 @@ class RunOptionConstants :
     def DEFAULT_CHUNK_SIZE(self) :
         return 16384 #4096 # default size in bytes of each file upload chunk
     @property
+    def DEFAULT_MAX_UPLOAD_QUEUE_SIZE(self):
+        return 10000 #default maximum number of items allowed in the upload Queue at once
+    @property
     def DEFAULT_UPDATE_SECONDS(self) :
         return 30 # how many seconds to wait by default between printing the "still alive" character/message for a running process
     

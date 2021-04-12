@@ -74,6 +74,7 @@ class DataFile() :
     def add_chunks_to_upload_queue(self,queue,**kwargs) :
         """
         Add chunks of this file to a given upload queue. If the file runs out of chunks it will be marked as fully enqueued.
+        If the given queue is full this function will do absolutely nothing and will just return.
 
         Possible keyword arguments:
         n_threads  = the number of threads running during uploading; at most this number of chunks will be added per call to this function
@@ -83,6 +84,8 @@ class DataFile() :
         """
         if self._fully_enqueued :
             self._logger.warning(f'WARNING: add_chunks_to_upload_queue called for fully enqueued file {self._filepath}, nothing else will be added.')
+            return
+        if queue.full() :
             return
         if len(self._chunks_to_upload)==0 :
             kwargs = populated_kwargs(kwargs,{'chunk_size': RUN_OPT_CONST.DEFAULT_CHUNK_SIZE},self._logger)
