@@ -113,15 +113,12 @@ class DataFileReconstructor() :
             dfc = DataFileChunk.from_token(token,logger=self._logger)
             #add the chunk's data to the file that's being reconstructed
             if dfc.filename not in self._data_files_by_name.keys() :
-                with lock :
-                    self._data_files_by_name[dfc.filename] = (DataFile(dfc.filepath,logger=self._logger),Lock())
+                self._data_files_by_name[dfc.filename] = (DataFile(dfc.filepath,logger=self._logger),Lock())
             return_value = self._data_files_by_name[dfc.filename][0].write_chunk_to_disk(dfc,workingdir,self._data_files_by_name[dfc.filename][1])
             if return_value==DATA_FILE_HANDLING_CONST.FILE_HASH_MISMATCH_CODE :
-                with lock :
-                    self._logger.error(f'ERROR: file hashes for file {dfc.filename} not matched after reconstruction!',RuntimeError)
+                self._logger.error(f'ERROR: file hashes for file {dfc.filename} not matched after reconstruction!',RuntimeError)
             elif return_value==DATA_FILE_HANDLING_CONST.FILE_SUCCESSFULLY_RECONSTRUCTED_CODE :
-                with lock :
-                    self._logger.info(f'File {dfc.filename} successfully reconstructed locally from stream')
+                self._logger.info(f'File {dfc.filename} successfully reconstructed locally from stream')
                 with lock :
                     if dfc.filename in self._data_files_by_name :
                         self._n_msgs_read+=1

@@ -6,7 +6,7 @@ from ..utilities.misc import populated_kwargs
 from ..utilities.logging import Logger
 from ..utilities.config import DATA_FILE_HANDLING_CONST, RUN_OPT_CONST, TUTORIAL_CLUSTER_CONST
 from confluent_kafka import Producer
-from threading import Thread, Lock
+from threading import Thread
 from queue import Queue
 from contextlib import nullcontext
 from hashlib import sha512
@@ -125,13 +125,11 @@ class DataFile() :
             upload_queue.put(None)
         #produce all the messages in the queue using multiple threads
         upload_threads = []
-        lock = Lock()
         for ti in range(kwargs['n_threads']) :
             t = Thread(target=produce_from_queue_of_file_chunks, args=(upload_queue,
                                                                        kwargs['producer'],
                                                                        kwargs['topic_name'],
-                                                                       self._logger,
-                                                                       lock))
+                                                                       self._logger))
             t.start()
             upload_threads.append(t)
         #join the threads

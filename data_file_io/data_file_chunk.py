@@ -69,14 +69,13 @@ class DataFileChunk() :
 
     #################### PUBLIC FUNCTIONS ####################
 
-    def upload_as_message(self,producer,topic_name,logger,thread_lock,print_every=1000) :
+    def upload_as_message(self,producer,topic_name,logger,print_every=1000) :
         """
         Upload the file chunk as a message to the specified topic using the specified producer
         Meant to be run in parallel
         producer     = the producer to use
         topic_name   = the name of the topic to produce the message to
         logger       = the logger object to use
-        thread_lock  = a lock to acquire and release when logging messages to keep everything clean
         print_every  = how often to print/log progress messages
         """
         #set the logger so the callback can use it
@@ -85,25 +84,22 @@ class DataFileChunk() :
         #log a line about this file chunk if applicable
         filepath = self.filepath
         if (self.chunk_i-1)%print_every==0 or self.chunk_i==self.n_total_chunks :
-            with thread_lock :
-                logger.info(f'uploading {filepath} chunk {self.chunk_i} (out of {self.n_total_chunks})')
+            logger.info(f'uploading {filepath} chunk {self.chunk_i} (out of {self.n_total_chunks})')
         #get this chunk's data from the file
         with open(filepath, "rb") as fp:
             fp.seek(self.chunk_offset)
             data = fp.read(self.chunk_size)
         #make sure it's of the expected size
         if len(data) != self.chunk_size:
-            with thread_lock :
-                msg = f'ERROR: chunk {self.chunk_hash} size {len(data)} != expected size {self.chunk_size} in file {filepath}, offset {self.chunk_offset}'
-                logger.error(msg,ValueError)
+            msg = f'ERROR: chunk {self.chunk_hash} size {len(data)} != expected size {self.chunk_size} in file {filepath}, offset {self.chunk_offset}'
+            logger.error(msg,ValueError)
         #check that its hash matches what was found at the time of putting it in the queue
         check_chunk_hash = sha512()
         check_chunk_hash.update(data)
         check_chunk_hash = check_chunk_hash.digest()
         if self.chunk_hash != check_chunk_hash:
-            with thread_lock :
-                msg = f'ERROR: chunk hash {check_chunk_hash} != expected hash {self.chunk_hash} in file {filepath}, offset {self.chunk_offset}'
-                logger.error(msg,ValueError)
+            msg = f'ERROR: chunk hash {check_chunk_hash} != expected hash {self.chunk_hash} in file {filepath}, offset {self.chunk_offset}'
+            logger.error(msg,ValueError)
         #produce the message to the topic
         message_key = f'{self.filename}_chunk_{self.chunk_i}_of_{self.n_total_chunks}'
         message_value = self._packed_as_message(data)

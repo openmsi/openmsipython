@@ -7,7 +7,7 @@ from ..utilities.logging import Logger
 from ..utilities.config import RUN_OPT_CONST, TUTORIAL_CLUSTER_CONST
 from confluent_kafka import Producer
 from queue import Queue
-from threading import Thread, Lock
+from threading import Thread
 import os, glob, time
 
 # DataFileDirectory Class
@@ -71,13 +71,11 @@ class DataFileDirectory() :
         self._logger.info(msg)
         upload_queue = Queue()
         upload_threads = []
-        lock = Lock()
         for ti in range(kwargs['n_threads']) :
             t = Thread(target=produce_from_queue_of_file_chunks,args=(upload_queue,
                                                                       kwargs['producer'],
                                                                       kwargs['topic_name'],
-                                                                      self._logger,
-                                                                      lock))
+                                                                      self._logger))
             t.start()
             upload_threads.append(t)
         #loop until the user inputs a command to stop
