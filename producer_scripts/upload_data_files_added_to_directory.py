@@ -28,6 +28,9 @@ def main(args=None) :
                         help=f'Maximum number of threads to use (default={RUN_OPT_CONST.N_DEFAULT_UPLOAD_THREADS})')
     parser.add_argument('--chunk_size', default=RUN_OPT_CONST.DEFAULT_CHUNK_SIZE, type=int,
                         help=f'Size (in bytes) of chunks into which files should be broken as they are uploaded (default={RUN_OPT_CONST.DEFAULT_CHUNK_SIZE})')
+    parser.add_argument('--queue_max_size', default=RUN_OPT_CONST.DEFAULT_MAX_UPLOAD_QUEUE_SIZE, type=int,
+                        help=f"""Maximum number of items (file chunks) to allow in the upload queue at a time 
+                                 (default={RUN_OPT_CONST.DEFAULT_MAX_UPLOAD_QUEUE_SIZE}). Use to limit RAM usage if necessary.""")
     parser.add_argument('--update_seconds', default=RUN_OPT_CONST.DEFAULT_UPDATE_SECONDS, type=int,
                         help=f"""Number of seconds to wait between printing a '.' to the console to indicate the program is alive 
                                  (default={RUN_OPT_CONST.DEFAULT_UPDATE_SECONDS})""")

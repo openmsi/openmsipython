@@ -46,6 +46,7 @@ class DataFileDirectory() :
         chunk_size     = the size of each file chunk in bytes
         producer       = the producer object to use
         topic_name     = the name of the topic to use
+        max_queue_size = maximum number of items allowed to be placed in the upload queue at once
         update_seconds = number of seconds to wait between printing a progress character to the console to indicate the program is alive
         """
         #set the important variables
@@ -54,6 +55,7 @@ class DataFileDirectory() :
                                    'chunk_size': RUN_OPT_CONST.DEFAULT_CHUNK_SIZE,
                                    'producer': (TutorialClusterProducer(),Producer),
                                    'topic_name': TUTORIAL_CLUSTER_CONST.LECROY_FILE_TOPIC_NAME,
+                                   'max_queue_size':RUN_OPT_CONST.DEFAULT_MAX_UPLOAD_QUEUE_SIZE,
                                    'update_seconds':RUN_OPT_CONST.DEFAULT_UPDATE_SECONDS,
                                   },self._logger)
         #initialize a thread to listen for and get user input and a queue to put it into
@@ -66,10 +68,10 @@ class DataFileDirectory() :
         if len(self._data_files_by_path)>0 :
             msg+='new files added to '
         else :
-            msg+='files in'
+            msg+='files in '
         msg+=f'{self._dirpath} to the {kwargs["topic_name"]} topic using {kwargs["n_threads"]} threads'
         self._logger.info(msg)
-        upload_queue = Queue()
+        upload_queue = Queue(kwargs['max_queue_size'])
         upload_threads = []
         for ti in range(kwargs['n_threads']) :
             t = Thread(target=produce_from_queue_of_file_chunks,args=(upload_queue,
