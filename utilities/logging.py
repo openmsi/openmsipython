@@ -25,11 +25,15 @@ class Logger :
         self._logger_obj.info(msg)
     
     def warning(self,msg) :
+        if not msg.startswith('WARNING:') :
+            msg = f'WARNING: {msg}'
         self._logger_obj.warning(msg)
 
     #function to log an error message and optionally raise an exception with the same message
 
     def error(self,msg,exception_type=None) :
+        if not msg.startswith('ERROR:') :
+            msg = f'ERROR: {msg}'
         self._logger_obj.error(msg)
         if exception_type is not None :
             raise exception_type(msg)
