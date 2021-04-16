@@ -1,6 +1,6 @@
 #imports
 from hashlib import sha512
-import msgpack, time
+import pathlib, msgpack, time
 
 # DataFileChunk Class 
 class DataFileChunk() :
@@ -41,7 +41,7 @@ class DataFileChunk() :
                 logger.error(msg,ValueError)
         args = [None,None,None,None,None,None,None,None,None]
         try :
-            args[0] = str(p_list[0].decode())
+            args[0] = pathlib.Path(str(p_list[0].decode()))
             args[1] = p_list[1]
             chunk_hash = p_list[2]
             args[2] = chunk_hash
@@ -121,7 +121,7 @@ class DataFileChunk() :
     #helper function to return the file chunk as a packed message given the actual data from the file
     def _packed_as_message(self,data) :
         p_list = []
-        p_list.append(self.filepath)
+        p_list.append(str(self.filepath))
         p_list.append(self.file_hash)
         p_list.append(self.chunk_hash)
         p_list.append(self.chunk_offset)
