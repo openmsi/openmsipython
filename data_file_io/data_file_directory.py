@@ -7,7 +7,7 @@ from ..my_kafka.my_producers import MyProducer
 from ..my_kafka.my_consumers import MyConsumer
 from ..utilities.misc import add_user_input, populated_kwargs
 from ..utilities.logging import Logger
-from queue import Queue
+from queue import Queue, Empty
 from threading import Thread, Lock
 import pathlib, time, uuid
 
@@ -182,16 +182,18 @@ class DataFileDirectory() :
         user_input_thread.daemon=True
         user_input_thread.start()
         self._logger.info(f'Will listen for files from the {topic_name} topic using {kwargs["n_threads"]} threads')
-        #start up all of the queues, consumers, and threads
+        #start up all of the queues and threads
         self._queues = []
-        self._consumers = []
         self._threads = []
         lock = Lock()
         for i in range(kwargs['n_threads']) :
             self._queues.append(Queue())
-            self._consumers.append(MyConsumer.from_file(config_path,logger=self._logger,group_id=kwargs['consumer_group_id']))
-            self._consumers[-1].subscribe([topic_name])
-            self._threads.append(Thread(target=self._get_chunks_from_queues_worker,args=(lock,i)))
+            self._threads.append(Thread(target=self._consume_and_process_messages_worker,
+                                        args=(config_path,
+                                              topic_name,
+                                              kwargs['consumer_group_id'],
+                                              lock,
+                                              i)))
             self._threads[-1].start()
         #loop until the user inputs a command to stop
         last_update = time.time()
@@ -206,31 +208,35 @@ class DataFileDirectory() :
                     break
                 elif cmd.lower() in ('c','check') :
                     self._logger.info(f'{self._n_msgs_read} messages read, {len(self._completely_reconstructed_filenames)} files completely reconstructed so far')
-            for i in range(len(self._threads)) :
-                consumed_msg = self._consumers[i].poll(0)
-                if consumed_msg is not None and consumed_msg.error() is None :
-                    self._queues[i].put(consumed_msg.value())
         #stop the processes by adding "None" to the queues 
         for i in range(len(self._threads)) :
             self._queues[i].put(None)
         #join all the threads
         for t in self._threads :
             t.join()
-        #close all the consumers
-        for consumer in self._consumers :
-            consumer.close()
         return self._n_msgs_read, self._completely_reconstructed_filenames
 
     #################### PRIVATE HELPER FUNCTIONS ####################
 
     #helper function to get DataFileChunks from a queue and write them to disk, paying attention to whether they've been fully reconstructed
-    def _get_chunks_from_queues_worker(self,lock,list_index) :
+    def _consume_and_process_messages_worker(self,config_path,topic_name,group_id,lock,list_index) :
+        #start up the consumer
+        consumer = MyConsumer.from_file(config_path,logger=self._logger,group_id=group_id)
+        consumer.subscribe([topic_name])
         #loop until None is pulled from the queue
         while True:
-            token = self._queues[list_index].get()
+            try :
+                token = self._queues[list_index].get(block=False)
+            except Empty :
+                consumed_msg = consumer.poll(0)
+                if consumed_msg is not None and consumed_msg.error() is None :
+                    self._queues[list_index].put(consumed_msg.value())
+                continue
             if token is None:
                 #make sure the thread can be joined
                 self._queues[list_index].task_done()
+                #close the consumer
+                consumer.close()
                 break
             #get the file chunk object from the token
             dfc = DataFileChunk.from_token(token,logger=self._logger)
@@ -250,3 +256,4 @@ class DataFileDirectory() :
             elif return_value==DATA_FILE_HANDLING_CONST.FILE_IN_PROGRESS :
                 with lock :
                     self._n_msgs_read+=1
+
