@@ -1,33 +1,32 @@
-#Classes that extend Kafka Consumers for specific scenarios
-
 #imports
+from .config_file_parser import ConfigFileParser
 from confluent_kafka import Consumer
-from ..utilities.misc import populated_kwargs
-from ..utilities.config import TUTORIAL_CLUSTER_CONST
 import uuid
 
-#Producer to the tutorial cluster
-class TutorialClusterConsumer(Consumer) :
+class MyConsumer(Consumer) :
+    """
+    Class to extend Kafka Consumers for specific scenarios
+    """
 
-    def __init__(self,**kwargs) :
+    def __init__(self,config_dict) :
+        super().__init__(config_dict)
+
+    @classmethod
+    def from_file(cls,config_file_path,**kwargs) :
         """
+        config_file_path = path to the config file to use in defining this consumer
+
         Possible keyword arguments:
-        group_id          = ID for the group that this consumer should belong to
-        auto_offset_reset = argument for auto.offset.reset for this consumer
-        fetch_min_bytes   = argument for fetch.min.bytes for this consumer
+        logger = the logger object to use
+        !!!!! any other keyword arguments will be added to the configuration (with underscores replaced with dots) !!!!!
         """
-        kwargs = populated_kwargs(kwargs,
-                                  {'group_id':str(uuid.uuid1()), # this will create a new consumer group on each invocation by default
-                                   'auto_offset_reset':'earliest',
-                                   'fetch_min_bytes':100000
-                                  })
-        config = {'bootstrap.servers': TUTORIAL_CLUSTER_CONST.SERVER,
-                  'sasl.mechanism'   : TUTORIAL_CLUSTER_CONST.SASL_MECHANISM,
-                  'security.protocol': TUTORIAL_CLUSTER_CONST.SECURITY_PROTOCOL,
-                  'sasl.username'    : TUTORIAL_CLUSTER_CONST.USERNAME,
-                  'sasl.password'    : TUTORIAL_CLUSTER_CONST.PASSWORD,
-                  'group.id'         : kwargs['group_id'],  
-                  'auto.offset.reset': kwargs['auto_offset_reset'],
-                  'fetch.min.bytes'  : kwargs['fetch_min_bytes']
-                }
-        super().__init__(config)
+        parser = ConfigFileParser(config_file_path,**kwargs)
+        configs = parser.get_config_dict_for_groups(['cluster','consumer'])
+        for argname,arg in kwargs.items() :
+            if argname=='logger' :
+                continue
+            configs[argname.replace('_','.')]=arg
+        #if the group.id has been set as "new" generate a new group ID
+        if 'group.id' in configs.keys() and configs['group.id'].lower()=='new' :
+            configs['group.id']=str(uuid.uuid1())
+        return cls(configs)

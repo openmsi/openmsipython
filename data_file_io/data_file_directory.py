@@ -1,63 +1,67 @@
 #imports
 from .data_file import DataFile
+from .data_file_chunk import DataFileChunk
 from .utilities import produce_from_queue_of_file_chunks
-from ..my_kafka.my_producers import TutorialClusterProducer
+from .config import RUN_OPT_CONST, DATA_FILE_HANDLING_CONST
+from ..my_kafka.my_producers import MyProducer
+from ..my_kafka.my_consumers import MyConsumer
 from ..utilities.misc import add_user_input, populated_kwargs
 from ..utilities.logging import Logger
-from ..utilities.config import RUN_OPT_CONST, TUTORIAL_CLUSTER_CONST
-from confluent_kafka import Producer
 from queue import Queue
-from threading import Thread
-import os, glob, time
+from threading import Thread, Lock
+import pathlib, time, uuid
 
 # DataFileDirectory Class
 class DataFileDirectory() :
     """
     Class for representing a directory holding data files
-    Can be used to listen for new files to be added and upload them as they are
     """
     def __init__(self,dirpath,**kwargs) :
         """
-        dirpath = path to the directory to listen in on
+        dirpath = path to the directory 
         
         Possible keyword arguments:
         logger         = the logger object to use (a new one will be created if none is supplied)
-        new_files_only = set to True if any files that already exist in the directory should be assumed to have been produced
-                         i.e., if False (the default) then even files that are already in the directory will be enqueued to the producer
         """
         kwargs = populated_kwargs(kwargs,{'new_files_only':False})
         self._dirpath = dirpath
         self._logger = kwargs.get('logger')
         if self._logger is None :
-            self._logger = Logger(os.path.basename(__file__).split('.')[0])
+            self._logger = Logger(pathlib.Path(__file__).name.split('.')[0])
         self._data_files_by_path = {}
-        if kwargs['new_files_only'] :
-            for filepath in glob.glob(os.path.join(self._dirpath,'*')) :
-                self._data_files_by_path[filepath]=DataFile(filepath,logger=self._logger,to_upload=False)
 
     #################### PUBLIC FUNCTIONS ####################
 
-    def upload_files_as_added(self,**kwargs) :
+    def upload_files_as_added(self,config_path,topic_name,**kwargs) :
         """
         Listen for new files to be added to the directory. Chunk and produce newly added files as messages to the topic.
+
+        config_path = path to the config file to use in defining the producer
+        topic_name  = name of the topic to produce messages to
 
         Possible keyword arguments:
         n_threads      = the number of threads to run at once during uploading
         chunk_size     = the size of each file chunk in bytes
-        producer       = the producer object to use
-        topic_name     = the name of the topic to use
         max_queue_size = maximum number of items allowed to be placed in the upload queue at once
-        update_seconds = number of seconds to wait between printing a progress character to the console to indicate the program is alive
+        update_secs    = number of seconds to wait between printing a progress character to the console to indicate the program is alive
+        new_files_only = set to True if any files that already exist in the directory should be assumed to have been produced
+                         i.e., if False (the default) then even files that are already in the directory will be enqueued to the producer
         """
         #set the important variables
         kwargs = populated_kwargs(kwargs,
                                   {'n_threads': RUN_OPT_CONST.N_DEFAULT_UPLOAD_THREADS,
                                    'chunk_size': RUN_OPT_CONST.DEFAULT_CHUNK_SIZE,
-                                   'producer': (TutorialClusterProducer(),Producer),
-                                   'topic_name': TUTORIAL_CLUSTER_CONST.LECROY_FILE_TOPIC_NAME,
                                    'max_queue_size':RUN_OPT_CONST.DEFAULT_MAX_UPLOAD_QUEUE_SIZE,
-                                   'update_seconds':RUN_OPT_CONST.DEFAULT_UPDATE_SECONDS,
+                                   'update_secs':RUN_OPT_CONST.DEFAULT_UPDATE_SECONDS,
+                                   'new_files_only':False,
                                   },self._logger)
+        #start the producer 
+        producer = MyProducer.from_file(config_path,logger=self._logger)
+        #if we're only going to upload new files, exclude what's already in the directory
+        if kwargs['new_files_only'] :
+            for filepath in self._dirpath.glob('*') :
+                if not filepath.name.startswith('.') :
+                    self._data_files_by_path[filepath]=DataFile(filepath,logger=self._logger,to_upload=False)
         #initialize a thread to listen for and get user input and a queue to put it into
         user_input_queue = Queue()
         user_input_thread = Thread(target=add_user_input,args=(user_input_queue,))
@@ -65,18 +69,18 @@ class DataFileDirectory() :
         user_input_thread.start()
         #start the upload queue and thread
         msg = 'Will upload '
-        if len(self._data_files_by_path)>0 :
+        if kwargs['new_files_only'] :
             msg+='new files added to '
         else :
             msg+='files in '
-        msg+=f'{self._dirpath} to the {kwargs["topic_name"]} topic using {kwargs["n_threads"]} threads'
+        msg+=f'{self._dirpath} to the {topic_name} topic using {kwargs["n_threads"]} threads'
         self._logger.info(msg)
         upload_queue = Queue(kwargs['max_queue_size'])
         upload_threads = []
         for ti in range(kwargs['n_threads']) :
             t = Thread(target=produce_from_queue_of_file_chunks,args=(upload_queue,
-                                                                      kwargs['producer'],
-                                                                      kwargs['topic_name'],
+                                                                      producer,
+                                                                      topic_name,
                                                                       self._logger))
             t.start()
             upload_threads.append(t)
@@ -84,15 +88,16 @@ class DataFileDirectory() :
         last_update = time.time()
         while True:
             #print the "still alive" character at each given interval
-            if time.time()-last_update>kwargs['update_seconds']:
+            if time.time()-last_update>kwargs['update_secs']:
                 print('.')
                 last_update = time.time()
             #if the user has put something in the console
             if not user_input_queue.empty() :
                 cmd = user_input_queue.get()
-                for filepath in glob.glob(os.path.join(self._dirpath,'*')) :
+                for filepath in self._dirpath.glob('*') :
                     if filepath not in self._data_files_by_path.keys() :
-                        self._data_files_by_path[filepath]=DataFile(filepath,logger=self._logger)
+                        if not filepath.name.startswith('.') :
+                            self._data_files_by_path[filepath]=DataFile(filepath,logger=self._logger)
                 progress_msg = 'The following files have been recognized so far:\n'
                 for datafile in self._data_files_by_path.values() :
                     if not datafile.to_upload :
@@ -114,9 +119,10 @@ class DataFileDirectory() :
                     have_file=True
                     break
             if not have_file :
-                for filepath in glob.glob(os.path.join(self._dirpath,'*')) :
-                    if filepath not in self._data_files_by_path.keys() :
-                        self._data_files_by_path[filepath]=DataFile(filepath,logger=self._logger)
+                for filepath in self._dirpath.glob('*') :
+                    if not filepath.name.startswith('.') :
+                        if filepath not in self._data_files_by_path.keys() :
+                            self._data_files_by_path[filepath]=DataFile(filepath,logger=self._logger)
                 continue
             #find the first file that's running and add some of its chunks to the upload queue 
             for datafile in self._data_files_by_path.values() :
@@ -143,7 +149,104 @@ class DataFileDirectory() :
         for ut in upload_threads :
             ut.join()
         self._logger.info('Waiting for all enqueued messages to be delivered (this may take a moment)....')
-        kwargs['producer'].flush() #don't move on function until all enqueued messages have been sent/received
+        producer.flush() #don't move on function until all enqueued messages have been sent/received
         self._logger.info('Done!')
         #return a list of filepaths that have been uploaded
         return [fp for fp,datafile in self._data_files_by_path.items() if datafile.fully_enqueued]
+
+    def reconstruct(self,config_path,topic_name,**kwargs) :
+        """
+        Consumes messages into a queue and processes them using several parallel threads to reconstruct 
+        the files to which they correspond. Runs until the user inputs a command to shut it down.
+        Returns the total number of messages consumed, as well as the number of files whose reconstruction 
+        was completed during the run. 
+
+        config_path = path to the config file that should be used to define the consumer group
+        topic_name  = name of the topic to consume messages from
+
+        Possible keyword arguments:
+        n_threads   = number of threads/consumers to use in listening for messages from the stream
+        update_secs = number of seconds to wait between printing a progress character to the console to indicate the program is alive
+        """
+        kwargs = populated_kwargs(kwargs,
+                                  {'n_threads':RUN_OPT_CONST.N_DEFAULT_DOWNLOAD_THREADS,
+                                   'update_secs':RUN_OPT_CONST.DEFAULT_UPDATE_SECONDS,
+                                   'consumer_group_id':str(uuid.uuid1()) #by default, make a new consumer group every time this code is run
+                                  },self._logger)
+        #initialize variables for return values
+        self._n_msgs_read = 0
+        self._completely_reconstructed_filenames = set()
+        #initialize a thread to listen for and get user input and a queue to put it into
+        user_input_queue = Queue()
+        user_input_thread = Thread(target=add_user_input,args=(user_input_queue,))
+        user_input_thread.daemon=True
+        user_input_thread.start()
+        self._logger.info(f'Will listen for files from the {topic_name} topic using {kwargs["n_threads"]} threads')
+        #start up all of the queues, consumers, and threads
+        self._queues = []
+        self._consumers = []
+        self._threads = []
+        lock = Lock()
+        for i in range(kwargs['n_threads']) :
+            self._queues.append(Queue())
+            self._consumers.append(MyConsumer.from_file(config_path,logger=self._logger,group_id=kwargs['consumer_group_id']))
+            self._consumers[-1].subscribe([topic_name])
+            self._threads.append(Thread(target=self._get_chunks_from_queues_worker,args=(lock,i)))
+            self._threads[-1].start()
+        #loop until the user inputs a command to stop
+        last_update = time.time()
+        while True:
+            if time.time()-last_update>kwargs['update_secs']:
+                print('.')
+                last_update = time.time()
+            if not user_input_queue.empty():
+                cmd = user_input_queue.get()
+                if cmd.lower() in ('q','quit') :
+                    user_input_queue.task_done()
+                    break
+                elif cmd.lower() in ('c','check') :
+                    self._logger.info(f'{self._n_msgs_read} messages read, {len(self._completely_reconstructed_filenames)} files completely reconstructed so far')
+            for i in range(len(self._threads)) :
+                consumed_msg = self._consumers[i].poll(0)
+                if consumed_msg is not None and consumed_msg.error() is None :
+                    self._queues[i].put(consumed_msg.value())
+        #stop the processes by adding "None" to the queues 
+        for i in range(len(self._threads)) :
+            self._queues[i].put(None)
+        #join all the threads
+        for t in self._threads :
+            t.join()
+        #close all the consumers
+        for consumer in self._consumers :
+            consumer.close()
+        return self._n_msgs_read, self._completely_reconstructed_filenames
+
+    #################### PRIVATE HELPER FUNCTIONS ####################
+
+    #helper function to get DataFileChunks from a queue and write them to disk, paying attention to whether they've been fully reconstructed
+    def _get_chunks_from_queues_worker(self,lock,list_index) :
+        #loop until None is pulled from the queue
+        while True:
+            token = self._queues[list_index].get()
+            if token is None:
+                #make sure the thread can be joined
+                self._queues[list_index].task_done()
+                break
+            #get the file chunk object from the token
+            dfc = DataFileChunk.from_token(token,logger=self._logger)
+            #add the chunk's data to the file that's being reconstructed
+            if dfc.filepath not in self._data_files_by_path.keys() :
+                self._data_files_by_path[dfc.filepath] = (DataFile(dfc.filepath,logger=self._logger),Lock())
+            return_value = self._data_files_by_path[dfc.filepath][0].write_chunk_to_disk(dfc,self._dirpath,self._data_files_by_path[dfc.filepath][1])
+            if return_value==DATA_FILE_HANDLING_CONST.FILE_HASH_MISMATCH_CODE :
+                self._logger.error(f'ERROR: file hashes for file {dfc.filename} not matched after reconstruction!',RuntimeError)
+            elif return_value==DATA_FILE_HANDLING_CONST.FILE_SUCCESSFULLY_RECONSTRUCTED_CODE :
+                self._logger.info(f'File {dfc.filename} successfully reconstructed locally from stream')
+                with lock :
+                    if dfc.filepath in self._data_files_by_path :
+                        self._n_msgs_read+=1
+                        self._completely_reconstructed_filenames.add(dfc.filepath)
+                        del self._data_files_by_path[dfc.filepath]
+            elif return_value==DATA_FILE_HANDLING_CONST.FILE_IN_PROGRESS :
+                with lock :
+                    self._n_msgs_read+=1

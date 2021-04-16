@@ -13,8 +13,8 @@ def add_user_input(input_queue) :
 def populated_kwargs(given_kwargs,defaults,logger=None) :
     #for all the needed keys
     for key in defaults.keys() :
-        #if it was given
-        if key in given_kwargs.keys() :
+        #if it was given and is not None
+        if key in given_kwargs.keys() and given_kwargs[key] is not None :
             #if there are several options for what the argument can be, check them all
             if isinstance(defaults[key],tuple) :
                 #if there is a default and at least one specified class or type that the argument must be

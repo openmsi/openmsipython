@@ -1,16 +1,15 @@
 #imports
 from .data_file_chunk import DataFileChunk
 from .utilities import produce_from_queue_of_file_chunks
-from ..my_kafka.my_producers import TutorialClusterProducer
+from .config import DATA_FILE_HANDLING_CONST, RUN_OPT_CONST
+from ..my_kafka.my_producers import MyProducer
 from ..utilities.misc import populated_kwargs
 from ..utilities.logging import Logger
-from ..utilities.config import DATA_FILE_HANDLING_CONST, RUN_OPT_CONST, TUTORIAL_CLUSTER_CONST
-from confluent_kafka import Producer
 from threading import Thread
 from queue import Queue
 from contextlib import nullcontext
 from hashlib import sha512
-import os
+import pathlib, os
 
 # DataFile Class
 class DataFile() :
@@ -70,10 +69,10 @@ class DataFile() :
         to_upload = if False, the file will be ignored for purposes of uploading to a topic (default is True)
         """
         self._filepath = filepath
-        self._filename = os.path.basename(filepath)
+        self._filename = filepath.name
         self._logger = kwargs.get('logger')
         if self._logger is None :
-            self._logger = Logger(os.path.basename(__file__).split('.')[0])
+            self._logger = Logger(pathlib.Path(__file__).name.split('.')[0])
         if kwargs.get('to_upload') is not None :
             self._to_upload = kwargs.get('to_upload')
         else :
@@ -112,24 +111,25 @@ class DataFile() :
         if len(self._chunks_to_upload)==0 :
             self._fully_enqueued = True
     
-    def upload_whole_file(self,**kwargs) :
+    def upload_whole_file(self,config_path,topic_name,**kwargs) :
         """
         Chunk and upload an entire file on disk to a cluster's topic.
+
+        config_path = path to the config file to use in defining the producer
+        topic_name  = name of the topic to produce messages to
         
         Possible keyword arguments:
         n_threads  = the number of threads to run at once during uploading
         chunk_size = the size of each file chunk in bytes
-        producer   = the producer object to use
-        topic_name = the name of the topic to use
         """
         #set the important variables
         kwargs = populated_kwargs(kwargs,
                                   {'n_threads': RUN_OPT_CONST.N_DEFAULT_UPLOAD_THREADS,
                                    'chunk_size': RUN_OPT_CONST.DEFAULT_CHUNK_SIZE,
-                                   'producer': (TutorialClusterProducer(),Producer),
-                                   'topic_name': TUTORIAL_CLUSTER_CONST.LECROY_FILE_TOPIC_NAME
                                   },self._logger)
-        startup_msg = f"Uploading entire file {self._filepath} to {kwargs['topic_name']} in {kwargs['chunk_size']} byte chunks "
+        #start the producer
+        producer = MyProducer.from_file(config_path,logger=self._logger)
+        startup_msg = f"Uploading entire file {self._filepath} to {topic_name} in {kwargs['chunk_size']} byte chunks "
         startup_msg+=f"using {kwargs['n_threads']} threads...."
         self._logger.info(startup_msg)
         #add all the chunks to the upload queue
@@ -142,8 +142,8 @@ class DataFile() :
         upload_threads = []
         for ti in range(kwargs['n_threads']) :
             t = Thread(target=produce_from_queue_of_file_chunks, args=(upload_queue,
-                                                                       kwargs['producer'],
-                                                                       kwargs['topic_name'],
+                                                                       producer,
+                                                                       topic_name,
                                                                        self._logger))
             t.start()
             upload_threads.append(t)
@@ -151,7 +151,7 @@ class DataFile() :
         for ut in upload_threads :
             ut.join()
         self._logger.info('Waiting for all enqueued messages to be delivered (this may take a moment)....')
-        kwargs['producer'].flush() #don't leave the function until all messages have been sent/received
+        producer.flush() #don't leave the function until all messages have been sent/received
         self._logger.info('Done!')
 
     def write_chunk_to_disk(self,dfc,workingdir,thread_lock=nullcontext) :
@@ -162,9 +162,9 @@ class DataFile() :
         thread_lock = the lock object to acquire/release so that race conditions don't affect 
                       reconstruction of the files (optional, only needed if running this function asynchronously)
         """
-        reconstructed_filepath = os.path.join(workingdir,dfc.filename)
+        reconstructed_filepath = workingdir / dfc.filename
         #lock the current thread while data is written to the file
-        mode = 'r+b' if os.path.isfile(reconstructed_filepath) else 'w+b'
+        mode = 'r+b' if reconstructed_filepath.is_file() else 'w+b'
         with open(reconstructed_filepath,mode) as fp :
             with thread_lock :
                 fp.seek(dfc.chunk_offset)

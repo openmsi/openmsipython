@@ -1,35 +1,28 @@
-#Classes that extend Kafka Producers for specific scenarios
-
 #imports
+from .config_file_parser import ConfigFileParser
 from confluent_kafka import Producer
-from ..utilities.misc import populated_kwargs
-from ..utilities.config import TUTORIAL_CLUSTER_CONST
 
-#Producer to the tutorial cluster
-class TutorialClusterProducer(Producer) :
+class MyProducer(Producer) :
+    """
+    Class to extend Kafka Producers for specific scenarios
+    """
 
-    def __init__(self,**kwargs) :
+    def __init__(self,config_dict) :
+        super().__init__(config_dict)
+
+    @classmethod
+    def from_file(cls,config_file_path,**kwargs) :
         """
+        config_file_path = path to the config file to use in defining this producer
+
         Possible keyword arguments:
-        batch_size         : the allowed size (in bytes) of each message batch (default=200,000)
-        retries            : the number of times to retry sending any particular message before erroring out (default is 2)
-        linger_ms          : how long (in ms) each batch of messages should wait to fill with mesages before being sent off (default is 100ms)
-        compression_type   : the type of compression algorithm to use for compressing a batch of messages (default: lz4)
+        logger = the logger object to use
+        !!!!! any other keyword arguments will be added to the configuration (with underscores replaced with dots) !!!!!
         """
-        kwargs = populated_kwargs(kwargs,
-                                  {'batch_size':200000,
-                                   'retries':2,
-                                   'linger_ms':100,
-                                   'compression_type':'lz4',
-                                  })
-        config = {'bootstrap.servers'  : TUTORIAL_CLUSTER_CONST.SERVER,
-                  'sasl.mechanism'     : TUTORIAL_CLUSTER_CONST.SASL_MECHANISM,
-                  'security.protocol'  : TUTORIAL_CLUSTER_CONST.SECURITY_PROTOCOL,
-                  'sasl.username'      : TUTORIAL_CLUSTER_CONST.USERNAME,
-                  'sasl.password'      : TUTORIAL_CLUSTER_CONST.PASSWORD,
-                  'batch.size'         : kwargs['batch_size'],
-                  'retries'            : kwargs['retries'],
-                  'linger.ms'          : kwargs['linger_ms'],
-                  'compression.type'   : kwargs['compression_type'],
-                }
-        super().__init__(config)
+        parser = ConfigFileParser(config_file_path,**kwargs)
+        configs = parser.get_config_dict_for_groups(['cluster','producer'])
+        for argname,arg in kwargs.items() :
+            if argname=='logger' :
+                continue
+            configs[argname.replace('_','.')]=arg
+        return cls(configs)

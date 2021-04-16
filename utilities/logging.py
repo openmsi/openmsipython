@@ -1,5 +1,5 @@
 #imports
-import logging, os
+import logging, pathlib
 
 class Logger :
     """
@@ -12,7 +12,7 @@ class Logger :
         """
         self._name = name
         if self._name is None :
-            self._name = os.path.basename(__file__).split('.')[0]
+            self._name = pathlib.Path(__file__).name.split('.')[0]
         self._logger_obj = logging.getLogger(self._name)
         self._logger_obj.setLevel(logging.DEBUG)
         handler = logging.StreamHandler()
