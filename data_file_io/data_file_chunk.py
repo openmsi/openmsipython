@@ -1,77 +1,37 @@
 #imports
+from .utilities import producer_callback, PRODUCER_CALLBACK_LOGGER
 from hashlib import sha512
-import pathlib, msgpack, time
+import time
 
 # DataFileChunk Class 
 class DataFileChunk() :
     """
     Class to deal with single chunks of file info
     """
-    def __init__(self,*args) :
+    def __init__(self,filepath,file_hash,chunk_hash,chunk_offset,chunk_size,chunk_i,n_total_chunks,data=None) :
         """
-        *args = ordered list of initializing arguments (see assignments below for what exactly they are)
+        filepath       = path to this chunk's original file
+        file_hash      = hash of this chunk's entire file data
+        chunk_hash     = hash of this chunk's data
+        chunk_offset   = offset (in bytes) of this chunk within the original file
+        chunk_size     = size of this chunk (in bytes)
+        chunk_i        = index of this chunk within the larger file
+        n_total_chunks = the total number of chunks to expect from the original file
+        data           = the actual binary data of this chunk of the file (can be set later if this chunk is being produced and not consumed)
         """
-        self.filepath = args[0]
-        self.file_hash = args[1]
-        self.chunk_hash = args[2]
-        self.chunk_offset = args[3]
-        self.chunk_size = args[4]
-        self.filename = args[5]
-        self.chunk_i = args[6]
-        self.n_total_chunks = args[7]
-        if len(args)>8 :
-            self.data = args[8]
-        else :
-            self.data=None
+        self.filepath = filepath
+        self.filename = self.filepath.name
+        self.file_hash = file_hash
+        self.chunk_hash = chunk_hash
+        self.chunk_offset = chunk_offset
+        self.chunk_size = chunk_size
+        self.chunk_i = chunk_i
+        self.n_total_chunks = n_total_chunks
+        self.data = data
 
-    #class method to instantiate the object by reading a token instead of from individual values
-    @classmethod
-    def from_token(cls,token,**kwargs) :
+    def produce_to_topic(self,producer,topic_name,logger,print_every=1000) :
         """
-        Possible keyword arguments:
-        logger = the logger object to use
-        """
-        logger = kwargs.get('logger')
-        p_list = msgpack.unpackb(token,raw=True)
-        if len(p_list)!=8 :
-            msg = f'ERROR: unrecognized token passed to DataFileChunk.from_token(). Expected 8 properties but found {len(p_list)}'
-            if logger is None :
-                raise ValueError(msg)
-            else :
-                logger.error(msg,ValueError)
-        args = [None,None,None,None,None,None,None,None,None]
-        try :
-            args[0] = pathlib.Path(str(p_list[0].decode()))
-            args[1] = p_list[1]
-            chunk_hash = p_list[2]
-            args[2] = chunk_hash
-            chunk_offset = int(p_list[3])
-            args[3] = chunk_offset
-            data = p_list[4]
-            args[8] = data
-            args[4] = len(data)
-            filename = str(p_list[5].decode())
-            args[5] = filename
-            args[6] = int(p_list[6])
-            args[7] = int(p_list[7])
-        except Exception as e :
-            raise ValueError(f'ERROR: unrecognized value(s) when instantiating DataFileChunk from token. Exception: {e}')
-        check_chunk_hash = sha512()
-        check_chunk_hash.update(data)
-        check_chunk_hash = check_chunk_hash.digest()
-        if check_chunk_hash!=chunk_hash :
-            msg = f'ERROR: chunk hash {check_chunk_hash} != expected hash {chunk_hash} in file {filename}, offset {chunk_offset}'
-            if logger is None :
-                raise ValueError(msg)
-            else :
-                logger.error(msg,ValueError)
-        return cls(*args)
-
-    #################### PUBLIC FUNCTIONS ####################
-
-    def upload_as_message(self,producer,topic_name,logger,print_every=1000) :
-        """
-        Upload the file chunk as a message to the specified topic using the specified producer
+        Upload the file chunk as a message to the specified topic using the specified SerializingProducer
         Meant to be run in parallel
         producer     = the producer to use
         topic_name   = the name of the topic to produce the message to
@@ -79,8 +39,7 @@ class DataFileChunk() :
         print_every  = how often to print/log progress messages
         """
         #set the logger so the callback can use it
-        global LOGGER
-        LOGGER = logger
+        PRODUCER_CALLBACK_LOGGER.logger = logger
         #log a line about this file chunk if applicable
         filepath = self.filepath
         if (self.chunk_i-1)%print_every==0 or self.chunk_i==self.n_total_chunks :
@@ -100,13 +59,14 @@ class DataFileChunk() :
         if self.chunk_hash != check_chunk_hash:
             msg = f'ERROR: chunk hash {check_chunk_hash} != expected hash {self.chunk_hash} in file {filepath}, offset {self.chunk_offset}'
             logger.error(msg,ValueError)
+        #set the chunk's data value
+        self.data = data
         #produce the message to the topic
         message_key = f'{self.filename}_chunk_{self.chunk_i}_of_{self.n_total_chunks}'
-        message_value = self._packed_as_message(data)
         success=False; retries=0; sleep_secs=5; total_wait_secs=60 
         if (not success) and retries<(1.0*total_wait_secs/sleep_secs) :
             try :
-                producer.produce(topic=topic_name,key=message_key,value=message_value,callback=producer_callback)
+                producer.produce(topic=topic_name,key=message_key,value=self,on_delivery=producer_callback)
                 success=True
             except BufferError :
                 time.sleep(sleep_secs)
@@ -114,42 +74,3 @@ class DataFileChunk() :
         if not success :
             logger.warning(f'WARNING: message with key {message_key} failed to buffer for more than {total_wait_secs}s and was dropped!')
         producer.poll(0.025)
-
-
-    #################### PRIVATE HELPER FUNCTIONS ####################
-
-    #helper function to return the file chunk as a packed message given the actual data from the file
-    def _packed_as_message(self,data) :
-        p_list = []
-        p_list.append(str(self.filepath))
-        p_list.append(self.file_hash)
-        p_list.append(self.chunk_hash)
-        p_list.append(self.chunk_offset)
-        p_list.append(data)
-        p_list.append(self.filename)
-        p_list.append(self.chunk_i)
-        p_list.append(self.n_total_chunks)
-        return msgpack.packb(p_list,use_bin_type=True)
-
-#################### FILE-SCOPE VARIABLES AND HELPER FUNCTIONS ####################
-
-#logger for use with the producer callback 
-LOGGER=None
-
-#a callback function to use for testing whether a message has been successfully produced to the topic
-def producer_callback(err,msg) :
-    global LOGGER
-    if err is not None: #raise an error if the message wasn't sent successfully
-        if err.fatal() :
-            logmsg=f'ERROR: fatally failed to deliver message with key {msg.key()}. Error reason: {err.str()}'
-            if LOGGER is not None :
-                LOGGER.error(logmsg,RuntimeError)
-            else :
-                raise RuntimeError(logmsg)
-        elif not err.retriable() :
-            logmsg=f'WARNING: Failed to deliver message with key {msg.key()}. Error reason: {err.str()}'
-            if LOGGER is not None :
-                LOGGER.warning(logmsg)
-            else :
-                print(logmsg)
-

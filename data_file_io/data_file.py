@@ -2,7 +2,7 @@
 from .data_file_chunk import DataFileChunk
 from .utilities import produce_from_queue_of_file_chunks
 from .config import DATA_FILE_HANDLING_CONST, RUN_OPT_CONST
-from ..my_kafka.my_producers import MyProducer
+from ..my_kafka.my_producers import MySerializingProducer
 from ..utilities.misc import populated_kwargs
 from ..utilities.logging import Logger
 from threading import Thread
@@ -128,7 +128,7 @@ class DataFile() :
                                    'chunk_size': RUN_OPT_CONST.DEFAULT_CHUNK_SIZE,
                                   },self._logger)
         #start the producer
-        producer = MyProducer.from_file(config_path,logger=self._logger)
+        producer = MySerializingProducer.from_file(config_path,logger=self._logger)
         startup_msg = f"Uploading entire file {self._filepath} to {topic_name} in {kwargs['chunk_size']} byte chunks "
         startup_msg+=f"using {kwargs['n_threads']} threads...."
         self._logger.info(startup_msg)
@@ -213,4 +213,4 @@ class DataFile() :
         self._logger.info(f'File {self._filepath} has a total of {len(chunks)} chunks')
         #add all the chunks to the final list as DataFileChunk objects
         for ic,c in enumerate(chunks,start=1) :
-            self._chunks_to_upload.append(DataFileChunk(self._filepath,file_hash,c[0],c[1],c[2],self._filename,ic,len(chunks)))
+            self._chunks_to_upload.append(DataFileChunk(self._filepath,file_hash,c[0],c[1],c[2],ic,len(chunks)))
