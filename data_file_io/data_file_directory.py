@@ -1,10 +1,9 @@
 #imports
 from .data_file import DataFile
-from .data_file_chunk import DataFileChunk
 from .utilities import produce_from_queue_of_file_chunks
 from .config import RUN_OPT_CONST, DATA_FILE_HANDLING_CONST
-from ..my_kafka.my_producers import MyProducer
-from ..my_kafka.my_consumers import MyConsumer
+from ..my_kafka.my_producers import MySerializingProducer
+from ..my_kafka.my_consumers import MyDeserializingConsumer
 from ..utilities.misc import add_user_input, populated_kwargs
 from ..utilities.logging import Logger
 from queue import Queue, Empty
@@ -56,7 +55,7 @@ class DataFileDirectory() :
                                    'new_files_only':False,
                                   },self._logger)
         #start the producer 
-        producer = MyProducer.from_file(config_path,logger=self._logger)
+        producer = MySerializingProducer.from_file(config_path,logger=self._logger)
         #if we're only going to upload new files, exclude what's already in the directory
         if kwargs['new_files_only'] :
             for filepath in self._dirpath.glob('*') :
@@ -221,25 +220,23 @@ class DataFileDirectory() :
     #helper function to get DataFileChunks from a queue and write them to disk, paying attention to whether they've been fully reconstructed
     def _consume_and_process_messages_worker(self,config_path,topic_name,group_id,lock,list_index) :
         #start up the consumer
-        consumer = MyConsumer.from_file(config_path,logger=self._logger,group_id=group_id)
+        consumer = MyDeserializingConsumer.from_file(config_path,logger=self._logger,group_id=group_id)
         consumer.subscribe([topic_name])
         #loop until None is pulled from the queue
         while True:
             try :
-                token = self._queues[list_index].get(block=False)
+                dfc = self._queues[list_index].get(block=False)
             except Empty :
                 consumed_msg = consumer.poll(0)
                 if consumed_msg is not None and consumed_msg.error() is None :
                     self._queues[list_index].put(consumed_msg.value())
                 continue
-            if token is None:
+            if dfc is None:
                 #make sure the thread can be joined
                 self._queues[list_index].task_done()
                 #close the consumer
                 consumer.close()
                 break
-            #get the file chunk object from the token
-            dfc = DataFileChunk.from_token(token,logger=self._logger)
             #add the chunk's data to the file that's being reconstructed
             if dfc.filepath not in self._data_files_by_path.keys() :
                 self._data_files_by_path[dfc.filepath] = (DataFile(dfc.filepath,logger=self._logger),Lock())
