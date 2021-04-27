@@ -25,9 +25,11 @@ class DataFileDirectoryUploaderService(SMWinservice) :
         Called just before the service is requested to begin running; handles internal class setup and configuration
         """
         #make the logger
-        self._logger = Logger(pathlib.Path(__file__).name.split('.')[0])
+        filename = pathlib.Path(__file__).name.split('.')[0]
+        self._logger = Logger(filename)
         #parse the configuration stuff in the file
         self._args = self._get_args()
+        self._logger.add_file_handler(pathlib.Path(self._args.file_directory)/f'{filename}.log')
         #set up the DataFileDirectory
         self._upload_file_directory = DataFileDirectory(self._args.file_directory,logger=self._logger)
         #allow it to start uploading
@@ -61,8 +63,12 @@ class DataFileDirectoryUploaderService(SMWinservice) :
                                                                                new_files_only=self._args.new_files_only)
         finish_time = datetime.datetime.now()
         self._logger.info(f'Done listening to {self._args.file_directory} for files to upload')
-        final_msg = f'The following {len(uploaded_filepaths)} files were uploaded between {self._start_time} '
-        final_msg+= f'and {self._finish_time} (stop requested at {self._stop_time}):\n'
+        final_msg = f'The following {len(uploaded_filepaths)} file'
+        if len(uploaded_filepaths)==1 :
+            final_msg+=' was'
+        else :
+            final_msg+='s were'
+        final_msg+=f' uploaded between {run_start} and {run_stop}:\n'
         for fp in uploaded_filepaths :
             final_msg+=f'\t{fp}\n'
         self._logger.info(final_msg)
