@@ -1,6 +1,6 @@
 #imports
-from .config_file_parser import ConfigFileParser
 from .serialization import DataFileChunkSerializer
+from ..utilities.config_file_parser import ConfigFileParser
 from confluent_kafka import Producer, SerializingProducer
 from confluent_kafka.serialization import DoubleSerializer, IntegerSerializer, StringSerializer
 
