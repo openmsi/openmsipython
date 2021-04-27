@@ -15,12 +15,24 @@ class DataFileDirectory() :
     """
     Class for representing a directory holding data files
     """
+
+    #################### PROPERTIES ####################
+
+    @property
+    def upload_running(self):
+        return self._upload_running
+    @upload_running.setter
+    def upload_running(self,v) :
+        self._upload_running = v
+
+    #################### PUBLIC FUNCTIONS ####################
+
     def __init__(self,dirpath,**kwargs) :
         """
         dirpath = path to the directory 
         
         Possible keyword arguments:
-        logger         = the logger object to use (a new one will be created if none is supplied)
+        logger = the logger object to use (a new one will be created if none is supplied)
         """
         kwargs = populated_kwargs(kwargs,{'new_files_only':False})
         self._dirpath = dirpath
@@ -28,8 +40,7 @@ class DataFileDirectory() :
         if self._logger is None :
             self._logger = Logger(pathlib.Path(__file__).name.split('.')[0])
         self._data_files_by_path = {}
-
-    #################### PUBLIC FUNCTIONS ####################
+        self._upload_running = False
 
     def upload_files_as_added(self,config_path,topic_name,**kwargs) :
         """
@@ -39,12 +50,14 @@ class DataFileDirectory() :
         topic_name  = name of the topic to produce messages to
 
         Possible keyword arguments:
-        n_threads      = the number of threads to run at once during uploading
-        chunk_size     = the size of each file chunk in bytes
-        max_queue_size = maximum number of items allowed to be placed in the upload queue at once
-        update_secs    = number of seconds to wait between printing a progress character to the console to indicate the program is alive
-        new_files_only = set to True if any files that already exist in the directory should be assumed to have been produced
-                         i.e., if False (the default) then even files that are already in the directory will be enqueued to the producer
+        takes_user_input = set to True if the directory should spawn a thread listening for user input to check whether it's running
+                           if False the loop can only be exited by setting DataFileDirectory.upload_running = False
+        n_threads        = the number of threads to run at once during uploading
+        chunk_size       = the size of each file chunk in bytes
+        max_queue_size   = maximum number of items allowed to be placed in the upload queue at once
+        update_secs      = number of seconds to wait between printing a progress character to the console to indicate the program is alive
+        new_files_only   = set to True if any files that already exist in the directory should be assumed to have been produced
+                           i.e., if False (the default) then even files that are already in the directory will be enqueued to the producer
         """
         #set the important variables
         kwargs = populated_kwargs(kwargs,
@@ -63,9 +76,10 @@ class DataFileDirectory() :
                     self._data_files_by_path[filepath]=DataFile(filepath,logger=self._logger,to_upload=False)
         #initialize a thread to listen for and get user input and a queue to put it into
         user_input_queue = Queue()
-        user_input_thread = Thread(target=add_user_input,args=(user_input_queue,))
-        user_input_thread.daemon=True
-        user_input_thread.start()
+        if takes_user_input :
+            user_input_thread = Thread(target=add_user_input,args=(user_input_queue,))
+            user_input_thread.daemon=True
+            user_input_thread.start()
         #start the upload queue and thread
         msg = 'Will upload '
         if kwargs['new_files_only'] :
@@ -90,9 +104,9 @@ class DataFileDirectory() :
             if kwargs['update_secs']!=-1 and time.time()-last_update>kwargs['update_secs']:
                 print('.')
                 last_update = time.time()
-            #if the user has put something in the console
-            if not user_input_queue.empty() :
-                cmd = user_input_queue.get()
+            #if the uploading has been stopped externally or the user has put something in the console
+            if (not self._upload_running) or (not user_input_queue.empty()) :
+                #make the progress message
                 for filepath in self._dirpath.glob('*') :
                     if filepath not in self._data_files_by_path.keys() :
                         if not filepath.name.startswith('.') :
@@ -102,15 +116,23 @@ class DataFileDirectory() :
                     if not datafile.to_upload :
                         continue
                     progress_msg+=f'\t{datafile.upload_status_msg}\n'
-                #close the user input task and break out of the loop
-                if cmd.lower() in ('q','quit') :
+                #get the command if that's why we're here
+                if not user_input_queue.empty() :
+                    cmd = user_input_queue.get()
+                    #close the user input task and break out of the loop
+                    if cmd.lower() in ('q','quit') :
+                        self._logger.info('Will quit after all currently enqueued files are done being transferred.')
+                        self._logger.info(progress_msg)
+                        user_input_queue.task_done()
+                        self._upload_running = False
+                        break
+                    #log progress so far
+                    elif cmd.lower() in ('c','check') :
+                        self._logger.info(progress_msg)
+                elif not self._upload_running :
                     self._logger.info('Will quit after all currently enqueued files are done being transferred.')
                     self._logger.info(progress_msg)
-                    user_input_queue.task_done()
                     break
-                #log progress so far
-                elif cmd.lower() in ('c','check') :
-                    self._logger.info(progress_msg)
             #check for new files in the directory if we haven't already found some to run
             have_file = False
             for datafile in self._data_files_by_path.values() :
