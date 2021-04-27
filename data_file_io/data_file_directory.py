@@ -87,7 +87,7 @@ class DataFileDirectory() :
         last_update = time.time()
         while True:
             #print the "still alive" character at each given interval
-            if time.time()-last_update>kwargs['update_secs']:
+            if kwargs['update_secs']!=-1 and time.time()-last_update>kwargs['update_secs']:
                 print('.')
                 last_update = time.time()
             #if the user has put something in the console
@@ -197,7 +197,7 @@ class DataFileDirectory() :
         #loop until the user inputs a command to stop
         last_update = time.time()
         while True:
-            if time.time()-last_update>kwargs['update_secs']:
+            if kwargs['update_secs']!=-1 and time.time()-last_update>kwargs['update_secs']:
                 print('.')
                 last_update = time.time()
             if not user_input_queue.empty():
