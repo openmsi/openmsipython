@@ -66,6 +66,7 @@ class DataFileDirectory() :
                                    'max_queue_size':RUN_OPT_CONST.DEFAULT_MAX_UPLOAD_QUEUE_SIZE,
                                    'update_secs':RUN_OPT_CONST.DEFAULT_UPDATE_SECONDS,
                                    'new_files_only':False,
+                                   'takes_user_input':True,
                                   },self._logger)
         #start the producer 
         producer = MySerializingProducer.from_file(config_path,logger=self._logger)
@@ -76,7 +77,8 @@ class DataFileDirectory() :
                     self._data_files_by_path[filepath]=DataFile(filepath,logger=self._logger,to_upload=False)
         #initialize a thread to listen for and get user input and a queue to put it into
         user_input_queue = Queue()
-        if takes_user_input :
+        if kwargs['takes_user_input'] :
+            self._upload_running = True
             user_input_thread = Thread(target=add_user_input,args=(user_input_queue,))
             user_input_thread.daemon=True
             user_input_thread.start()
