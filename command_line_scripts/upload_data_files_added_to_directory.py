@@ -38,7 +38,8 @@ def main(args=None) :
                                  (by default files already existing in the directory at startup will be uploaded as well)""")
     args = parser.parse_args(args=args)
     #make a new logger
-    logger = Logger(pathlib.Path(__file__).name.split('.')[0])
+    filename = pathlib.Path(__file__).name.split('.')[0]
+    logger = Logger(filename,filepath=pathlib.Path(args.file_directory)/f'{filename}.log')
     #make the DataFileDirectory for the specified directory
     upload_file_directory = DataFileDirectory(args.file_directory,logger=logger)
     #listen for new files in the directory and run uploads as they come in until the process is shut down
@@ -55,7 +56,12 @@ def main(args=None) :
                                                                      new_files_only=args.new_files_only)
     run_stop = datetime.datetime.now()
     logger.info(f'Done listening to {args.file_directory} for files to upload')
-    final_msg = f'The following {len(uploaded_filepaths)} files were uploaded between {run_start} and {run_stop}:\n'
+    final_msg = f'The following {len(uploaded_filepaths)} file'
+    if len(uploaded_filepaths)==1 :
+        final_msg+=' was'
+    else :
+        final_msg+='s were'
+    final_msg+=f' uploaded between {run_start} and {run_stop}:\n'
     for fp in uploaded_filepaths :
         final_msg+=f'\t{fp}\n'
     logger.info(final_msg)

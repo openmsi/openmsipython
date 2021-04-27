@@ -59,7 +59,7 @@ class DataFileDirectory() :
         #if we're only going to upload new files, exclude what's already in the directory
         if kwargs['new_files_only'] :
             for filepath in self._dirpath.glob('*') :
-                if not filepath.name.startswith('.') :
+                if self._filepath_should_be_uploaded(filepath) :
                     self._data_files_by_path[filepath]=DataFile(filepath,logger=self._logger,to_upload=False)
         #initialize a thread to listen for and get user input and a queue to put it into
         user_input_queue = Queue()
@@ -88,15 +88,14 @@ class DataFileDirectory() :
         while True:
             #print the "still alive" character at each given interval
             if time.time()-last_update>kwargs['update_secs']:
-                print('.')
+                self._logger.debug('.')
                 last_update = time.time()
             #if the user has put something in the console
             if not user_input_queue.empty() :
                 cmd = user_input_queue.get()
                 for filepath in self._dirpath.glob('*') :
-                    if filepath not in self._data_files_by_path.keys() :
-                        if not filepath.name.startswith('.') :
-                            self._data_files_by_path[filepath]=DataFile(filepath,logger=self._logger)
+                    if (filepath not in self._data_files_by_path.keys()) and self._filepath_should_be_uploaded(filepath) :
+                        self._data_files_by_path[filepath]=DataFile(filepath,logger=self._logger)
                 progress_msg = 'The following files have been recognized so far:\n'
                 for datafile in self._data_files_by_path.values() :
                     if not datafile.to_upload :
@@ -110,7 +109,7 @@ class DataFileDirectory() :
                     break
                 #log progress so far
                 elif cmd.lower() in ('c','check') :
-                    self._logger.info(progress_msg)
+                    self._logger.debug(progress_msg)
             #check for new files in the directory if we haven't already found some to run
             have_file = False
             for datafile in self._data_files_by_path.values() :
@@ -119,9 +118,8 @@ class DataFileDirectory() :
                     break
             if not have_file :
                 for filepath in self._dirpath.glob('*') :
-                    if not filepath.name.startswith('.') :
-                        if filepath not in self._data_files_by_path.keys() :
-                            self._data_files_by_path[filepath]=DataFile(filepath,logger=self._logger)
+                    if self._filepath_should_be_uploaded(filepath) and (filepath not in self._data_files_by_path.keys()):
+                        self._data_files_by_path[filepath]=DataFile(filepath,logger=self._logger)
                 continue
             #find the first file that's running and add some of its chunks to the upload queue 
             for datafile in self._data_files_by_path.values() :
@@ -198,7 +196,7 @@ class DataFileDirectory() :
         last_update = time.time()
         while True:
             if time.time()-last_update>kwargs['update_secs']:
-                print('.')
+                self._logger.debug('.')
                 last_update = time.time()
             if not user_input_queue.empty():
                 cmd = user_input_queue.get()
@@ -206,7 +204,7 @@ class DataFileDirectory() :
                     user_input_queue.task_done()
                     break
                 elif cmd.lower() in ('c','check') :
-                    self._logger.info(f'{self._n_msgs_read} messages read, {len(self._completely_reconstructed_filenames)} files completely reconstructed so far')
+                    self._logger.debug(f'{self._n_msgs_read} messages read, {len(self._completely_reconstructed_filenames)} files completely reconstructed so far')
         #stop the processes by adding "None" to the queues 
         for i in range(len(self._threads)) :
             self._queues[i].put(None)
@@ -253,4 +251,12 @@ class DataFileDirectory() :
             elif return_value==DATA_FILE_HANDLING_CONST.FILE_IN_PROGRESS :
                 with lock :
                     self._n_msgs_read+=1
+
+    #helper function to filter filepaths and return a boolean that's True if they should be uploaded
+    def _filepath_should_be_uploaded(self,filepath) :
+        if filepath.name.startswith('.') :
+            return False
+        if filepath.name.endswith('.log') :
+            return False
+        return True
 
