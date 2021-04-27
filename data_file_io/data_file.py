@@ -213,4 +213,4 @@ class DataFile() :
         self._logger.info(f'File {self._filepath} has a total of {len(chunks)} chunks')
         #add all the chunks to the final list as DataFileChunk objects
         for ic,c in enumerate(chunks,start=1) :
-            self._chunks_to_upload.append(DataFileChunk(self._filepath,file_hash,c[0],c[1],c[2],ic,len(chunks)))
+            self._chunks_to_upload.append(DataFileChunk(self._filepath,self._filename,file_hash,c[0],c[1],c[2],ic,len(chunks)))
