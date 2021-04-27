@@ -8,9 +8,10 @@ class DataFileChunk() :
     """
     Class to deal with single chunks of file info
     """
-    def __init__(self,filepath,file_hash,chunk_hash,chunk_offset,chunk_size,chunk_i,n_total_chunks,data=None) :
+    def __init__(self,filepath,filename,file_hash,chunk_hash,chunk_offset,chunk_size,chunk_i,n_total_chunks,data=None) :
         """
         filepath       = path to this chunk's original file
+        filename       = the name of the file (important to pass for compatibility btwn. filesystems)
         file_hash      = hash of this chunk's entire file data
         chunk_hash     = hash of this chunk's data
         chunk_offset   = offset (in bytes) of this chunk within the original file
@@ -20,7 +21,7 @@ class DataFileChunk() :
         data           = the actual binary data of this chunk of the file (can be set later if this chunk is being produced and not consumed)
         """
         self.filepath = filepath
-        self.filename = self.filepath.name
+        self.filename = filename
         self.file_hash = file_hash
         self.chunk_hash = chunk_hash
         self.chunk_offset = chunk_offset
