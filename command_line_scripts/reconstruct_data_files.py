@@ -32,7 +32,8 @@ def main(args=None) :
                         help='ID to use for all consumers in the group (by default a new, unique, ID will be created)')
     args = parser.parse_args(args=args)
     #get the logger
-    logger = Logger(pathlib.Path(__file__).name.split('.')[0])
+    filename = pathlib.Path(__file__).name.split('.')[0]
+    logger = Logger(filename,filepath=pathlib.Path(args.workingdir)/f'{filename}.log')
     #make the DataFileDirectory
     reconstructor_directory = DataFileDirectory(args.workingdir,logger=logger)
     #start the reconstructor running (returns total number of chunks read and total number of files completely reconstructed)
@@ -47,7 +48,12 @@ def main(args=None) :
     logger.info(f'File reconstructor writing to {args.workingdir} shut down')
     msg = f'{n_msgs} total messages were consumed'
     if len(complete_filenames)>0 :
-        msg+=f' and the following {len(complete_filenames)} files were successfully reconstructed'
+        msg+=f' and the following {len(complete_filenames)} file'
+        if len(complete_filenames)==1 :
+            msg+=' was'
+        else :
+            msg+='s were'
+        msg+=' successfully reconstructed'
     msg+=f' from {run_start} to {run_stop}'
     for fn in complete_filenames :
         msg+=f'\n\t{fn}'
