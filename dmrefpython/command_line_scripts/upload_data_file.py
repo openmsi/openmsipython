@@ -30,7 +30,7 @@ def main(args=None) :
     args = parser.parse_args(args=args)
     #make a new logger
     filename = pathlib.Path(__file__).name.split('.')[0]
-    logger = Logger(filename,filepath=pathlib.Path(args.filepath)/f'{filename}.log')
+    logger = Logger(filename,filepath=(pathlib.Path(args.filepath).parent)/f'{filename}.log')
     #make the DataFile for the single specified file
     upload_file = DataFile(args.filepath,logger=logger)
     #chunk and upload the file
