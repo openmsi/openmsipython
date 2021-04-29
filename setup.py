@@ -6,7 +6,7 @@ site.ENABLE_USER_SITE = True #https://www.scivision.dev/python-pip-devel-user-in
 setuptools.setup(
     name="dmrefpython",
     version="0.0.1",
-    packages=setuptools.find_packages(),
+    packages=setuptools.find_packages(include=['dmrefpython*']),
     python_requires='>=3.7',
     install_requires=['confluent-kafka>=1.6.0',
                       'msgpack>=1.0.0',
