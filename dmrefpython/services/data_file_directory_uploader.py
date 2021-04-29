@@ -1,9 +1,9 @@
 #imports
-from data_file_io.data_file_directory import DataFileDirectory
-from utilities.smwinservice import SMWinservice
-from utilities.config_file_parser import ConfigFileParser
-from utilities.argument_parsing import existing_dir, config_path, int_power_of_two
-from utilities.logging import Logger
+from dmrefpython.data_file_io.data_file_directory import DataFileDirectory
+from dmrefpython.utilities.smwinservice import SMWinservice
+from dmrefpython.utilities.config_file_parser import ConfigFileParser
+from dmrefpython.utilities.argument_parsing import existing_dir, config_path, int_power_of_two
+from dmrefpython.utilities.logging import Logger
 import pathlib, datetime
 
 class DataFileDirectoryUploaderService(SMWinservice) :
