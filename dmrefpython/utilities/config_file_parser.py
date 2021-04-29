@@ -29,6 +29,8 @@ class ConfigFileParser :
 
         group_names = the list of group names to add to the dictionary
         """
+        if isinstance(group_names,str) :
+            group_names = [group_names]
         config_dict = {}
         for group_name in group_names :
             if group_name not in self._config :
