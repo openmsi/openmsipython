@@ -4,6 +4,7 @@ from dmrefpython.utilities.smwinservice import SMWinservice
 from dmrefpython.utilities.config_file_parser import ConfigFileParser
 from dmrefpython.utilities.argument_parsing import existing_dir, config_path, int_power_of_two
 from dmrefpython.utilities.logging import Logger
+from argparse import Namespace
 import pathlib, datetime
 
 class DataFileDirectoryUploaderService(SMWinservice) :
@@ -85,7 +86,7 @@ class DataFileDirectoryUploaderService(SMWinservice) :
         configs['config']=config_path(self._config_file_path_)
         #check the other arguments to make sure they're the correct type and replace them in the dictionary
         arg_checks = {'file_directory':existing_dir,
-                      'topic_name':None, 
+                      'topic_name':str, 
                       'n_threads':int,      
                       'chunk_size':int_power_of_two,
                       'queue_max_size':int,

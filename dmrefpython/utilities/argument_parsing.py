@@ -34,7 +34,7 @@ def create_dir(argstring) :
 
 #helper function to convert a string argument into a path (raise an exception if the file can't be found)
 def config_path(configarg) :
-    if '.' not in configarg :
+    if isinstance(configarg,str) and '.' not in configarg :
         configarg+=CONFIG_FILE_EXT
     if pathlib.Path.is_file(pathlib.Path(configarg)) :
         return pathlib.Path(configarg).resolve().absolute()
@@ -44,6 +44,11 @@ def config_path(configarg) :
 
 #helper function to make sure a given value is a nonzero integer power of two
 def int_power_of_two(argval) :
+    if not isinstance(argval,int) :
+        try :
+            argval=int(argval)
+        except Exception as e :
+            raise ValueError(f'ERROR: could not convert {argval} to an integer in int_power_of_two!')
     if argval<=0 or math.ceil(math.log2(argval))!=math.floor(math.log2(argval)) :
         raise ValueError(f'ERROR: invalid argument: {argval} must be a (nonzero) power of two!')
     return argval
