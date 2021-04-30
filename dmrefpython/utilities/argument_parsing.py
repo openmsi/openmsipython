@@ -48,7 +48,7 @@ def int_power_of_two(argval) :
         try :
             argval=int(argval)
         except Exception as e :
-            raise ValueError(f'ERROR: could not convert {argval} to an integer in int_power_of_two!')
+            raise ValueError(f'ERROR: could not convert {argval} to an integer in int_power_of_two! Exception: {e}')
     if argval<=0 or math.ceil(math.log2(argval))!=math.floor(math.log2(argval)) :
         raise ValueError(f'ERROR: invalid argument: {argval} must be a (nonzero) power of two!')
     return argval
