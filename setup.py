@@ -13,7 +13,7 @@ setuptools.setup(
                              'reconstruct_data_files=dmrefpython.command_line_scripts.reconstruct_data_files:main',
                             ],
     },
-    python_requires='>=3.7',
+    python_requires='>=3.7,<3.8',
     install_requires=['confluent-kafka>=1.6.0',
                       'msgpack>=1.0.0',
                      ],
