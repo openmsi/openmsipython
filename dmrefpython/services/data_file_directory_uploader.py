@@ -42,4 +42,4 @@ def get_args(config_file_path) :
     return args
 
 #call the main method of the command line script (first argument to this script is the path to the config file to use)
-main(get_args(sys.argv[1]))
+main(args=get_args(sys.argv[1]),safe_quit_on_exit=True)
