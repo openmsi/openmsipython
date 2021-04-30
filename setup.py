@@ -17,7 +17,4 @@ setuptools.setup(
     install_requires=['confluent-kafka>=1.6.0',
                       'msgpack>=1.0.0',
                      ],
-    extras_require={
-        'windows_services':['pywin32',],
-    }
 )
