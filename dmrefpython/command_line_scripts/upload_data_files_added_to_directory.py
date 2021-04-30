@@ -50,7 +50,6 @@ def main(args=None) :
     else :
         logger.info(f'Uploading files in/added to {args.file_directory}...')
     uploaded_filepaths = upload_file_directory.upload_files_as_added(args.config,args.topic_name,
-                                                                     takes_user_input=True,
                                                                      n_threads=args.n_threads,
                                                                      chunk_size=args.chunk_size,
                                                                      max_queue_size=args.queue_max_size,
