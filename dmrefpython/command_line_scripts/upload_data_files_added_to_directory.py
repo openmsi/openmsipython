@@ -14,29 +14,30 @@ DEFAULT_TOPIC_NAME  = 'lecroy_files' # name of the topic to produce to by defaul
 #################### MAIN SCRIPT ####################
 
 def main(args=None) :
-    #make the argument parser
-    parser = ArgumentParser()
-    #positional argument: filepath to upload
-    parser.add_argument('file_directory', type=existing_dir, help='Path to the directory to watch for files to upload')
-    #optional arguments
-    parser.add_argument('--config', default=DEFAULT_CONFIG_FILE, type=config_path,
-                        help=f'Name of config file in config_files directory, or path to a file in a different location (default={DEFAULT_CONFIG_FILE})')
-    parser.add_argument('--topic_name', default=DEFAULT_TOPIC_NAME,
-                        help=f'Name of the topic to produce to (default={DEFAULT_TOPIC_NAME})')
-    parser.add_argument('--n_threads', default=RUN_OPT_CONST.N_DEFAULT_UPLOAD_THREADS, type=int,
-                        help=f'Maximum number of threads to use (default={RUN_OPT_CONST.N_DEFAULT_UPLOAD_THREADS})')
-    parser.add_argument('--chunk_size', default=RUN_OPT_CONST.DEFAULT_CHUNK_SIZE, type=int_power_of_two,
-                        help=f'Size (in bytes) of chunks into which files should be broken as they are uploaded (default={RUN_OPT_CONST.DEFAULT_CHUNK_SIZE})')
-    parser.add_argument('--queue_max_size', default=RUN_OPT_CONST.DEFAULT_MAX_UPLOAD_QUEUE_SIZE, type=int,
-                        help=f"""Maximum number of items (file chunks) to allow in the upload queue at a time 
-                                 (default={RUN_OPT_CONST.DEFAULT_MAX_UPLOAD_QUEUE_SIZE}). Use to limit RAM usage if necessary.""")
-    parser.add_argument('--update_seconds', default=RUN_OPT_CONST.DEFAULT_UPDATE_SECONDS, type=int,
-                        help=f"""Number of seconds to wait between printing a '.' to the console to indicate the program is alive 
-                                 (default={RUN_OPT_CONST.DEFAULT_UPDATE_SECONDS})""")
-    parser.add_argument('--new_files_only', action='store_true',
-                         help="""Add this flag to only upload files added to the directory after this code is already running
-                                 (by default files already existing in the directory at startup will be uploaded as well)""")
-    args = parser.parse_args(args=args)
+    if args is None :
+        #make the argument parser
+        parser = ArgumentParser()
+        #positional argument: filepath to upload
+        parser.add_argument('file_directory', type=existing_dir, help='Path to the directory to watch for files to upload')
+        #optional arguments
+        parser.add_argument('--config', default=DEFAULT_CONFIG_FILE, type=config_path,
+                            help=f'Name of config file in config_files directory, or path to a file in a different location (default={DEFAULT_CONFIG_FILE})')
+        parser.add_argument('--topic_name', default=DEFAULT_TOPIC_NAME,
+                            help=f'Name of the topic to produce to (default={DEFAULT_TOPIC_NAME})')
+        parser.add_argument('--n_threads', default=RUN_OPT_CONST.N_DEFAULT_UPLOAD_THREADS, type=int,
+                            help=f'Maximum number of threads to use (default={RUN_OPT_CONST.N_DEFAULT_UPLOAD_THREADS})')
+        parser.add_argument('--chunk_size', default=RUN_OPT_CONST.DEFAULT_CHUNK_SIZE, type=int_power_of_two,
+                            help=f'Size (in bytes) of chunks into which files should be broken as they are uploaded (default={RUN_OPT_CONST.DEFAULT_CHUNK_SIZE})')
+        parser.add_argument('--queue_max_size', default=RUN_OPT_CONST.DEFAULT_MAX_UPLOAD_QUEUE_SIZE, type=int,
+                            help=f"""Maximum number of items (file chunks) to allow in the upload queue at a time 
+                                     (default={RUN_OPT_CONST.DEFAULT_MAX_UPLOAD_QUEUE_SIZE}). Use to limit RAM usage if necessary.""")
+        parser.add_argument('--update_seconds', default=RUN_OPT_CONST.DEFAULT_UPDATE_SECONDS, type=int,
+                            help=f"""Number of seconds to wait between printing a '.' to the console to indicate the program is alive 
+                                     (default={RUN_OPT_CONST.DEFAULT_UPDATE_SECONDS})""")
+        parser.add_argument('--new_files_only', action='store_true',
+                             help="""Add this flag to only upload files added to the directory after this code is already running
+                                     (by default files already existing in the directory at startup will be uploaded as well)""")
+        args = parser.parse_args(args=args)
     #make a new logger
     filename = pathlib.Path(__file__).name.split('.')[0]
     logger = Logger(filename,filepath=pathlib.Path(args.file_directory)/f'{filename}.log')
