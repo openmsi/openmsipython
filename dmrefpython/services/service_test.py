@@ -8,6 +8,6 @@ if not filedirpath.is_dir() :
 n_files = 20
 for i in range(n_files) :
 	filename = f'service_test_{i+1}_of_{n_files}.txt'
-	with open(filedirpath / filename) as fp :
+	with open(filedirpath / filename,'w') as fp :
 		fp.write(f'hello in file number {i+1} of {n_files} : )')
 	time.sleep(5)
