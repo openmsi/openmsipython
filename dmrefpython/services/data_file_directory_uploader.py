@@ -3,6 +3,7 @@ from dmrefpython.command_line_scripts.upload_data_files_added_to_directory impor
 from dmrefpython.utilities.config_file_parser import ConfigFileParser
 from dmrefpython.utilities.argument_parsing import existing_dir, config_path, int_power_of_two
 from argparse import Namespace
+import pathlib
 
 CONFIG_FILE_PATH = pathlib.Path(__file__).parent / 'data_file_directory_uploader.config'
 
