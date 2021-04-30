@@ -4,7 +4,7 @@ from ..data_file_io.config import RUN_OPT_CONST
 from ..utilities.argument_parsing import existing_dir, config_path, int_power_of_two
 from ..utilities.logging import Logger
 from argparse import ArgumentParser
-import pathlib, datetime, atexit
+import pathlib, datetime
 
 #################### FILE-SCOPE CONSTANTS ####################
 
