@@ -3,15 +3,13 @@ from dmrefpython.command_line_scripts.upload_data_files_added_to_directory impor
 from dmrefpython.utilities.config_file_parser import ConfigFileParser
 from dmrefpython.utilities.argument_parsing import existing_dir, config_path, int_power_of_two
 from argparse import Namespace
-import pathlib
-
-CONFIG_FILE_PATH = pathlib.Path(__file__).parent / 'data_file_directory_uploader.config'
+import sys, pathlib
 
 #helper function to get the configs from the file and make sure they are all valid, and then return them in a namespace
 #basically cloning the command line argument parser from the command line script, but using the arguments from the config file
 def get_args(config_file_path) :
     #parse the config file
-    cfp = ConfigFileParser(config_file_path)
+    cfp = ConfigFileParser(pathlib.Path(config_file_path))
     configs = cfp.get_config_dict_for_groups('data_file_directory_uploader')
     #add the config file path as an argument called "config"
     configs['config']=config_path(config_file_path)
@@ -43,5 +41,5 @@ def get_args(config_file_path) :
                     )
     return args
 
-#call the main method of the command line script
-main(get_args(CONFIG_FILE_PATH))
+#call the main method of the command line script (first argument to this script is the path to the config file to use)
+main(get_args(sys.argv[1]))
