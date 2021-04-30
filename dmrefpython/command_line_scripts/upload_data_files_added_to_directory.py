@@ -11,16 +11,9 @@ import pathlib, datetime, atexit
 DEFAULT_CONFIG_FILE = 'test'         # name of the config file that will be used by default
 DEFAULT_TOPIC_NAME  = 'lecroy_files' # name of the topic to produce to by default
 
-#################### HELPER FUNCTIONS ####################
-
-#helper function to add "quit" to the user input queue
-#registered through atexit to make sure normal termination runs all the cleanup
-def quit_data_file_directory_loop(datafiledirectory) :
-    datafiledirectory.user_input_queue.put('quit')
-
 #################### MAIN SCRIPT ####################
 
-def main(args=None,safe_quit_on_exit=False) :
+def main(args=None) :
     if args is None :
         #make the argument parser
         parser = ArgumentParser()
@@ -50,9 +43,6 @@ def main(args=None,safe_quit_on_exit=False) :
     logger = Logger(filename,filepath=pathlib.Path(args.file_directory)/f'{filename}.log')
     #make the DataFileDirectory for the specified directory
     upload_file_directory = DataFileDirectory(args.file_directory,logger=logger)
-    #register adding the "quit" command to the user input queue of the upload_file_directory if requested
-    if safe_quit_on_exit :
-        atexit.register(quit_data_file_directory_loop,upload_file_directory)
     #listen for new files in the directory and run uploads as they come in until the process is shut down
     run_start = datetime.datetime.now()
     if args.new_files_only :
