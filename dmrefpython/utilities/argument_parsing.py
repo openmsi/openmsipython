@@ -40,7 +40,7 @@ def config_path(configarg) :
         return pathlib.Path(configarg).resolve().absolute()
     if pathlib.Path.is_file(CONFIG_FILE_DIR / configarg) :
         return (CONFIG_FILE_DIR / configarg).resolve().absolute()
-    raise ValueError(f'ERROR: config argument {configarg} is not a recognized file!')
+    raise ValueError(f'ERROR: config argument {configarg} is not a recognized config file!')
 
 #helper function to make sure a given value is a nonzero integer power of two
 def int_power_of_two(argval) :

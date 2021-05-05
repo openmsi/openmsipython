@@ -15,6 +15,12 @@ DATA_FILE_HANDLING_CONST=DataFileHandlingConstants()
 
 class RunOptionConstants :
 	@property
+	def DEFAULT_CONFIG_FILE(self):
+		return 'test' # name of the config file that will be used by default
+	@property
+	def DEFAULT_TOPIC_NAME(self):
+		return 'lecroy_files' # name of the topic to produce to by default
+	@property
 	def N_DEFAULT_UPLOAD_THREADS(self) :
 		return 5      # default number of threads to use when uploading a file
 	@property
