@@ -9,12 +9,13 @@ import sys, pathlib
 SERVICE_NAME = 'OpenMSIDirectoryStreamService'
 SERVICE_DISPLAY_NAME = 'OpenMSI Directory Stream Service'
 SERVICE_DESCRIPTION = 'Automatically produce to a Kafka topic any files added to a watched directory'
+NSSM_DOWNLOAD_URL = 'https://nssm.cc/release/nssm-2.24.zip'
 
 #################### HELPER FUNCTIONS ####################
 
 #briefly test the python code of the Service to catch any errors
 def test_python_code(config_file_path) :
-    print('Testing Service code to check for errors....')
+    print('Testing Service code to check for errors...')
     path_to_python_code = pathlib.Path(__file__).parent.parent / 'services' / 'openmsi_directory_stream_service.py'
     p = Popen([sys.executable,str(path_to_python_code),config_file_path],stdout=PIPE,stdin=PIPE,stderr=PIPE)
     #see if running the python code produced any errors
@@ -28,7 +29,27 @@ def test_python_code(config_file_path) :
 
 #if NSSM doesn't exist in the current directory, install it from the web
 def find_install_NSSM() :
-    pass
+    if 'nssm.exe' in check_output('dir',shell=True).decode() :
+        print('NSSM is already installed : )')
+        return
+    else :
+        print(f'Installing NSSM from {NSSM_DOWNLOAD_URL}...')
+        result = check_output(f'curl {NSSM_DOWNLOAD_URL} -O',shell=True)
+        if result.decode()!='' :
+            raise RuntimeError(f'ERROR: could not successfully download NSSM. Error: {result.decode()}')
+        nssm_zip_file_name = NSSM_DOWNLOAD_URL.split('/')[-1]
+        result = check_output(f'tar -xf {pathlib.Path() / nssm_zip_file_name}',shell=True)
+        if result.decode()!='' :
+            raise RuntimeError(f'ERROR: failed to unzip NSSM archive. Error: {result.decode()}')
+        result = check_output(f'move {pathlib.Path() / nssm_zip_file_name.rstrip(".zip") / "win64" / "nssm.exe"} {pathlib.Path()}',shell=True)
+        if result.decode()!='' :
+            if result.decode().strip()!='1 file(s) moved.' :
+                raise RuntimeError(f'ERROR: failed to move nssm.exe from unzipped archive. Error: {result.decode()}')
+        result = check_output(f'del {nssm_zip_file_name}',shell=True)
+        result = check_output(f'rmdir /S /Q {nssm_zip_file_name.rstrip(".zip")}',shell=True)
+        print('Done.')
+        return
+    return
 
 #install the Service using NSSM
 def install_service(config_file_path) :
