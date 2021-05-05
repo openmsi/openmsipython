@@ -1,7 +1,7 @@
-# <div align="center"> OpenMSI Python Code </div>
+# <div align="center"> Open MSI Python Code </div>
 #### <div align="center">***v0.0.1***</div>
 
-#### <div align="center">Created by: David Elbert<sup>1</sup>, Maggie Eminizer<sup>2</sup>, Sam Tabrisky<sup>3</sup></div>
+#### <div align="center">David Elbert<sup>1</sup>, Maggie Eminizer<sup>2</sup>, Sam Tabrisky<sup>3</sup></div>
 
  <div align="center"><sup>1</sup>PARADIM Data Consortium, Center for Materials in Extreme Dynamic Environments, and Dept. of Earth and Planetary Sciences, The Johns Hopkins University, Baltimore, MD, USA</div>
   <div align="center"><sup>2</sup>Institute for Data Intensive Engineering and Science (IDIES), Dept. of Physics and Astronomy, The Johns Hopkins University, Baltimore, MD, USA</div>
@@ -12,7 +12,9 @@
 
 ## Introduction
 User-friendly implementation and extension of common data streaming applications using Apache Kakfa, written in Python
+
 Available on GitHub at https://github.com/openmsi/Python_code
+
 Developed for Open MSI (NSF DMREF award #1921959)
 
 ## Installation
