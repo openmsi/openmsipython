@@ -13,7 +13,7 @@ def get_args(config_file_path) :
     cfp = ConfigFileParser(pathlib.Path(config_file_path))
     configs = cfp.get_config_dict_for_groups('data_file_directory_uploader')
     #if the cluster and producer configs are also specified in the given file, add it as the "config" argument to the command line script
-    if 'cluster' in cfp.available_group_names() and 'producer' in cfp.available_group_names() :
+    if 'cluster' in cfp.available_group_names and 'producer' in cfp.available_group_names :
         #but in this case the 'cluster_producer_config' argument would be ambiguous
         if 'cluster_producer_config' in configs.keys() :
             msg = 'ERROR: ambiguous cluster/producer configuration. Specify cluster/producer configs EITHER '
