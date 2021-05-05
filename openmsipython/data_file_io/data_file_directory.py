@@ -102,7 +102,7 @@ class DataFileDirectory() :
                     if not datafile.to_upload :
                         continue
                     progress_msg+=f'\t{datafile.upload_status_msg}\n'
-                    cmd = user_input_queue.get()
+                cmd = user_input_queue.get()
                 #close the user input task and break out of the loop
                 if cmd.lower() in ('q','quit') :
                     self._logger.info('Will quit after all currently enqueued files are done being transferred.')
