@@ -8,8 +8,6 @@
  <div align="center"><sup>3</sup>Depts. of Biology and Computer Science, Dartmouth College, Hanover, NH, and Whiting School of Engineering, The Johns Hopkins University, Baltimore, MD, USA</div> 
  <br>
 
-#### <div align="center">Correspondence to: margaret.eminizer@gmail.com</div>
-
 ## Introduction
 User-friendly implementation and extension of common data streaming applications using Apache Kakfa, written in Python
 
@@ -19,7 +17,39 @@ Developed for Open MSI (NSF DMREF award #1921959)
 
 ## Installation
 
+Programs use the python implementation of the Apache Kafka API, and are designed to run on Windows machines in laboratories. The only base requirements are Python 3.7 (the python Kafka API is not yet implemented on Windows with later versions of Python), `git` (to clone and track this repository), and `pip` (to install this package and its dependencies). 
+
+### Using Miniconda3
+
+The quickest way to get started is to use Miniconda3. Miniconda3 installers can be downloaded from [the website here](https://docs.conda.io/en/latest/miniconda.html) (either the Python 3.8 or Python 3.9 versions are fine), and installation instructions can be found on [the website here](https://conda.io/projects/conda/en/latest/user-guide/install/index.html) (includes instructions for Windows, macOS, and Linux).
+
+Once you have Miniconda installed, you'll want to create a new environment based on Python 3.7. Open a terminal window (or, on Windows, an Anaconda Prompt in admin mode from the Start menu) and type:
+
+`conda create -n py37 python=3.7`
+
+After this new environment is created, change to it using `conda activate py37`. You'll need to activate the `py37` environment in this way every time you open a Terminal window or Anaconda Prompt. If you are on Windows and don't already have `git` installed, you can install it into the `py37` environment by typing:
+
+`conda install -c anaconda git`
+
+(If for any reason that doesn't work, you can also try installing Git using the instructions on [the website here](https://github.com/git-guides/install-git).)
+
+### Cloning this repo and installing the openmsipython package
+
+Once you have a Python 3.7 environment with `git` and `pip` set up, the next step is to clone this GitHub repository. Navigate to wherever you would like to store this code, and type:
+
+`git clone https://github.com/openmsi/Python_code.git`
+
+When that's finished, you can install the `openmsipython` package and its dependencies with:
+
+`pip install Python_code`
+
+This will give you access to all of the console commands discussed below, as well as any of the other modules in the `openmsipython` package. If you'd like to be able to make changes to the `openmsipython` code without reinstalling, you can include the `--editable` flag in the `pip install` command.
+
+And you should be good to go! If you want to double check, you can start python and try typing `import openmsipython`. 
+
 ## Open MSI Directory Stream Service
+
+The main application of this software package is to make it easy to stream data to a topic in a Kafka cluster using a Windows Service. This service (called Open MSI Directory Stream Service) can be installed for all users of a particular Windows machine and, once installed, it will run automatically until it is stopped and/or removed.
 
 ## Other programs
 
