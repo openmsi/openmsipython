@@ -7,7 +7,7 @@ import sys, pathlib
 #################### FILE-SCOPE CONSTANTS ####################
 
 SERVICE_NAME = 'OpenMSIDirectoryStreamService'
-SERVICE_DISPLAY_NAME = 'OpenMSI Directory Stream Service'
+SERVICE_DISPLAY_NAME = 'Open MSI Directory Stream Service'
 SERVICE_DESCRIPTION = 'Automatically produce to a Kafka topic any files added to a watched directory'
 NSSM_DOWNLOAD_URL = 'https://nssm.cc/release/nssm-2.24.zip'
 PYTHON_CODE_PATH = pathlib.Path(__file__).parent.parent / 'services' / 'openmsi_directory_stream_service.py'
