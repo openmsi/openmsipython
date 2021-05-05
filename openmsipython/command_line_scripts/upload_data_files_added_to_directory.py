@@ -10,7 +10,7 @@ def main(args=None) :
     if args is None :
         #make the argument parser
         parser = ArgumentParser()
-        #positional argument: filepath to upload
+        #positional argument: path to directory to monitor
         parser.add_argument('file_directory', type=existing_dir, help='Path to the directory to watch for files to upload')
         #optional arguments
         parser.add_argument('--config', default=RUN_OPT_CONST.DEFAULT_CONFIG_FILE, type=config_path,
