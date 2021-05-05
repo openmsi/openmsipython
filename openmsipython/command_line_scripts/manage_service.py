@@ -30,7 +30,6 @@ def test_python_code(config_file_path) :
 #if NSSM doesn't exist in the current directory, install it from the web
 def find_install_NSSM() :
     if 'nssm.exe' in check_output('dir',shell=True).decode() :
-        print('NSSM is already installed : )')
         return
     else :
         print(f'Installing NSSM from {NSSM_DOWNLOAD_URL}...')
@@ -56,19 +55,50 @@ def install_service(config_file_path) :
     print(f'Installing {SERVICE_NAME}...')
     cmd = f'.\\nssm.exe install \"{SERVICE_NAME}\" \"{sys.executable}\" \"{PYTHON_CODE_PATH} {pathlib.Path(config_file_path).absolute()}\"'
     result = check_output(cmd,shell=True)
-    print('Done : )')
+    result = check_output(f'.\\nssm.exe set {SERVICE_NAME} DisplayName {SERVICE_DISPLAY_NAME}')
+    result = check_output(f'.\\nssm.exe set {SERVICE_NAME} Description {SERVICE_DESCRIPTION}')
+    print('Done')
+    return
 
 #start the Service
 def start_service() :
-    pass
+    #start the service using net
+    print(f'Starting {SERVICE_NAME}...')
+    cmd = f'net start {SERVICE_NAME}'
+    result = check_output(cmd,shell=True)
+    print('Done')
+    return
+
+#use NSSM to get the status of the service
+def service_status() :
+    #find or install NSSM in the current directory
+    find_install_NSSM()
+    #get the service status
+    cmd = f'.\\nssm.exe status {SERVICE_NAME}'
+    result = check_output(cmd,shell=True)
+    print(result.decode())
+    return
 
 #stop the Service
 def stop_service() :
+    #stop the service using net
+    print(f'Stopping {SERVICE_NAME}...')
+    cmd = f'net stop {SERVICE_NAME}'
+    result = check_output(cmd,shell=True)
+    print('Done')
+    return
     pass
 
 #remove the Service
 def remove_service() :
-    pass
+    #find or install NSSM in the current directory
+    find_install_NSSM()
+    #remove the service using NSSM
+    print(f'Removing {SERVICE_NAME}...')
+    cmd = f'.\\nssm.exe remove {SERVICE_NAME} confirm'
+    result = check_output(cmd,shell=True)
+    print('Done')
+    return
 
 #################### MAIN FUNCTION ####################
 
@@ -76,7 +106,7 @@ def main() :
     #get the arguments
     parser = ArgumentParser()
     #first positional argument: run mode
-    parser.add_argument('run_mode', choices=['install_and_start','install','start','stop','remove','stop_and_remove'])
+    parser.add_argument('run_mode', choices=['install_and_start','install','start','status','stop','remove','stop_and_remove'])
     #optional arguments
     parser.add_argument('--config', help=f'Path to the config file to use in setting up the Service')
     args = parser.parse_args()
@@ -85,6 +115,8 @@ def main() :
         install_service(args.config)
     if args.run_mode in ['start','install_and_start'] :
         start_service()
+    if args.run_mode in ['status'] :
+        service_status()
     if args.run_mode in ['stop','stop_and_remove'] :
         stop_service()
     if args.run_mode in ['remove','stop_and_remove'] :
