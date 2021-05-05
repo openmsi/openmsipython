@@ -10,14 +10,14 @@ SERVICE_NAME = 'OpenMSIDirectoryStreamService'
 SERVICE_DISPLAY_NAME = 'OpenMSI Directory Stream Service'
 SERVICE_DESCRIPTION = 'Automatically produce to a Kafka topic any files added to a watched directory'
 NSSM_DOWNLOAD_URL = 'https://nssm.cc/release/nssm-2.24.zip'
+PYTHON_CODE_PATH = pathlib.Path(__file__).parent.parent / 'services' / 'openmsi_directory_stream_service.py'
 
 #################### HELPER FUNCTIONS ####################
 
 #briefly test the python code of the Service to catch any errors
 def test_python_code(config_file_path) :
     print('Testing Service code to check for errors...')
-    path_to_python_code = pathlib.Path(__file__).parent.parent / 'services' / 'openmsi_directory_stream_service.py'
-    p = Popen([sys.executable,str(path_to_python_code),config_file_path],stdout=PIPE,stdin=PIPE,stderr=PIPE)
+    p = Popen([sys.executable,str(PYTHON_CODE_PATH),config_file_path],stdout=PIPE,stdin=PIPE,stderr=PIPE)
     #see if running the python code produced any errors
     result = p.communicate(input='quit'.encode())
     if 'ERROR' in result[0].decode() :
@@ -53,7 +53,10 @@ def install_service(config_file_path) :
     #find or install NSSM in the current directory
     find_install_NSSM()
     #install the service using NSSM
-    result = check_output()
+    print(f'Installing {SERVICE_NAME}...')
+    cmd = f'.\\nssm.exe install \"{SERVICE_NAME}\" \"{sys.executable}\" \"{PYTHON_CODE_PATH} {pathlib.Path(config_file_path).absolute()}\"'
+    result = check_output(cmd,shell=True)
+    print('Done : )')
 
 #start the Service
 def start_service() :
