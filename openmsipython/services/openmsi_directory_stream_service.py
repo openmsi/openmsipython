@@ -31,7 +31,7 @@ def get_args(config_file_path) :
                   'chunk_size':{'type':int_power_of_two,'default':RUN_OPT_CONST.DEFAULT_CHUNK_SIZE},
                   'queue_max_size':{'type':int,'default':RUN_OPT_CONST.DEFAULT_MAX_UPLOAD_QUEUE_SIZE},
                   'update_seconds':{'type':int,'default':RUN_OPT_CONST.DEFAULT_UPDATE_SECONDS},
-                  'new_files_only':{'type':bool,'default':False},
+                  'new_files_only':{'type':bool,'default':True},
                  }
     for argname,argdict in arg_checks.items() :
         #if the argument was given
@@ -59,6 +59,7 @@ def get_args(config_file_path) :
     return args
 
 #call the main method of the command line script
-if len(sys.argv)!=2 :
-    raise RuntimeError('ERROR: must provide exactly one argument (the path to the config file)!')
-main(args=get_args(sys.argv[1]))
+if __name__=='__main__' :
+    if len(sys.argv)!=2 :
+        raise RuntimeError('ERROR: must provide exactly one argument (the path to the config file)!')
+    main(args=get_args(sys.argv[1]))
