@@ -14,17 +14,16 @@ SERVICE_DESCRIPTION = 'Automatically produce to a Kafka topic any files added to
 
 #briefly test the python code of the Service to catch any errors
 def test_python_code(config_file_path) :
-    print('Testing Service code to check for errors (will take about 15 seconds)....')
+    print('Testing Service code to check for errors....')
     path_to_python_code = pathlib.Path(__file__).parent.parent / 'services' / 'openmsi_directory_stream_service.py'
-    p = Popen([sys.executable,path_to_python_code,config_file_path],stdout=PIPE,stdin=PIPE,stderr=PIPE)
+    p = Popen([sys.executable,str(path_to_python_code),config_file_path],stdout=PIPE,stdin=PIPE,stderr=PIPE)
     #see if running the python code produced any errors
-    result = p.communicate(timeout=10)
-    if result[1].decode()!='' :
+    result = p.communicate(input='quit'.encode())
+    if 'ERROR' in result[0].decode() :
+        raise RuntimeError(f'ERROR: something went wrong in testing the code with the current configuration. This is the error:\n{result[0].decode()}')
+    if 'ERROR' in result[1].decode() :
         raise RuntimeError(f'ERROR: something went wrong in testing the code with the current configuration. This is the error:\n{result[1].decode()}')
-    #if no errors were thrown, try to give the "quit" command to the process
-    result = p.communicate(input='quit')
-    if result[1].decode()!='' :
-        raise RuntimeError(f'ERROR: something went wrong in testing the code with the current configuration. This is the error:\n{result[1].decode()}')
+    print('Done testing code.')
     return
 
 #if NSSM doesn't exist in the current directory, install it from the web
