@@ -13,10 +13,11 @@
 ## Introduction
 User-friendly implementation and extension of common data streaming applications using Apache Kakfa, written in Python
 Available on GitHub at https://github.com/openmsi/Python_code
+Developed for Open MSI (NSF DMREF award #1921959)
 
 ## Installation
 
-## OpenMSI Directory Stream Service
+## Open MSI Directory Stream Service
 
 ## Other programs
 
