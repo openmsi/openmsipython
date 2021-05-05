@@ -1,8 +1,8 @@
 #imports
-from dmrefpython.command_line_scripts.upload_data_files_added_to_directory import main
-from dmrefpython.utilities.config_file_parser import ConfigFileParser
-from dmrefpython.utilities.argument_parsing import existing_dir, config_path, int_power_of_two
-from dmrefpython.data_file_io.config import RUN_OPT_CONST
+from openmsipython.command_line_scripts.upload_data_files_added_to_directory import main
+from openmsipython.utilities.config_file_parser import ConfigFileParser
+from openmsipython.utilities.argument_parsing import existing_dir, config_path, int_power_of_two
+from openmsipython.data_file_io.config import RUN_OPT_CONST
 from argparse import Namespace
 import sys, pathlib
 
