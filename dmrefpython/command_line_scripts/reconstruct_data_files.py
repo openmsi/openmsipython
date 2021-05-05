@@ -6,23 +6,17 @@ from ..utilities.logging import Logger
 from argparse import ArgumentParser
 import pathlib, datetime
 
-#################### FILE-SCOPE CONSTANTS ####################
-
-DEFAULT_CONFIG_FILE = 'test'         # name of the config file that will be used by default
-DEFAULT_TOPIC_NAME  = 'lecroy_files' # name of the topic to consume from by default
-
-#################### MAIN SCRIPT ####################
-
 def main(args=None) :
     #make the argument parser
     parser = ArgumentParser()
     #positional argument: path to directory to hold reconstructed files
     parser.add_argument('workingdir', type=create_dir, help='Path to the directory to hold reconstructed files')
     #optional arguments
-    parser.add_argument('--config', default=DEFAULT_CONFIG_FILE, type=config_path,
-                        help=f'Name of config file in config_files directory, or path to a file in a different location (default={DEFAULT_CONFIG_FILE})')
-    parser.add_argument('--topic_name', default=DEFAULT_TOPIC_NAME,
-                        help=f'Name of the topic to consume from (default={DEFAULT_TOPIC_NAME})')
+    parser.add_argument('--config', default=RUN_OPT_CONST.DEFAULT_CONFIG_FILE, type=config_path,
+                        help=f"""Name of config file in config_files directory, or path to a file in a different location 
+                                 (default={RUN_OPT_CONST.DEFAULT_CONFIG_FILE})""")
+    parser.add_argument('--topic_name', default=RUN_OPT_CONST.DEFAULT_TOPIC_NAME,
+                        help=f'Name of the topic to consume from (default={RUN_OPT_CONST.DEFAULT_TOPIC_NAME})')
     parser.add_argument('--n_threads', default=RUN_OPT_CONST.N_DEFAULT_DOWNLOAD_THREADS, type=int,
                         help=f'Maximum number of threads to use (default={RUN_OPT_CONST.N_DEFAULT_DOWNLOAD_THREADS})')
     parser.add_argument('--update_seconds', default=RUN_OPT_CONST.DEFAULT_UPDATE_SECONDS, type=int,

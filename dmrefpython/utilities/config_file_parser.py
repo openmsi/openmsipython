@@ -7,6 +7,15 @@ class ConfigFileParser :
     A class to parse configurations from files
     """
 
+    #################### PROPERTIES ####################
+
+    @property
+    def available_group_names(self):
+        return self._config.sections()
+    
+
+    #################### PUBLIC FUNCTIONS ####################
+
     def __init__(self,config_path,**kwargs) :
         """
         config_path = path to the config file to parse
