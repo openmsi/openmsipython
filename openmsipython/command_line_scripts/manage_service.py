@@ -35,16 +35,9 @@ def find_install_NSSM() :
     else :
         print(f'Installing NSSM from {NSSM_DOWNLOAD_URL}...')
         result = check_output(f'curl {NSSM_DOWNLOAD_URL} -O',shell=True)
-        if result.decode()!='' :
-            raise RuntimeError(f'ERROR: could not successfully download NSSM. Error: {result.decode()}')
         nssm_zip_file_name = NSSM_DOWNLOAD_URL.split('/')[-1]
         result = check_output(f'tar -xf {pathlib.Path() / nssm_zip_file_name}',shell=True)
-        if result.decode()!='' :
-            raise RuntimeError(f'ERROR: failed to unzip NSSM archive. Error: {result.decode()}')
         result = check_output(f'move {pathlib.Path() / nssm_zip_file_name.rstrip(".zip") / "win64" / "nssm.exe"} {pathlib.Path()}',shell=True)
-        if result.decode()!='' :
-            if result.decode().strip()!='1 file(s) moved.' :
-                raise RuntimeError(f'ERROR: failed to move nssm.exe from unzipped archive. Error: {result.decode()}')
         result = check_output(f'del {nssm_zip_file_name}',shell=True)
         result = check_output(f'rmdir /S /Q {nssm_zip_file_name.rstrip(".zip")}',shell=True)
         print('Done.')
@@ -60,7 +53,7 @@ def install_service(config_file_path) :
     #find or install NSSM in the current directory
     find_install_NSSM()
     #install the service using NSSM
-    pass
+    result = check_output()
 
 #start the Service
 def start_service() :
