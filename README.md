@@ -41,7 +41,10 @@ Once you have a Python 3.7 environment with `git` and `pip` set up, the next ste
 
 When that's finished, you can install the `openmsipython` package and its dependencies with:
 
-`pip install Python_code`
+```
+cd Python_code
+pip install .
+```
 
 This will give you access to all of the console commands discussed below, as well as any of the other modules in the `openmsipython` package. If you'd like to be able to make changes to the `openmsipython` code without reinstalling, you can include the `--editable` flag in the `pip install` command.
 
