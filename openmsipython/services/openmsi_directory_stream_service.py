@@ -52,7 +52,7 @@ def get_args(config_file_path) :
                      n_threads=configs['n_threads'],
                      chunk_size=configs['chunk_size'],
                      queue_max_size=configs['queue_max_size'],
-                     update_seconds=configs['update_seconds'],
+                     update_seconds=-1,
                      new_files_only=configs['new_files_only'],
                     )
     return args
