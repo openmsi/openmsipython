@@ -1,7 +1,6 @@
 #imports
-from ..utilities.argument_parsing import config_path
 from argparse import ArgumentParser
-from subprocess import Popen, PIPE, STDOUT, check_output
+from subprocess import Popen, PIPE, check_output
 import sys, pathlib
 
 #################### FILE-SCOPE CONSTANTS ####################
@@ -39,6 +38,7 @@ def find_install_NSSM() :
         result = check_output(f'move {pathlib.Path() / nssm_zip_file_name.rstrip(".zip") / "win64" / "nssm.exe"} {pathlib.Path()}',shell=True)
         result = check_output(f'del {nssm_zip_file_name}',shell=True)
         result = check_output(f'rmdir /S /Q {nssm_zip_file_name.rstrip(".zip")}',shell=True)
+        result = result #pyflakes
         print('Done.')
         return
     return
@@ -57,6 +57,7 @@ def install_service(config_file_path) :
     result = check_output(cmd,shell=True)
     result = check_output(f'.\\nssm.exe set {SERVICE_NAME} DisplayName {SERVICE_DISPLAY_NAME}')
     result = check_output(f'.\\nssm.exe set {SERVICE_NAME} Description {SERVICE_DESCRIPTION}')
+    result = result #pyflakes
     print('Done')
     return
 
@@ -66,6 +67,7 @@ def start_service() :
     print(f'Starting {SERVICE_NAME}...')
     cmd = f'net start {SERVICE_NAME}'
     result = check_output(cmd,shell=True)
+    result = result #pyflakes
     print('Done')
     return
 
@@ -85,6 +87,7 @@ def stop_service() :
     print(f'Stopping {SERVICE_NAME}...')
     cmd = f'net stop {SERVICE_NAME}'
     result = check_output(cmd,shell=True)
+    result = result #pyflakes
     print('Done')
     return
     pass
@@ -97,6 +100,7 @@ def remove_service() :
     print(f'Removing {SERVICE_NAME}...')
     cmd = f'.\\nssm.exe remove {SERVICE_NAME} confirm'
     result = check_output(cmd,shell=True)
+    result = result #pyflakes
     print('Done')
     return
 
@@ -108,7 +112,7 @@ def main() :
     #first positional argument: run mode
     parser.add_argument('run_mode', choices=['install_and_start','install','start','status','stop','remove','stop_and_remove'])
     #optional arguments
-    parser.add_argument('--config', help=f'Path to the config file to use in setting up the Service')
+    parser.add_argument('--config', help='Path to the config file to use in setting up the Service')
     args = parser.parse_args()
     #run some of the helper functions above based on the run mode
     if args.run_mode in ['install','install_and_start'] :
