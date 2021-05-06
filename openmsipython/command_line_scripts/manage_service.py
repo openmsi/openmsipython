@@ -20,7 +20,9 @@ def test_python_code(config_file_path) :
     #see if running the python code produced any errors
     stdout,stderr = p.communicate(input='quit'.encode())
     if stderr.decode()!='' :
-        raise RuntimeError(f'ERROR: something went wrong in testing the code with the current configuration. This is the error:\n{stderr.decode()}')
+        for line in stderr.decode().split('\n') :
+            if 'ERROR' in line :
+                raise RuntimeError(f'ERROR: something went wrong in testing the code with the current configuration. This is the error:\n{stderr.decode()}')
     print('Done testing code.')
     return
 
