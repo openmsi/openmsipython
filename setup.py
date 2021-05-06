@@ -7,6 +7,7 @@ setuptools.setup(
     name='openmsipython',
     version='0.0.1',
     packages=setuptools.find_packages(include=['openmsipython*']),
+    include_package_data=True,
     entry_points = {
         'console_scripts' : ['manage_service=openmsipython.command_line_scripts.manage_service:main',
                              'upload_data_files_added_to_directory=openmsipython.command_line_scripts.upload_data_files_added_to_directory:main',
