@@ -1,6 +1,6 @@
 #imports
 from argparse import ArgumentParser
-from subprocess import Popen, PIPE, STDOUT, check_output
+from subprocess import Popen, PIPE, check_output
 import sys, pathlib
 
 #################### FILE-SCOPE CONSTANTS ####################
@@ -16,7 +16,7 @@ PYTHON_CODE_PATH = pathlib.Path(__file__).parent.parent / 'services' / 'openmsi_
 #briefly test the python code of the Service to catch any errors
 def test_python_code(config_file_path) :
     print('Testing Service code to check for errors...')
-    p = Popen([sys.executable,str(PYTHON_CODE_PATH),config_file_path],stdout=STDOUT,stdin=PIPE,stderr=PIPE)
+    p = Popen([sys.executable,str(PYTHON_CODE_PATH),config_file_path],stdin=PIPE,stderr=PIPE)
     #see if running the python code produced any errors
     result = p.communicate(input='quit'.encode())
     if result[1].decode()!='' :
