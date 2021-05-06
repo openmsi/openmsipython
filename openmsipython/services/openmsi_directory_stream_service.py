@@ -11,7 +11,7 @@ import sys, pathlib
 def get_args(config_file_path) :
     #parse the config file
     cfp = ConfigFileParser(pathlib.Path(config_file_path))
-    configs = cfp.get_config_dict_for_groups('data_file_directory_uploader')
+    configs = cfp.get_config_dict_for_groups('openmsi_directory_stream_service')
     #if the cluster and producer configs are also specified in the given file, add it as the "config" argument to the command line script
     if 'cluster' in cfp.available_group_names and 'producer' in cfp.available_group_names :
         #but in this case the 'cluster_producer_config' argument would be ambiguous
@@ -30,7 +30,6 @@ def get_args(config_file_path) :
                   'n_threads':{'type':int,'default':RUN_OPT_CONST.N_DEFAULT_UPLOAD_THREADS},      
                   'chunk_size':{'type':int_power_of_two,'default':RUN_OPT_CONST.DEFAULT_CHUNK_SIZE},
                   'queue_max_size':{'type':int,'default':RUN_OPT_CONST.DEFAULT_MAX_UPLOAD_QUEUE_SIZE},
-                  'update_seconds':{'type':int,'default':RUN_OPT_CONST.DEFAULT_UPDATE_SECONDS},
                   'new_files_only':{'type':bool,'default':True},
                  }
     for argname,argdict in arg_checks.items() :
