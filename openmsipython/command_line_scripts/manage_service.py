@@ -19,7 +19,7 @@ def test_python_code(config_file_path) :
     p = Popen([sys.executable,str(PYTHON_CODE_PATH),config_file_path],stdout=PIPE,stdin=PIPE,stderr=PIPE)
     #see if running the python code produced any errors
     stdout,stderr = p.communicate(input='quit'.encode())
-    if stderr[1].decode()!='' :
+    if stderr.decode()!='' :
         raise RuntimeError(f'ERROR: something went wrong in testing the code with the current configuration. This is the error:\n{result[1].decode()}')
     print('Done testing code.')
     return
