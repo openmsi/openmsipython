@@ -36,11 +36,11 @@ Miniconda installs `pip`, and if you need to install Git you can do so with
 
 `conda install -c anaconda git`
 
-or using the instructions on [the website here](https://github.com/git-guides/install-git).)
+(or use the instructions on [the website here](https://github.com/git-guides/install-git).)
 
 ### Cloning this repo and installing the openmsipython package
 
-Still in the `py37` environment, navigate to wherever you'd like to store this code, and type:
+While in the `py37` environment, navigate to wherever you'd like to store this code, and type:
 
 ```
 git clone https://github.com/openmsi/Python_code.git
@@ -63,17 +63,17 @@ And if that line runs without any problems then the package was installed correc
 
 ## Open MSI Directory Stream Service
 
-This software makes it much easier to stream data to a topic in a Kafka cluster using a Windows Service. The service, called Open MSI Directory Stream Service, can be installed for all users of a particular Windows machine and, once installed, it will run automatically from when the machine boots until it is stopped and/or removed.
+This software provides a way to stream data to a topic in a Kafka cluster using a Windows Service called "Open MSI Directory Stream Service". The Service can be installed for all users of a particular Windows machine and, once installed, it will run automatically from when the machine boots until it is stopped and/or removed.
 
-The Open MSI Directory Stream Service will continually monitor a specific directory for any new files that are added to it. When a new file is detected, it will break the data in the file into smaller chunks and produce each of the chunks as a message to a specific Kafka topic. The `reconstuct_data_files` program discussed below, for example, can then be used to download the messages and rebuild the files on any other machine. Soon, other routines will be added to perform analysis of the uploaded data as soon as they are available. In other words, installing the Service turns an existing directory into a "drop box" to a particular Kafka topic.  
+The Open MSI Directory Stream Service will continually monitor a specific directory for any new files that are added to it. When a new file is detected, it will break the data in the file into smaller chunks and produce each of the chunks as a message to a specific Kafka topic. The `reconstuct_data_files` program discussed below, for example, can then be used to download the messages and rebuild the files on any other machine. Other routines will soon be added to perform analyses or other manipulations of the uploaded data as soon as they are available. In other words, installing the Service turns an existing directory into a "drop box" to a particular Kafka topic.  
 
 ### Setup and installation
 
 Setting up the Service requires a configuration file that tells the program which directory to monitor and which Kafka cluster/topic to produce the data to. Two examples of these configuration files are located [here (`test.config`)](./openmsipython/services/config_files/test.config) and [here (`prod.config`)](./openmsipython/services/config_files/prod.config). These files each contain four lines, explained below:
 
 1. `[openmsi_directory_stream_service]` : this line begins a block in the file that contains the configuration options for the Service.
-1. `file_directory = [some directory path]` : this is where you specify the path to the directory you'd like the Service to monitor (the directory must already exist).
-1. `cluster_producer_config = [name or path to another config file]` : this line tells the Service which Kafka cluster the messages should be produced to, and how the Producer should be configured, by pointing it to another configuration file that includes these details. The two example files above each give names of files in the default location for Kafka configuraton files for this parameter: `test.config` tells the code to use [this file](./openmsipython/my_kafka/config_files/test.config) and `prod.config` tells the code to use [this file](./openmsipython/my_kafka/config_files/prod.config). In your files you have a couple options for this parameter: 
+1. `file_directory = [some directory path]` : this is where you specify the path to the directory you'd like the Service to monitor. The directory must already exist, to prevent accidental continuity or duplication errors.
+1. `cluster_producer_config = [name or path to another config file]` : this line tells the Service which Kafka cluster the messages should be produced to, and how the Producer should be configured, by pointing it to another configuration file that includes these details. The two example config files above each give names of files in the default location for Kafka configuraton files for this parameter: `test.config` tells the code to use [this file](./openmsipython/my_kafka/config_files/test.config) and `prod.config` tells the code to use [this file](./openmsipython/my_kafka/config_files/prod.config). In your files you have a couple options for this parameter: 
     - you could use either of these two same file names as in the example files. `test.config` will produce to the "tutorial_cluster" on Kafka for testing, and `prod.config` will produce to the "openmsi_cluster" for real production cases. 
     - you could use the name of any file in `Python_code/openmsipython/my_kafka/config_files/`, or the full path to a file in any other location, that contains "`[cluster]`" and "`[producer]`" sections. If you're interested in creating one of your own configuration files like this, check [the section on config files](#more-details-on-configuration-files) below.
     - you could completely omit the `cluster_producer_config` parameter, and instead add `[cluster]` and `[producer]` sections to the file below the `[openmsi_directory_stream_service]` section. Again check [the section on config files](#more-details-on-configuration-files) below for more details on how you can do this.
@@ -83,26 +83,26 @@ To install the Service and start it running, type the following command in the `
 
 `manage_service install_and_start --config [path_to_config_file]`
 
-where `[path_to_config_file]` is the path to a configuration file containing at least an `[openmsi_directory_stream_service]` section in it as described above. If that command runs successfully, you should be able to see the Service listed (and running) in the Windows Service Manager window that pops up when you types `mmc Services.msc`.
+where `[path_to_config_file]` is the path to a configuration file containing at least an `[openmsi_directory_stream_service]` section in it as described above. If that command runs successfully, you should be able to see the Service listed (and running) in the Windows Service Manager window that pops up when you type `mmc Services.msc`.
 
 ### Management, use, and output
 
 While the Service is running, you can use the `manage_service` command to perform several actions:
 1. **check the Service status** with `manage_service status`
-2. **stop the Service running** with `manage_service stop` (if you temporarily stop the Service using this command you can restart it with `manage_service start`)
-3. **uninstall the Service completely** with `manage_service stop_and_remove` (or, if the Service is already stopped, `manage_service remove`)
+2. **stop the Service running** with `manage_service stop`. If you temporarily stop the Service using this command, you can restart it afterward with `manage_service start`.
+3. **uninstall the Service completely** with `manage_service stop_and_remove` (or, if the Service is already stopped, simply `manage_service remove`)
 
-Please note that if you do need to stop the Service, it would be best to wait about five minutes after adding any new files to the watched directory to do so. There is a slight buffer time between a file being recognized in the directory and all of its messages being produced to the Kafka topic, so stopping the Service without a few minutes' delay may cause some messages to be dropped.
+**Please note** that if you do need to stop the Service, it would be best to wait about five minutes after adding any new files to the watched directory to do so. There is a slight buffer time between a file being recognized in the directory and all of its messages being produced to the Kafka topic, so stopping the Service without a few minutes' delay may cause some messages to be dropped.
 
-Starting and running the Service will create a log file called `upload_data_files_added_to_directory.log` in the watched directory. At any time you can check what's in this file to see the files that have been added to the directory, recognized, and produced to the topic, along with other information.
+Starting and running the Service will create a log file called `upload_data_files_added_to_directory.log` in the watched directory. At any time you can check what's in this file to see the files that have been added to the directory and produced to the topic, along with other information.
 
 ### More user options
 
-In addition to the location of the watched directory and the cluster/topic to produce to, you can further tune the behavior of the Service by adding other options to the configuration file. These options are:
+In addition to the location of the watched directory and the cluster/topic to produce to, you can further tune the behavior of the Service by adding other options to the `[openmsi_directory_stream_service]` section of the configuration file. These options are:
 1. `n_threads = [n_threads]` : Run the Service with `[n_threads]` threads instead of the default number (5). Using fewer threads may slightly decrease CPU usage but slightly increase the lag time between a file being added and its data being produced.
 1. `chunk_size = [n_bytes]` : Break files into chunks of size `[n_bytes]` bytes instead of the default 16384 bytes (must be an nonzero power of two)
 1. `queue_max_size = [n_messages]` : Change the size of the intermediate queue that holds messages that haven't yet been produced from the default (3000). Making the queue larger will allow files to be recognized sooner after they are added, but may increase the lag time until they are fully produced (it may also result in Kafka errors).
-1. `new_files_only = [True or False]` : Set to 'False' if you would like the Service to produce any files that already exist in the watched directory at the time it's started. By default, any files that already exist in the directory when the Service is started are ignored, and only files that are newly added are produced to the topic. 
+1. `new_files_only = [True or False]` : Set to 'False' if you would like the Service to produce any files that already exist in the watched directory at the time it's started. By default this parameter is 'True', meaning any files that already exist in the directory when the Service is started are ignored, and only files that are newly added are produced to the topic. 
 
 ## More details on configuration files
 
@@ -119,14 +119,14 @@ The different sections recognized by the `openmsipython` code are:
 1. `[producer]` to configure a Producer used by a program. You can add here any [parameters recognized by Kafka Producers](https://docs.confluent.io/platform/current/installation/configuration/producer-configs.html) in general, but some of the most useful are:
     - `batch.size` to control the maximum number of messages in each batch sent to the cluster
     - `retries` to control how many times a failed message should be retried before throwing a fatal error and moving on
-    - `linger.ms` to change how long a batch of messages should wait to become as full as possible befor being sent to the cluster 
+    - `linger.ms` to change how long a batch of messages should wait to become as full as possible before being sent to the cluster 
     - `compression.type` to add or change how batches of messages are compressed before being produced (and decompressed afterward)
-    - `key.serializer` and `value.serializer` to change methods used to convert message keys and values (respectively) to byte arrays. The `openmsipython` code provides an additional option here for `DataFileChunkSerializer` as a message value serializer to pack chunks of data files.
+    - `key.serializer` and `value.serializer` to change methods used to convert message keys and values (respectively) to byte arrays. The `openmsipython` code provides an additional option called [`DataFileChunkSerializer`](./openmsipython/my_kafka/serialization.py#L10-#L29) as a message value serializer to pack chunks of data files.
 1. `[consumer]` to configure a Consumer used by a program. Again here any [parameters recognized by Kafka Consumers](https://docs.confluent.io/platform/current/installation/configuration/consumer-configs.html) in general are valid, but some of the most useful are:
-    - `group.id` to group Consumers amongst one another. Giving "`new`" for this parameter will create a new group ID every time the code is run, but using a constant group ID will allow a group of Consumers to pick up where they left off.
+    - `group.id` to group Consumers amongst one another. Giving "`new`" for this parameter will create a new group ID every time the code is run.
     - `auto.offset.reset` to tell the Consumer where in the log to start consuming messages. "`earliest`" will start at the beginning of the topic every time.
     - `fetch.min.bytes` to change how many bytes must accumulate before a batch of messages is consumed from the topic (consuming batches of messages is also subject to a timeout, so changing this parameter will only ever adjust the tradeoff between throughput and latency, but will not prevent any messages from being consumed in general)
-    - `key.deserializer` and `value.deserializer` to change methods used to convert message keys and values (respectively) from byte arrays to objects. The `openmsipython` code provides an additional option for a `DataFileChunkDeserializer` to convert a chunk of a data file as a byte array to a [DataFileChunk object](./openmsipython/data_file_io/data_file_chunk.py#L7).
+    - `key.deserializer` and `value.deserializer` to change methods used to convert message keys and values (respectively) from byte arrays to objects. The `openmsipython` code provides an additional option called [`DataFileChunkDeserializer`](./openmsipython/my_kafka/serialization.py#L31-#L58) to convert a chunk of a data file as a byte array to a [DataFileChunk object](./openmsipython/data_file_io/data_file_chunk.py#L7).
 
 ## Other programs
 
@@ -178,5 +178,7 @@ The following items are currently planned to be implemented ASAP:
 1. More securely managing API keys and secrets instead of hardcoding them in configuration files
 1. Adding a safer and more graceful shutdown when stopping the Open MSI Directory Stream Service so that no external lag time needs to be considered
 1. Allowing watching directories where large files are in the process of being created/saved instead of just directories where fully-created files are being added
-1. 
+1. Adding automatic test routines
+1. Implementing other data types and serialization schemas, likely using Avro
+1. Further improving logging
 
