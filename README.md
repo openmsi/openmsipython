@@ -3,9 +3,9 @@
 
 #### <div align="center">David Elbert<sup>1</sup>, Maggie Eminizer<sup>2</sup>, Sam Tabrisky<sup>3</sup></div>
 
- <div align="center"><sup>1</sup>Hopkins Extreme Materials Institute, PARADIM Materials Innovation Platform, and Dept. of Earth and Planetary Sciences, The Johns Hopkins University, Baltimore, MD, USA</div>
+ <div align="center"><sup>1</sup>Hopkins Extreme Materials Institute (HEMI), PARADIM Materials Innovation Platform, and Dept. of Earth and Planetary Sciences, The Johns Hopkins University, Baltimore, MD, USA</div>
   <div align="center"><sup>2</sup>Institute for Data Intensive Engineering and Science (IDIES), Dept. of Physics and Astronomy, The Johns Hopkins University, Baltimore, MD, USA</div>
- <div align="center"><sup>3</sup>Depts. of Biology and Computer Science, Dartmouth College, Hanover, NH, and Whiting School of Engineering, The Johns Hopkins University, Baltimore, MD, USA</div> 
+ <div align="center"><sup>3</sup>Depts. of Biology and Computer Science, Dartmouth College, Hanover, NH, and HEMI, The Johns Hopkins University, Baltimore, MD, USA</div> 
  <br>
 
 ## Introduction
