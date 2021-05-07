@@ -182,6 +182,20 @@ The following items are currently planned to be implemented ASAP:
 1. Implementing other data types and serialization schemas, likely using Avro
 1. Further improving logging
 1. Add unittests
-1. create pypi and conda installations
-1. rename repo to openmsipython
+1. Create pypi and conda installations
+1. Rename repo to openmsipython
+1. Python 3.8 and 3.9 support
+
+## Questions that will arise later (inFAQs?)
+
+1. What happens to subdirectories?  Can we watch a single “uber-directory” and then populate it with subdirectories by sample or date or student, etc?
+2. What are best practices for topic creation and naming?  Should we have a new topic for each student, for each instrument, for each “kind” of data, ...?
+3. Would it be possible to have an environment and dependency definition? YAML??
+4. Merits of pip vs conda?
+5. How can we efficiently and effectively protect credentials and configurations so they won’t create a vulnerability?
+	* key login only
+	* config files using linux and Windows standards
+6. How do I know (and trust!) my data made it and is safe?
+7. What if I forget and write my data to some “wrong” place?  What if I write my data to the directory twice?  
+8. Should I clear my data out of the streaming directory once it’s been produced to Kafka?
 
