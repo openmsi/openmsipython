@@ -181,4 +181,7 @@ The following items are currently planned to be implemented ASAP:
 1. Adding automatic test routines
 1. Implementing other data types and serialization schemas, likely using Avro
 1. Further improving logging
+1. Add unittests
+1. create pypi and conda installations
+1. rename repo to openmsipython
 
