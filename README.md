@@ -11,7 +11,7 @@
 ## Introduction
 User-friendly implementation and extension of common data streaming applications using Apache Kakfa, written in Python
 
-Available on GitHub at https://github.com/openmsi/Python_code
+Available on GitHub at https://github.com/openmsi/openmsipython
 
 Developed for Open MSI (NSF DMREF award #1921959)
 
@@ -43,8 +43,8 @@ Miniconda installs `pip`, and if you need to install Git you can do so with
 While in the `py37` environment, navigate to wherever you'd like to store this code, and type:
 
 ```
-git clone https://github.com/openmsi/Python_code.git
-cd Python_code
+git clone https://github.com/openmsi/openmsipython.git
+cd openmsipython
 pip install .
 cd ..
 ```
@@ -75,7 +75,7 @@ Setting up the Service requires a configuration file that tells the program whic
 1. `file_directory = [some directory path]` : this is where you specify the path to the directory you'd like the Service to monitor. The directory must already exist, to prevent accidental continuity or duplication errors.
 1. `cluster_producer_config = [name or path to another config file]` : this line tells the Service which Kafka cluster the messages should be produced to, and how the Producer should be configured, by pointing it to another configuration file that includes these details. The two example config files above each give names of files in the default location for Kafka configuraton files for this parameter: `test.config` tells the code to use [this file](./openmsipython/my_kafka/config_files/test.config) and `prod.config` tells the code to use [this file](./openmsipython/my_kafka/config_files/prod.config). In your files you have a couple options for this parameter: 
     - you could use either of these two same file names as in the example files. `test.config` will produce to the "tutorial_cluster" on Kafka for testing, and `prod.config` will produce to the "openmsi_cluster" for real production cases. 
-    - you could use the name of any file in `Python_code/openmsipython/my_kafka/config_files/`, or the full path to a file in any other location, that contains "`[cluster]`" and "`[producer]`" sections. If you're interested in creating one of your own configuration files like this, check [the section on config files](#more-details-on-configuration-files) below.
+    - you could use the name of any file that exists in `openmsipython/openmsipython/my_kafka/config_files/` when you installed the repo, or the full path to a file in any other location, that contains "`[cluster]`" and "`[producer]`" sections. If you're interested in creating one of your own configuration files like this, check [the section on config files](#more-details-on-configuration-files) below.
     - you could completely omit the `cluster_producer_config` parameter, and instead add `[cluster]` and `[producer]` sections to the file below the `[openmsi_directory_stream_service]` section. Again check [the section on config files](#more-details-on-configuration-files) below for more details on how you can do this.
 1. `topic_name = [topic_name]` : this is the name of the topic in the cluster to produce messages to. 
 
@@ -178,12 +178,10 @@ The following items are currently planned to be implemented ASAP:
 1. More securely managing API keys and secrets instead of hardcoding them in configuration files
 1. Adding a safer and more graceful shutdown when stopping the Open MSI Directory Stream Service so that no external lag time needs to be considered
 1. Allowing watching directories where large files are in the process of being created/saved instead of just directories where fully-created files are being added
-1. Adding automatic test routines
+1. Adding automatic unittest routines (Jenkins?)
 1. Implementing other data types and serialization schemas, likely using Avro
 1. Further improving logging
-1. Add unittests
 1. Create pypi and conda installations
-1. Rename repo to openmsipython
 1. Python 3.8 and 3.9 support
 
 ## Questions that will arise later (inFAQs?)
