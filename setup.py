@@ -19,4 +19,5 @@ setuptools.setup(
     install_requires=['confluent-kafka>=1.6.0',
                       'msgpack>=1.0.0',
                      ],
+    extras_require = {'test': ['pyflakes>=2.2.0',],},
 )
