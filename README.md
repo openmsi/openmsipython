@@ -171,6 +171,9 @@ Options for running the code include:
 1. Changing the maximum number of parallel threads allowed to run at a time: add the `--n_threads [threads]` argument where `[threads]` is the desired number of parallel threads to use (and, also, the number of consumers to allow in the group). The default is 5 threads/consumers; increasing this number may give Kafka warnings or errors intermittently as the consumer group is rebalanced.
 1. Changing how often the "still alive" character is printed to the console: add the `--update_seconds [seconds]` argument where `[seconds]` is the number of seconds to wait between printing the character to the console from the main thread (the default is 30 seconds). Giving -1 for this argument disables printing the "still alive" character entirely.
 
+## Automatic code tests
+There are several tests for the codebase already written (and more are being added over time). If you're editing the code, you can make sure it doesn't break anything currently being tested by running `python test/run_all_tests.py` from just inside the directory of the repo. If you'd like to add more tests, you can include any classes that extend `unittest.TestCase` in the `test/unittests` subdirectory, and call their files anything that starts with `test`, and the `run_all_tests.py` script will run them automatically. `run_all_tests.py` needs `pyflakes` installed, which you can get right from this repo by running `pip install . [test]` (with or without the `--editable` or `-e` flag(s)).
+
 ## To-do list
 
 The following items are currently planned to be implemented ASAP:
@@ -178,7 +181,7 @@ The following items are currently planned to be implemented ASAP:
 1. More securely managing API keys and secrets instead of hardcoding them in configuration files
 1. Adding a safer and more graceful shutdown when stopping the Open MSI Directory Stream Service so that no external lag time needs to be considered
 1. Allowing watching directories where large files are in the process of being created/saved instead of just directories where fully-created files are being added
-1. Adding automatic unittest routines (Jenkins?)
+1. Adding more unittest routines (Jenkins? Travis CI?)
 1. Implementing other data types and serialization schemas, likely using Avro
 1. Further improving logging
 1. Create pypi and conda installations. Pypi method using twine here: https://github.com/bast/pypi-howto. Putting on conda-forge is a heavier lift. Need to decide if it's worth it; probably not for such an immature package.
