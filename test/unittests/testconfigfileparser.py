@@ -3,7 +3,7 @@ from openmsipython.utilities.config_file_parser import ConfigFileParser
 from openmsipython.utilities.logging import Logger
 from openmsipython.utilities.argument_parsing import CONFIG_FILE_DIR, CONFIG_FILE_EXT
 from openmsipython.data_file_io.config import RUN_OPT_CONST
-import unittest, logging, configparser
+import unittest, logging, configparser, string
 
 #constants
 TEST_CONFIG_FILE_PATH = (CONFIG_FILE_DIR / f'{RUN_OPT_CONST.DEFAULT_CONFIG_FILE}{CONFIG_FILE_EXT}').resolve()
@@ -31,3 +31,10 @@ class TestConfigFileParser(unittest.TestCase) :
         for group_name in self.testconfigparser.sections() :
             all_sections_dict = {**all_sections_dict,**(dict(self.testconfigparser[group_name]))}
         self.assertEqual(self.cfp.get_config_dict_for_groups(self.testconfigparser.sections()),all_sections_dict)
+        random_section_name = string.ascii_letters
+        while random_section_name in self.cfp.available_group_names :
+            random_section_name = string.ascii_letters
+        with self.assertRaises(ValueError) :
+            _ = self.cfp.get_config_dict_for_groups(random_section_name)
+        with self.assertRaises(ValueError) :
+            _ = self.cfp.get_config_dict_for_groups([self.testconfigparser.sections()[0],random_section_name])
