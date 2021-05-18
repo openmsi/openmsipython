@@ -59,7 +59,7 @@ class MyDeserializingConsumer(DeserializingConsumer) :
         #if the group.id has been set as "new" generate a new group ID
         if 'group.id' in configs.keys() and configs['group.id'].lower()=='new' :
             configs['group.id']=str(uuid.uuid1())
-        #if one of several recognized deserializers have been given as config paramenters for the key/value serializer, replace them with the actual class
+        #if one of several recognized deserializers have been given as config paramenters for the key/value deserializer, replace them with the actual class
         names_to_classes = {
             'DoubleDeserializer': DoubleDeserializer(),
             'IntegerDeserializer': IntegerDeserializer(),
