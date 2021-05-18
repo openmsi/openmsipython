@@ -174,6 +174,8 @@ Options for running the code include:
 ## Automatic code tests
 There are several tests for the codebase already written (and more are being added over time). If you're editing the code, you can make sure it doesn't break anything currently being tested by running `python test/run_all_tests.py` from just inside the directory of the repo. If you'd like to add more tests, you can include any classes that extend `unittest.TestCase` in the `test/unittests` subdirectory, and call their files anything that starts with `test`, and the `run_all_tests.py` script will run them automatically. `run_all_tests.py` needs `pyflakes` installed, which you can get right from this repo by running `pip install . [test]` (with or without the `--editable` or `-e` flag(s)).
 
+Some of the tests rely on static example data in `test/data`. If you need to regenerate these static test data under some new conditions (i.e., because you've changed default options someplace), you can run `python test/rebuild_test_reference_data.py` and follow the prompts it gives you to replace the necessary files.
+
 ## To-do list
 
 The following items are currently planned to be implemented ASAP:
