@@ -154,7 +154,7 @@ class DataFile() :
         producer.flush() #don't leave the function until all messages have been sent/received
         self._logger.info('Done!')
 
-    def write_chunk_to_disk(self,dfc,workingdir,thread_lock=nullcontext) :
+    def write_chunk_to_disk(self,dfc,workingdir,thread_lock=nullcontext()) :
         """
         Add the data from a given file chunk to this file on disk in a given working directory
         dfc         = the DataFileChunk object whose data should be added

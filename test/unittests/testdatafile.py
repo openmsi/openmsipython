@@ -63,7 +63,7 @@ class TestDataFileChunk(unittest.TestCase) :
                                         n_threads=RUN_OPT_CONST.N_DEFAULT_UPLOAD_THREADS,
                                         chunk_size=RUN_OPT_CONST.DEFAULT_CHUNK_SIZE)
 
-    def write_chunk_to_disk(self) :
+    def test_write_chunk_to_disk(self) :
         TEST_CONST.TEST_RECO_DIR_PATH.mkdir()
         try :
             self.datafile._build_list_of_file_chunks(RUN_OPT_CONST.DEFAULT_CHUNK_SIZE)
@@ -77,6 +77,7 @@ class TestDataFileChunk(unittest.TestCase) :
             if not filecmp.cmp(TEST_CONST.TEST_DATA_FILE_PATH,TEST_CONST.TEST_RECO_DIR_PATH/self.datafile.filename,shallow=False) :
                 raise RuntimeError('ERROR: files are not the same after reconstruction!')
             (TEST_CONST.TEST_RECO_DIR_PATH/self.datafile.filename).unlink()
+            self.datafile._chunk_offsets_downloaded=set()
             hash_missing_some_chunks = sha512()
             for ic,dfc in enumerate(self.datafile._chunks_to_upload) :
                 if ic%2==0 :
@@ -88,7 +89,7 @@ class TestDataFileChunk(unittest.TestCase) :
                 check = self.datafile.write_chunk_to_disk(dfc,TEST_CONST.TEST_RECO_DIR_PATH)
                 expected_check_value = DATA_FILE_HANDLING_CONST.FILE_IN_PROGRESS
                 if ic==len(self.datafile._chunks_to_upload)-1 :
-                    expected_check_value = DATA_FILE_HANDLING_CONST.FILE_HASH_MISTMATCH_CODE 
+                    expected_check_value = DATA_FILE_HANDLING_CONST.FILE_HASH_MISMATCH_CODE 
                 self.assertEqual(check,expected_check_value)
         except Exception as e :
             raise e
