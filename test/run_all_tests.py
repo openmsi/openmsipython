@@ -29,6 +29,8 @@ def main() :
     if stdout.decode()!='' :
         raise RuntimeError(f'ERROR: Git repo check failed with output:\n{stdout.decode()}')
     print('Repo is good : )')
+    #If we've made it here all the tests passed!
+    print('All tests passed!')
 
 if __name__=='__main__' :
     main()

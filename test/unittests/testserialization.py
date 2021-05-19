@@ -1,4 +1,5 @@
 #imports
+from config import TEST_CONST
 from openmsipython.my_kafka.serialization import DataFileChunkSerializer, DataFileChunkDeserializer
 from openmsipython.data_file_io.data_file import DataFile
 from openmsipython.data_file_io.config import RUN_OPT_CONST
@@ -7,7 +8,6 @@ from confluent_kafka.error import SerializationError
 import unittest, pathlib, logging
 
 #constants
-TEST_FILE_PATH = pathlib.Path(__file__).parent.parent / 'data' / '1a0ceb89-b5f0-45dc-9c12-63d3020e2217.dat'
 LOGGER = Logger(pathlib.Path(__file__).name.split('.')[0],logging.ERROR)
 
 class TestSerialization(unittest.TestCase) :
@@ -18,13 +18,15 @@ class TestSerialization(unittest.TestCase) :
     def setUp(self) :
         #make the dictionary of reference serialized binaries from the existing reference files
         self.test_chunk_binaries = {}
-        for tcfp in TEST_FILE_PATH.parent.glob(f'{TEST_FILE_PATH.name.split(".")[0]}_test_chunk_*.bin') :
+        for tcfp in TEST_CONST.TEST_DATA_FILE_PATH.parent.glob(f'{TEST_CONST.TEST_DATA_FILE_PATH.name.split(".")[0]}_test_chunk_*.bin') :
             with open(tcfp,'rb') as fp :
                 self.test_chunk_binaries[tcfp.name.split('.')[0].split('_')[-1]] = fp.read()
         if len(self.test_chunk_binaries)<1 :
-            raise RuntimeError(f'ERROR: could not find any binary DataFileChunk test files to use as references for TestSerialization in {TEST_FILE_PATH.parent}!')
+            msg = 'ERROR: could not find any binary DataFileChunk test files to use as references for TestSerialization '
+            msg+= f'in {TEST_CONST.TEST_DATA_FILE_PATH.parent}!'
+            raise RuntimeError(msg)
         #make the dictionary of reference DataFileChunk objects
-        data_file = DataFile(TEST_FILE_PATH,logger=LOGGER)
+        data_file = DataFile(TEST_CONST.TEST_DATA_FILE_PATH,logger=LOGGER)
         data_file._build_list_of_file_chunks(RUN_OPT_CONST.DEFAULT_CHUNK_SIZE)
         self.test_chunk_objects = {}
         for chunk_i in self.test_chunk_binaries.keys() :
