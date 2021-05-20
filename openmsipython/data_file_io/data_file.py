@@ -162,6 +162,9 @@ class DataFile() :
         thread_lock = the lock object to acquire/release so that race conditions don't affect 
                       reconstruction of the files (optional, only needed if running this function asynchronously)
         """
+        #if this chunk's offset has already been written to disk, return the "already written" code
+        if dfc.chunk_offset in self._chunk_offsets_downloaded :
+            return DATA_FILE_HANDLING_CONST.CHUNK_ALREADY_WRITTEN_CODE
         reconstructed_filepath = workingdir / dfc.filename
         #lock the current thread while data is written to the file
         mode = 'r+b' if reconstructed_filepath.is_file() else 'w+b'

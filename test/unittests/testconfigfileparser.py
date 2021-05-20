@@ -33,6 +33,9 @@ class TestConfigFileParser(unittest.TestCase) :
         random_section_name = ''.join(choices(string.ascii_letters,k=10))
         while random_section_name in self.cfp.available_group_names :
             random_section_name = string.ascii_letters
+        LOGGER.set_stream_level(logging.INFO)
+        LOGGER.info('\nExpecting two errors below:')
+        LOGGER.set_stream_level(logging.ERROR)
         with self.assertRaises(ValueError) :
             _ = self.cfp.get_config_dict_for_groups(random_section_name)
         with self.assertRaises(ValueError) :

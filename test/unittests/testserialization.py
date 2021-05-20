@@ -18,12 +18,12 @@ class TestSerialization(unittest.TestCase) :
     def setUp(self) :
         #make the dictionary of reference serialized binaries from the existing reference files
         self.test_chunk_binaries = {}
-        for tcfp in TEST_CONST.TEST_DATA_FILE_PATH.parent.glob(f'{TEST_CONST.TEST_DATA_FILE_PATH.name.split(".")[0]}_test_chunk_*.bin') :
+        for tcfp in TEST_CONST.TEST_DATA_DIR_PATH.glob(f'{TEST_CONST.TEST_DATA_FILE_NAME.split(".")[0]}_test_chunk_*.bin') :
             with open(tcfp,'rb') as fp :
                 self.test_chunk_binaries[tcfp.name.split('.')[0].split('_')[-1]] = fp.read()
         if len(self.test_chunk_binaries)<1 :
             msg = 'ERROR: could not find any binary DataFileChunk test files to use as references for TestSerialization '
-            msg+= f'in {TEST_CONST.TEST_DATA_FILE_PATH.parent}!'
+            msg+= f'in {TEST_CONST.TEST_DATA_DIR_PATH}!'
             raise RuntimeError(msg)
         #make the dictionary of reference DataFileChunk objects
         data_file = DataFile(TEST_CONST.TEST_DATA_FILE_PATH,logger=LOGGER)

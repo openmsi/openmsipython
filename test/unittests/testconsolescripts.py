@@ -3,7 +3,7 @@ import pkg_resources, subprocess, unittest
 
 class TestConsoleScripts(unittest.TestCase):
     
-    def testConsoleScripts(self):
+    def test_console_scripts_exist(self):
         """
         Make sure console scripts defined in setup.py exist and that their imports work
         """

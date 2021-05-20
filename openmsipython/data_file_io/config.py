@@ -2,6 +2,9 @@
 
 class DataFileHandlingConstants :
     @property
+    def CHUNK_ALREADY_WRITTEN_CODE(self):
+        return 10 # code indicating that a particular chunk has already been written
+    @property
     def FILE_HASH_MISMATCH_CODE(self):
         return -1 # code indicating that a file's hashes didn't match
     @property
