@@ -36,8 +36,8 @@ def producer_callback(err,msg) :
             else :
                 raise RuntimeError(logmsg)
         elif not err.retriable() :
-            logmsg=f'WARNING: Failed to deliver message with key {msg.key()}. Error reason: {err.str()}'
+            logmsg=f'ERROR: Failed to deliver message with key {msg.key()} and cannot retry. Error reason: {err.str()}'
             if PRODUCER_CALLBACK_LOGGER.logger is not None :
-                PRODUCER_CALLBACK_LOGGER.logger.warning(logmsg)
+                PRODUCER_CALLBACK_LOGGER.logger.error(logmsg,RuntimeError)
             else :
-                print(logmsg)
+                raise RuntimeError(logmsg)

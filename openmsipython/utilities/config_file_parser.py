@@ -12,7 +12,6 @@ class ConfigFileParser :
     @property
     def available_group_names(self):
         return self._config.sections()
-    
 
     #################### PUBLIC FUNCTIONS ####################
 
