@@ -2,6 +2,9 @@
 
 class DataFileHandlingConstants :
     @property
+    def CHUNK_ALREADY_WRITTEN_CODE(self):
+        return 10 # code indicating that a particular chunk has already been written
+    @property
     def FILE_HASH_MISMATCH_CODE(self):
         return -1 # code indicating that a file's hashes didn't match
     @property
@@ -19,7 +22,7 @@ class RunOptionConstants :
 		return 'test' # name of the config file that will be used by default
 	@property
 	def DEFAULT_TOPIC_NAME(self):
-		return 'lecroy_files' # name of the topic to produce to by default
+		return 'test' # name of the topic to produce to by default
 	@property
 	def N_DEFAULT_UPLOAD_THREADS(self) :
 		return 5      # default number of threads to use when uploading a file

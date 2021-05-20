@@ -9,7 +9,7 @@ import pathlib, msgpack
 
 class DataFileChunkSerializer(Serializer) :
 
-    def __call__(self,file_chunk_obj,ctx) :
+    def __call__(self,file_chunk_obj,ctx=None) :
         if file_chunk_obj is None :
             return None
         elif not isinstance(file_chunk_obj,DataFileChunk) :
@@ -30,7 +30,7 @@ class DataFileChunkSerializer(Serializer) :
 
 class DataFileChunkDeserializer(Deserializer) :
 
-    def __call__(self,byte_array,ctx) :
+    def __call__(self,byte_array,ctx=None) :
         if byte_array is None :
             return None
         try :

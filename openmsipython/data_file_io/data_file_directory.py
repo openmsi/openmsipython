@@ -63,8 +63,8 @@ class DataFileDirectory() :
                 if self._filepath_should_be_uploaded(filepath) :
                     self._data_files_by_path[filepath]=DataFile(filepath,logger=self._logger,to_upload=False)
         #initialize a thread to listen for and get user input and a queue to put it into
-        user_input_queue = Queue()
-        user_input_thread = Thread(target=add_user_input,args=(user_input_queue,))
+        self.user_input_queue = Queue()
+        user_input_thread = Thread(target=add_user_input,args=(self.user_input_queue,))
         user_input_thread.daemon=True
         user_input_thread.start()
         #start the upload queue and thread
@@ -92,7 +92,7 @@ class DataFileDirectory() :
                 self._logger.debug('.')
                 last_update = time.time()
             #if the uploading has been stopped externally or the user has put something in the console
-            if not user_input_queue.empty() :
+            if not self.user_input_queue.empty() :
                 #make the progress message
                 for filepath in self._dirpath.glob('*') :
                     if (filepath not in self._data_files_by_path.keys()) and self._filepath_should_be_uploaded(filepath) :
@@ -102,12 +102,12 @@ class DataFileDirectory() :
                     if not datafile.to_upload :
                         continue
                     progress_msg+=f'\t{datafile.upload_status_msg}\n'
-                cmd = user_input_queue.get()
+                cmd = self.user_input_queue.get()
                 #close the user input task and break out of the loop
                 if cmd.lower() in ('q','quit') :
                     self._logger.info('Will quit after all currently enqueued files are done being transferred.')
                     self._logger.info(progress_msg)
-                    user_input_queue.task_done()
+                    self.user_input_queue.task_done()
                     break
                 #log progress so far
                 elif cmd.lower() in ('c','check') :
@@ -176,8 +176,8 @@ class DataFileDirectory() :
         self._n_msgs_read = 0
         self._completely_reconstructed_filenames = set()
         #initialize a thread to listen for and get user input and a queue to put it into
-        user_input_queue = Queue()
-        user_input_thread = Thread(target=add_user_input,args=(user_input_queue,))
+        self.user_input_queue = Queue()
+        user_input_thread = Thread(target=add_user_input,args=(self.user_input_queue,))
         user_input_thread.daemon=True
         user_input_thread.start()
         self._logger.info(f'Will listen for files from the {topic_name} topic using {kwargs["n_threads"]} threads')
@@ -200,10 +200,10 @@ class DataFileDirectory() :
             if kwargs['update_secs']!=-1 and time.time()-last_update>kwargs['update_secs']:
                 self._logger.debug('.')
                 last_update = time.time()
-            if not user_input_queue.empty():
-                cmd = user_input_queue.get()
+            if not self.user_input_queue.empty():
+                cmd = self.user_input_queue.get()
                 if cmd.lower() in ('q','quit') :
-                    user_input_queue.task_done()
+                    self.user_input_queue.task_done()
                     break
                 elif cmd.lower() in ('c','check') :
                     self._logger.debug(f'{self._n_msgs_read} messages read, {len(self._completely_reconstructed_filenames)} files completely reconstructed so far')
@@ -250,12 +250,14 @@ class DataFileDirectory() :
                         self._n_msgs_read+=1
                         self._completely_reconstructed_filenames.add(dfc.filepath)
                         del self._data_files_by_path[dfc.filepath]
-            elif return_value==DATA_FILE_HANDLING_CONST.FILE_IN_PROGRESS :
+            elif return_value in (DATA_FILE_HANDLING_CONST.FILE_IN_PROGRESS,DATA_FILE_HANDLING_CONST.CHUNK_ALREADY_WRITTEN_CODE) :
                 with lock :
                     self._n_msgs_read+=1
 
     #helper function to filter filepaths and return a boolean that's True if they should be uploaded
     def _filepath_should_be_uploaded(self,filepath) :
+        if not isinstance(filepath,pathlib.PurePath) :
+            self._logger.error(f'ERROR: {filepath} passed to _filepath_should_be_uploaded is not a Path!',TypeError)
         if filepath.name.startswith('.') :
             return False
         if filepath.name.endswith('.log') :
