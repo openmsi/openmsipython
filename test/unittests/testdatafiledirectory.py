@@ -71,7 +71,7 @@ class TestDataFileDirectory(unittest.TestCase) :
             dfd.user_input_queue.put('c')
             dfd.user_input_queue.put('check')
             #wait for the timeout for the test file to be completely reconstructed or for the reconstructor to stop getting new messages
-            current_messages_read = 0
+            current_messages_read = -1
             time_waited = 0
             LOGGER.set_stream_level(logging.INFO)
             LOGGER.info(f'Waiting to reconstruct test file from the "{RUN_OPT_CONST.DEFAULT_TOPIC_NAME}" topic in run_reconstruct (will timeout after {TIMEOUT_SECS} seconds)...')
