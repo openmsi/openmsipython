@@ -20,19 +20,19 @@ class TestDataFileDirectory(unittest.TestCase) :
     def run_upload_files_as_added(self) :
         #make the directory to watch
         TEST_CONST.TEST_WATCHED_DIR_PATH.mkdir()
+        #start up the DataFileDirectory
+        dfd = DataFileDirectory(TEST_CONST.TEST_WATCHED_DIR_PATH,logger=LOGGER)
+        #start upload_files_as_added in a separate thread so we can time it out
+        upload_thread = Thread(target=dfd.upload_files_as_added,
+                               args=(TEST_CONST.TEST_CONFIG_FILE_PATH,RUN_OPT_CONST.DEFAULT_TOPIC_NAME),
+                               kwargs={'n_threads':RUN_OPT_CONST.N_DEFAULT_UPLOAD_THREADS,
+                                       'chunk_size':RUN_OPT_CONST.DEFAULT_CHUNK_SIZE,
+                                       'max_queue_size':RUN_OPT_CONST.DEFAULT_MAX_UPLOAD_QUEUE_SIZE,
+                                       'update_secs':UPDATE_SECS,
+                                       'new_files_only':False}
+                              )
+        upload_thread.start()
         try :
-            #start up the DataFileDirectory
-            dfd = DataFileDirectory(TEST_CONST.TEST_WATCHED_DIR_PATH,logger=LOGGER)
-            #start upload_files_as_added in a separate thread so we can time it out
-            upload_thread = Thread(target=dfd.upload_files_as_added,
-                                   args=(TEST_CONST.TEST_CONFIG_FILE_PATH,RUN_OPT_CONST.DEFAULT_TOPIC_NAME),
-                                   kwargs={'n_threads':RUN_OPT_CONST.N_DEFAULT_UPLOAD_THREADS,
-                                           'chunk_size':RUN_OPT_CONST.DEFAULT_CHUNK_SIZE,
-                                           'max_queue_size':RUN_OPT_CONST.DEFAULT_MAX_UPLOAD_QUEUE_SIZE,
-                                           'update_secs':UPDATE_SECS,
-                                           'new_files_only':False}
-                                  )
-            upload_thread.start()
             #wait a second, and then copy the test file into the watched directory
             time.sleep(1)
             (TEST_CONST.TEST_WATCHED_DIR_PATH/TEST_CONST.TEST_DATA_FILE_NAME).write_bytes(TEST_CONST.TEST_DATA_FILE_PATH.read_bytes())
@@ -51,22 +51,33 @@ class TestDataFileDirectory(unittest.TestCase) :
         except Exception as e :
             raise e
         finally :
-            shutil.rmtree(TEST_CONST.TEST_WATCHED_DIR_PATH)
+            if upload_thread.is_alive() :
+                try :
+                    dfd.user_input_queue.put('q')
+                    upload_thread.join(timeout=5)
+                    if upload_thread.is_alive() :
+                        raise TimeoutError('ERROR: upload thread in run_upload_files_as_added timed out after 5 seconds!')
+                except Exception as e :
+                    raise e
+                finally :
+                    shutil.rmtree(TEST_CONST.TEST_WATCHED_DIR_PATH)
+            if TEST_CONST.TEST_WATCHED_DIR_PATH.is_dir() :
+                shutil.rmtree(TEST_CONST.TEST_WATCHED_DIR_PATH)
 
     #called by the test method below
     def run_reconstruct(self) :
         #make the directory to reconstruct files into
         TEST_CONST.TEST_RECO_DIR_PATH.mkdir()
+        #start up the DataFileDirectory
+        dfd = DataFileDirectory(TEST_CONST.TEST_RECO_DIR_PATH,logger=LOGGER)
+        #start reconstruct in a separate thread so we can time it out
+        download_thread = Thread(target=dfd.reconstruct,
+                                 args=(TEST_CONST.TEST_CONFIG_FILE_PATH,RUN_OPT_CONST.DEFAULT_TOPIC_NAME),
+                                 kwargs={'n_threads':RUN_OPT_CONST.N_DEFAULT_UPLOAD_THREADS,
+                                         'update_secs':UPDATE_SECS}
+                                )
+        download_thread.start()
         try :
-            #start up the DataFileDirectory
-            dfd = DataFileDirectory(TEST_CONST.TEST_RECO_DIR_PATH,logger=LOGGER)
-            #start reconstruct in a separate thread so we can time it out
-            download_thread = Thread(target=dfd.reconstruct,
-                                     args=(TEST_CONST.TEST_CONFIG_FILE_PATH,RUN_OPT_CONST.DEFAULT_TOPIC_NAME),
-                                     kwargs={'n_threads':RUN_OPT_CONST.N_DEFAULT_UPLOAD_THREADS,
-                                             'update_secs':UPDATE_SECS}
-                                    )
-            download_thread.start()
             #put the "check" command into the input queue a couple times
             dfd.user_input_queue.put('c')
             dfd.user_input_queue.put('check')
@@ -99,7 +110,18 @@ class TestDataFileDirectory(unittest.TestCase) :
         except Exception as e :
             raise e
         finally :
-            shutil.rmtree(TEST_CONST.TEST_RECO_DIR_PATH)
+            if download_thread.is_alive() :
+                try :
+                    dfd.user_input_queue.put('q')
+                    download_thread.join(timeout=5)
+                    if download_thread.is_alive() :
+                        raise TimeoutError('ERROR: download thread in run_reconstruct timed out after 5 seconds!')
+                except Exception as e :
+                    raise e
+                finally :
+                    shutil.rmtree(TEST_CONST.TEST_RECO_DIR_PATH)
+            if TEST_CONST.TEST_RECO_DIR_PATH.is_dir() :
+                shutil.rmtree(TEST_CONST.TEST_RECO_DIR_PATH)
 
     #below we test both upload_files_as_added and then reconstruct, in that order
     def test_upload_files_as_added_and_then_reconstruct(self) :
