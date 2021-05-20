@@ -19,12 +19,12 @@ class TestDataFileChunk(unittest.TestCase) :
         self.datafile = DataFile(TEST_CONST.TEST_DATA_FILE_PATH,logger=LOGGER)
 
     def test_initial_properties(self) :
-        self.assertEqual(self.datafile.filename,TEST_CONST.TEST_DATA_FILE_PATH.name)
+        self.assertEqual(self.datafile.filename,TEST_CONST.TEST_DATA_FILE_NAME)
         self.assertTrue(self.datafile.to_upload)
         self.assertFalse(self.datafile.fully_enqueued)
         self.assertTrue(self.datafile.waiting_to_upload)
         self.assertFalse(self.datafile.upload_in_progress)
-        self.assertEqual(self.datafile.upload_status_msg,f'{TEST_CONST.TEST_DATA_FILE_PATH.name} (waiting to be enqueued)')
+        self.assertEqual(self.datafile.upload_status_msg,f'{TEST_CONST.TEST_DATA_FILE_NAME} (waiting to be enqueued)')
 
     def test_add_chunks_to_upload_queue(self) :
         #adding to a full Queue should do nothing
@@ -43,7 +43,7 @@ class TestDataFileChunk(unittest.TestCase) :
         n_total_chunks = len(self.datafile._chunks_to_upload)
         self.assertFalse(self.datafile.waiting_to_upload)
         self.assertTrue(self.datafile.upload_in_progress)
-        self.assertEqual(self.datafile.upload_status_msg,f'{TEST_CONST.TEST_DATA_FILE_PATH.name} (in progress)')
+        self.assertEqual(self.datafile.upload_status_msg,f'{TEST_CONST.TEST_DATA_FILE_NAME} (in progress)')
         self.assertFalse(self.datafile.fully_enqueued)
         self.datafile.add_chunks_to_upload_queue(real_queue,n_threads=RUN_OPT_CONST.N_DEFAULT_UPLOAD_THREADS)
         self.datafile.add_chunks_to_upload_queue(real_queue,n_threads=RUN_OPT_CONST.N_DEFAULT_UPLOAD_THREADS)
@@ -52,7 +52,7 @@ class TestDataFileChunk(unittest.TestCase) :
         self.assertEqual(real_queue.qsize(),n_total_chunks)
         self.assertFalse(self.datafile.waiting_to_upload)
         self.assertFalse(self.datafile.upload_in_progress)
-        self.assertEqual(self.datafile.upload_status_msg,f'{TEST_CONST.TEST_DATA_FILE_PATH.name} (fully enqueued)')
+        self.assertEqual(self.datafile.upload_status_msg,f'{TEST_CONST.TEST_DATA_FILE_NAME} (fully enqueued)')
         self.assertTrue(self.datafile.fully_enqueued)
         #and try one more time to add more chunks; this should just return without doing anything
         self.datafile.add_chunks_to_upload_queue(real_queue)
@@ -70,6 +70,10 @@ class TestDataFileChunk(unittest.TestCase) :
             for ic,dfc in enumerate(self.datafile._chunks_to_upload) :
                 dfc._populate_with_file_data(logger=LOGGER)
                 check = self.datafile.write_chunk_to_disk(dfc,TEST_CONST.TEST_RECO_DIR_PATH)
+                #try writing every tenth chunk twice; should return "chunk already added"
+                if ic%10==0 :
+                    check2 = self.datafile.write_chunk_to_disk(dfc,TEST_CONST.TEST_RECO_DIR_PATH)
+                    self.assertEqual(check2,DATA_FILE_HANDLING_CONST.CHUNK_ALREADY_WRITTEN_CODE)
                 expected_check_value = DATA_FILE_HANDLING_CONST.FILE_IN_PROGRESS
                 if ic==len(self.datafile._chunks_to_upload)-1 :
                     expected_check_value = DATA_FILE_HANDLING_CONST.FILE_SUCCESSFULLY_RECONSTRUCTED_CODE 

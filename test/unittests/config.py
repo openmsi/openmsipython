@@ -14,8 +14,17 @@ class TestRoutineConstants :
     def TEST_CONFIG_FILE_PATH_NO_SERIALIZATION(self) : # Same as above except it's the config file that doesn't have the serialization stuff in it
         return (CONFIG_FILE_DIR / 'test_no_serialization.config').resolve()
     @property
+    def TEST_DATA_DIR_PATH(self) : #path to the test data directory
+        return pathlib.Path(__file__).parent.parent / 'data'
+    @property 
+    def TEST_DATA_FILE_NAME(self) : #name of the test data file
+        return '1a0ceb89-b5f0-45dc-9c12-63d3020e2217.dat'
+    @property
     def TEST_DATA_FILE_PATH(self) : # Path to the test data file
-        return pathlib.Path(__file__).parent.parent / 'data' / '1a0ceb89-b5f0-45dc-9c12-63d3020e2217.dat'
+        return self.TEST_DATA_DIR_PATH / self.TEST_DATA_FILE_NAME
+    @property
+    def TEST_WATCHED_DIR_PATH(self) : #path to the "watched" directory to use in testing DataFileDirectory etc.
+        return pathlib.Path(__file__).parent.parent / 'test_watched_dir'
     @property
     def TEST_RECO_DIR_PATH(self) : # Path to the test data file
         return pathlib.Path(__file__).parent.parent / 'test_reco'
