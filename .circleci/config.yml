@@ -39,12 +39,18 @@ jobs:
       - run:
           name: code check
           command: cd ~/project; python -m pyflakes .; cd -
+      - persist_to_workspace:
+      	  root:	.
+      	  paths:
+      	      -	.
   # Run unittests that don't interact with the kafka cluster at all in parallel
   tests-no-kafka:
     docker:
       - image: cimg/python:3.7
     parallelism: 3
     steps:
+      - attach_workspace:
+          at: .
       - run:
           name: run non-Kafka tests
           command: |
@@ -57,11 +63,17 @@ jobs:
             TESTCLASSES=$(circleci tests glob "test/unittests/test*parallel.py" | sed -r 's/\//./g' | sed -e 's/.py//' | circleci tests split)
             echo 'TESTCLASSES = ' $TESTCLASSES
             python -m unittest $TESTCLASSES
+      - persist_to_workspace:
+          root: .
+          paths:
+              - .
   # Run unittests that DO interact with the kafka cluster sequentially
   tests:
     docker:
       - image: cimg/python:3.7
     steps:
+      - attach_workspace:
+          at: .
       - run:
           name: test datafilechunk
           command: cd test/unittests; python -m unittest testdatafilechunk
@@ -73,6 +85,8 @@ jobs:
     docker:
       - image: cimg/python:3.7
     steps:
+      - attach_workspace:
+          at: .
       - run:
           name: check repo
           command: cd ~/project; sh test/test_repo_status.sh
