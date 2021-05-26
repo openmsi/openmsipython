@@ -43,23 +43,20 @@ jobs:
   tests-no-kafka:
     docker:
       - image: cimg/python:3.7
+        environment:
+	  PARALLEL_TEST_CLASSES: >-
+	    test.unittests.testconsolescripts
+	    test.unittests.testconfigfileparser
+	    test.unittests.testargumentparsing
+	    test.unittests.testcreatingkafkaproducersandconsumers
+	    test.unittests.testserialization
     parallelism: 3
     steps:
       - run:
-          name: test console scripts
-          command: python -m unittest project.test.testconsolescripts
-      - run:
-          name: test config file parser
-          command: python -m unittest project.test.testconfigfileparser
-      - run:
-          name: test argument parsing
-          command: python -m unittest project.test.testargumentparsing
-      - run:
-          name: test creating producers and consumers
-          command: python -m unittest project.test.testcreatingkafkaproducersandconsumers
-      - run:
-          name: test serialization
-          command: python -m unittest project.test.testserialization
+          name: run non-Kafka tests
+          command: |
+	    TESTCLASSES=$($PARALLEL_TEST_CLASSES | circleci tests split)
+	    python -m unittest $TESTCLASSES
   # Run unittests that DO interact with the kafka cluster sequentially
   tests:
     docker:
