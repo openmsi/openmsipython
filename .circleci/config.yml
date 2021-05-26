@@ -50,7 +50,9 @@ jobs:
           command: |
             echo 'cwd = ' $(pwd)
             echo 'glob output = ' $(circleci tests glob "~/project/test/unittests/test*parallel.py")
+            circleci tests glob "~/project/test/unittests/test*parallel.py" | xargs -n 1 echo
             echo 'glob + sed = ' $(circleci tests glob "~/project/test/unittests/test*parallel.py" | sed -r 's/\//./g' | sed -e 's/.py//')
+            circleci tests glob "~/project/test/unittests/test*parallel.py" | sed -r 's/\//./g' | sed -e 's/.py//' | xargs -n 1 echo
             TESTCLASSES=$(circleci tests glob "~/project/test/unittests/test*parallel.py" | sed -r 's/\//./g' | sed -e 's/.py//' | circleci tests split)
             echo 'TESTCLASSES = ' $TESTCLASSES
             python -m unittest $TESTCLASSES
@@ -61,10 +63,10 @@ jobs:
     steps:
       - run:
           name: test datafilechunk
-          command: python -m unittest test.unittests.testdatafilechunk
+          command: dir=$(basename $(pwd)); cd ..; python -m unittest $(dir).test.unittests.testdatafilechunk
       - run:
           name: test datafile
-          command: python -m unittest test.unittests.testdatafile
+          command: dir=$(basename $(pwd)); cd ..; python -m unittest $(dir).test.unittests.testdatafile
   # Make sure that the repository is clean after all tests have been run
   check-repo:
     docker:
