@@ -33,6 +33,7 @@ jobs:
       - checkout
       - python/install-packages:
           pkg-manager: pip
+	  include-branch-in-cache-key: false
       - run:
           name: pip install
           command: cd ~/project; pip install .[all]; cd -
