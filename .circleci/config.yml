@@ -81,10 +81,10 @@ jobs:
           pkg-manager: pip
       - run:
           name: test datafilechunk
-          command: cd test/unittests; python -m unittest testdatafilechunk
+          command: cd test/unittests; python -m unittest testdatafilechunk -v
       - run:
           name: test datafile
-          command: cd test/unittests; python -m unittest testdatafile
+          command: cd test/unittests; python -m unittest testdatafile -v
   # Make sure that the repository is clean after all tests have been run
   check-repo:
     docker:
