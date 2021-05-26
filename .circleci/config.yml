@@ -12,15 +12,12 @@ workflows:
     jobs:
       - build-and-code-check
       - tests-no-kafka:
-          type: approval
           requires:
             - build-and-code-check
       - tests:
-          type: approval
           requires:
             - build-and-code-check
       - check-repo:
-          type: approval
           requires:
             - build-and-code-check
             - tests-no-kafka
