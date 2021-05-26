@@ -34,6 +34,9 @@ jobs:
       - python/install-packages:
           pkg-manager: pip
       - run:
+          name: pip install
+	  command: cd ~/project; pip install .[all]; cd -
+      - run:
           name: code check
           command: cd ~/project; python -m pyflakes .; cd -
   # Run unittests that don't interact with the kafka cluster at all in parallel
