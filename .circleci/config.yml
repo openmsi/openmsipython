@@ -49,6 +49,7 @@ jobs:
           name: run non-Kafka tests
           command: |
             echo 'cwd = ' $(pwd)
+            echo 'cwd ls = ' $(ls)
             echo 'glob output = ' $(circleci tests glob "test/unittests/test*parallel.py")
             circleci tests glob "test/unittests/test*parallel.py" | xargs -n 1 echo
             echo 'glob + sed = ' $(circleci tests glob "test/unittests/test*parallel.py" | sed -r 's/\//./g' | sed -e 's/.py//')
