@@ -12,16 +12,19 @@ workflows:
     jobs:
       - build-and-code-check
       - tests-no-kafka:
-        requires:
-	  - build-and-code-check
+          type: approval
+          requires:
+            - build-and-code-check
       - tests:
-        requires:
-	  - build-and-code-check
+          type: approval
+          requires:
+            - build-and-code-check
       - check-repo:
-        requires:
-	  - build-and-code-check
-	  - tests-no-kafka
-	  - tests
+          type: approval
+          requires:
+            - build-and-code-check
+            - tests-no-kafka
+            - tests
 
 ################# JOBS #################
 jobs:
@@ -47,19 +50,19 @@ jobs:
     steps:
       - run:
           name: test console scripts
-	  command: python -m unittest project.test.testconsolescripts
+          command: python -m unittest project.test.testconsolescripts
       - run:
           name: test config file parser
-	  command: python -m unittest project.test.testconfigfileparser
+          command: python -m unittest project.test.testconfigfileparser
       - run:
           name: test argument parsing
-	  command: python -m unittest project.test.testargumentparsing
+          command: python -m unittest project.test.testargumentparsing
       - run:
           name: test creating producers and consumers
-	  command: python -m unittest project.test.testcreatingkafkaproducersandconsumers
+          command: python -m unittest project.test.testcreatingkafkaproducersandconsumers
       - run:
           name: test serialization
-	  command: python -m unittest project.test.testserialization
+          command: python -m unittest project.test.testserialization
   # Run unittests that DO interact with the kafka cluster sequentially
   tests:
     docker:
@@ -67,10 +70,10 @@ jobs:
     steps:
       - run:
           name: test datafilechunk
-	  command: python -m unittest project.test.testdatafilechunk
+          command: python -m unittest project.test.testdatafilechunk
       - run:
           name: test datafile
-	  command: python -m unittest project.test.testdatafile
+          command: python -m unittest project.test.testdatafile
   # Make sure that the repository is clean after all tests have been run
   check-repo:
     docker:
@@ -78,4 +81,4 @@ jobs:
     steps:
       - run:
           name: check repo
-	  command: cd ~/project; sh test/test_repo_status.sh
+          command: cd ~/project; sh test/test_repo_status.sh
