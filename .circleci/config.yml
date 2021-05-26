@@ -48,8 +48,8 @@ jobs:
       - run:
           name: run non-Kafka tests
           command: |
-	    TESTCLASSES=$(circleci tests glob "test/unittests/test*parallel.py" | sed -r 's/\//./g' | sed -e 's/.py//' | circleci tests split)
-	    python -m unittest $TESTCLASSES
+            TESTCLASSES=$(circleci tests glob "test/unittests/test*parallel.py" | sed -r 's/\//./g' | sed -e 's/.py//' | circleci tests split)
+            python -m unittest $TESTCLASSES
   # Run unittests that DO interact with the kafka cluster sequentially
   tests:
     docker:
