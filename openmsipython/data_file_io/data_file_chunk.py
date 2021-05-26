@@ -37,7 +37,8 @@ class DataFileChunk() :
     def __eq__(self,other) :
         if not isinstance(other,DataFileChunk) :
             return NotImplemented
-        retval = self.filepath == other.filepath
+        retval = True
+        #retval = retval and self.filepath == other.filepath #chunks can have different filepaths if created on different machines but still be equal
         retval = retval and self.filename == other.filename
         retval = retval and self.file_hash == other.file_hash
         retval = retval and self.chunk_hash == other.chunk_hash
