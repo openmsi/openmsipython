@@ -52,6 +52,8 @@ jobs:
     steps:
       - attach_workspace:
           at: .
+      - python/install-packages:
+          pkg-manager: pip
       - run:
           name: run non-Kafka tests
           command: |
@@ -75,6 +77,8 @@ jobs:
     steps:
       - attach_workspace:
           at: .
+      - python/install-packages:
+          pkg-manager: pip
       - run:
           name: test datafilechunk
           command: cd test/unittests; python -m unittest testdatafilechunk
