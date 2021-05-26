@@ -49,11 +49,11 @@ jobs:
           name: run non-Kafka tests
           command: |
             echo 'cwd = ' $(pwd)
-            echo 'glob output = ' $(circleci tests glob "~/project/test/unittests/test*parallel.py")
-            circleci tests glob "~/project/test/unittests/test*parallel.py" | xargs -n 1 echo
-            echo 'glob + sed = ' $(circleci tests glob "~/project/test/unittests/test*parallel.py" | sed -r 's/\//./g' | sed -e 's/.py//')
-            circleci tests glob "~/project/test/unittests/test*parallel.py" | sed -r 's/\//./g' | sed -e 's/.py//' | xargs -n 1 echo
-            TESTCLASSES=$(circleci tests glob "~/project/test/unittests/test*parallel.py" | sed -r 's/\//./g' | sed -e 's/.py//' | circleci tests split)
+            echo 'glob output = ' $(circleci tests glob "test/unittests/test*parallel.py")
+            circleci tests glob "test/unittests/test*parallel.py" | xargs -n 1 echo
+            echo 'glob + sed = ' $(circleci tests glob "test/unittests/test*parallel.py" | sed -r 's/\//./g' | sed -e 's/.py//')
+            circleci tests glob "test/unittests/test*parallel.py" | sed -r 's/\//./g' | sed -e 's/.py//' | xargs -n 1 echo
+            TESTCLASSES=$(circleci tests glob "test/unittests/test*parallel.py" | sed -r 's/\//./g' | sed -e 's/.py//' | circleci tests split)
             echo 'TESTCLASSES = ' $TESTCLASSES
             python -m unittest $TESTCLASSES
   # Run unittests that DO interact with the kafka cluster sequentially
@@ -63,10 +63,10 @@ jobs:
     steps:
       - run:
           name: test datafilechunk
-          command: dir=$(basename $(pwd)); cd ..; python -m unittest $(dir).test.unittests.testdatafilechunk
+          command: cd test/unittests; python -m unittest testdatafilechunk
       - run:
           name: test datafile
-          command: dir=$(basename $(pwd)); cd ..; python -m unittest $(dir).test.unittests.testdatafile
+          command: cd test/unittests; python -m unittest testdatafile
   # Make sure that the repository is clean after all tests have been run
   check-repo:
     docker:
