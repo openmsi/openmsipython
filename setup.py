@@ -3,7 +3,7 @@ import setuptools, site
 
 site.ENABLE_USER_SITE = True #https://www.scivision.dev/python-pip-devel-user-install/
 
-setuptools.setup(
+setupkwargs = dict(
     name='openmsipython',
     version='0.0.1',
     packages=setuptools.find_packages(include=['openmsipython*']),
@@ -21,3 +21,7 @@ setuptools.setup(
                      ],
     extras_require = {'test': ['pyflakes>=2.2.0',],},
 )
+
+setupkwargs["extras_require"]["all"] = sum(setupkwargs["extras_require"].values(), [])
+
+setuptools.setup(**setupkwargs)
