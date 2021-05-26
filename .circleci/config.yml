@@ -1,43 +1,78 @@
 version: 2.1
 
+################# ORB #################
 orbs:
-  # The python orb contains a set of prepackaged CircleCI configuration you can use repeatedly in your configuration files
-  # Orb commands and jobs help you with common scripting around a language/tool
-  # so you dont have to copy and paste it everywhere.
   # See the orb documentation here: https://circleci.com/developer/orbs/orb/circleci/python
   python: circleci/python@1.4.0
 
+################# WORKFLOWS #################
 workflows:
-  sample:  # This is the name of the workflow, feel free to change it to better match your workflow.
-    # Inside the workflow, you define the jobs you want to run. 
+  build_and_test:
     # For more details on extending your workflow, see the configuration docs: https://circleci.com/docs/2.0/configuration-reference/#workflows 
     jobs:
-      - build-and-test
+      - build-and-code-check
+      - tests-no-kafka:
+        requires:
+	  - build-and-code-check
+      - tests:
+        requires:
+	  - build-and-code-check
+      - check-repo:
+        requires:
+	  - build-and-code-check
+	  - tests-no-kafka
+	  - tests
 
-
+################# JOBS #################
 jobs:
-  build-and-test:  # This is the name of the job, feel free to change it to better match what you're trying to do!
-    # These next lines defines a Docker executors: https://circleci.com/docs/2.0/executor-types/
-    # You can specify an image from Dockerhub or use one of the convenience images from CircleCI's Developer Hub
-    # A list of available CircleCI Docker convenience images are available here: https://circleci.com/developer/images/image/cimg/python
-    # The executor is the environment in which the steps below will be executed - below will use a python 3.9 container
-    # Change the version below to your required version of python
+  # Build the repo and check the code using pyflakes 
+  build-and-code-check:
     docker:
       - image: cimg/python:3.7
-    # Checkout the code as the first step. This is a dedicated CircleCI step.
-    # The python orb's install-packages step will install the dependencies from a Pipfile via Pipenv by default.
-    # Here we're making sure we use just use the system-wide pip. By default it uses the project root's requirements.txt.
-    # Then run your tests!
-    # CircleCI will report the results back to your VCS provider.
     steps:
       - checkout
       - python/install-packages:
           pkg-manager: pip
-          # app-dir: ~/project/package-directory/  # If you're requirements.txt isn't in the root directory.
-          # pip-dependency-file: test-requirements.txt  # if you have a different name for your requirements file, maybe one that combines your runtime and test requirements.
       - run:
-          name: Run tests
-          # This assumes pytest is installed via the install-package step above
-          command: python ~/project/test/run_all_tests.py
-      - store_test_results:
-          path: test-results
+          name: code check
+          command: cd ~/project; python -m pyflakes .; cd -
+  # Run unittests that don't interact with the kafka cluster at all in parallel
+  tests-no-kafka:
+    docker:
+      - image: cimg/python:3.7
+    parallelism: 3
+    steps:
+      - run:
+          name: test console scripts
+	  command: python -m unittest project.test.testconsolescripts
+      - run:
+          name: test config file parser
+	  command: python -m unittest project.test.testconfigfileparser
+      - run:
+          name: test argument parsing
+	  command: python -m unittest project.test.testargumentparsing
+      - run:
+          name: test creating producers and consumers
+	  command: python -m unittest project.test.testcreatingkafkaproducersandconsumers
+      - run:
+          name: test serialization
+	  command: python -m unittest project.test.testserialization
+  # Run unittests that DO interact with the kafka cluster sequentially
+  tests:
+    docker:
+      - image: cimg/python:3.7
+    steps:
+      - run:
+          name: test datafilechunk
+	  command: python -m unittest project.test.testdatafilechunk
+      - run:
+          name: test datafile
+	  command: python -m unittest project.test.testdatafile
+  # Make sure that the repository is clean after all tests have been run
+  check-repo:
+    docker:
+      - image: cimg/python:3.7
+    steps:
+      - run:
+          name: check repo
+	  command: cd ~/project; sh test/test_repo_status.sh
