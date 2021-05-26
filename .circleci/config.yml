@@ -50,23 +50,24 @@ jobs:
       - image: cimg/python:3.7
     parallelism: 3
     steps:
+      - attach_workspace:
+          at: .
       - restore_cache:
           keys:
               - -pypi-v1-circleCI-{{ checksum "./requirements.txt" }}-{{ checksum "/home/circleci/.pyenv/version" }}-
-      - attach_workspace:
-          at: .
       - run:
           name: run non-Kafka tests
           command: |
+            cd test/unittests
             echo 'cwd = ' $(pwd)
             echo 'cwd ls = ' $(ls)
-            echo 'glob output = ' $(circleci tests glob "test/unittests/test*parallel.py")
-            circleci tests glob "test/unittests/test*parallel.py" | xargs -n 1 echo
-            echo 'glob + sed = ' $(circleci tests glob "test/unittests/test*parallel.py" | sed -r 's/\//./g' | sed -e 's/.py//')
-            circleci tests glob "test/unittests/test*parallel.py" | sed -r 's/\//./g' | sed -e 's/.py//' | xargs -n 1 echo
-            TESTCLASSES=$(circleci tests glob "test/unittests/test*parallel.py" | sed -r 's/\//./g' | sed -e 's/.py//' | circleci tests split)
+            echo 'glob output = ' $(circleci tests glob "test*parallel.py")
+            circleci tests glob "test*parallel.py" | xargs -n 1 echo
+            echo 'glob + sed = ' $(circleci tests glob "test*parallel.py" | sed -e 's/.py//')
+            circleci tests glob "test*parallel.py" | sed -e 's/.py//' | xargs -n 1 echo
+            TESTCLASSES=$(circleci tests glob "test*parallel.py" | sed -e 's/.py//' | circleci tests split)
             echo 'TESTCLASSES = ' $TESTCLASSES
-            python -m unittest $TESTCLASSES
+            python -m unittest $TESTCLASSES -v
       - persist_to_workspace:
           root: .
           paths:
