@@ -23,8 +23,7 @@ def main() :
         print(stdout_line,end='')
     return_code = p.wait()
     if return_code>0 :
-        print('ERROR: some unittest(s) failed! See output above for details.')
-        return
+        raise RuntimeError('ERROR: some unittest(s) failed! See output above for details.')
     print('All unittest checks complete : )')
     #make sure the Github repo is still clean from its initial state
     print('Checking the status of the Git repo....')
