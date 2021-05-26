@@ -51,7 +51,7 @@ jobs:
             echo 'glob output = ' $(circleci tests glob "test/unittests/test*parallel.py")
             echo 'glob + sed = ' $(circleci tests glob "test/unittests/test*parallel.py" | sed -r 's/\//./g' | sed -e 's/.py//')
             TESTCLASSES=$(circleci tests glob "test/unittests/test*parallel.py" | sed -r 's/\//./g' | sed -e 's/.py//' | circleci tests split)
-	    echo 'TESTCLASSES = ' $TESTCLASSES
+            echo 'TESTCLASSES = ' $TESTCLASSES
             python -m unittest $TESTCLASSES
   # Run unittests that DO interact with the kafka cluster sequentially
   tests:
