@@ -11,17 +11,17 @@ workflows:
     # For more details on extending your workflow, see the configuration docs: https://circleci.com/docs/2.0/configuration-reference/#workflows 
     jobs:
       - build-and-code-check
-      - tests-no-kafka:
+      - parallel-tests-no-kafka:
           requires:
             - build-and-code-check
-      - tests:
+      - sequential-tests-with-kafka:
           requires:
             - build-and-code-check
       - check-repo:
           requires:
             - build-and-code-check
-            - tests-no-kafka
-            - tests
+            - parallel-tests-no-kafka
+            - sequential-tests-with-kafka
 
 ################# JOBS #################
 jobs:
