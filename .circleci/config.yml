@@ -76,11 +76,8 @@ jobs:
           keys:
               - -pypi-v1-circleCI-{{ checksum "./requirements.txt" }}-{{ checksum "/home/circleci/.pyenv/version" }}-
       - run:
-          name: test datafilechunk
-          command: cd test/unittests; python -m unittest testdatafilechunk -v
-      - run:
-          name: test datafile
-          command: cd test/unittests; python -m unittest testdatafile -v
+          name: run tests
+          command: python -m unittest discover -s test/unittests -v -p test*_with_kafka.py
   # Make sure that the repository is clean after all tests have been run
   check-repo:
     docker:
