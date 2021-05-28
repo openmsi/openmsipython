@@ -44,7 +44,7 @@ jobs:
           paths:
             - .
   # Run unittests that don't interact with the kafka cluster at all in parallel
-  tests-no-kafka:
+  parallel-tests-no-kafka:
     docker:
       - image: cimg/python:3.7
     parallelism: 3
@@ -64,7 +64,7 @@ jobs:
           paths:
               - .
   # Run unittests that DO interact with the kafka cluster sequentially
-  tests:
+  sequential-tests-with-kafka:
     docker:
       - image: cimg/python:3.7
     steps:
