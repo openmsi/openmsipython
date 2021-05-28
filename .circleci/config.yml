@@ -70,8 +70,8 @@ jobs:
     steps:
       - attach_workspace:
           at: .
-      - python/install-packages
-          pkg-manager:pip
+      - python/install-packages:
+          pkg-manager: pip
       - run:
           name: run tests
           command: python -m unittest discover -s test/unittests -v -p test*_with_kafka.py
