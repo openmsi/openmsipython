@@ -176,6 +176,12 @@ There are several tests for the codebase already written (and more will be added
 
 Some of the tests rely on static example data in `test/data`. If you need to regenerate these static test data under some new conditions (i.e., because you've changed default options someplace), you can run `python test/rebuild_test_reference_data.py` and follow the prompts it gives you to replace the necessary files.
 
+There are also a few options you can add to `run_all_tests.py` if you only want to run some specific tests:
+1. Add the "`--no_pyflakes`" flag to skip the pyflakes test
+1. Add the "`--no_unittests`" flag to skip the unittests entirely, OR
+1. Add just the "`--no_kafka`" flag to skip running tests that need to communicate with the Kafka cluster
+1. Add the "`--no_repo`" flag to skip the test of whether the Git repo is still clean after running all tests
+
 Also please note that a few of the tests open processes in external threads and therefore there is a chance that changes you make could cause the testing code to behave differently than expected for those cases. In particular, making changes to how the `upload_files_as_added` and `reconstruct` methods in the `DataFileDirectory` class are signalled to shut down and clean up their own child processes COULD POTENTIALLY result in the test code hanging as it runs or even zombie threads. Things would have to get pretty messed up for that to happen but it's simply not impossible to prevent in all cases.
 
 ## To-do list
