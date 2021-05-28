@@ -10,9 +10,9 @@ import unittest, pathlib, logging, shutil, filecmp
 #constants
 LOGGER = Logger(pathlib.Path(__file__).name.split('.')[0],logging.ERROR)
 
-class TestDataFileChunk(unittest.TestCase) :
+class TestDataFile(unittest.TestCase) :
     """
-    Class for testing DataFile functions
+    Class for testing DataFile functions (without interacting with the Kafka cluster)
     """
 
     def setUp(self) :
@@ -56,12 +56,6 @@ class TestDataFileChunk(unittest.TestCase) :
         self.assertTrue(self.datafile.fully_enqueued)
         #and try one more time to add more chunks; this should just return without doing anything
         self.datafile.add_chunks_to_upload_queue(real_queue)
-
-    def test_upload_whole_file(self) :
-        #just need to make sure this function runs without throwing any errors
-        self.datafile.upload_whole_file(TEST_CONST.TEST_CONFIG_FILE_PATH,RUN_OPT_CONST.DEFAULT_TOPIC_NAME,
-                                        n_threads=RUN_OPT_CONST.N_DEFAULT_UPLOAD_THREADS,
-                                        chunk_size=RUN_OPT_CONST.DEFAULT_CHUNK_SIZE)
 
     def test_write_chunk_to_disk(self) :
         TEST_CONST.TEST_RECO_DIR_PATH.mkdir()
