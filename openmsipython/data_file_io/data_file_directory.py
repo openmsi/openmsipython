@@ -231,6 +231,7 @@ class DataFileDirectory() :
                     consumed_msg = consumer.poll(0)
                 except Exception as e :
                     self._logger.warning(f'WARNING: encountered an error in a call to consumer.poll() and will skip the offending message. Error: {e}')
+                    continue
                 if consumed_msg is not None and consumed_msg.error() is None :
                     self._queues[list_index].put(consumed_msg.value())
                 continue
