@@ -51,9 +51,8 @@ jobs:
     steps:
       - attach_workspace:
           at: .
-      - restore_cache:
-          keys:
-              - -pypi-v1-circleCI-{{ checksum "./requirements.txt" }}-{{ checksum "/home/circleci/.pyenv/version" }}-
+      - python/install-packages:
+          pkg-manager: pip
       - run:
           name: run non-Kafka tests
           command: |
@@ -71,9 +70,8 @@ jobs:
     steps:
       - attach_workspace:
           at: .
-      - restore_cache:
-          keys:
-              - -pypi-v1-circleCI-{{ checksum "./requirements.txt" }}-{{ checksum "/home/circleci/.pyenv/version" }}-
+      - python/install-packages
+          pkg-manager:pip
       - run:
           name: run tests
           command: python -m unittest discover -s test/unittests -v -p test*_with_kafka.py
