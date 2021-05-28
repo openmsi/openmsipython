@@ -237,7 +237,10 @@ class DataFileDirectory() :
                 #close the consumer
                 consumer.close()
                 break
-            #add the chunk's data to the file that's being reconstructed
+            #set the chunk's filepath to be in the working directory and add its data to the file that's being reconstructed
+            if dfc.filepath is not None :
+                self._logger.error(f'ERROR: message with key {dfc.message_key} has filepath={dfc.filepath} (should be None as it was just consumed)!',RuntimeError)
+            dfc.filepath = self._dirpath/dfc.filename
             if dfc.filepath not in self._data_files_by_path.keys() :
                 self._data_files_by_path[dfc.filepath] = (DataFile(dfc.filepath,logger=self._logger),Lock())
             return_value = self._data_files_by_path[dfc.filepath][0].write_chunk_to_disk(dfc,self._dirpath,self._data_files_by_path[dfc.filepath][1])
