@@ -3,7 +3,6 @@ from config import TEST_CONST
 from openmsipython.data_file_io.data_file import DataFile
 from openmsipython.data_file_io.data_file_chunk import DataFileChunk
 from openmsipython.data_file_io.config import RUN_OPT_CONST
-from openmsipython.my_kafka.my_producers import MySerializingProducer
 from openmsipython.utilities.logging import Logger
 import unittest, pathlib, logging
 
@@ -12,7 +11,7 @@ LOGGER = Logger(pathlib.Path(__file__).name.split('.')[0],logging.ERROR)
 
 class TestDataFileChunk(unittest.TestCase) :
     """
-    Class for testing DataFileChunk functions
+    Class for testing DataFileChunk functions (without interacting with the Kafka cluster)
     """
 
     def setUp(self) :
@@ -45,10 +44,3 @@ class TestDataFileChunk(unittest.TestCase) :
         self.assertEqual(self.test_chunk_2,test_chunk_2_copied)
         self.assertFalse(self.test_chunk_1==2)
         self.assertFalse(self.test_chunk_1=='this is a string, not a DataFileChunk!')
-
-    def test_produce_to_topic(self) :
-        producer = MySerializingProducer.from_file(TEST_CONST.TEST_CONFIG_FILE_PATH,logger=LOGGER)
-        self.test_chunk_1.produce_to_topic(producer,RUN_OPT_CONST.DEFAULT_TOPIC_NAME,logger=LOGGER)
-        producer.flush()
-        self.test_chunk_2.produce_to_topic(producer,RUN_OPT_CONST.DEFAULT_TOPIC_NAME,logger=LOGGER)
-        producer.flush()
