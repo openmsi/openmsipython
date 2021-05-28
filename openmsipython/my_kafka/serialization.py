@@ -34,19 +34,16 @@ class DataFileChunkDeserializer(Deserializer) :
             return None
         try :
             ordered_properties = msgpack.unpackb(byte_array,raw=True)
-            #if len(ordered_properties)!=7 :
-            #    raise ValueError(f'ERROR: unrecognized token passed to FileChunkDeserializer. Expected 7 properties but found {len(ordered_properties)}')
+            if len(ordered_properties)!=7 :
+                raise ValueError(f'ERROR: unrecognized token passed to FileChunkDeserializer. Expected 7 properties but found {len(ordered_properties)}')
             try :
-                po = 0
-                if len(ordered_properties)==8 :
-                    po=1
-                filename = str(ordered_properties[0+po].decode())
-                file_hash = ordered_properties[1+po]
-                chunk_hash = ordered_properties[2+po]
-                chunk_offset = int(ordered_properties[3+po])
-                chunk_i = int(ordered_properties[4+po])
-                n_total_chunks = int(ordered_properties[5+po])
-                data = ordered_properties[6+po]
+                filename = str(ordered_properties[0].decode())
+                file_hash = ordered_properties[1]
+                chunk_hash = ordered_properties[2]
+                chunk_offset = int(ordered_properties[3])
+                chunk_i = int(ordered_properties[4])
+                n_total_chunks = int(ordered_properties[5])
+                data = ordered_properties[6]
             except Exception as e :
                 raise ValueError(f'ERROR: unrecognized value(s) when deserializing a DataFileChunk from token. Exception: {e}')
             check_chunk_hash = sha512()
