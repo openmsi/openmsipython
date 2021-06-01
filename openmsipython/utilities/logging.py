@@ -1,6 +1,25 @@
 #imports
 import logging, pathlib
 
+class MyFormatter(logging.Formatter) :
+    """
+    Very small extension of the usual logging.Formatter to allow modification of format based on message content
+    """
+
+    def __init__(self,*args,**kwargs) :
+        super().__init__(*args,**kwargs)
+
+    def format(self, record):
+        """
+        If a message starts with a newline, start the actual logging line with the newline before any of the rest
+        """
+        formatted = ''
+        if record.msg.startswith('\n') :
+            record.msg = record.msg.lstrip('\n')
+            formatted+='\n'
+        formatted+=super().format(record)
+        return formatted
+
 class Logger :
     """
     Class for a general logger. Logs messages and raises exceptions
@@ -8,7 +27,7 @@ class Logger :
 
     @property
     def formatter(self):
-        return logging.Formatter('[%(name)s at %(asctime)s] %(message)s','%Y-%m-%d %H:%M:%S')
+        return MyFormatter('[%(name)s at %(asctime)s] %(message)s','%Y-%m-%d %H:%M:%S')
 
     def __init__(self,name=None,streamlevel=logging.DEBUG,filepath=None,filelevel=logging.INFO) :
         """

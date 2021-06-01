@@ -172,11 +172,26 @@ Options for running the code include:
 1. Changing how often the "still alive" character is printed to the console: add the `--update_seconds [seconds]` argument where `[seconds]` is the number of seconds to wait between printing the character to the console from the main thread (the default is 30 seconds). Giving -1 for this argument disables printing the "still alive" character entirely.
 
 ## Automatic code tests
+
+### Running tests interactively
+
 There are several tests for the codebase already written (and more will be added over time). If you're editing the code, you can make sure it doesn't break anything currently being tested by running `python test/run_all_tests.py` from just inside the directory of the repo. If you'd like to add more tests, you can include any classes that extend `unittest.TestCase` in the `test/unittests` subdirectory, and call their files anything that starts with `test`, and the `run_all_tests.py` script will run them automatically. `run_all_tests.py` needs `pyflakes` installed, which you can get right from this repo by running `pip install . [test]` (with or without the `--editable` or `-e` flag(s)).
 
 Some of the tests rely on static example data in `test/data`. If you need to regenerate these static test data under some new conditions (i.e., because you've changed default options someplace), you can run `python test/rebuild_test_reference_data.py` and follow the prompts it gives you to replace the necessary files.
 
+There are also a few options you can add to `run_all_tests.py` if you only want to run some subset of the available tests:
+1. Add the "`--no_pyflakes`" flag to skip the pyflakes test
+1. Add the "`--no_unittests`" flag to skip the unittests entirely, OR
+1. Add the "`--no_kafka`" flag to skip running tests that need to communicate with the Kafka cluster (this just makes the `unittest discover` pattern `test*parallel.py` instead of `test*.py`, so you have to name the files with "Non-Kafka" tests something that starts with "`test`" and ends in "`parallel.py`".)
+1. Add the "`--no_repo`" flag to skip the test of whether the Git repo is still clean after running all tests
+
 Also please note that a few of the tests open processes in external threads and therefore there is a chance that changes you make could cause the testing code to behave differently than expected for those cases. In particular, making changes to how the `upload_files_as_added` and `reconstruct` methods in the `DataFileDirectory` class are signalled to shut down and clean up their own child processes COULD POTENTIALLY result in the test code hanging as it runs or even zombie threads. Things would have to get pretty messed up for that to happen but it's simply not impossible to prevent in all cases.
+
+### Continuous Integration with CircleCI
+
+There is also currently set up a continuous integration service through CircleCI. On the website you can manually run tests on any branch you'd like, and the tests will also automatically be run when pull requests are submitted. One thing about running tests on CircleCI is that the naming conventions of the files are important: anything that doesn't interact with the Kafka cluster should go in a file called `test*parallel.py` so that it can be run in parallel to speed things up. Anything that DOES interact with the Kafka cluster shoul be called `test*_with_kafka.py` so that the `unittest discover` command that's run can find it. 
+
+You can also change the setup of how the tests are run on CircleCI by editing the `.circleci/config.yml` file in the repo.
 
 ## To-do list
 
