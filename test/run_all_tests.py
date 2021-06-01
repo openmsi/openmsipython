@@ -45,7 +45,7 @@ def main(args=None) :
             print(stdout_line,end='')
         return_code = p.wait()
         if return_code>0 :
-            print('ERROR: some unittest(s) failed! See output above for details.')
+            raise RuntimeError('ERROR: some unittest(s) failed! See output above for details.')
             return
         print('All unittest checks complete : )')
     if args.no_repo :

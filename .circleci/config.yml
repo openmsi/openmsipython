@@ -1,0 +1,89 @@
+version: 2.1
+
+################# ORB #################
+orbs:
+  # See the orb documentation here: https://circleci.com/developer/orbs/orb/circleci/python
+  python: circleci/python@1.4.0
+
+################# WORKFLOWS #################
+workflows:
+  build_and_test:
+    # For more details on extending your workflow, see the configuration docs: https://circleci.com/docs/2.0/configuration-reference/#workflows 
+    jobs:
+      - build-and-code-check
+      - parallel-tests-no-kafka:
+          requires:
+            - build-and-code-check
+      - sequential-tests-with-kafka:
+          requires:
+            - parallel-tests-no-kafka
+      - check-repo:
+          requires:
+            - sequential-tests-with-kafka
+
+################# JOBS #################
+jobs:
+  # Build the repo and check the code using pyflakes 
+  build-and-code-check:
+    docker:
+      - image: cimg/python:3.7
+    steps:
+      - checkout
+      - python/install-packages:
+          pkg-manager: pip
+      - run:
+          name: pip install
+          command: cd ~/project; pip install .[all]; cd -
+      - run:
+          name: code check
+          command: cd ~/project; python -m pyflakes .; cd -
+      - persist_to_workspace:
+          root: .
+          paths:
+            - .
+  # Run unittests that don't interact with the kafka cluster at all in parallel
+  parallel-tests-no-kafka:
+    docker:
+      - image: cimg/python:3.7
+    parallelism: 4
+    steps:
+      - attach_workspace:
+          at: .
+      - python/install-packages:
+          pkg-manager: pip
+      - run:
+          name: run non-Kafka tests
+          command: |
+            cd test/unittests
+            TESTCLASSES=$(circleci tests glob "test*parallel.py" | sed -e 's/.py//' | circleci tests split)
+            python -m unittest $TESTCLASSES -v
+      - persist_to_workspace:
+          root: .
+          paths:
+              - .
+  # Run unittests that DO interact with the kafka cluster sequentially
+  sequential-tests-with-kafka:
+    docker:
+      - image: cimg/python:3.7
+    steps:
+      - attach_workspace:
+          at: .
+      - python/install-packages:
+          pkg-manager: pip
+      - run:
+          name: run tests
+          command: python -m unittest discover -s test/unittests -v -p test*_with_kafka.py
+      - persist_to_workspace:
+          root: .
+          paths:
+              - .
+  # Make sure that the repository is clean after all tests have been run
+  check-repo:
+    docker:
+      - image: cimg/python:3.7
+    steps:
+      - attach_workspace:
+          at: .
+      - run:
+          name: check repo
+          command: cd ~/project; sh test/test_repo_status.sh
