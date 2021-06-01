@@ -17,6 +17,7 @@ workflows:
       - sequential-tests-with-kafka:
           requires:
             - build-and-code-check
+            - parallel-tests-no-kafka
       - check-repo:
           requires:
             - build-and-code-check
