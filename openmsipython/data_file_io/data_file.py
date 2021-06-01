@@ -65,7 +65,7 @@ class DataFile() :
         filepath = path to the file
         
         Possible keyword arguments:
-        logger           = the logger object for this file's messages to use (a new one will be created if none is supplied)
+        logger    = the logger object for this file's messages to use (a new one will be created if none is supplied)
         to_upload = if False, the file will be ignored for purposes of uploading to a topic (default is True)
         """
         self._filepath = filepath
@@ -216,4 +216,4 @@ class DataFile() :
         self._logger.info(f'File {self._filepath} has a total of {len(chunks)} chunks')
         #add all the chunks to the final list as DataFileChunk objects
         for ic,c in enumerate(chunks,start=1) :
-            self._chunks_to_upload.append(DataFileChunk(self._filepath,self._filename,file_hash,c[0],c[1],c[2],ic,len(chunks)))
+            self._chunks_to_upload.append(DataFileChunk(self._filename,file_hash,c[0],c[1],c[2],ic,len(chunks),filepath=self._filepath))
