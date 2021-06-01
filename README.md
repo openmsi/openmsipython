@@ -169,15 +169,13 @@ While the main process is running, a line with a "`.`" character will be printed
 
 Options for running the code include:
 1. Changing the maximum number of parallel threads allowed to run at a time: add the `--n_threads [threads]` argument where `[threads]` is the desired number of parallel threads to use (and, also, the number of consumers to allow in the group). The default is 5 threads/consumers; increasing this number may give Kafka warnings or errors intermittently as the consumer group is rebalanced.
-1. Changing how often the "still alive" character is printed to the console: add the `--update_seconds [seconds]` argument where `[seconds]` is the number of seconds to wait between printing the character to the console from the main thread (the default is 30 seconds). Giving -1 for this argument disables printing the "still alive" character entirely.
+1. Changing how often the "still alive" character is printed to the console: add the `--update_seconds [seconds]` argument where `[seconds]` is the number of seconds to wait between printing the character to the console from the main thread (the default is 30 seconds). Giving -1 for this argument disables printing the "still alive" character entirely. 
 
 ## Automatic code tests
+There are several tests for the codebase already written (and more will be added over time). The repo also has a continuous integration workflow set up on CircleCI, and the checks in that workflow must pass successfully on any branch being merged into main.  
 
-### Running tests interactively
-
-There are several tests for the codebase already written (and more will be added over time). If you're editing the code, you can make sure it doesn't break anything currently being tested by running `python test/run_all_tests.py` from just inside the directory of the repo. If you'd like to add more tests, you can include any classes that extend `unittest.TestCase` in the `test/unittests` subdirectory, and call their files anything that starts with `test`, and the `run_all_tests.py` script will run them automatically. `run_all_tests.py` needs `pyflakes` installed, which you can get right from this repo by running `pip install . [test]` (with or without the `--editable` or `-e` flag(s)).
-
-Some of the tests rely on static example data in `test/data`. If you need to regenerate these static test data under some new conditions (i.e., because you've changed default options someplace), you can run `python test/rebuild_test_reference_data.py` and follow the prompts it gives you to replace the necessary files.
+### Running tests interactively 
+If you're editing the code, you can make sure it doesn't break anything currently being tested by running `python test/run_all_tests.py` from just inside the directory of the repo. If you'd like to add more tests, you can include any classes that extend `unittest.TestCase` in the `test/unittests` subdirectory. If you name their files anything that starts with `test` the `run_all_tests.py` script will run them automatically. `run_all_tests.py` needs `pyflakes` installed, which you can get right from this repo by running `pip install . [test]` (with or without the `--editable` or `-e` flag(s)).
 
 There are also a few options you can add to `run_all_tests.py` if you only want to run some subset of the available tests:
 1. Add the "`--no_pyflakes`" flag to skip the pyflakes test
@@ -185,13 +183,12 @@ There are also a few options you can add to `run_all_tests.py` if you only want 
 1. Add the "`--no_kafka`" flag to skip running tests that need to communicate with the Kafka cluster (this just makes the `unittest discover` pattern `test*parallel.py` instead of `test*.py`, so you have to name the files with "Non-Kafka" tests something that starts with "`test`" and ends in "`parallel.py`".)
 1. Add the "`--no_repo`" flag to skip the test of whether the Git repo is still clean after running all tests
 
-Also please note that a few of the tests open processes in external threads and therefore there is a chance that changes you make could cause the testing code to behave differently than expected for those cases. In particular, making changes to how the `upload_files_as_added` and `reconstruct` methods in the `DataFileDirectory` class are signalled to shut down and clean up their own child processes COULD POTENTIALLY result in the test code hanging as it runs or even zombie threads. Things would have to get pretty messed up for that to happen but it's simply not impossible to prevent in all cases.
-
 ### Continuous Integration with CircleCI
 
-There is also currently set up a continuous integration service through CircleCI. On the website you can manually run tests on any branch you'd like, and the tests will also automatically be run when pull requests are submitted. One thing about running tests on CircleCI is that the naming conventions of the files are important: anything that doesn't interact with the Kafka cluster should go in a file called `test*parallel.py` so that it can be run in parallel to speed things up. Anything that DOES interact with the Kafka cluster shoul be called `test*_with_kafka.py` so that the `unittest discover` command that's run can find it. 
+Continuous integration for the repo is set up using CircleCI. On the website you can manually run tests on any branch you'd like, and the tests will also automatically be run when pull requests are submitted. The names of the files in `test/unittests` are important for these CircleCI tests to run: anything that doesn't interact with the Kafka cluster should go in a file called `test*parallel.py` so that it can be run in parallel to speed things up, and anything that DOES interact with the Kafka cluster should be called `test*_with_kafka.py` so that the `unittest discover` command that's run can find it at that step. The configuration for CircleCI is in the [`.circleci/config.yml`](./circleci/config.yml) file.
 
-You can also change the setup of how the tests are run on CircleCI by editing the `.circleci/config.yml` file in the repo.
+### Rebuilding static test data
+Some of the tests rely on static example data in `test/data`. If you need to regenerate these data under some new conditions (i.e., because you've changed default options someplace), you can run `python test/rebuild_test_reference_data.py` and follow the prompts it gives you to replace the necessary files. You can also add to that script if you write any new tests that rely on example data. Static test data should be committed to the repo like any other file, and they'll be picked up both interactively and on CircleCI.
 
 ## To-do list
 
@@ -200,7 +197,6 @@ The following items are currently planned to be implemented ASAP:
 1. More securely managing API keys and secrets instead of hardcoding them in configuration files
 1. Adding a safer and more graceful shutdown when stopping the Open MSI Directory Stream Service so that no external lag time needs to be considered
 1. Allowing watching directories where large files are in the process of being created/saved instead of just directories where fully-created files are being added
-1. Adding more unittest routines (Jenkins? Travis CI?)
 1. Implementing other data types and serialization schemas, likely using Avro
 1. Further improving logging
 1. Create pypi and conda installations. Pypi method using twine here: https://github.com/bast/pypi-howto. Putting on conda-forge is a heavier lift. Need to decide if it's worth it; probably not for such an immature package.
