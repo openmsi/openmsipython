@@ -73,6 +73,9 @@ jobs:
       - run:
           name: run tests
           command: python -m unittest discover -s test/unittests -v -p test*_with_kafka.py
+      - run:
+          name: create a file to break the next test
+          command: touch test.txt
       - persist_to_workspace:
           root: .
           paths:

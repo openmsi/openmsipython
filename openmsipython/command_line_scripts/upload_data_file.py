@@ -32,7 +32,6 @@ def main(args=None) :
                                   n_threads=args.n_threads,
                                   chunk_size=args.chunk_size)
     logger.info(f'Done uploading {args.filepath}')
-    print(f'pyflakes will be unhappy about this line')
 
 if __name__=='__main__' :
     main()
