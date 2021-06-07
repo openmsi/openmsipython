@@ -10,20 +10,23 @@ SERVICE_DISPLAY_NAME = 'Open MSI Directory Stream Service'
 SERVICE_DESCRIPTION = 'Automatically produce to a Kafka topic any files added to a watched directory'
 NSSM_DOWNLOAD_URL = 'https://nssm.cc/release/nssm-2.24.zip'
 PYTHON_CODE_PATH = pathlib.Path(__file__).parent.parent / 'services' / 'openmsi_directory_stream_service.py'
+UNITTEST_DIR_PATH = (pathlib.Path(__file__).parent.parent.parent / 'test' / 'unittests').resolve()
 
 #################### HELPER FUNCTIONS ####################
 
 #briefly test the python code of the Service to catch any errors
 def test_python_code(config_file_path) :
     print('Testing Service code to check for errors...')
-    p = Popen([sys.executable,str(PYTHON_CODE_PATH),config_file_path],stdout=PIPE,stdin=PIPE,stderr=PIPE)
-    #see if running the python code produced any errors
-    stdout,stderr = p.communicate(input='quit'.encode())
-    if stderr.decode()!='' :
-        for line in stderr.decode().split('\n') :
-            if 'ERROR' in line :
-                raise RuntimeError(f'ERROR: something went wrong in testing the code with the current configuration. This is the error:\n{stderr.decode()}')
-    print('Done testing code.')
+    print(f'Running all unittests in {UNITTEST_DIR_PATH}...')
+    cmd = f'python -m unittest discover -s {UNITTEST_DIR_PATH} -v'
+    p = Popen(cmd,stdout=PIPE,stderr=STDOUT,shell=True,universal_newlines=True)
+    for stdout_line in p.stdout :
+        print(stdout_line,end='')
+    return_code = p.wait()
+    if return_code>0 :
+        raise RuntimeError('ERROR: some unittest(s) failed! See output above for details.')
+        return
+    print('All unittest checks complete : )')
     return
 
 #if NSSM doesn't exist in the current directory, install it from the web
