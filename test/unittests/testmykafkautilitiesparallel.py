@@ -2,11 +2,7 @@
 from openmsipython.my_kafka.serialization import DataFileChunkSerializer, DataFileChunkDeserializer
 from confluent_kafka.serialization import DoubleSerializer, IntegerSerializer, StringSerializer, DoubleDeserializer, IntegerDeserializer, StringDeserializer
 from openmsipython.my_kafka.utilities import get_transformed_configs, get_replaced_configs
-from openmsipython.utilities.logging import Logger
-import unittest, pathlib, logging
-
-#constants
-LOGGER = Logger(pathlib.Path(__file__).name.split('.')[0],logging.ERROR)
+import unittest
 
 class ReplacementDummyClass :
     """
@@ -38,9 +34,6 @@ class TestMyKafkaUtilities(unittest.TestCase) :
                 self.assertTrue(isinstance(test_config_dict[k],ReplacementDummyClass))
             else :
                 self.assertEqual(test_config_dict[k],ref_config_dict[k])
-        LOGGER.set_stream_level(logging.INFO)
-        LOGGER.info('\nExpecting three errors below:')
-        LOGGER.set_stream_level(logging.ERROR)
         with self.assertRaises(AttributeError) :
             _ = get_transformed_configs(None,None)
         with self.assertRaises(AttributeError) :
@@ -81,9 +74,6 @@ class TestMyKafkaUtilities(unittest.TestCase) :
                 self.assertTrue(isinstance(test_config_dict_2[k],ref_classes_dict[k]))
             else :
                 self.assertEqual(test_config_dict_2[k],test_config_dict[k])
-        LOGGER.set_stream_level(logging.INFO)
-        LOGGER.info('\nExpecting three errors below:')
-        LOGGER.set_stream_level(logging.ERROR)
         with self.assertRaises(AttributeError) :
             _ = get_transformed_configs(None,None)
         with self.assertRaises(AttributeError) :
