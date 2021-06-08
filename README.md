@@ -83,7 +83,9 @@ To install the Service and start it running, type the following command in the `
 
 `manage_service install_and_start --config [path_to_config_file]`
 
-where `[path_to_config_file]` is the path to a configuration file containing at least an `[openmsi_directory_stream_service]` section in it as described above. If that command runs successfully, you should be able to see the Service listed (and running) in the Windows Service Manager window that pops up when you type `mmc Services.msc`.
+where `[path_to_config_file]` is the path to a configuration file containing at least an `[openmsi_directory_stream_service]` section in it as described above. While the script runs, you will be prompted to input the usernames and passwords to the Kafka "test" and "production" clusters; you should have those from somewhere else if you're looking to install the Service. 
+
+If the script completes successfully, you should be able to see the Service listed (and running) in the Windows Service Manager window that pops up when you type `mmc Services.msc`. Starting and running the Service will create a log file called `upload_data_files_added_to_directory.log` in the watched directory. At any time you can check what's in this file to see the files that have been added to the directory and produced to the topic, along with other information.
 
 ### Management, use, and output
 
@@ -94,7 +96,7 @@ While the Service is running, you can use the `manage_service` command to perfor
 
 **Please note** that if you do need to stop the Service, it would be best to wait about five minutes after adding any new files to the watched directory to do so. There is a slight buffer time between a file being recognized in the directory and all of its messages being produced to the Kafka topic, so stopping the Service without a few minutes' delay may cause some messages to be dropped.
 
-Starting and running the Service will create a log file called `upload_data_files_added_to_directory.log` in the watched directory. At any time you can check what's in this file to see the files that have been added to the directory and produced to the topic, along with other information.
+Removing the Service using the `manage_service` tool will also automatically try to unset the Username and Password environment variables you added in when installing the Service. If this step fails and error message will be printed out encouraging you to manually remove these environment variables even though the Service is already removed.
 
 ### More user options
 
@@ -108,7 +110,7 @@ In addition to the location of the watched directory and the cluster/topic to pr
 
 Both the Open MSI Directory Stream Service and the other programs listed below depend on configuration files. This section gives a few more details about how these files can be formatted, the recognized sections they can contain, and options you can change using them.
 
-In general, a configuration file is a text file with one or more distinct and named sections. Comments can be added by using lines starting with "`#`", and other whitespace in general is ignored. Each section begins with a heading line like "`[section_name]`," and beneath that heading different parameters are supplied using lines like "`[key] = [value]`". 
+In general, a configuration file is a text file with one or more distinct and named sections. Comments can be added by using lines starting with "`#`", and other whitespace in general is ignored. Each section begins with a heading line like "`[section_name]`," and beneath that heading different parameters are supplied using lines like "`[key] = [value]`". If any parameter `value`s begin with the "`$`" character, the configuration file parser will attempt to expand those values as environment variables (this is useful to, for example, store usernames or passwords as environment variables instead of plain text in the repository).
 
 The different sections recognized by the `openmsipython` code are:
 1. `[openmsi_directory_stream_service]` for configuring the Open MSI Directory Stream Service as described above
@@ -185,7 +187,7 @@ There are also a few options you can add to `run_all_tests.py` if you only want 
 
 ### Continuous Integration with CircleCI
 
-Continuous integration for the repo is set up using CircleCI. On the website you can manually run tests on any branch you'd like, and the tests will also automatically be run when pull requests are submitted. The names of the files in `test/unittests` are important for these CircleCI tests to run: anything that doesn't interact with the Kafka cluster should go in a file called `test*parallel.py` so that it can be run in parallel to speed things up, and anything that DOES interact with the Kafka cluster should be called `test*_with_kafka.py` so that the `unittest discover` command that's run can find it at that step. The configuration for CircleCI is in the [`.circleci/config.yml`](./.circleci/config.yml) file.
+Continuous integration for the repo is set up using CircleCI. On the website you can manually run tests on any branch you'd like, and the tests will also automatically be run when pull requests are submitted. The names of the files in `test/unittests` are important for these CircleCI tests to run: anything that doesn't interact with the Kafka cluster should go in a file called `test*parallel.py` so that it can be run in parallel to speed things up, and anything that DOES interact with the Kafka cluster should be called `test*_with_kafka.py` so that the `unittest discover` command that's run can find it at that step. The configuration for CircleCI is in the [`.circleci/config.yml`](./.circleci/config.yml) file. Running tests successfully on CircleCI requires that the Project on the CircleCI has environment variables for the test cluster username and password registered within it.
 
 ### Rebuilding static test data
 Some of the tests rely on static example data in `test/data`. If you need to regenerate these data under some new conditions (i.e., because you've changed default options someplace), you can run `python test/rebuild_test_reference_data.py` and follow the prompts it gives you to replace the necessary files. You can also add to that script if you write any new tests that rely on example data. Static test data should be committed to the repo like any other file, and they'll be picked up both interactively and on CircleCI.
@@ -194,7 +196,6 @@ Some of the tests rely on static example data in `test/data`. If you need to reg
 
 The following items are currently planned to be implemented ASAP:
 
-1. More securely managing API keys and secrets instead of hardcoding them in configuration files
 1. Adding a safer and more graceful shutdown when stopping the Open MSI Directory Stream Service so that no external lag time needs to be considered
 1. Allowing watching directories where large files are in the process of being created/saved instead of just directories where fully-created files are being added
 1. Implementing other data types and serialization schemas, likely using Avro
@@ -205,12 +206,9 @@ The following items are currently planned to be implemented ASAP:
 ## Questions that will arise later (inFAQs?)
 
 1. What happens to subdirectories?  Can we watch a single “uber-directory” and then populate it with subdirectories by sample or date or student, etc?
-2. What are best practices for topic creation and naming?  Should we have a new topic for each student, for each instrument, for each “kind” of data, ...?
-3. Would it be possible to have an environment and dependency definition? YAML??
-5. How can we efficiently and effectively protect credentials and configurations so they won’t create a vulnerability?
-	* key login only
-	* config files using linux and Windows standards
-6. How do I know (and trust!) my data made it and is safe?
-7. What if I forget and write my data to some “wrong” place?  What if I write my data to the directory twice?  
-8. Should I clear my data out of the streaming directory once it’s been produced to Kafka?
+1. What are best practices for topic creation and naming?  Should we have a new topic for each student, for each instrument, for each “kind” of data, ...?
+1. Would it be possible to have an environment and dependency definition? YAML??
+1. How do I know (and trust!) my data made it and is safe?
+1. What if I forget and write my data to some “wrong” place?  What if I write my data to the directory twice?  
+1. Should I clear my data out of the streaming directory once it’s been produced to Kafka?
 
