@@ -1,6 +1,6 @@
 #imports
 from argparse import ArgumentParser
-from subprocess import Popen, PIPE, check_output
+from subprocess import Popen, PIPE, check_output, CalledProcessError
 import sys, pathlib
 
 #################### FILE-SCOPE CONSTANTS ####################
@@ -13,6 +13,17 @@ PYTHON_CODE_PATH = pathlib.Path(__file__).parent.parent / 'services' / 'openmsi_
 UNITTEST_DIR_PATH = (pathlib.Path(__file__).parent.parent.parent / 'test' / 'unittests').resolve()
 
 #################### HELPER FUNCTIONS ####################
+
+#run a command in a subprocess and return its result, printing and re-throwing any exceptions it causes
+def run_cmd_in_subprocess(args,*,shell=False) :
+    if isinstance(args,str) :
+        args = [args]
+    try :
+        result = check_output(args,shell=shell)
+    except CalledProcessError as e :
+        print(f'ERROR: failed to run a command. result = {result}, output:\n{e.output.decode}')
+        raise e
+    return result
 
 #set a machine environment variable with the given name and description based on user input
 def set_env_var_from_user_input(var_name,var_desc) :
@@ -39,16 +50,13 @@ def find_install_NSSM() :
         return
     else :
         print(f'Installing NSSM from {NSSM_DOWNLOAD_URL}...')
-        result = check_output(f'curl {NSSM_DOWNLOAD_URL} -O',shell=True)
+        run_cmd_in_subprocess(f'curl {NSSM_DOWNLOAD_URL} -O',shell=True)
         nssm_zip_file_name = NSSM_DOWNLOAD_URL.split('/')[-1]
-        result = check_output(f'tar -xf {pathlib.Path() / nssm_zip_file_name}',shell=True)
-        result = check_output(f'move {pathlib.Path() / nssm_zip_file_name.rstrip(".zip") / "win64" / "nssm.exe"} {pathlib.Path()}',shell=True)
-        result = check_output(f'del {nssm_zip_file_name}',shell=True)
-        result = check_output(f'rmdir /S /Q {nssm_zip_file_name.rstrip(".zip")}',shell=True)
-        result = result #pyflakes
+        run_cmd_in_subprocess(f'tar -xf {pathlib.Path() / nssm_zip_file_name}',shell=True)
+        run_cmd_in_subprocess(f'move {pathlib.Path() / nssm_zip_file_name.rstrip(".zip") / "win64" / "nssm.exe"} {pathlib.Path()}',shell=True)
+        run_cmd_in_subprocess(f'del {nssm_zip_file_name}',shell=True)
+        run_cmd_in_subprocess(f'rmdir /S /Q {nssm_zip_file_name.rstrip(".zip")}',shell=True)
         print('Done.')
-        return
-    return
 
 #install the Service using NSSM
 def install_service(config_file_path) :
@@ -67,22 +75,18 @@ def install_service(config_file_path) :
     #install the service using NSSM
     print(f'Installing {SERVICE_NAME}...')
     cmd = f'.\\nssm.exe install \"{SERVICE_NAME}\" \"{sys.executable}\" \"{PYTHON_CODE_PATH} {pathlib.Path(config_file_path).absolute()}\"'
-    result = check_output(cmd,shell=True)
-    result = check_output(f'.\\nssm.exe set {SERVICE_NAME} DisplayName {SERVICE_DISPLAY_NAME}')
-    result = check_output(f'.\\nssm.exe set {SERVICE_NAME} Description {SERVICE_DESCRIPTION}')
-    result = result #pyflakes
+    run_cmd_in_subprocess(cmd,shell=True)
+    run_cmd_in_subprocess(f'.\\nssm.exe set {SERVICE_NAME} DisplayName {SERVICE_DISPLAY_NAME}')
+    run_cmd_in_subprocess(f'.\\nssm.exe set {SERVICE_NAME} Description {SERVICE_DESCRIPTION}')
     print('Done')
-    return
 
 #start the Service
 def start_service() :
     #start the service using net
     print(f'Starting {SERVICE_NAME}...')
     cmd = f'net start {SERVICE_NAME}'
-    result = check_output(cmd,shell=True)
-    result = result #pyflakes
+    run_cmd_in_subprocess(cmd,shell=True)
     print('Done')
-    return
 
 #use NSSM to get the status of the service
 def service_status() :
@@ -90,20 +94,16 @@ def service_status() :
     find_install_NSSM()
     #get the service status
     cmd = f'.\\nssm.exe status {SERVICE_NAME}'
-    result = check_output(cmd,shell=True)
+    result = run_cmd_in_subprocess(cmd,shell=True)
     print(result.decode())
-    return
 
 #stop the Service
 def stop_service() :
     #stop the service using net
     print(f'Stopping {SERVICE_NAME}...')
     cmd = f'net stop {SERVICE_NAME}'
-    result = check_output(cmd,shell=True)
-    result = result #pyflakes
+    run_cmd_in_subprocess(cmd,shell=True)
     print('Done')
-    return
-    pass
 
 #remove the Service
 def remove_service() :
@@ -112,10 +112,8 @@ def remove_service() :
     #remove the service using NSSM
     print(f'Removing {SERVICE_NAME}...')
     cmd = f'.\\nssm.exe remove {SERVICE_NAME} confirm'
-    result = check_output(cmd,shell=True)
-    result = result #pyflakes
+    run_cmd_in_subprocess(cmd,shell=True)
     print('Done')
-    return
 
 #################### MAIN FUNCTION ####################
 
