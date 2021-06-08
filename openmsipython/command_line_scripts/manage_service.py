@@ -14,6 +14,10 @@ UNITTEST_DIR_PATH = (pathlib.Path(__file__).parent.parent.parent / 'test' / 'uni
 
 #################### HELPER FUNCTIONS ####################
 
+#set a machine environment variable with the given name and description based on user input
+def set_env_var_from_user_input(var_name,var_desc) :
+    pass
+
 #briefly test the python code of the Service to catch any errors
 def test_python_code(config_file_path) :
     print('Testing Service code to check for errors...')
@@ -50,6 +54,12 @@ def find_install_NSSM() :
 def install_service(config_file_path) :
     if config_file_path is None :
         raise RuntimeError('ERROR: installing the Service requires a config file, specified with the "--config" flag!')
+    #set the environment variables needed to run in test and prod by default from user input
+    #(other configs would need the user to work outside this script)
+    set_env_var_from_user_input('KAFKA_TEST_CLUSTER_USERNAME','Kafka TESTING cluster username')
+    set_env_var_from_user_input('KAFKA_TEST_CLUSTER_PASSWORD','Kafka TESTING cluster password')
+    set_env_var_from_user_input('KAFKA_PROD_CLUSTER_USERNAME','Kafka PRODUCTION cluster username')
+    set_env_var_from_user_input('KAFKA_PROD_CLUSTER_PASSWORD','Kafka PRODUCTION cluster password')
     #test the Python code to make sure the configs are all valid
     test_python_code(config_file_path)
     #find or install NSSM in the current directory
