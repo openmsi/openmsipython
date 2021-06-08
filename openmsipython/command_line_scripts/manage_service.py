@@ -1,6 +1,6 @@
 #imports
 from argparse import ArgumentParser
-from subprocess import Popen, PIPE, check_output, CalledProcessError
+from subprocess import Popen, PIPE, STDOUT, check_output, CalledProcessError
 import sys, pathlib
 
 #################### FILE-SCOPE CONSTANTS ####################
@@ -25,9 +25,15 @@ def run_cmd_in_subprocess(args,*,shell=False) :
         raise e
     return result
 
+#set a machine environment variable using a powershell command given its name and value
+def set_machine_env_var(var_name,var_val) :
+    pwrsh_cmd = f'[Environment]::SetEnvironmentVariable("{var_name}","{var_val}",[EnvironmentVariableTarget]::Machine)'
+    run_cmd_in_subprocess(['powershell.exe',pwrsh_cmd])
+
 #set a machine environment variable with the given name and description based on user input
 def set_env_var_from_user_input(var_name,var_desc) :
-    pass
+    var_val = input(f'Please enter the {var_desc}: ')
+    set_machine_env_var(var_name,var_val)
 
 #briefly test the python code of the Service to catch any errors
 def test_python_code(config_file_path) :
@@ -113,6 +119,24 @@ def remove_service() :
     print(f'Removing {SERVICE_NAME}...')
     cmd = f'.\\nssm.exe remove {SERVICE_NAME} confirm'
     run_cmd_in_subprocess(cmd,shell=True)
+    print('Service successfully removed')
+    #remove the environment variables that were set when the service was installed
+    try :
+        set_machine_env_var('KAFKA_TEST_CLUSTER_USERNAME','$null')
+        set_machine_env_var('KAFKA_TEST_CLUSTER_PASSWORD','$null')
+        set_machine_env_var('KAFKA_PROD_CLUSTER_USERNAME','$null')
+        set_machine_env_var('KAFKA_PROD_CLUSTER_PASSWORD','$null')
+    except CalledProcessError :
+        warnmsg = 'WARNING: failed to remove environment variables. '
+        warnmsg+= 'You should remove any username/password environment variables manually even though the service is uninstalled!'
+        print(warnmsg)
+    print('Username/password environment variables successfully removed')
+    #remove NSSM from the current directory
+    if 'nssm.exe' in check_output('dir',shell=True).decode() :
+        try :
+            run_cmd_in_subprocess('del nssm.exe',shell=True)
+        except CalledProcessError :
+            print('WARNING: failed to delete nssm.exe in the current directory. You are free to delete it manually if you would like.')
     print('Done')
 
 #################### MAIN FUNCTION ####################
