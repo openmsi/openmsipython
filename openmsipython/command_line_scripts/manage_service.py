@@ -56,12 +56,21 @@ def find_install_NSSM() :
         return
     else :
         print(f'Installing NSSM from {NSSM_DOWNLOAD_URL}...')
-        run_cmd_in_subprocess(f'curl {NSSM_DOWNLOAD_URL} -O',shell=True)
         nssm_zip_file_name = NSSM_DOWNLOAD_URL.split('/')[-1]
-        run_cmd_in_subprocess(f'tar -xf {pathlib.Path() / nssm_zip_file_name}',shell=True)
-        run_cmd_in_subprocess(f'move {pathlib.Path() / nssm_zip_file_name.rstrip(".zip") / "win64" / "nssm.exe"} {pathlib.Path()}',shell=True)
-        run_cmd_in_subprocess(f'del {nssm_zip_file_name}',shell=True)
-        run_cmd_in_subprocess(f'rmdir /S /Q {nssm_zip_file_name.rstrip(".zip")}',shell=True)
+        cmd_tuples = [
+            (f'curl {NSSM_DOWNLOAD_URL} -O',f'Invoke-WebRequest -Uri {NSSM_DOWNLOAD_URL} -OutFile {nssm_zip_file_name}'),
+            (f'tar -xf {pathlib.Path() / nssm_zip_file_name}',f'Expand-Archive {nssm_zip_file_name} -DestinationPath {pathlib.Path().resolve()}'),
+            (f'del {nssm_zip_file_name}',f'Remove-Item -Path {nssm_zip_file_name}'),
+            (f'move {pathlib.Path() / nssm_zip_file_name.rstrip(".zip") / "win64" / "nssm.exe"} {pathlib.Path()}',
+                f'Move-Item -Path {pathlib.Path()/nssm_zip_file_name.rstrip(".zip")/"win64"/"nssm.exe"} -Destination {(pathlib.Path()/"nssm.exe").resolve()}'),
+            (f'rmdir /S /Q {nssm_zip_file_name.rstrip(".zip")}',f'Remove-Item -Recurse -Force {nssm_zip_file_name.rstrip(".zip")}'),
+        ]
+        for cmd in cmd_tuples :
+            try :
+                run_cmd_in_subprocess(['powershell.exe',cmd[1]])
+            except CalledProcessError :
+                run_cmd_in_subprocess(cmd[0],shell=True)
+                
         print('Done.')
 
 #install the Service using NSSM
@@ -83,15 +92,15 @@ def install_service(config_file_path) :
             if choice.lower() in ('yes','y') :
                 set_env_var_from_user_input(*env_var_tuple)
     #test the Python code to make sure the configs are all valid
-    test_python_code(config_file_path)
+    #test_python_code(config_file_path)
     #find or install NSSM in the current directory
     find_install_NSSM()
     #install the service using NSSM
     print(f'Installing {SERVICE_NAME}...')
-    cmd = f'.\\nssm.exe install \"{SERVICE_NAME}\" \"{sys.executable}\" \"{PYTHON_CODE_PATH} {pathlib.Path(config_file_path).absolute()}\"'
-    run_cmd_in_subprocess(cmd,shell=True)
-    run_cmd_in_subprocess(f'.\\nssm.exe set {SERVICE_NAME} DisplayName {SERVICE_DISPLAY_NAME}')
-    run_cmd_in_subprocess(f'.\\nssm.exe set {SERVICE_NAME} Description {SERVICE_DESCRIPTION}')
+    cmd = f'.\\nssm.exe install \"{SERVICE_NAME}\" \"{sys.executable}\" \"{PYTHON_CODE_PATH} {pathlib.Path(config_file_path).resolve()}\"'
+    run_cmd_in_subprocess(['powershell.exe',cmd])
+    run_cmd_in_subprocess(['powershell.exe',f'.\\nssm.exe set {SERVICE_NAME} DisplayName {SERVICE_DISPLAY_NAME}'])
+    run_cmd_in_subprocess(['powershell.exe',f'.\\nssm.exe set {SERVICE_NAME} Description {SERVICE_DESCRIPTION}'])
     print('Done')
 
 #start the Service
@@ -99,7 +108,7 @@ def start_service() :
     #start the service using net
     print(f'Starting {SERVICE_NAME}...')
     cmd = f'net start {SERVICE_NAME}'
-    run_cmd_in_subprocess(cmd,shell=True)
+    run_cmd_in_subprocess(['powershell.exe',cmd])
     print('Done')
 
 #use NSSM to get the status of the service
@@ -108,7 +117,7 @@ def service_status() :
     find_install_NSSM()
     #get the service status
     cmd = f'.\\nssm.exe status {SERVICE_NAME}'
-    result = run_cmd_in_subprocess(cmd,shell=True)
+    result = run_cmd_in_subprocess(['powershell.exe',cmd])
     print(result.decode())
 
 #stop the Service
@@ -116,7 +125,7 @@ def stop_service() :
     #stop the service using net
     print(f'Stopping {SERVICE_NAME}...')
     cmd = f'net stop {SERVICE_NAME}'
-    run_cmd_in_subprocess(cmd,shell=True)
+    run_cmd_in_subprocess(['powershell.exe',cmd])
     print('Done')
 
 #remove the Service
@@ -126,14 +135,14 @@ def remove_service() :
     #remove the service using NSSM
     print(f'Removing {SERVICE_NAME}...')
     cmd = f'.\\nssm.exe remove {SERVICE_NAME} confirm'
-    run_cmd_in_subprocess(cmd,shell=True)
+    run_cmd_in_subprocess(['powershell.exe',cmd])
     print('Service successfully removed')
     #remove the environment variables that were set when the service was installed
     try :
-        set_machine_env_var('KAFKA_TEST_CLUSTER_USERNAME','$null')
-        set_machine_env_var('KAFKA_TEST_CLUSTER_PASSWORD','$null')
-        set_machine_env_var('KAFKA_PROD_CLUSTER_USERNAME','$null')
-        set_machine_env_var('KAFKA_PROD_CLUSTER_PASSWORD','$null')
+        run_cmd_in_subprocess(['powershell.exe','Remove-Item Env:\\KAFKA_TEST_CLUSTER_USERNAME'])
+        run_cmd_in_subprocess(['powershell.exe','Remove-Item Env:\\KAFKA_TEST_CLUSTER_PASSWORD'])
+        run_cmd_in_subprocess(['powershell.exe','Remove-Item Env:\\KAFKA_PROD_CLUSTER_USERNAME'])
+        run_cmd_in_subprocess(['powershell.exe','Remove-Item Env:\\KAFKA_PROD_CLUSTER_PASSWORD'])
     except CalledProcessError :
         warnmsg = 'WARNING: failed to remove environment variables. '
         warnmsg+= 'You should remove any username/password environment variables manually even though the service is uninstalled!'
@@ -142,7 +151,7 @@ def remove_service() :
     #remove NSSM from the current directory
     if 'nssm.exe' in check_output('dir',shell=True).decode() :
         try :
-            run_cmd_in_subprocess('del nssm.exe',shell=True)
+            run_cmd_in_subprocess(['powershell.exe','del nssm.exe'])
         except CalledProcessError :
             print('WARNING: failed to delete nssm.exe in the current directory. You are free to delete it manually if you would like.')
     print('Done')
