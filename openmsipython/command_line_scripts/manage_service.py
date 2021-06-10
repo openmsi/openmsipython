@@ -1,7 +1,7 @@
 #imports
 from argparse import ArgumentParser
 from subprocess import Popen, PIPE, STDOUT, check_output, CalledProcessError
-import sys, pathlib
+import sys, pathlib, os
 
 #################### FILE-SCOPE CONSTANTS ####################
 
@@ -20,10 +20,10 @@ def run_cmd_in_subprocess(args,*,shell=False) :
         args = [args]
     try :
         result = check_output(args,shell=shell)
+        return result
     except CalledProcessError as e :
-        print(f'ERROR: failed to run a command. result = {result}, output:\n{e.output.decode}')
+        print(f'ERROR: failed to run a command. output:\n{e.output.decode}')
         raise e
-    return result
 
 #set a machine environment variable using a powershell command given its name and value
 def set_machine_env_var(var_name,var_val) :
@@ -70,10 +70,18 @@ def install_service(config_file_path) :
         raise RuntimeError('ERROR: installing the Service requires a config file, specified with the "--config" flag!')
     #set the environment variables needed to run in test and prod by default from user input
     #(other configs would need the user to work outside this script)
-    set_env_var_from_user_input('KAFKA_TEST_CLUSTER_USERNAME','Kafka TESTING cluster username')
-    set_env_var_from_user_input('KAFKA_TEST_CLUSTER_PASSWORD','Kafka TESTING cluster password')
-    set_env_var_from_user_input('KAFKA_PROD_CLUSTER_USERNAME','Kafka PRODUCTION cluster username')
-    set_env_var_from_user_input('KAFKA_PROD_CLUSTER_PASSWORD','Kafka PRODUCTION cluster password')
+    env_var_names_descs = [('KAFKA_TEST_CLUSTER_USERNAME','Kafka TESTING cluster username'),
+                           ('KAFKA_TEST_CLUSTER_PASSWORD','Kafka TESTING cluster password'),
+                           ('KAFKA_PROD_CLUSTER_USERNAME','Kafka PRODUCTION cluster username'),
+                           ('KAFKA_PROD_CLUSTER_PASSWORD','Kafka PRODUCTION cluster password'),
+                        ]
+    for env_var_tuple in env_var_names_descs :
+        if os.path.expandvars(f'${env_var_tuple[0]}') == f'${env_var_tuple[0]}' :
+            set_env_var_from_user_input(*env_var_tuple)
+        else :
+            choice = input(f'A value for the {env_var_tuple[1]} is already set, would you like to reset it? [y/(n)]: ')
+            if choice.lower() in ('yes','y') :
+                set_env_var_from_user_input(*env_var_tuple)
     #test the Python code to make sure the configs are all valid
     test_python_code(config_file_path)
     #find or install NSSM in the current directory
