@@ -46,8 +46,11 @@ class ConfigFileParser :
             for key, value in self._config[group_name].items() :
                 #if the value is an environment variable, expand it on the current system
                 if value.startswith('$') :
-                    self._logger.warning(f'WARNING: Expanding {value} in {self._filepath} as an environment variable (must be set on system)')
-                    value = os.path.expandvars(value)
+                    exp_value = os.path.expandvars(value)
+                    if exp_value == value :
+                        self._logger.error(f'ERROR: Expanding {value} in {self._filepath} as an environment variable failed (must be set on system)',ValueError)
+                    else :
+                        value = exp_value
                 config_dict[key] = value
         return config_dict
 
