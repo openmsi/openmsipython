@@ -11,6 +11,12 @@ class TestRoutineConstants :
     def TEST_CONFIG_FILE_PATH(self) : # The path to the Kafka config file to use
         return (CONFIG_FILE_DIR / f'{RUN_OPT_CONST.DEFAULT_CONFIG_FILE}{CONFIG_FILE_EXT}').resolve()
     @property
+    def PROD_CONFIG_FILE_PATH(self) : # The path to the "prod" Kafka config file to use in making sure that the prod environment variables are not set
+        return (CONFIG_FILE_DIR / f'prod{CONFIG_FILE_EXT}').resolve()
+    @property
+    def FAKE_PROD_CONFIG_FILE_PATH(self) : # The path to the "prod" Kafka config file to use in making sure that the prod environment variables are not set
+        return (self.TEST_DATA_DIR_PATH / f'fake_prod{CONFIG_FILE_EXT}').resolve()
+    @property
     def TEST_CONFIG_FILE_PATH_NO_SERIALIZATION(self) : # Same as above except it's the config file that doesn't have the serialization stuff in it
         return (CONFIG_FILE_DIR / 'test_no_serialization.config').resolve()
     @property

@@ -47,3 +47,13 @@ class TestConfigFileParser(unittest.TestCase) :
             _ = self.cfp.get_config_dict_for_groups(random_section_name)
         with self.assertRaises(ValueError) :
             _ = self.cfp.get_config_dict_for_groups([self.testconfigparser.sections()[0],random_section_name])
+        if os.path.expandvars('$KAFKA_PROD_CLUSTER_USERNAME') == '$KAFKA_PROD_CLUSTER_USERNAME' :
+            other_cfp = ConfigFileParser(TEST_CONST.PROD_CONFIG_FILE_PATH,logger=LOGGER)
+        else :
+            other_cfp = ConfigFileParser(TEST_CONST.FAKE_PROD_CONFIG_FILE_PATH,logger=LOGGER)
+        self.assertTrue('cluster' in other_cfp.available_group_names)
+        LOGGER.set_stream_level(logging.INFO)
+        LOGGER.info('\nExpecting one error below:')
+        LOGGER.set_stream_level(logging.ERROR)
+        with self.assertRaises(ValueError) :
+            _ = other_cfp.get_config_dict_for_groups('cluster')

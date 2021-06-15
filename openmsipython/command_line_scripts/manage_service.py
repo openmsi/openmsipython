@@ -150,7 +150,7 @@ def remove_service() :
         remove_machine_env_var('KAFKA_PROD_CLUSTER_USERNAME')
         remove_machine_env_var('KAFKA_PROD_CLUSTER_PASSWORD')
         print('Username/password environment variables successfully removed')
-    except CalledProcessError as e :
+    except CalledProcessError :
         warnmsg = 'WARNING: failed to remove environment variables. '
         warnmsg+= 'You should remove any username/password environment variables manually even though the service is uninstalled!'
         print(warnmsg)
