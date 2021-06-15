@@ -29,7 +29,6 @@ def run_cmd_in_subprocess(args,*,shell=False) :
 def remove_machine_env_var(var_name) :
     pwrsh_cmd = f'[Environment]::SetEnvironmentVariable("{var_name}",$null,[EnvironmentVariableTarget]::Machine)'
     run_cmd_in_subprocess(['powershell.exe',pwrsh_cmd])
-    del os.environ[var_name]
 
 #set a machine environment variable using a powershell command given its name and value
 def set_machine_env_var(var_name,var_val) :
