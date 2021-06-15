@@ -1,6 +1,6 @@
 #imports
 from config import TEST_CONST
-from openmsipython.data_file_io.data_file import DataFile
+from openmsipython.data_file_io.data_file import UploadDataFile
 from openmsipython.data_file_io.data_file_chunk import DataFileChunk
 from openmsipython.data_file_io.config import RUN_OPT_CONST
 from openmsipython.utilities.logging import Logger
@@ -16,10 +16,10 @@ class TestDataFileChunk(unittest.TestCase) :
 
     def setUp(self) :
         #use a DataFile to get a couple chunks to test
-        df = DataFile(TEST_CONST.TEST_DATA_FILE_PATH,logger=LOGGER)
-        df._build_list_of_file_chunks(RUN_OPT_CONST.DEFAULT_CHUNK_SIZE)
-        self.test_chunk_1 = df._chunks_to_upload[0]
-        self.test_chunk_2 = df._chunks_to_upload[1]
+        udf = UploadDataFile(TEST_CONST.TEST_DATA_FILE_PATH,logger=LOGGER)
+        udf._build_list_of_file_chunks(RUN_OPT_CONST.DEFAULT_CHUNK_SIZE)
+        self.test_chunk_1 = udf._chunks_to_upload[0]
+        self.test_chunk_2 = udf._chunks_to_upload[1]
         self.test_chunk_1._populate_with_file_data(logger=LOGGER)
         self.test_chunk_2._populate_with_file_data(logger=LOGGER)
 

@@ -1,7 +1,7 @@
 #imports
 from config import TEST_CONST
 from openmsipython.my_kafka.serialization import DataFileChunkSerializer, DataFileChunkDeserializer
-from openmsipython.data_file_io.data_file import DataFile
+from openmsipython.data_file_io.data_file import UploadDataFile
 from openmsipython.data_file_io.config import RUN_OPT_CONST
 from openmsipython.utilities.logging import Logger
 from confluent_kafka.error import SerializationError
@@ -26,7 +26,7 @@ class TestSerialization(unittest.TestCase) :
             msg+= f'in {TEST_CONST.TEST_DATA_DIR_PATH}!'
             raise RuntimeError(msg)
         #make the dictionary of reference DataFileChunk objects
-        data_file = DataFile(TEST_CONST.TEST_DATA_FILE_PATH,logger=LOGGER)
+        data_file = UploadDataFile(TEST_CONST.TEST_DATA_FILE_PATH,logger=LOGGER)
         data_file._build_list_of_file_chunks(RUN_OPT_CONST.DEFAULT_CHUNK_SIZE)
         self.test_chunk_objects = {}
         for chunk_i in self.test_chunk_binaries.keys() :

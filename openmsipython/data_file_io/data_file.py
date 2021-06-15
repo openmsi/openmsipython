@@ -11,11 +11,9 @@ from contextlib import nullcontext
 from hashlib import sha512
 import pathlib, os
 
-# DataFile Class
 class DataFile() :
     """
-    Class for representing a single data file
-    Can be used to chunk and upload a file on disk to a topic in a cluster, or reconstruct a file from stream to one on disk
+    Base class for representing a single data file
     """
 
     #################### PROPERTIES ####################
@@ -23,6 +21,29 @@ class DataFile() :
     @property
     def filename(self): #the name of the file
         return self._filename
+
+    #################### PUBLIC FUNCTIONS ####################
+
+    def __init__(self,filepath,**kwargs) :
+        """
+        filepath = path to the file
+        
+        Possible keyword arguments:
+        logger    = the logger object for this file's messages to use (a new one will be created if none is supplied)
+        """
+        self._filepath = filepath
+        self._filename = filepath.name
+        self._logger = kwargs.get('logger')
+        if self._logger is None :
+            self._logger = Logger(pathlib.Path(__file__).name.split('.')[0])
+
+class UploadDataFile(DataFile) :
+    """
+    Class to represent a data file whose messages will be uploaded to a topic
+    """
+
+    #################### PROPERTIES ####################
+
     @property
     def to_upload(self):
         return self._to_upload #whether or not this file will be considered when automatically uploading some group of data files
@@ -60,26 +81,14 @@ class DataFile() :
 
     #################### PUBLIC FUNCTIONS ####################
 
-    def __init__(self,filepath,**kwargs) :
+    def __init__(self,*args,to_upload=True,**kwargs) :
         """
-        filepath = path to the file
-        
-        Possible keyword arguments:
-        logger    = the logger object for this file's messages to use (a new one will be created if none is supplied)
         to_upload = if False, the file will be ignored for purposes of uploading to a topic (default is True)
         """
-        self._filepath = filepath
-        self._filename = filepath.name
-        self._logger = kwargs.get('logger')
-        if self._logger is None :
-            self._logger = Logger(pathlib.Path(__file__).name.split('.')[0])
-        if kwargs.get('to_upload') is not None :
-            self._to_upload = kwargs.get('to_upload')
-        else :
-            self._to_upload = True
+        super().__init__(*args,**kwargs)
+        self._to_upload = to_upload
         self._fully_enqueued = False
         self._chunks_to_upload = []
-        self._chunk_offsets_downloaded = set()
 
     def add_chunks_to_upload_queue(self,queue,**kwargs) :
         """
@@ -154,6 +163,45 @@ class DataFile() :
         producer.flush() #don't leave the function until all messages have been sent/received
         self._logger.info('Done!')
 
+    #################### PRIVATE HELPER FUNCTIONS ####################
+
+    def _build_list_of_file_chunks(self,chunk_size) :
+        """
+        Build the full list of DataFileChunks for this file given a chunk size (in bytes)
+        """
+        #start a hash for the file and the lists of chunks
+        file_hash = sha512()
+        chunks = []
+        #read the binary data in the file as chunks of the given size, adding each chunk to the list 
+        with open(self._filepath, "rb") as fp :
+            chunk_offset = 0
+            chunk = fp.read(chunk_size)
+            while len(chunk) > 0:
+                chunk_length = len(chunk)
+                file_hash.update(chunk)
+                chunk_hash = sha512()
+                chunk_hash.update(chunk)
+                chunk_hash = chunk_hash.digest()
+                chunks.append([chunk_hash,chunk_offset,chunk_length])
+                chunk_offset += chunk_length
+                chunk = fp.read(chunk_size)
+        file_hash = file_hash.digest()
+        self._logger.info(f'File {self._filepath} has a total of {len(chunks)} chunks')
+        #add all the chunks to the final list as DataFileChunk objects
+        for ic,c in enumerate(chunks,start=1) :
+            self._chunks_to_upload.append(DataFileChunk(self._filename,file_hash,c[0],c[1],c[2],ic,len(chunks),filepath=self._filepath))
+
+class DownloadDataFile(DataFile) :
+    """
+    Class to represent a data file that will be reconstructed from messages downloaded from a topic
+    """
+
+    #################### PUBLIC FUNCTIONS ####################
+
+    def __init__(self,*args,**kwargs) :
+        super().__init__(*args,**kwargs)
+        self._chunk_offsets_downloaded = set()
+
     def write_chunk_to_disk(self,dfc,workingdir,thread_lock=nullcontext()) :
         """
         Add the data from a given file chunk to this file on disk in a given working directory
@@ -191,29 +239,3 @@ class DataFile() :
                 return DATA_FILE_HANDLING_CONST.FILE_SUCCESSFULLY_RECONSTRUCTED_CODE
         else :
             return DATA_FILE_HANDLING_CONST.FILE_IN_PROGRESS
-
-    #################### PRIVATE HELPER FUNCTIONS ####################
-
-    #helper function to build the full list of DataFileChunks for this file given a chunk size (in bytes)
-    def _build_list_of_file_chunks(self,chunk_size) :
-        #start a hash for the file and the lists of chunks
-        file_hash = sha512()
-        chunks = []
-        #read the binary data in the file as chunks of the given size, adding each chunk to the list 
-        with open(self._filepath, "rb") as fp :
-            chunk_offset = 0
-            chunk = fp.read(chunk_size)
-            while len(chunk) > 0:
-                chunk_length = len(chunk)
-                file_hash.update(chunk)
-                chunk_hash = sha512()
-                chunk_hash.update(chunk)
-                chunk_hash = chunk_hash.digest()
-                chunks.append([chunk_hash,chunk_offset,chunk_length])
-                chunk_offset += chunk_length
-                chunk = fp.read(chunk_size)
-        file_hash = file_hash.digest()
-        self._logger.info(f'File {self._filepath} has a total of {len(chunks)} chunks')
-        #add all the chunks to the final list as DataFileChunk objects
-        for ic,c in enumerate(chunks,start=1) :
-            self._chunks_to_upload.append(DataFileChunk(self._filename,file_hash,c[0],c[1],c[2],ic,len(chunks),filepath=self._filepath))

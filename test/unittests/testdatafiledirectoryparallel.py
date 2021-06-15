@@ -1,8 +1,8 @@
 #imports
 from config import TEST_CONST
-from openmsipython.data_file_io.data_file_directory import DataFileDirectory
+from openmsipython.data_file_io.data_file_directory import DataFileUploadDirectory
 from openmsipython.utilities.logging import Logger
-import unittest, pathlib, logging
+import unittest, pathlib, logging, shutil
 
 #constants
 LOGGER = Logger(pathlib.Path(__file__).name.split('.')[0],logging.ERROR)
@@ -15,7 +15,7 @@ class TestDataFileDirectory(unittest.TestCase) :
     """
 
     def test_filepath_should_be_uploaded(self) :
-        dfd = DataFileDirectory(TEST_CONST.TEST_DATA_DIR_PATH,logger=LOGGER)
+        dfd = DataFileUploadDirectory(TEST_CONST.TEST_DATA_DIR_PATH,logger=LOGGER)
         LOGGER.set_stream_level(logging.INFO)
         LOGGER.info('\nExpecting three errors below:')
         LOGGER.set_stream_level(logging.ERROR)
@@ -32,3 +32,11 @@ class TestDataFileDirectory(unittest.TestCase) :
                 self.assertFalse(dfd._filepath_should_be_uploaded(fp.resolve()))
             else :
                 self.assertTrue(dfd._filepath_should_be_uploaded(fp.resolve()))
+        subdir_path = TEST_CONST.TEST_DATA_DIR_PATH / 'this_subdirectory_should_not_be_uploaded'
+        subdir_path.mkdir()
+        try :
+            self.assertFalse(dfd._filepath_should_be_uploaded(subdir_path))
+        except Exception as e :
+            raise e
+        finally : 
+            shutil.rmtree(subdir_path)

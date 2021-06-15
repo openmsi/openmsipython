@@ -1,5 +1,5 @@
 #imports
-from .data_file import DataFile
+from .data_file import UploadDataFile, DownloadDataFile
 from .utilities import produce_from_queue_of_file_chunks
 from .config import RUN_OPT_CONST, DATA_FILE_HANDLING_CONST
 from ..my_kafka.my_producers import MySerializingProducer
@@ -10,10 +10,9 @@ from queue import Queue, Empty
 from threading import Thread, Lock
 import pathlib, time, uuid
 
-# DataFileDirectory Class
 class DataFileDirectory() :
     """
-    Class for representing a directory holding data files
+    Base class representing any directory holding data files
     """
 
     #################### PUBLIC FUNCTIONS ####################
@@ -31,6 +30,37 @@ class DataFileDirectory() :
         if self._logger is None :
             self._logger = Logger(pathlib.Path(__file__).name.split('.')[0])
         self._data_files_by_path = {}
+
+class DataFileUploadDirectory(DataFileDirectory) :
+    """
+    Class representing a directory being watched for new files to be added so they can be uploaded
+    """
+
+    #################### PROPERTIES ####################
+
+    @property
+    def progress_msg(self) :
+        self._find_new_files()
+        progress_msg = 'The following files have been recognized so far:\n'
+        for datafile in self._data_files_by_path.values() :
+            if not datafile.to_upload :
+                continue
+            progress_msg+=f'\t{datafile.upload_status_msg}\n'
+        return progress_msg
+    @property
+    def have_file_to_upload(self) :
+        for datafile in self._data_files_by_path.values() :
+            if datafile.upload_in_progress or datafile.waiting_to_upload :
+                return True
+        return False
+    @property
+    def partially_done_file_paths(self) :
+        return [fp for fp,df in self._data_files_by_path.items() if df.upload_in_progress]
+    @property
+    def n_partially_done_files(self) :
+        return len(self.partially_done_file_paths)
+
+    #################### PUBLIC FUNCTIONS ####################
 
     def upload_files_as_added(self,config_path,topic_name,**kwargs) :
         """
@@ -59,9 +89,7 @@ class DataFileDirectory() :
         producer = MySerializingProducer.from_file(config_path,logger=self._logger)
         #if we're only going to upload new files, exclude what's already in the directory
         if kwargs['new_files_only'] :
-            for filepath in self._dirpath.glob('*') :
-                if self._filepath_should_be_uploaded(filepath) :
-                    self._data_files_by_path[filepath]=DataFile(filepath,logger=self._logger,to_upload=False)
+            self._find_new_files(to_upload=False)
         #initialize a thread to listen for and get user input and a queue to put it into
         self.user_input_queue = Queue()
         user_input_thread = Thread(target=add_user_input,args=(self.user_input_queue,))
@@ -93,35 +121,19 @@ class DataFileDirectory() :
                 last_update = time.time()
             #if the uploading has been stopped externally or the user has put something in the console
             if not self.user_input_queue.empty() :
-                #make the progress message
-                for filepath in self._dirpath.glob('*') :
-                    if (filepath not in self._data_files_by_path.keys()) and self._filepath_should_be_uploaded(filepath) :
-                        self._data_files_by_path[filepath]=DataFile(filepath,logger=self._logger)
-                progress_msg = 'The following files have been recognized so far:\n'
-                for datafile in self._data_files_by_path.values() :
-                    if not datafile.to_upload :
-                        continue
-                    progress_msg+=f'\t{datafile.upload_status_msg}\n'
                 cmd = self.user_input_queue.get()
                 #close the user input task and break out of the loop
                 if cmd.lower() in ('q','quit') :
                     self._logger.info('Will quit after all currently enqueued files are done being transferred.')
-                    self._logger.info(progress_msg)
+                    self._logger.info(self.progress_msg)
                     self.user_input_queue.task_done()
                     break
                 #log progress so far
                 elif cmd.lower() in ('c','check') :
-                    self._logger.debug(progress_msg)
+                    self._logger.debug(self.progress_msg)
             #check for new files in the directory if we haven't already found some to run
-            have_file = False
-            for datafile in self._data_files_by_path.values() :
-                if datafile.upload_in_progress or datafile.waiting_to_upload :
-                    have_file=True
-                    break
-            if not have_file :
-                for filepath in self._dirpath.glob('*') :
-                    if self._filepath_should_be_uploaded(filepath) and (filepath not in self._data_files_by_path.keys()):
-                        self._data_files_by_path[filepath]=DataFile(filepath,logger=self._logger)
+            if not self.have_file_to_upload :
+                self._find_new_files()
                 continue
             #find the first file that's running and add some of its chunks to the upload queue 
             for datafile in self._data_files_by_path.values() :
@@ -129,19 +141,16 @@ class DataFileDirectory() :
                     datafile.add_chunks_to_upload_queue(upload_queue,**kwargs)
                     break
         #add the remainder of any files currently in progress
-        n_partially_done_files = len([df for df in self._data_files_by_path.values() if df.upload_in_progress])
-        if n_partially_done_files>0 :
-            partially_done_file_paths = [fp for fp,df in self._data_files_by_path.items() if df.upload_in_progress]
+        if self.n_partially_done_files>0 :
             msg='Will finish queueing the remainder of the following files before flushing the producer and quitting:\n'
-            for pdfp in partially_done_file_paths :
+            for pdfp in self.partially_done_file_paths :
                 msg+=f'\t{pdfp}\n'
             self._logger.info(msg)
-        while n_partially_done_files>0 :
+        while self.n_partially_done_files>0 :
             for datafile in self._data_files_by_path.values() :
                 if datafile.upload_in_progress :
                     datafile.add_chunks_to_upload_queue(upload_queue,**kwargs)
                     break
-            n_partially_done_files = len([df for df in self._data_files_by_path.values() if df.upload_in_progress])
         #stop the uploading threads by adding "None"s to their queues and joining them
         for ut in upload_threads :
             upload_queue.put(None)
@@ -152,6 +161,44 @@ class DataFileDirectory() :
         self._logger.info('Done!')
         #return a list of filepaths that have been uploaded
         return [fp for fp,datafile in self._data_files_by_path.items() if datafile.fully_enqueued]
+
+    #################### PRIVATE HELPER FUNCTIONS ####################
+
+    def _find_new_files(self,to_upload=True) :
+        """
+        Search the directory for any unrecognized files and add them to _data_files_by_path
+
+        to_upload = if False, new files found will NOT be marked for uploading (default is new files are expected to be uploaded)
+        """
+        for filepath in self._dirpath.rglob('*') :
+            if self._filepath_should_be_uploaded(filepath) and (filepath not in self._data_files_by_path.keys()):
+                self._data_files_by_path[filepath]=UploadDataFile(filepath,logger=self._logger)
+
+    def _filepath_should_be_uploaded(self,filepath) :
+        """
+        Filter filepaths from a glob and return a boolean that's True if they should be uploaded
+        """
+        if not isinstance(filepath,pathlib.PurePath) :
+            self._logger.error(f'ERROR: {filepath} passed to _filepath_should_be_uploaded is not a Path!',TypeError)
+        if not filepath.is_file() :
+            return False
+        if filepath.name.startswith('.') :
+            return False
+        if filepath.name.endswith('.log') :
+            return False
+        return True
+
+class DataFileDownloadDirectory(DataFileDirectory) :
+    """
+    Class representing a directory into which files are being reconstructed
+    """
+
+    #################### PUBLIC FUNCTIONS ####################
+
+    def __init__(self,*args,**kwargs) :
+        super().__init__(*args,**kwargs)
+        self._n_msgs_read = 0
+        self._completely_reconstructed_filenames = set()
 
     def reconstruct(self,config_path,topic_name,**kwargs) :
         """
@@ -172,9 +219,6 @@ class DataFileDirectory() :
                                    'update_secs':RUN_OPT_CONST.DEFAULT_UPDATE_SECONDS,
                                    'consumer_group_id':str(uuid.uuid1()) #by default, make a new consumer group every time this code is run
                                   },self._logger)
-        #initialize variables for return values
-        self._n_msgs_read = 0
-        self._completely_reconstructed_filenames = set()
         #initialize a thread to listen for and get user input and a queue to put it into
         self.user_input_queue = Queue()
         user_input_thread = Thread(target=add_user_input,args=(self.user_input_queue,))
@@ -217,15 +261,22 @@ class DataFileDirectory() :
 
     #################### PRIVATE HELPER FUNCTIONS ####################
 
-    #helper function to get DataFileChunks from a queue and write them to disk, paying attention to whether they've been fully reconstructed
     def _consume_and_process_messages_worker(self,config_path,topic_name,group_id,lock,list_index) :
+        """
+        Create a Consumer and subscribe it to a topic to monitor. As messages are read from the topic, try to reconstruct them
+        in the directory as DataFileChunks, paying attention to whether/how the files they're coming from end up fully reconstructed
+        or mismatched with their original hashes.
+        Several iterations of this function are meant to run in parallel threads, managing a group of Consumers.
+        """
         #start up the consumer
         consumer = MyDeserializingConsumer.from_file(config_path,logger=self._logger,group_id=group_id)
         consumer.subscribe([topic_name])
-        #loop until None is pulled from the queue
+        #start the infinite loop
         while True:
+            #try to get something from the queue
             try :
                 dfc = self._queues[list_index].get(block=False)
+            #if there's nothing there, try to add a message consumed from the topic and then start over
             except Empty :
                 try :
                     consumed_msg = consumer.poll(0)
@@ -235,6 +286,7 @@ class DataFileDirectory() :
                 if consumed_msg is not None and consumed_msg.error() is None :
                     self._queues[list_index].put(consumed_msg.value())
                 continue
+            #if instead the queue had "None" in it then shut down the task
             if dfc is None:
                 #make sure the thread can be joined
                 self._queues[list_index].task_done()
@@ -245,8 +297,9 @@ class DataFileDirectory() :
             if dfc.filepath is not None :
                 self._logger.error(f'ERROR: message with key {dfc.message_key} has filepath={dfc.filepath} (should be None as it was just consumed)!',RuntimeError)
             dfc.filepath = self._dirpath/dfc.filename
+            #add the chunk's data to the file that's being reconstructed
             if dfc.filepath not in self._data_files_by_path.keys() :
-                self._data_files_by_path[dfc.filepath] = (DataFile(dfc.filepath,logger=self._logger),Lock())
+                self._data_files_by_path[dfc.filepath] = (DownloadDataFile(dfc.filepath,logger=self._logger),Lock())
             return_value = self._data_files_by_path[dfc.filepath][0].write_chunk_to_disk(dfc,self._dirpath,self._data_files_by_path[dfc.filepath][1])
             if return_value==DATA_FILE_HANDLING_CONST.FILE_HASH_MISMATCH_CODE :
                 self._logger.error(f'ERROR: file hashes for file {dfc.filename} not matched after reconstruction!',RuntimeError)
@@ -260,14 +313,3 @@ class DataFileDirectory() :
             elif return_value in (DATA_FILE_HANDLING_CONST.FILE_IN_PROGRESS,DATA_FILE_HANDLING_CONST.CHUNK_ALREADY_WRITTEN_CODE) :
                 with lock :
                     self._n_msgs_read+=1
-
-    #helper function to filter filepaths and return a boolean that's True if they should be uploaded
-    def _filepath_should_be_uploaded(self,filepath) :
-        if not isinstance(filepath,pathlib.PurePath) :
-            self._logger.error(f'ERROR: {filepath} passed to _filepath_should_be_uploaded is not a Path!',TypeError)
-        if filepath.name.startswith('.') :
-            return False
-        if filepath.name.endswith('.log') :
-            return False
-        return True
-

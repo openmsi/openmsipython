@@ -1,6 +1,6 @@
 #imports
 from openmsipython.my_kafka.serialization import DataFileChunkSerializer
-from openmsipython.data_file_io.data_file import DataFile
+from openmsipython.data_file_io.data_file import UploadDataFile
 from openmsipython.data_file_io.config import RUN_OPT_CONST
 from openmsipython.utilities.logging import Logger
 import pathlib, logging, shutil, filecmp
@@ -45,7 +45,7 @@ def compare_and_check_old_and_new_files(filename) :
 def rebuild_binary_file_chunks_for_serialization_reference() :
     test_data_file_path = EXISTING_TEST_DATA_DIR / TEST_DATA_FILE_NAME
     #make the data file and build its list of chunks
-    df = DataFile(test_data_file_path,logger=LOGGER)
+    df = UploadDataFile(test_data_file_path,logger=LOGGER)
     df._build_list_of_file_chunks(RUN_OPT_CONST.DEFAULT_CHUNK_SIZE)
     #populate and serialize a few chunks and save them as binary data
     dfcs = DataFileChunkSerializer()

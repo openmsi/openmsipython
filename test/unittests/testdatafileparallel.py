@@ -1,6 +1,6 @@
 #imports
 from config import TEST_CONST
-from openmsipython.data_file_io.data_file import DataFile
+from openmsipython.data_file_io.data_file import UploadDataFile, DownloadDataFile
 from openmsipython.data_file_io.config import RUN_OPT_CONST, DATA_FILE_HANDLING_CONST
 from openmsipython.utilities.logging import Logger
 from queue import Queue
@@ -10,13 +10,13 @@ import unittest, pathlib, logging, shutil, filecmp
 #constants
 LOGGER = Logger(pathlib.Path(__file__).name.split('.')[0],logging.ERROR)
 
-class TestDataFile(unittest.TestCase) :
+class TestUploadDataFile(unittest.TestCase) :
     """
-    Class for testing DataFile functions (without interacting with the Kafka cluster)
+    Class for testing UploadDataFile functions (without interacting with the Kafka cluster)
     """
 
     def setUp(self) :
-        self.datafile = DataFile(TEST_CONST.TEST_DATA_FILE_PATH,logger=LOGGER)
+        self.datafile = UploadDataFile(TEST_CONST.TEST_DATA_FILE_PATH,logger=LOGGER)
 
     def test_initial_properties(self) :
         self.assertEqual(self.datafile.filename,TEST_CONST.TEST_DATA_FILE_NAME)
@@ -57,11 +57,20 @@ class TestDataFile(unittest.TestCase) :
         #and try one more time to add more chunks; this should just return without doing anything
         self.datafile.add_chunks_to_upload_queue(real_queue)
 
+class TestDownloadDataFile(unittest.TestCase) :
+    """
+    Class for testing DownloadDataFile functions (without interacting with the Kafka cluster)
+    """
+
+    def setUp(self) :
+        self.upload_datafile = UploadDataFile(TEST_CONST.TEST_DATA_FILE_PATH,logger=LOGGER)
+        self.datafile = DownloadDataFile(TEST_CONST.TEST_DATA_FILE_PATH,logger=LOGGER)
+
     def test_write_chunk_to_disk(self) :
         TEST_CONST.TEST_RECO_DIR_PATH.mkdir()
         try :
-            self.datafile._build_list_of_file_chunks(RUN_OPT_CONST.DEFAULT_CHUNK_SIZE)
-            for ic,dfc in enumerate(self.datafile._chunks_to_upload) :
+            self.upload_datafile._build_list_of_file_chunks(RUN_OPT_CONST.DEFAULT_CHUNK_SIZE)
+            for ic,dfc in enumerate(self.upload_datafile._chunks_to_upload) :
                 dfc._populate_with_file_data(logger=LOGGER)
                 check = self.datafile.write_chunk_to_disk(dfc,TEST_CONST.TEST_RECO_DIR_PATH)
                 #try writing every tenth chunk twice; should return "chunk already added"
@@ -69,7 +78,7 @@ class TestDataFile(unittest.TestCase) :
                     check2 = self.datafile.write_chunk_to_disk(dfc,TEST_CONST.TEST_RECO_DIR_PATH)
                     self.assertEqual(check2,DATA_FILE_HANDLING_CONST.CHUNK_ALREADY_WRITTEN_CODE)
                 expected_check_value = DATA_FILE_HANDLING_CONST.FILE_IN_PROGRESS
-                if ic==len(self.datafile._chunks_to_upload)-1 :
+                if ic==len(self.upload_datafile._chunks_to_upload)-1 :
                     expected_check_value = DATA_FILE_HANDLING_CONST.FILE_SUCCESSFULLY_RECONSTRUCTED_CODE 
                 self.assertEqual(check,expected_check_value)
             if not filecmp.cmp(TEST_CONST.TEST_DATA_FILE_PATH,TEST_CONST.TEST_RECO_DIR_PATH/self.datafile.filename,shallow=False) :
@@ -77,16 +86,16 @@ class TestDataFile(unittest.TestCase) :
             (TEST_CONST.TEST_RECO_DIR_PATH/self.datafile.filename).unlink()
             self.datafile._chunk_offsets_downloaded=set()
             hash_missing_some_chunks = sha512()
-            for ic,dfc in enumerate(self.datafile._chunks_to_upload) :
+            for ic,dfc in enumerate(self.upload_datafile._chunks_to_upload) :
                 if ic%2==0 :
                     hash_missing_some_chunks.update(dfc.data)
             hash_missing_some_chunks.digest()
-            for ic,dfc in enumerate(self.datafile._chunks_to_upload) :
-                if ic==len(self.datafile._chunks_to_upload)-1 :
+            for ic,dfc in enumerate(self.upload_datafile._chunks_to_upload) :
+                if ic==len(self.upload_datafile._chunks_to_upload)-1 :
                     dfc.file_hash=hash_missing_some_chunks
                 check = self.datafile.write_chunk_to_disk(dfc,TEST_CONST.TEST_RECO_DIR_PATH)
                 expected_check_value = DATA_FILE_HANDLING_CONST.FILE_IN_PROGRESS
-                if ic==len(self.datafile._chunks_to_upload)-1 :
+                if ic==len(self.upload_datafile._chunks_to_upload)-1 :
                     expected_check_value = DATA_FILE_HANDLING_CONST.FILE_HASH_MISMATCH_CODE 
                 self.assertEqual(check,expected_check_value)
         except Exception as e :
