@@ -19,16 +19,23 @@ def run_cmd_in_subprocess(args,*,shell=False) :
     if isinstance(args,str) :
         args = [args]
     try :
-        result = check_output(args,shell=shell)
+        result = check_output(args,shell=shell,env=os.environ)
         return result
     except CalledProcessError as e :
         print(f'ERROR: failed to run a command. output:\n{e.output.decode}')
         raise e
 
+#remove a machine environment variable using a powershell command given its name
+def remove_machine_env_var(var_name) :
+    pwrsh_cmd = f'[Environment]::SetEnvironmentVariable("{var_name}",$null,[EnvironmentVariableTarget]::Machine)'
+    run_cmd_in_subprocess(['powershell.exe',pwrsh_cmd])
+    del os.environ[var_name]
+
 #set a machine environment variable using a powershell command given its name and value
 def set_machine_env_var(var_name,var_val) :
     pwrsh_cmd = f'[Environment]::SetEnvironmentVariable("{var_name}","{var_val}",[EnvironmentVariableTarget]::Machine)'
     run_cmd_in_subprocess(['powershell.exe',pwrsh_cmd])
+    os.environ[var_name]=var_val
 
 #set a machine environment variable with the given name and description based on user input
 def set_env_var_from_user_input(var_name,var_desc) :
@@ -40,7 +47,7 @@ def test_python_code(config_file_path) :
     print('Testing Service code to check for errors...')
     print(f'Running all unittests in {UNITTEST_DIR_PATH}...')
     cmd = f'python -m unittest discover -s {UNITTEST_DIR_PATH} -v'
-    p = Popen(cmd,stdout=PIPE,stderr=STDOUT,shell=True,universal_newlines=True)
+    p = Popen(cmd,stdout=PIPE,stderr=STDOUT,shell=True,universal_newlines=True,env=os.environ)
     for stdout_line in p.stdout :
         print(stdout_line,end='')
     return_code = p.wait()
@@ -92,7 +99,7 @@ def install_service(config_file_path) :
             if choice.lower() in ('yes','y') :
                 set_env_var_from_user_input(*env_var_tuple)
     #test the Python code to make sure the configs are all valid
-    #test_python_code(config_file_path)
+    test_python_code(config_file_path)
     #find or install NSSM in the current directory
     find_install_NSSM()
     #install the service using NSSM
@@ -139,15 +146,15 @@ def remove_service() :
     print('Service successfully removed')
     #remove the environment variables that were set when the service was installed
     try :
-        run_cmd_in_subprocess(['powershell.exe','Remove-Item Env:\\KAFKA_TEST_CLUSTER_USERNAME'])
-        run_cmd_in_subprocess(['powershell.exe','Remove-Item Env:\\KAFKA_TEST_CLUSTER_PASSWORD'])
-        run_cmd_in_subprocess(['powershell.exe','Remove-Item Env:\\KAFKA_PROD_CLUSTER_USERNAME'])
-        run_cmd_in_subprocess(['powershell.exe','Remove-Item Env:\\KAFKA_PROD_CLUSTER_PASSWORD'])
-    except CalledProcessError :
+        remove_machine_env_var('KAFKA_TEST_CLUSTER_USERNAME')
+        remove_machine_env_var('KAFKA_TEST_CLUSTER_PASSWORD')
+        remove_machine_env_var('KAFKA_PROD_CLUSTER_USERNAME')
+        remove_machine_env_var('KAFKA_PROD_CLUSTER_PASSWORD')
+        print('Username/password environment variables successfully removed')
+    except CalledProcessError as e :
         warnmsg = 'WARNING: failed to remove environment variables. '
         warnmsg+= 'You should remove any username/password environment variables manually even though the service is uninstalled!'
         print(warnmsg)
-    print('Username/password environment variables successfully removed')
     #remove NSSM from the current directory
     if 'nssm.exe' in check_output('dir',shell=True).decode() :
         try :
