@@ -1,8 +1,7 @@
 #imports
-from .serialization import DataFileChunkSerializer
+from .utilities import get_replaced_configs
 from ..utilities.config_file_parser import ConfigFileParser
 from confluent_kafka import Producer, SerializingProducer
-from confluent_kafka.serialization import DoubleSerializer, IntegerSerializer, StringSerializer
 
 class MyProducer(Producer) :
     """
@@ -53,15 +52,5 @@ class MySerializingProducer(SerializingProducer) :
                 continue
             configs[argname.replace('_','.')]=arg
         #if one of several recognized serializers have been given as config paramenters for the key/value serializer, replace them with the actual class
-        names_to_classes = {
-            'DoubleSerializer': DoubleSerializer(),
-            'IntegerSerializer': IntegerSerializer(),
-            'StringSerializer': StringSerializer(),
-            'DataFileChunkSerializer': DataFileChunkSerializer(),
-        }
-        configs_to_check = ['key.serializer','value.serializer']
-        for cfg in configs_to_check :
-            if cfg in configs.keys() :
-                if configs[cfg] in names_to_classes :
-                    configs[cfg] = names_to_classes[configs[cfg]]
+        configs = get_replaced_configs(configs,'serialization')
         return cls(configs)

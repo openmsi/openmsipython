@@ -1,6 +1,6 @@
 #imports
 from ..utilities.logging import Logger
-import pathlib, configparser
+import os, pathlib, configparser
 
 class ConfigFileParser :
     """
@@ -44,6 +44,13 @@ class ConfigFileParser :
             if group_name not in self._config :
                 self._logger.error(f'ERROR: {group_name} is not a recognized section in {self._filepath}!',ValueError)
             for key, value in self._config[group_name].items() :
+                #if the value is an environment variable, expand it on the current system
+                if value.startswith('$') :
+                    exp_value = os.path.expandvars(value)
+                    if exp_value == value :
+                        self._logger.error(f'ERROR: Expanding {value} in {self._filepath} as an environment variable failed (must be set on system)',ValueError)
+                    else :
+                        value = exp_value
                 config_dict[key] = value
         return config_dict
 
