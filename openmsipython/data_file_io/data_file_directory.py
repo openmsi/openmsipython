@@ -25,7 +25,7 @@ class DataFileDirectory() :
         logger = the logger object to use (a new one will be created if none is supplied)
         """
         kwargs = populated_kwargs(kwargs,{'new_files_only':False})
-        self._dirpath = dirpath
+        self._dirpath = dirpath.resolve()
         self._logger = kwargs.get('logger')
         if self._logger is None :
             self._logger = Logger(pathlib.Path(__file__).name.split('.')[0])
@@ -171,8 +171,9 @@ class DataFileUploadDirectory(DataFileDirectory) :
         to_upload = if False, new files found will NOT be marked for uploading (default is new files are expected to be uploaded)
         """
         for filepath in self._dirpath.rglob('*') :
+            filepath = filepath.resolve()
             if self._filepath_should_be_uploaded(filepath) and (filepath not in self._data_files_by_path.keys()):
-                self._data_files_by_path[filepath]=UploadDataFile(filepath,logger=self._logger)
+                self._data_files_by_path[filepath]=UploadDataFile(filepath,rootdir=self._dirpath,logger=self._logger)
 
     def _filepath_should_be_uploaded(self,filepath) :
         """
@@ -199,6 +200,7 @@ class DataFileDownloadDirectory(DataFileDirectory) :
         super().__init__(*args,**kwargs)
         self._n_msgs_read = 0
         self._completely_reconstructed_filenames = set()
+        self._thread_locks_by_filepath = {}
 
     def reconstruct(self,config_path,topic_name,**kwargs) :
         """
@@ -293,14 +295,15 @@ class DataFileDownloadDirectory(DataFileDirectory) :
                 #close the consumer
                 consumer.close()
                 break
-            #set the chunk's filepath to be in the working directory and add its data to the file that's being reconstructed
-            if dfc.filepath is not None :
-                self._logger.error(f'ERROR: message with key {dfc.message_key} has filepath={dfc.filepath} (should be None as it was just consumed)!',RuntimeError)
-            dfc.filepath = self._dirpath/dfc.filename
+            #set the chunk's rootdir to the working directory
+            if dfc.rootdir is not None :
+                self._logger.error(f'ERROR: message with key {dfc.message_key} has rootdir={dfc.rootdir} (should be None as it was just consumed)!',RuntimeError)
+            dfc.rootdir = self._dirpath
             #add the chunk's data to the file that's being reconstructed
             if dfc.filepath not in self._data_files_by_path.keys() :
-                self._data_files_by_path[dfc.filepath] = (DownloadDataFile(dfc.filepath,logger=self._logger),Lock())
-            return_value = self._data_files_by_path[dfc.filepath][0].write_chunk_to_disk(dfc,self._dirpath,self._data_files_by_path[dfc.filepath][1])
+                self._data_files_by_path[dfc.filepath] = DownloadDataFile(dfc.filepath,logger=self._logger)
+                self._thread_locks_by_filepath[dfc.filepath] = Lock()
+            return_value = self._data_files_by_path[dfc.filepath].write_chunk_to_disk(dfc,self._thread_locks_by_filepath[dfc.filepath])
             if return_value==DATA_FILE_HANDLING_CONST.FILE_HASH_MISMATCH_CODE :
                 self._logger.error(f'ERROR: file hashes for file {dfc.filename} not matched after reconstruction!',RuntimeError)
             elif return_value==DATA_FILE_HANDLING_CONST.FILE_SUCCESSFULLY_RECONSTRUCTED_CODE :

@@ -22,12 +22,21 @@ class TestRoutineConstants :
     @property
     def TEST_DATA_DIR_PATH(self) : #path to the test data directory
         return pathlib.Path(__file__).parent.parent / 'data'
+    @property
+    def TEST_DATA_FILE_ROOT_DIR_NAME(self) : #path to the test data directory
+        return 'test_file_root_dir'
+    @property
+    def TEST_DATA_FILE_SUB_DIR_NAME(self) : #path to the test data directory
+        return 'test_file_sub_dir'
     @property 
     def TEST_DATA_FILE_NAME(self) : #name of the test data file
         return '1a0ceb89-b5f0-45dc-9c12-63d3020e2217.dat'
     @property
+    def TEST_DATA_FILE_ROOT_DIR_PATH(self) : # Path to the test data file
+        return self.TEST_DATA_DIR_PATH / self.TEST_DATA_FILE_ROOT_DIR_NAME
+    @property
     def TEST_DATA_FILE_PATH(self) : # Path to the test data file
-        return self.TEST_DATA_DIR_PATH / self.TEST_DATA_FILE_NAME
+        return self.TEST_DATA_DIR_PATH / self.TEST_DATA_FILE_ROOT_DIR_NAME / self.TEST_DATA_FILE_SUB_DIR_NAME/ self.TEST_DATA_FILE_NAME
     @property
     def TEST_WATCHED_DIR_PATH(self) : #path to the "watched" directory to use in testing DataFileDirectory etc.
         return pathlib.Path(__file__).parent.parent / 'test_watched_dir'

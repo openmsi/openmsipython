@@ -17,7 +17,7 @@ class TestDataFileChunkWithKafka(unittest.TestCase) :
 
     def setUp(self) :
         #use a DataFile to get a couple chunks to test
-        df = UploadDataFile(TEST_CONST.TEST_DATA_FILE_PATH,logger=LOGGER)
+        df = UploadDataFile(TEST_CONST.TEST_DATA_FILE_PATH,rootdir=TEST_CONST.TEST_DATA_FILE_ROOT_DIR_PATH,logger=LOGGER)
         df._build_list_of_file_chunks(RUN_OPT_CONST.DEFAULT_CHUNK_SIZE)
         self.test_chunk_1 = df._chunks_to_upload[0]
         self.test_chunk_2 = df._chunks_to_upload[1]
@@ -34,8 +34,8 @@ class TestDataFileChunkWithKafka(unittest.TestCase) :
     def test_chunk_of_nonexistent_file(self) :
         nonexistent_file_path = pathlib.Path(__file__).parent / 'never_name_a_file_this.txt'
         self.assertFalse(nonexistent_file_path.is_file())
-        chunk_to_fail = DataFileChunk(nonexistent_file_path.name,self.test_chunk_1.file_hash,self.test_chunk_1.chunk_hash,self.test_chunk_1.chunk_offset,
-                                      self.test_chunk_1.chunk_size,self.test_chunk_1.chunk_i,self.test_chunk_1.n_total_chunks,filepath=nonexistent_file_path)
+        chunk_to_fail = DataFileChunk(nonexistent_file_path,nonexistent_file_path.name,self.test_chunk_1.file_hash,self.test_chunk_1.chunk_hash,
+                                      self.test_chunk_1.chunk_offset,self.test_chunk_1.chunk_size,self.test_chunk_1.chunk_i,self.test_chunk_1.n_total_chunks)
         LOGGER.set_stream_level(logging.INFO)
         LOGGER.info('\nExpecting two errors below:')
         LOGGER.set_stream_level(logging.ERROR)
