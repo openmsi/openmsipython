@@ -17,7 +17,7 @@ class TestUploadDataFile(unittest.TestCase) :
     """
 
     def setUp(self) :
-        self.datafile = UploadDataFile(TEST_CONST.TEST_DATA_FILE_PATH,rootdir=TEST_CONST.TEST_DATA_DIR_PATH/TEST_CONST.TEST_DATA_FILE_ROOT_DIR_NAME,logger=LOGGER)
+        self.datafile = UploadDataFile(TEST_CONST.TEST_DATA_FILE_PATH,rootdir=TEST_CONST.TEST_DATA_FILE_ROOT_DIR_PATH,logger=LOGGER)
 
     def test_initial_properties(self) :
         self.assertEqual(self.datafile.filename,TEST_CONST.TEST_DATA_FILE_NAME)
@@ -64,7 +64,7 @@ class TestDownloadDataFile(unittest.TestCase) :
     """
 
     def test_write_chunk_to_disk(self) :
-        ul_datafile = UploadDataFile(TEST_CONST.TEST_DATA_FILE_PATH,rootdir=TEST_CONST.TEST_DATA_DIR_PATH/TEST_CONST.TEST_DATA_FILE_ROOT_DIR_NAME,logger=LOGGER)
+        ul_datafile = UploadDataFile(TEST_CONST.TEST_DATA_FILE_PATH,rootdir=TEST_CONST.TEST_DATA_FILE_ROOT_DIR_PATH,logger=LOGGER)
         dl_datafile = None
         TEST_CONST.TEST_RECO_DIR_PATH.mkdir()
         try :

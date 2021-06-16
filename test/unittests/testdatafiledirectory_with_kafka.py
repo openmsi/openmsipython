@@ -24,7 +24,7 @@ class MyThread(Thread) :
 #constants
 LOGGER = Logger(pathlib.Path(__file__).name.split('.')[0],logging.ERROR)
 UPDATE_SECS = 5
-TIMEOUT_SECS = 60
+TIMEOUT_SECS = 90
 
 class TestDataFileDirectoryWithKafka(unittest.TestCase) :
     """
@@ -34,7 +34,7 @@ class TestDataFileDirectoryWithKafka(unittest.TestCase) :
     #called by the test method below
     def run_upload_files_as_added(self) :
         #make the directory to watch
-        TEST_CONST.TEST_WATCHED_DIR_PATH.mkdir()
+        (TEST_CONST.TEST_WATCHED_DIR_PATH/TEST_CONST.TEST_DATA_FILE_SUB_DIR_NAME).mkdir(parents=True)
         #start up the DataFileUploadDirectory
         dfud = DataFileUploadDirectory(TEST_CONST.TEST_WATCHED_DIR_PATH,logger=LOGGER)
         #start upload_files_as_added in a separate thread so we can time it out
@@ -50,7 +50,7 @@ class TestDataFileDirectoryWithKafka(unittest.TestCase) :
         try :
             #wait a second, and then copy the test file into the watched directory
             time.sleep(1)
-            (TEST_CONST.TEST_WATCHED_DIR_PATH/TEST_CONST.TEST_DATA_FILE_NAME).write_bytes(TEST_CONST.TEST_DATA_FILE_PATH.read_bytes())
+            (TEST_CONST.TEST_WATCHED_DIR_PATH/TEST_CONST.TEST_DATA_FILE_SUB_DIR_NAME/TEST_CONST.TEST_DATA_FILE_NAME).write_bytes(TEST_CONST.TEST_DATA_FILE_PATH.read_bytes())
             #put the "check" command into the input queue a couple times
             dfud.user_input_queue.put('c')
             dfud.user_input_queue.put('check')
@@ -102,7 +102,7 @@ class TestDataFileDirectoryWithKafka(unittest.TestCase) :
             LOGGER.set_stream_level(logging.INFO)
             LOGGER.info(f'Waiting to reconstruct test file from the "{RUN_OPT_CONST.DEFAULT_TOPIC_NAME}" topic in run_reconstruct (will timeout after {TIMEOUT_SECS} seconds)...')
             LOGGER.set_stream_level(logging.ERROR)
-            while len(dfdd._completely_reconstructed_filenames)==0 and current_messages_read<dfdd._n_msgs_read and time_waited<TIMEOUT_SECS:
+            while (TEST_CONST.TEST_DATA_FILE_NAME not in dfdd._completely_reconstructed_filenames) and current_messages_read<dfdd._n_msgs_read and time_waited<TIMEOUT_SECS:
                 current_messages_read = dfdd._n_msgs_read
                 LOGGER.set_stream_level(logging.INFO)
                 LOGGER.info(f'\t{current_messages_read} messages read after waiting {time_waited} seconds....')
@@ -119,8 +119,8 @@ class TestDataFileDirectoryWithKafka(unittest.TestCase) :
             if download_thread.is_alive() :
                 raise TimeoutError('ERROR: download thread in run_reconstruct timed out after 5 seconds!')
             #make sure the reconstructed file exists with the same name and content as the original
-            self.assertTrue((TEST_CONST.TEST_RECO_DIR_PATH/TEST_CONST.TEST_DATA_FILE_NAME).is_file())
-            if not filecmp.cmp(TEST_CONST.TEST_DATA_FILE_PATH,TEST_CONST.TEST_RECO_DIR_PATH/TEST_CONST.TEST_DATA_FILE_NAME,shallow=False) :
+            self.assertTrue((TEST_CONST.TEST_RECO_DIR_PATH/TEST_CONST.TEST_DATA_FILE_SUB_DIR_NAME/TEST_CONST.TEST_DATA_FILE_NAME).is_file())
+            if not filecmp.cmp(TEST_CONST.TEST_DATA_FILE_PATH,TEST_CONST.TEST_RECO_DIR_PATH/TEST_CONST.TEST_DATA_FILE_SUB_DIR_NAME/TEST_CONST.TEST_DATA_FILE_NAME,shallow=False) :
                 raise RuntimeError(f'ERROR: files are not the same after reconstruction! (This may also be due to the timeout at {TIMEOUT_SECS} seconds)')
         except Exception as e :
             raise e

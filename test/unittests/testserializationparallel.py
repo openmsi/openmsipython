@@ -27,7 +27,7 @@ class TestSerialization(unittest.TestCase) :
             msg+= f'in {TEST_CONST.TEST_DATA_DIR_PATH}!'
             raise RuntimeError(msg)
         #make the dictionary of reference DataFileChunk objects
-        data_file = UploadDataFile(TEST_CONST.TEST_DATA_FILE_PATH,rootdir=TEST_CONST.TEST_DATA_DIR_PATH/TEST_CONST.TEST_DATA_FILE_ROOT_DIR_NAME,logger=LOGGER)
+        data_file = UploadDataFile(TEST_CONST.TEST_DATA_FILE_PATH,rootdir=TEST_CONST.TEST_DATA_FILE_ROOT_DIR_PATH,logger=LOGGER)
         data_file._build_list_of_file_chunks(RUN_OPT_CONST.DEFAULT_CHUNK_SIZE)
         self.test_ul_chunk_objects = {}; self.test_dl_chunk_objects = {}
         for chunk_i in self.test_chunk_binaries.keys() :
