@@ -170,10 +170,14 @@ class DataFileUploadDirectory(DataFileDirectory) :
 
         to_upload = if False, new files found will NOT be marked for uploading (default is new files are expected to be uploaded)
         """
-        for filepath in self._dirpath.rglob('*') :
-            filepath = filepath.resolve()
-            if self._filepath_should_be_uploaded(filepath) and (filepath not in self._data_files_by_path.keys()):
-                self._data_files_by_path[filepath]=UploadDataFile(filepath,rootdir=self._dirpath,logger=self._logger)
+        #This is in a try/except in case a subdirectory is renamed while this method is running; it'll just return and try again
+        try :
+            for filepath in self._dirpath.rglob('*') :
+                filepath = filepath.resolve()
+                if self._filepath_should_be_uploaded(filepath) and (filepath not in self._data_files_by_path.keys()):
+                    self._data_files_by_path[filepath]=UploadDataFile(filepath,to_upload=to_upload,rootdir=self._dirpath,logger=self._logger)
+        except FileNotFoundError :
+            return
 
     def _filepath_should_be_uploaded(self,filepath) :
         """
