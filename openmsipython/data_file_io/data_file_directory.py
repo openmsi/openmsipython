@@ -307,7 +307,7 @@ class DataFileDownloadDirectory(DataFileDirectory) :
             if return_value==DATA_FILE_HANDLING_CONST.FILE_HASH_MISMATCH_CODE :
                 self._logger.error(f'ERROR: file hashes for file {dfc.filename} not matched after reconstruction!',RuntimeError)
             elif return_value==DATA_FILE_HANDLING_CONST.FILE_SUCCESSFULLY_RECONSTRUCTED_CODE :
-                self._logger.info(f'File {dfc.filename} successfully reconstructed locally from stream')
+                self._logger.info(f'File {dfc.filepath.relative_to(dfc.rootdir)} successfully reconstructed locally from stream')
                 with lock :
                     if dfc.filepath in self._data_files_by_path :
                         self._n_msgs_read+=1

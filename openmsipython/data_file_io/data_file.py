@@ -66,7 +66,10 @@ class UploadDataFile(DataFile) :
         return True
     @property
     def upload_status_msg(self): #a message stating the file's name and status w.r.t. being enqueued to be uploaded 
-        msg = f'{self._filename} '
+        if self._rootdir is None :
+            msg = f'{self._filepath} '
+        else :
+            msg = f'{self._filepath.relative_to(self._rootdir)} '
         if not self._to_upload :
             msg+='(will not be uploaded)'
         elif self._fully_enqueued :
