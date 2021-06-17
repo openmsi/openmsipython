@@ -224,7 +224,7 @@ class DownloadDataFile(DataFile) :
         """
         #the filepath of this DownloadDataFile and of the given DataFileChunk must match
         if dfc.filepath!=self._filepath :
-            self._logger.error(f'ERROR: filepath mismatch between data file chunk {dfc._filepath} and data file {self._filepath}')
+            self._logger.error(f'ERROR: filepath mismatch between data file chunk {dfc._filepath} and data file {self._filepath}',ValueError)
         #if this chunk's offset has already been written to disk, return the "already written" code
         if dfc.chunk_offset in self._chunk_offsets_downloaded :
             return DATA_FILE_HANDLING_CONST.CHUNK_ALREADY_WRITTEN_CODE

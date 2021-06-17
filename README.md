@@ -65,7 +65,7 @@ And if that line runs without any problems then the package was installed correc
 
 This software provides a way to stream data to a topic in a Kafka cluster using a Windows Service called "Open MSI Directory Stream Service". The Service can be installed for all users of a particular Windows machine and, once installed, it will run automatically from when the machine boots until it is stopped and/or removed.
 
-The Open MSI Directory Stream Service will continually monitor a specific directory for any new files that are added to it. When a new file is detected, it will break the data in the file into smaller chunks and produce each of the chunks as a message to a specific Kafka topic. The `reconstuct_data_files` program discussed below, for example, can then be used to download the messages and rebuild the files on any other machine. Other routines will soon be added to perform analyses or other manipulations of the uploaded data as soon as they are available. In other words, installing the Service turns an existing directory into a "drop box" to a particular Kafka topic.  
+The Open MSI Directory Stream Service will continually monitor a specific directory for any new files that are added to it. When a new file is detected, it will break the data in the file into smaller chunks and produce each of the chunks as a message to a specific Kafka topic. Any subdirectory structure relative to the watched directory will be preserved in the messages that are sent. The `reconstuct_data_files` program discussed below, for example, can then be used to download the messages and rebuild the files on any other machine. Other routines will soon be added to perform analyses or other manipulations of the uploaded data as soon as they are available. In other words, installing the Service turns an existing directory into a "drop box" to a particular Kafka topic.  
 
 ### Setup and installation
 
@@ -146,7 +146,7 @@ Options for running the code include:
 1. Changing the size of the individual file chunks: add the `--chunk_size [n_bytes]` argument where `[n_bytes]` is the desired chunk size in bytes. `[n_bytes]` must be a nonzero power of two (the default is 16384).
 
 ### upload_data_files_added_to_directory
-This module uploads any files that are added to a given directory path to a topic on a cluster using the same "chunking" idea as above. This program is a platform-independent version of the Open MSI Directory Stream Service that runs interactively on the command line. To run it in the most common use case, enter the following command and arguments:
+This module uploads any files that are added to a given directory path to a topic on a cluster using the same "chunking" idea as above. It also preserves subdirectory structure relative to the watched directory.This program is a platform-independent version of the Open MSI Directory Stream Service that runs interactively on the command line. To run it in the most common use case, enter the following command and arguments:
 
 `upload_data_files_added_to_directory [directory_path] --config [config_file_path] --topic_name [name_of_topic]`
 
@@ -161,7 +161,7 @@ Options for running the code include:
 1. Changing how often the "still alive" character is printed to the console: add the `--update_seconds [seconds]` argument where `[seconds]` is the number of seconds to wait between printing the character to the console from the main thread (the default is 30 seconds). Giving -1 for this argument disables printing the "still alive" character entirely.
 
 ### reconstruct_data_files
-This module subscribes a group of consumers to a topic on a cluster and passively listens in several parallel threads for messages that are file chunks of the type produced by `upload_data_file`. It reconstructs files produced to the topic from their individual chunks and puts the reconstructed files in a specified directory. To run it in the most common use case, enter the following command and arguments:
+This module subscribes a group of consumers to a topic on a cluster and passively listens in several parallel threads for messages that are file chunks of the type produced by `upload_data_file`. It reconstructs files produced to the topic from their individual chunks and puts the reconstructed files in a specified directory, preserving any subdirectory structure on the production end. To run it in the most common use case, enter the following command and arguments:
 
 `reconstruct_data_files [working_directory_path] --config [config_file_path] --topic_name [topic_name]`
 
