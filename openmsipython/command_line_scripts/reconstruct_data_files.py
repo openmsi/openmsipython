@@ -1,5 +1,5 @@
 #imports
-from ..data_file_io.data_file_directory import DataFileDirectory
+from ..data_file_io.data_file_directory import DataFileDownloadDirectory
 from ..data_file_io.config import RUN_OPT_CONST
 from ..utilities.argument_parsing import create_dir, config_path
 from ..utilities.logging import Logger
@@ -29,7 +29,7 @@ def main(args=None) :
     filename = pathlib.Path(__file__).name.split('.')[0]
     logger = Logger(filename,filepath=pathlib.Path(args.workingdir)/f'{filename}.log')
     #make the DataFileDirectory
-    reconstructor_directory = DataFileDirectory(args.workingdir,logger=logger)
+    reconstructor_directory = DataFileDownloadDirectory(args.workingdir,logger=logger)
     #start the reconstructor running (returns total number of chunks read and total number of files completely reconstructed)
     run_start = datetime.datetime.now()
     logger.info(f'Listening for files to reconstruct in {args.workingdir}')

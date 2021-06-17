@@ -1,6 +1,6 @@
 #imports
 from config import TEST_CONST
-from openmsipython.data_file_io.data_file import DataFile
+from openmsipython.data_file_io.data_file import UploadDataFile
 from openmsipython.data_file_io.config import RUN_OPT_CONST
 from openmsipython.utilities.logging import Logger
 import unittest, pathlib, logging
@@ -14,7 +14,7 @@ class TestDataFileWithKafka(unittest.TestCase) :
     """
 
     def setUp(self) :
-        self.datafile = DataFile(TEST_CONST.TEST_DATA_FILE_PATH,logger=LOGGER)
+        self.datafile = UploadDataFile(TEST_CONST.TEST_DATA_FILE_PATH,rootdir=TEST_CONST.TEST_DATA_FILE_ROOT_DIR_PATH,logger=LOGGER)
 
     def test_upload_whole_file(self) :
         #just need to make sure this function runs without throwing any errors

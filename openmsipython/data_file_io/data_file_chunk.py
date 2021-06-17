@@ -16,10 +16,18 @@ class DataFileChunk() :
 
     @property
     def filepath(self) :
-        return self._filepath #the path to the file (already set if chunk is to be produced, but must be set later if chunk is a consumed message)
-    @filepath.setter
-    def filepath(self,fp) :
-        self._filepath=fp
+        return self._filepath #the path to the file
+    @property
+    def rootdir(self) :
+        return self._rootdir #the path to the file's root directory (already set if chunk is to be produced, but must be set later if chunk is a consumed message)
+    @rootdir.setter
+    def rootdir(self,rd) : #also resets the overall filepath (used in consuming messages for files in subdirectories)
+        self._rootdir=rd
+        try :
+            self._filepath = self._filepath.relative_to(self._rootdir)
+        except ValueError :
+            pass
+        self._filepath = self._rootdir / self._filepath
     @property
     def data(self) :
         return self._data #the binary data in the file chunk (populated at time of production or when consumed)
@@ -27,13 +35,22 @@ class DataFileChunk() :
     def data(self,d) :
         self._data=d
     @property
+    def subdir_str(self) :
+        if self._rootdir is None :
+            return self.filepath.parent.as_posix()
+        relpath = self.filepath.parent.relative_to(self._rootdir)
+        if relpath==pathlib.Path() :
+            return ''
+        return str(relpath.as_posix())
+    @property
     def message_key(self) :
         return f'{self.filename}_chunk_{self.chunk_i}_of_{self.n_total_chunks}' #the key of the message
 
     #################### SPECIAL FUNCTIONS ####################
 
-    def __init__(self,filename,file_hash,chunk_hash,chunk_offset,chunk_size,chunk_i,n_total_chunks,filepath=None,data=None) :
+    def __init__(self,filepath,filename,file_hash,chunk_hash,chunk_offset,chunk_size,chunk_i,n_total_chunks,rootdir=None,data=None) :
         """
+        filepath       = path to this chunk's file (fully resolved if being produced, may be relative if it was consumed)
         filename       = the name of the file
         file_hash      = hash of this chunk's entire file data
         chunk_hash     = hash of this chunk's data
@@ -41,9 +58,10 @@ class DataFileChunk() :
         chunk_size     = size of this chunk (in bytes)
         chunk_i        = index of this chunk within the larger file
         n_total_chunks = the total number of chunks to expect from the original file
-        filepath       = path to this chunk's original file (optional, only needed if the chunk needs to find its data from a file on disk; can also be set later)
+        rootdir        = path to the "root" directory; anything in the filepath beyond here is considered a subdirectory (optional, can also be set later)
         data           = the actual binary data of this chunk of the file (can be set later if this chunk is being produced and not consumed)
         """
+        self._filepath = filepath
         self.filename = filename
         self.file_hash = file_hash
         self.chunk_hash = chunk_hash
@@ -51,7 +69,7 @@ class DataFileChunk() :
         self.chunk_size = chunk_size
         self.chunk_i = chunk_i
         self.n_total_chunks = n_total_chunks
-        self._filepath = filepath
+        self._rootdir = rootdir
         self._data = data
 
     def __eq__(self,other) :
@@ -65,6 +83,7 @@ class DataFileChunk() :
         retval = retval and self.chunk_size == other.chunk_size
         retval = retval and self.chunk_i == other.chunk_i
         retval = retval and self.n_total_chunks == other.n_total_chunks
+        retval = retval and self.subdir_str == other.subdir_str
         retval = retval and self._data == other.data
         return retval
 

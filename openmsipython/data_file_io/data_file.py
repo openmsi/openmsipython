@@ -11,11 +11,9 @@ from contextlib import nullcontext
 from hashlib import sha512
 import pathlib, os
 
-# DataFile Class
 class DataFile() :
     """
-    Class for representing a single data file
-    Can be used to chunk and upload a file on disk to a topic in a cluster, or reconstruct a file from stream to one on disk
+    Base class for representing a single data file
     """
 
     #################### PROPERTIES ####################
@@ -23,6 +21,29 @@ class DataFile() :
     @property
     def filename(self): #the name of the file
         return self._filename
+
+    #################### PUBLIC FUNCTIONS ####################
+
+    def __init__(self,filepath,**kwargs) :
+        """
+        filepath = path to the file
+        
+        Possible keyword arguments:
+        logger    = the logger object for this file's messages to use (a new one will be created if none is supplied)
+        """
+        self._filepath = filepath.resolve()
+        self._filename = self._filepath.name
+        self._logger = kwargs.get('logger')
+        if self._logger is None :
+            self._logger = Logger(pathlib.Path(__file__).name.split('.')[0])
+
+class UploadDataFile(DataFile) :
+    """
+    Class to represent a data file whose messages will be uploaded to a topic
+    """
+
+    #################### PROPERTIES ####################
+
     @property
     def to_upload(self):
         return self._to_upload #whether or not this file will be considered when automatically uploading some group of data files
@@ -45,7 +66,10 @@ class DataFile() :
         return True
     @property
     def upload_status_msg(self): #a message stating the file's name and status w.r.t. being enqueued to be uploaded 
-        msg = f'{self._filename} '
+        if self._rootdir is None :
+            msg = f'{self._filepath} '
+        else :
+            msg = f'{self._filepath.relative_to(self._rootdir)} '
         if not self._to_upload :
             msg+='(will not be uploaded)'
         elif self._fully_enqueued :
@@ -60,26 +84,20 @@ class DataFile() :
 
     #################### PUBLIC FUNCTIONS ####################
 
-    def __init__(self,filepath,**kwargs) :
+    def __init__(self,*args,to_upload=True,rootdir=None,**kwargs) :
         """
-        filepath = path to the file
-        
-        Possible keyword arguments:
-        logger    = the logger object for this file's messages to use (a new one will be created if none is supplied)
         to_upload = if False, the file will be ignored for purposes of uploading to a topic (default is True)
+        rootdir = path to the "root" directory that this file is in; anything in the path beyond this root directory 
+                  will be added to the DataFileChunk so that it will be reconstructed inside a subdirectory
         """
-        self._filepath = filepath
-        self._filename = filepath.name
-        self._logger = kwargs.get('logger')
-        if self._logger is None :
-            self._logger = Logger(pathlib.Path(__file__).name.split('.')[0])
-        if kwargs.get('to_upload') is not None :
-            self._to_upload = kwargs.get('to_upload')
+        super().__init__(*args,**kwargs)
+        self._to_upload = to_upload
+        if rootdir is None :
+            self._rootdir = self._filepath.parent
         else :
-            self._to_upload = True
+            self._rootdir = rootdir
         self._fully_enqueued = False
         self._chunks_to_upload = []
-        self._chunk_offsets_downloaded = set()
 
     def add_chunks_to_upload_queue(self,queue,**kwargs) :
         """
@@ -154,48 +172,12 @@ class DataFile() :
         producer.flush() #don't leave the function until all messages have been sent/received
         self._logger.info('Done!')
 
-    def write_chunk_to_disk(self,dfc,workingdir,thread_lock=nullcontext()) :
-        """
-        Add the data from a given file chunk to this file on disk in a given working directory
-        dfc         = the DataFileChunk object whose data should be added
-        workingdir  = path to the directory where the reconstructed files should be saved
-        thread_lock = the lock object to acquire/release so that race conditions don't affect 
-                      reconstruction of the files (optional, only needed if running this function asynchronously)
-        """
-        #if this chunk's offset has already been written to disk, return the "already written" code
-        if dfc.chunk_offset in self._chunk_offsets_downloaded :
-            return DATA_FILE_HANDLING_CONST.CHUNK_ALREADY_WRITTEN_CODE
-        reconstructed_filepath = workingdir / dfc.filename
-        #lock the current thread while data is written to the file
-        mode = 'r+b' if reconstructed_filepath.is_file() else 'w+b'
-        with open(reconstructed_filepath,mode) as fp :
-            with thread_lock :
-                fp.seek(dfc.chunk_offset)
-                fp.write(dfc.data)
-                fp.flush()
-                os.fsync(fp.fileno())
-                fp.close()
-        #add the offset of the added chunk to the set of reconstructed file chunks
-        self._chunk_offsets_downloaded.add(dfc.chunk_offset)
-        #if this chunk was the last that needed to be added, check the hashes to make sure the file is the same as it was originally
-        if len(self._chunk_offsets_downloaded)==dfc.n_total_chunks :
-            check_file_hash = sha512()
-            with thread_lock :
-                with open(reconstructed_filepath,'rb') as fp :
-                    data = fp.read()
-            check_file_hash.update(data)
-            check_file_hash = check_file_hash.digest()
-            if check_file_hash!=dfc.file_hash :
-                return DATA_FILE_HANDLING_CONST.FILE_HASH_MISMATCH_CODE
-            else :
-                return DATA_FILE_HANDLING_CONST.FILE_SUCCESSFULLY_RECONSTRUCTED_CODE
-        else :
-            return DATA_FILE_HANDLING_CONST.FILE_IN_PROGRESS
-
     #################### PRIVATE HELPER FUNCTIONS ####################
 
-    #helper function to build the full list of DataFileChunks for this file given a chunk size (in bytes)
     def _build_list_of_file_chunks(self,chunk_size) :
+        """
+        Build the full list of DataFileChunks for this file given a chunk size (in bytes)
+        """
         #start a hash for the file and the lists of chunks
         file_hash = sha512()
         chunks = []
@@ -216,4 +198,58 @@ class DataFile() :
         self._logger.info(f'File {self._filepath} has a total of {len(chunks)} chunks')
         #add all the chunks to the final list as DataFileChunk objects
         for ic,c in enumerate(chunks,start=1) :
-            self._chunks_to_upload.append(DataFileChunk(self._filename,file_hash,c[0],c[1],c[2],ic,len(chunks),filepath=self._filepath))
+            self._chunks_to_upload.append(DataFileChunk(self._filepath,self._filename,file_hash,c[0],c[1],c[2],ic,len(chunks),rootdir=self._rootdir))
+
+class DownloadDataFile(DataFile) :
+    """
+    Class to represent a data file that will be reconstructed from messages downloaded from a topic
+    """
+
+    #################### PUBLIC FUNCTIONS ####################
+
+    def __init__(self,*args,**kwargs) :
+        super().__init__(*args,**kwargs)
+        #create the parent directory of the file if it doesn't exist yet (in case the file is in a new subdirectory)
+        if not self._filepath.parent.is_dir() :
+            self._filepath.parent.mkdir(parents=True)
+        #start an empty set of this file's downloaded offsets
+        self._chunk_offsets_downloaded = set()
+
+    def write_chunk_to_disk(self,dfc,thread_lock=nullcontext()) :
+        """
+        Add the data from a given file chunk to this file on disk
+        dfc         = the DataFileChunk object whose data should be added
+        thread_lock = the lock object to acquire/release so that race conditions don't affect 
+                      reconstruction of the files (optional, only needed if running this function asynchronously)
+        """
+        #the filepath of this DownloadDataFile and of the given DataFileChunk must match
+        if dfc.filepath!=self._filepath :
+            self._logger.error(f'ERROR: filepath mismatch between data file chunk {dfc._filepath} and data file {self._filepath}',ValueError)
+        #if this chunk's offset has already been written to disk, return the "already written" code
+        if dfc.chunk_offset in self._chunk_offsets_downloaded :
+            return DATA_FILE_HANDLING_CONST.CHUNK_ALREADY_WRITTEN_CODE
+        #lock the current thread while data is written to the file
+        mode = 'r+b' if self._filepath.is_file() else 'w+b'
+        with open(self._filepath,mode) as fp :
+            with thread_lock :
+                fp.seek(dfc.chunk_offset)
+                fp.write(dfc.data)
+                fp.flush()
+                os.fsync(fp.fileno())
+                fp.close()
+        #add the offset of the added chunk to the set of reconstructed file chunks
+        self._chunk_offsets_downloaded.add(dfc.chunk_offset)
+        #if this chunk was the last that needed to be added, check the hashes to make sure the file is the same as it was originally
+        if len(self._chunk_offsets_downloaded)==dfc.n_total_chunks :
+            check_file_hash = sha512()
+            with thread_lock :
+                with open(self._filepath,'rb') as fp :
+                    data = fp.read()
+            check_file_hash.update(data)
+            check_file_hash = check_file_hash.digest()
+            if check_file_hash!=dfc.file_hash :
+                return DATA_FILE_HANDLING_CONST.FILE_HASH_MISMATCH_CODE
+            else :
+                return DATA_FILE_HANDLING_CONST.FILE_SUCCESSFULLY_RECONSTRUCTED_CODE
+        else :
+            return DATA_FILE_HANDLING_CONST.FILE_IN_PROGRESS

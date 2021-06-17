@@ -1,5 +1,5 @@
 #imports
-from ..data_file_io.data_file import DataFile
+from ..data_file_io.data_file import UploadDataFile
 from ..data_file_io.config import RUN_OPT_CONST
 from ..utilities.argument_parsing import existing_file, config_path, int_power_of_two
 from ..utilities.logging import Logger
@@ -26,7 +26,7 @@ def main(args=None) :
     filename = pathlib.Path(__file__).name.split('.')[0]
     logger = Logger(filename,filepath=(pathlib.Path(args.filepath).parent)/f'{filename}.log')
     #make the DataFile for the single specified file
-    upload_file = DataFile(args.filepath,logger=logger)
+    upload_file = UploadDataFile(args.filepath,logger=logger)
     #chunk and upload the file
     upload_file.upload_whole_file(args.config,args.topic_name,
                                   n_threads=args.n_threads,

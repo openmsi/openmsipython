@@ -1,5 +1,5 @@
 #imports
-from ..data_file_io.data_file_directory import DataFileDirectory
+from ..data_file_io.data_file_directory import DataFileUploadDirectory
 from ..data_file_io.config import RUN_OPT_CONST
 from ..utilities.argument_parsing import existing_dir, config_path, int_power_of_two
 from ..utilities.logging import Logger
@@ -36,7 +36,7 @@ def main(args=None) :
     filename = pathlib.Path(__file__).name.split('.')[0]
     logger = Logger(filename,filepath=pathlib.Path(args.file_directory)/f'{filename}.log')
     #make the DataFileDirectory for the specified directory
-    upload_file_directory = DataFileDirectory(args.file_directory,logger=logger)
+    upload_file_directory = DataFileUploadDirectory(args.file_directory,logger=logger)
     #listen for new files in the directory and run uploads as they come in until the process is shut down
     run_start = datetime.datetime.now()
     if args.new_files_only :
