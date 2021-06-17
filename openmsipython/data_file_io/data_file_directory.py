@@ -317,6 +317,7 @@ class DataFileDownloadDirectory(DataFileDirectory) :
                         self._n_msgs_read+=1
                         self._completely_reconstructed_filenames.add(dfc.filepath)
                         del self._data_files_by_path[dfc.filepath]
+                        del self._thread_locks_by_filepath[dfc.filepath]
             elif return_value in (DATA_FILE_HANDLING_CONST.FILE_IN_PROGRESS,DATA_FILE_HANDLING_CONST.CHUNK_ALREADY_WRITTEN_CODE) :
                 with lock :
                     self._n_msgs_read+=1
