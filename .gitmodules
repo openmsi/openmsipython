@@ -1,0 +1,3 @@
+[submodule "openmsipython/submodules/pdv_analysis"]
+	path = openmsipython/submodules/pdv_analysis
+	url = https://gitlab.hemi.johnshopkins.edu/jdiamo15/pdv-code-translation-and-automation
