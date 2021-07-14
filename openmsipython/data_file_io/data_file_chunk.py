@@ -41,10 +41,13 @@ class DataFileChunk() :
         relpath = self.filepath.parent.relative_to(self._rootdir)
         if relpath==pathlib.Path() :
             return ''
-        return str(relpath.as_posix())
+        return relpath.as_posix()
     @property
     def message_key(self) :
-        return f'{self.filename}_chunk_{self.chunk_i}_of_{self.n_total_chunks}' #the key of the message
+        key_pp = f'{"_".join(self.subdir_str.split("/"))}'
+        if key_pp!='' :
+            key_pp+='_'
+        return f'{key_pp}{self.filename}_chunk_{self.chunk_i}_of_{self.n_total_chunks}' #the key of the message
 
     #################### SPECIAL FUNCTIONS ####################
 
