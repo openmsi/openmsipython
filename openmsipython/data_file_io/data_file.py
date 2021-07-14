@@ -19,8 +19,14 @@ class DataFile() :
     #################### PROPERTIES ####################
 
     @property
-    def filename(self): #the name of the file
-        return self._filename
+    def filepath(self):
+        return self.__filepath
+    @property
+    def filename(self):
+        return self.__filename
+    @property
+    def logger(self):
+        return self.__logger
 
     #################### PUBLIC FUNCTIONS ####################
 
@@ -31,11 +37,11 @@ class DataFile() :
         Possible keyword arguments:
         logger    = the logger object for this file's messages to use (a new one will be created if none is supplied)
         """
-        self._filepath = filepath.resolve()
-        self._filename = self._filepath.name
-        self._logger = kwargs.get('logger')
-        if self._logger is None :
-            self._logger = Logger(pathlib.Path(__file__).name.split('.')[0])
+        self.__filepath = filepath.resolve()
+        self.__filename = self.__filepath.name
+        self.__logger = kwargs.get('logger')
+        if self.__logger is None :
+            self.__logger = Logger(pathlib.Path(__file__).name.split('.')[0])
 
 class UploadDataFile(DataFile) :
     """
@@ -46,33 +52,33 @@ class UploadDataFile(DataFile) :
 
     @property
     def to_upload(self):
-        return self._to_upload #whether or not this file will be considered when automatically uploading some group of data files
+        return self.__to_upload #whether or not this file will be considered when automatically uploading some group of data files
     @property
     def fully_enqueued(self): #whether or not this file has had all of its chunks added to an upload queue somewhere
-        return self._fully_enqueued
+        return self.__fully_enqueued
     @property
     def waiting_to_upload(self): #whether or not this file is waiting for its upload to begin
-        if (not self._to_upload) or self._fully_enqueued :
+        if (not self.__to_upload) or self.__fully_enqueued :
             return False
-        if len(self._chunks_to_upload)>0 :
+        if len(self.__chunks_to_upload)>0 :
             return False
         return True
     @property
     def upload_in_progress(self): #whether this file is in the process of being enqueued to be uploaded
-        if (not self._to_upload) or self._fully_enqueued :
+        if (not self.__to_upload) or self.__fully_enqueued :
             return False
-        if len(self._chunks_to_upload)==0 :
+        if len(self.__chunks_to_upload)==0 :
             return False
         return True
     @property
     def upload_status_msg(self): #a message stating the file's name and status w.r.t. being enqueued to be uploaded 
-        if self._rootdir is None :
-            msg = f'{self._filepath} '
+        if self.__rootdir is None :
+            msg = f'{self.filepath} '
         else :
-            msg = f'{self._filepath.relative_to(self._rootdir)} '
-        if not self._to_upload :
+            msg = f'{self.filepath.relative_to(self.__rootdir)} '
+        if not self.__to_upload :
             msg+='(will not be uploaded)'
-        elif self._fully_enqueued :
+        elif self.__fully_enqueued :
             msg+='(fully enqueued)'
         elif self.upload_in_progress :
             msg+='(in progress)'
@@ -91,13 +97,13 @@ class UploadDataFile(DataFile) :
                   will be added to the DataFileChunk so that it will be reconstructed inside a subdirectory
         """
         super().__init__(*args,**kwargs)
-        self._to_upload = to_upload
+        self.__to_upload = to_upload
         if rootdir is None :
-            self._rootdir = self._filepath.parent
+            self.__rootdir = self.filepath.parent
         else :
-            self._rootdir = rootdir
-        self._fully_enqueued = False
-        self._chunks_to_upload = []
+            self.__rootdir = rootdir
+        self.__fully_enqueued = False
+        self.__chunks_to_upload = []
 
     def add_chunks_to_upload_queue(self,queue,**kwargs) :
         """
@@ -110,24 +116,24 @@ class UploadDataFile(DataFile) :
         chunk_size = the size of each file chunk in bytes (used to create the list of file chunks if it doesn't already exist)
                      the default value will be used if this argument isn't given
         """
-        if self._fully_enqueued :
-            self._logger.warning(f'WARNING: add_chunks_to_upload_queue called for fully enqueued file {self._filepath}, nothing else will be added.')
+        if self.__fully_enqueued :
+            self.logger.warning(f'WARNING: add_chunks_to_upload_queue called for fully enqueued file {self.filepath}, nothing else will be added.')
             return
         if queue.full() :
             return
-        if len(self._chunks_to_upload)==0 :
-            kwargs = populated_kwargs(kwargs,{'chunk_size': RUN_OPT_CONST.DEFAULT_CHUNK_SIZE},self._logger)
+        if len(self.__chunks_to_upload)==0 :
+            kwargs = populated_kwargs(kwargs,{'chunk_size': RUN_OPT_CONST.DEFAULT_CHUNK_SIZE},self.logger)
             self._build_list_of_file_chunks(kwargs['chunk_size'])
         if kwargs.get('n_threads') is not None :
             n_chunks_to_add = kwargs['n_threads']
         else :
-            n_chunks_to_add = len(self._chunks_to_upload)
+            n_chunks_to_add = len(self.__chunks_to_upload)
         ic = 0
-        while len(self._chunks_to_upload)>0 and ic<n_chunks_to_add :
-            queue.put(self._chunks_to_upload.pop(0))
+        while len(self.__chunks_to_upload)>0 and ic<n_chunks_to_add :
+            queue.put(self.__chunks_to_upload.pop(0))
             ic+=1
-        if len(self._chunks_to_upload)==0 :
-            self._fully_enqueued = True
+        if len(self.__chunks_to_upload)==0 :
+            self.__fully_enqueued = True
     
     def upload_whole_file(self,config_path,topic_name,**kwargs) :
         """
@@ -144,12 +150,12 @@ class UploadDataFile(DataFile) :
         kwargs = populated_kwargs(kwargs,
                                   {'n_threads': RUN_OPT_CONST.N_DEFAULT_UPLOAD_THREADS,
                                    'chunk_size': RUN_OPT_CONST.DEFAULT_CHUNK_SIZE,
-                                  },self._logger)
+                                  },self.logger)
         #start the producer
-        producer = MySerializingProducer.from_file(config_path,logger=self._logger)
-        startup_msg = f"Uploading entire file {self._filepath} to {topic_name} in {kwargs['chunk_size']} byte chunks "
+        producer = MySerializingProducer.from_file(config_path,logger=self.logger)
+        startup_msg = f"Uploading entire file {self.filepath} to {topic_name} in {kwargs['chunk_size']} byte chunks "
         startup_msg+=f"using {kwargs['n_threads']} threads...."
-        self._logger.info(startup_msg)
+        self.logger.info(startup_msg)
         #add all the chunks to the upload queue
         upload_queue = Queue()
         self.add_chunks_to_upload_queue(upload_queue,chunk_size=kwargs['chunk_size'])
@@ -162,15 +168,15 @@ class UploadDataFile(DataFile) :
             t = Thread(target=produce_from_queue_of_file_chunks, args=(upload_queue,
                                                                        producer,
                                                                        topic_name,
-                                                                       self._logger))
+                                                                       self.logger))
             t.start()
             upload_threads.append(t)
         #join the threads
         for ut in upload_threads :
             ut.join()
-        self._logger.info('Waiting for all enqueued messages to be delivered (this may take a moment)....')
+        self.logger.info('Waiting for all enqueued messages to be delivered (this may take a moment)....')
         producer.flush() #don't leave the function until all messages have been sent/received
-        self._logger.info('Done!')
+        self.logger.info('Done!')
 
     #################### PRIVATE HELPER FUNCTIONS ####################
 
@@ -182,7 +188,7 @@ class UploadDataFile(DataFile) :
         file_hash = sha512()
         chunks = []
         #read the binary data in the file as chunks of the given size, adding each chunk to the list 
-        with open(self._filepath, "rb") as fp :
+        with open(self.filepath, "rb") as fp :
             chunk_offset = 0
             chunk = fp.read(chunk_size)
             while len(chunk) > 0:
@@ -195,10 +201,10 @@ class UploadDataFile(DataFile) :
                 chunk_offset += chunk_length
                 chunk = fp.read(chunk_size)
         file_hash = file_hash.digest()
-        self._logger.info(f'File {self._filepath} has a total of {len(chunks)} chunks')
+        self.logger.info(f'File {self.filepath} has a total of {len(chunks)} chunks')
         #add all the chunks to the final list as DataFileChunk objects
         for ic,c in enumerate(chunks,start=1) :
-            self._chunks_to_upload.append(DataFileChunk(self._filepath,self._filename,file_hash,c[0],c[1],c[2],ic,len(chunks),rootdir=self._rootdir))
+            self.__chunks_to_upload.append(DataFileChunk(self.filepath,self._filename,file_hash,c[0],c[1],c[2],ic,len(chunks),rootdir=self.__rootdir))
 
 class DownloadDataFile(DataFile) :
     """
@@ -210,8 +216,8 @@ class DownloadDataFile(DataFile) :
     def __init__(self,*args,**kwargs) :
         super().__init__(*args,**kwargs)
         #create the parent directory of the file if it doesn't exist yet (in case the file is in a new subdirectory)
-        if not self._filepath.parent.is_dir() :
-            self._filepath.parent.mkdir(parents=True)
+        if not self.filepath.parent.is_dir() :
+            self.filepath.parent.mkdir(parents=True)
         #start an empty set of this file's downloaded offsets
         self._chunk_offsets_downloaded = set()
 
@@ -223,14 +229,14 @@ class DownloadDataFile(DataFile) :
                       reconstruction of the files (optional, only needed if running this function asynchronously)
         """
         #the filepath of this DownloadDataFile and of the given DataFileChunk must match
-        if dfc.filepath!=self._filepath :
-            self._logger.error(f'ERROR: filepath mismatch between data file chunk {dfc._filepath} and data file {self._filepath}',ValueError)
+        if dfc.filepath!=self.filepath :
+            self.logger.error(f'ERROR: filepath mismatch between data file chunk {dfc._filepath} and data file {self.filepath}',ValueError)
         #if this chunk's offset has already been written to disk, return the "already written" code
         if dfc.chunk_offset in self._chunk_offsets_downloaded :
             return DATA_FILE_HANDLING_CONST.CHUNK_ALREADY_WRITTEN_CODE
         #lock the current thread while data is written to the file
-        mode = 'r+b' if self._filepath.is_file() else 'w+b'
-        with open(self._filepath,mode) as fp :
+        mode = 'r+b' if self.filepath.is_file() else 'w+b'
+        with open(self.filepath,mode) as fp :
             with thread_lock :
                 fp.seek(dfc.chunk_offset)
                 fp.write(dfc.data)
@@ -243,7 +249,7 @@ class DownloadDataFile(DataFile) :
         if len(self._chunk_offsets_downloaded)==dfc.n_total_chunks :
             check_file_hash = sha512()
             with thread_lock :
-                with open(self._filepath,'rb') as fp :
+                with open(self.filepath,'rb') as fp :
                     data = fp.read()
             check_file_hash.update(data)
             check_file_hash = check_file_hash.digest()

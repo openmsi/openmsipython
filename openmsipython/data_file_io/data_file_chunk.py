@@ -16,29 +16,29 @@ class DataFileChunk() :
 
     @property
     def filepath(self) :
-        return self._filepath #the path to the file
+        return self.__filepath #the path to the file
     @property
     def rootdir(self) :
-        return self._rootdir #the path to the file's root directory (already set if chunk is to be produced, but must be set later if chunk is a consumed message)
+        return self.__rootdir #the path to the file's root directory (already set if chunk is to be produced, but must be set later if chunk is a consumed message)
     @rootdir.setter
     def rootdir(self,rd) : #also resets the overall filepath (used in consuming messages for files in subdirectories)
-        self._rootdir=rd
+        self.__rootdir=rd
         try :
-            self._filepath = self._filepath.relative_to(self._rootdir)
+            self.__filepath = self.__filepath.relative_to(self.__rootdir)
         except ValueError :
             pass
-        self._filepath = self._rootdir / self._filepath
+        self.__filepath = self.__rootdir / self.__filepath
     @property
     def data(self) :
-        return self._data #the binary data in the file chunk (populated at time of production or when consumed)
+        return self.__data #the binary data in the file chunk (populated at time of production or when consumed)
     @data.setter
     def data(self,d) :
-        self._data=d
+        self.__data=d
     @property
     def subdir_str(self) :
-        if self._rootdir is None :
-            return self.filepath.parent.as_posix()
-        relpath = self.filepath.parent.relative_to(self._rootdir)
+        if self.__rootdir is None :
+            return self.__filepath.parent.as_posix()
+        relpath = self.__filepath.parent.relative_to(self.__rootdir)
         if relpath==pathlib.Path() :
             return ''
         return relpath.as_posix()
@@ -64,7 +64,7 @@ class DataFileChunk() :
         rootdir        = path to the "root" directory; anything in the filepath beyond here is considered a subdirectory (optional, can also be set later)
         data           = the actual binary data of this chunk of the file (can be set later if this chunk is being produced and not consumed)
         """
-        self._filepath = filepath
+        self.__filepath = filepath
         self.filename = filename
         self.file_hash = file_hash
         self.chunk_hash = chunk_hash
@@ -72,8 +72,8 @@ class DataFileChunk() :
         self.chunk_size = chunk_size
         self.chunk_i = chunk_i
         self.n_total_chunks = n_total_chunks
-        self._rootdir = rootdir
-        self._data = data
+        self.__rootdir = rootdir
+        self.__data = data
 
     def __eq__(self,other) :
         if not isinstance(other,DataFileChunk) :
@@ -87,7 +87,7 @@ class DataFileChunk() :
         retval = retval and self.chunk_i == other.chunk_i
         retval = retval and self.n_total_chunks == other.n_total_chunks
         retval = retval and self.subdir_str == other.subdir_str
-        retval = retval and self._data == other.data
+        retval = retval and self.__data == other.data
         return retval
 
     #################### PUBLIC FUNCTIONS ####################
@@ -116,7 +116,7 @@ class DataFileChunk() :
         if (self.chunk_i-1)%kwargs['print_every']==0 or self.chunk_i==self.n_total_chunks :
             logger.info(f'uploading {self.filename} chunk {self.chunk_i} (out of {self.n_total_chunks})')
         #get this chunk's data from the file if necessary
-        if self._data is None :
+        if self.__data is None :
             self._populate_with_file_data(logger)
         #produce the message to the topic
         success=False; total_wait_secs=0 
@@ -157,4 +157,4 @@ class DataFileChunk() :
             msg = f'ERROR: chunk hash {check_chunk_hash} != expected hash {self.chunk_hash} in file {self.filepath}, offset {self.chunk_offset}'
             logger.error(msg,ValueError)
         #set the chunk's data value
-        self._data = data
+        self.__data = data
