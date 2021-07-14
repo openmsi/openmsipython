@@ -174,6 +174,20 @@ class DataFileUploadDirectory(DataFileDirectory) :
         #return a list of filepaths that have been uploaded
         return [fp for fp,datafile in self.data_files_by_path.items() if datafile.fully_enqueued]
 
+    def filepath_should_be_uploaded(self,filepath) :
+        """
+        Filter filepaths from a glob and return a boolean that's True if they should be uploaded
+        """
+        if not isinstance(filepath,pathlib.PurePath) :
+            self.logger.error(f'ERROR: {filepath} passed to filepath_should_be_uploaded is not a Path!',TypeError)
+        if not filepath.is_file() :
+            return False
+        if filepath.name.startswith('.') :
+            return False
+        if filepath.name.endswith('.log') :
+            return False
+        return True
+
     #################### PRIVATE HELPER FUNCTIONS ####################
 
     def __find_new_files(self,to_upload=True) :
@@ -186,29 +200,24 @@ class DataFileUploadDirectory(DataFileDirectory) :
         try :
             for filepath in self.dirpath.rglob('*') :
                 filepath = filepath.resolve()
-                if self.__filepath_should_be_uploaded(filepath) and (filepath not in self.data_files_by_path.keys()):
+                if self.filepath_should_be_uploaded(filepath) and (filepath not in self.data_files_by_path.keys()):
                     self.data_files_by_path[filepath]=UploadDataFile(filepath,to_upload=to_upload,rootdir=self.dirpath,logger=self.logger)
         except FileNotFoundError :
             return
-
-    def __filepath_should_be_uploaded(self,filepath) :
-        """
-        Filter filepaths from a glob and return a boolean that's True if they should be uploaded
-        """
-        if not isinstance(filepath,pathlib.PurePath) :
-            self.logger.error(f'ERROR: {filepath} passed to __filepath_should_be_uploaded is not a Path!',TypeError)
-        if not filepath.is_file() :
-            return False
-        if filepath.name.startswith('.') :
-            return False
-        if filepath.name.endswith('.log') :
-            return False
-        return True
 
 class DataFileDownloadDirectory(DataFileDirectory) :
     """
     Class representing a directory into which files are being reconstructed
     """
+
+    #################### PROPERTIES ####################
+
+    @property
+    def n_msgs_read(self) :
+        return self.__n_msgs_read
+    @property
+    def completely_reconstructed_filenames(self) :
+        return self.__completely_reconstructed_filenames
 
     #################### PUBLIC FUNCTIONS ####################
 

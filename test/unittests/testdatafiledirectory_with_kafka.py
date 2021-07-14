@@ -102,8 +102,8 @@ class TestDataFileDirectoryWithKafka(unittest.TestCase) :
             LOGGER.set_stream_level(logging.INFO)
             LOGGER.info(f'Waiting to reconstruct test file from the "{RUN_OPT_CONST.DEFAULT_TOPIC_NAME}" topic in run_reconstruct (will timeout after {TIMEOUT_SECS} seconds)...')
             LOGGER.set_stream_level(logging.ERROR)
-            while (TEST_CONST.TEST_DATA_FILE_NAME not in dfdd._completely_reconstructed_filenames) and current_messages_read<dfdd._n_msgs_read and time_waited<TIMEOUT_SECS:
-                current_messages_read = dfdd._n_msgs_read
+            while (TEST_CONST.TEST_DATA_FILE_NAME not in dfdd.completely_reconstructed_filenames) and current_messages_read<dfdd.n_msgs_read and time_waited<TIMEOUT_SECS:
+                current_messages_read = dfdd.n_msgs_read
                 LOGGER.set_stream_level(logging.INFO)
                 LOGGER.info(f'\t{current_messages_read} messages read after waiting {time_waited} seconds....')
                 LOGGER.set_stream_level(logging.ERROR)

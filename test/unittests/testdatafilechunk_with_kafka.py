@@ -19,8 +19,8 @@ class TestDataFileChunkWithKafka(unittest.TestCase) :
         #use a DataFile to get a couple chunks to test
         df = UploadDataFile(TEST_CONST.TEST_DATA_FILE_PATH,rootdir=TEST_CONST.TEST_DATA_FILE_ROOT_DIR_PATH,logger=LOGGER)
         df._build_list_of_file_chunks(RUN_OPT_CONST.DEFAULT_CHUNK_SIZE)
-        self.test_chunk_1 = df._chunks_to_upload[0]
-        self.test_chunk_2 = df._chunks_to_upload[1]
+        self.test_chunk_1 = df.chunks_to_upload[0]
+        self.test_chunk_2 = df.chunks_to_upload[1]
         self.test_chunk_1._populate_with_file_data(logger=LOGGER)
         self.test_chunk_2._populate_with_file_data(logger=LOGGER)
 

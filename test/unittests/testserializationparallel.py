@@ -31,7 +31,7 @@ class TestSerialization(unittest.TestCase) :
         data_file._build_list_of_file_chunks(RUN_OPT_CONST.DEFAULT_CHUNK_SIZE)
         self.test_ul_chunk_objects = {}; self.test_dl_chunk_objects = {}
         for chunk_i in self.test_chunk_binaries.keys() :
-            ul_dfc = data_file._chunks_to_upload[int(chunk_i)]
+            ul_dfc = data_file.chunks_to_upload[int(chunk_i)]
             ul_dfc._populate_with_file_data(LOGGER)
             self.test_ul_chunk_objects[chunk_i] = ul_dfc
             subdir_as_path = pathlib.Path('').joinpath(*(pathlib.PurePosixPath(TEST_CONST.TEST_DATA_FILE_SUB_DIR_NAME).parts))

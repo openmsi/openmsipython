@@ -51,6 +51,12 @@ class UploadDataFile(DataFile) :
     #################### PROPERTIES ####################
 
     @property
+    def rootdir(self) :
+        return self.__rootdir
+    @property
+    def chunks_to_upload(self) :
+        return self.__chunks_to_upload
+    @property
     def to_upload(self):
         return self.__to_upload #whether or not this file will be considered when automatically uploading some group of data files
     @property
@@ -204,7 +210,7 @@ class UploadDataFile(DataFile) :
         self.logger.info(f'File {self.filepath} has a total of {len(chunks)} chunks')
         #add all the chunks to the final list as DataFileChunk objects
         for ic,c in enumerate(chunks,start=1) :
-            self.__chunks_to_upload.append(DataFileChunk(self.filepath,self._filename,file_hash,c[0],c[1],c[2],ic,len(chunks),rootdir=self.__rootdir))
+            self.__chunks_to_upload.append(DataFileChunk(self.filepath,self.filename,file_hash,c[0],c[1],c[2],ic,len(chunks),rootdir=self.__rootdir))
 
 class DownloadDataFile(DataFile) :
     """
