@@ -19,6 +19,9 @@ def main(args=None) :
                         help=f'Name of the topic to consume from (default={RUN_OPT_CONST.DEFAULT_TOPIC_NAME})')
     parser.add_argument('--n_threads', default=RUN_OPT_CONST.N_DEFAULT_DOWNLOAD_THREADS, type=int,
                         help=f'Maximum number of threads to use (default={RUN_OPT_CONST.N_DEFAULT_DOWNLOAD_THREADS})')
+    parser.add_argument('--queue_max_size', default=RUN_OPT_CONST.DEFAULT_MAX_DOWNLOAD_QUEUE_SIZE, type=int,
+                            help=f"""Maximum number of items (file chunks) to allow in the download queue at a time 
+                                     (default={RUN_OPT_CONST.DEFAULT_MAX_DOWNLOAD_QUEUE_SIZE}). Use to limit RAM usage if necessary.""")
     parser.add_argument('--update_seconds', default=RUN_OPT_CONST.DEFAULT_UPDATE_SECONDS, type=int,
                         help=f"""Number of seconds to wait between printing a '.' to the console to indicate the program is alive 
                                  (default={RUN_OPT_CONST.DEFAULT_UPDATE_SECONDS})""")
@@ -29,29 +32,31 @@ def main(args=None) :
     filename = pathlib.Path(__file__).name.split('.')[0]
     logger = Logger(filename,filepath=pathlib.Path(args.workingdir)/f'{filename}.log')
     #make the DataFileDirectory
-    reconstructor_directory = DataFileDownloadDirectory(args.workingdir,logger=logger)
-    #start the reconstructor running (returns total number of chunks read and total number of files completely reconstructed)
-    run_start = datetime.datetime.now()
-    logger.info(f'Listening for files to reconstruct in {args.workingdir}')
-    n_msgs,complete_filenames = reconstructor_directory.reconstruct(args.config,args.topic_name,
-                                                                    n_threads=args.n_threads,
-                                                                    update_secs=args.update_seconds,
-                                                                    consumer_group_ID=args.consumer_group_ID)
-    run_stop = datetime.datetime.now()
-    #shut down when that function returns
-    logger.info(f'File reconstructor writing to {args.workingdir} shut down')
-    msg = f'{n_msgs} total messages were consumed'
-    if len(complete_filenames)>0 :
-        msg+=f' and the following {len(complete_filenames)} file'
-        if len(complete_filenames)==1 :
-            msg+=' was'
-        else :
-            msg+='s were'
-        msg+=' successfully reconstructed'
-    msg+=f' from {run_start} to {run_stop}'
-    for fn in complete_filenames :
-        msg+=f'\n\t{fn}'
-    logger.info(msg)
+    reconstructor_directory = DataFileDownloadDirectory(args.workingdir,args.config,args.topic_name,
+                                                        n_threads=args.n_threads,
+                                                        consumer_group_ID=args.consumer_group_ID,
+                                                        update_secs=args.update_seconds,
+                                                        max_queue_size=args.queue_max_size,
+                                                        logger=logger)
+    ##start the reconstructor running (returns total number of chunks read and total number of files completely reconstructed)
+    #run_start = datetime.datetime.now()
+    #logger.info(f'Listening for files to reconstruct in {args.workingdir}')
+    #n_msgs,complete_filenames = reconstructor_directory.reconstruct()
+    #run_stop = datetime.datetime.now()
+    ##shut down when that function returns
+    #logger.info(f'File reconstructor writing to {args.workingdir} shut down')
+    #msg = f'{n_msgs} total messages were consumed'
+    #if len(complete_filenames)>0 :
+    #    msg+=f' and the following {len(complete_filenames)} file'
+    #    if len(complete_filenames)==1 :
+    #        msg+=' was'
+    #    else :
+    #        msg+='s were'
+    #    msg+=' successfully reconstructed'
+    #msg+=f' from {run_start} to {run_stop}'
+    #for fn in complete_filenames :
+    #    msg+=f'\n\t{fn}'
+    #logger.info(msg)
 
 if __name__=='__main__' :
     main()

@@ -49,6 +49,9 @@ class RunOptionConstants :
     def DEFAULT_MAX_UPLOAD_QUEUE_SIZE(self) :
         return 3000   # default maximum number of items allowed in the upload Queue at once
     @property
+    def DEFAULT_MAX_DOWNLOAD_QUEUE_SIZE(self) :
+        return 3000   # default maximum number of items allowed in the download Queue at once
+    @property
     def DEFAULT_UPDATE_SECONDS(self) :
         return 30     # how many seconds to wait by default between printing the "still alive" character/message for a running process
 
