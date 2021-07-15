@@ -3,8 +3,9 @@ from ..data_file_io.data_file_directory import DataFileDownloadDirectory
 from ..data_file_io.config import RUN_OPT_CONST
 from ..utilities.argument_parsing import create_dir, config_path
 from ..utilities.logging import Logger
+from ..utilities.config import UTIL_CONST
 from argparse import ArgumentParser
-import pathlib, datetime
+import pathlib, datetime, uuid
 
 def main(args=None) :
     #make the argument parser
@@ -19,13 +20,10 @@ def main(args=None) :
                         help=f'Name of the topic to consume from (default={RUN_OPT_CONST.DEFAULT_TOPIC_NAME})')
     parser.add_argument('--n_threads', default=RUN_OPT_CONST.N_DEFAULT_DOWNLOAD_THREADS, type=int,
                         help=f'Maximum number of threads to use (default={RUN_OPT_CONST.N_DEFAULT_DOWNLOAD_THREADS})')
-    parser.add_argument('--queue_max_size', default=RUN_OPT_CONST.DEFAULT_MAX_DOWNLOAD_QUEUE_SIZE, type=int,
-                            help=f"""Maximum number of items (file chunks) to allow in the download queue at a time 
-                                     (default={RUN_OPT_CONST.DEFAULT_MAX_DOWNLOAD_QUEUE_SIZE}). Use to limit RAM usage if necessary.""")
-    parser.add_argument('--update_seconds', default=RUN_OPT_CONST.DEFAULT_UPDATE_SECONDS, type=int,
+    parser.add_argument('--update_seconds', default=UTIL_CONST.DEFAULT_UPDATE_SECONDS, type=int,
                         help=f"""Number of seconds to wait between printing a '.' to the console to indicate the program is alive 
-                                 (default={RUN_OPT_CONST.DEFAULT_UPDATE_SECONDS})""")
-    parser.add_argument('--consumer_group_ID', 
+                                 (default={UTIL_CONST.DEFAULT_UPDATE_SECONDS})""")
+    parser.add_argument('--consumer_group_ID', default=str(uuid.uuid1()),
                         help='ID to use for all consumers in the group (by default a new, unique, ID will be created)')
     args = parser.parse_args(args=args)
     #get the logger
@@ -36,27 +34,26 @@ def main(args=None) :
                                                         n_threads=args.n_threads,
                                                         consumer_group_ID=args.consumer_group_ID,
                                                         update_secs=args.update_seconds,
-                                                        max_queue_size=args.queue_max_size,
                                                         logger=logger)
-    ##start the reconstructor running (returns total number of chunks read and total number of files completely reconstructed)
-    #run_start = datetime.datetime.now()
-    #logger.info(f'Listening for files to reconstruct in {args.workingdir}')
-    #n_msgs,complete_filenames = reconstructor_directory.reconstruct()
-    #run_stop = datetime.datetime.now()
-    ##shut down when that function returns
-    #logger.info(f'File reconstructor writing to {args.workingdir} shut down')
-    #msg = f'{n_msgs} total messages were consumed'
-    #if len(complete_filenames)>0 :
-    #    msg+=f' and the following {len(complete_filenames)} file'
-    #    if len(complete_filenames)==1 :
-    #        msg+=' was'
-    #    else :
-    #        msg+='s were'
-    #    msg+=' successfully reconstructed'
-    #msg+=f' from {run_start} to {run_stop}'
-    #for fn in complete_filenames :
-    #    msg+=f'\n\t{fn}'
-    #logger.info(msg)
+    #start the reconstructor running (returns total number of chunks read and total number of files completely reconstructed)
+    run_start = datetime.datetime.now()
+    logger.info(f'Listening for files to reconstruct in {args.workingdir}')
+    n_msgs,complete_filenames = reconstructor_directory.reconstruct()
+    run_stop = datetime.datetime.now()
+    #shut down when that function returns
+    logger.info(f'File reconstructor writing to {args.workingdir} shut down')
+    msg = f'{n_msgs} total messages were consumed'
+    if len(complete_filenames)>0 :
+        msg+=f' and the following {len(complete_filenames)} file'
+        if len(complete_filenames)==1 :
+            msg+=' was'
+        else :
+            msg+='s were'
+        msg+=' successfully reconstructed'
+    msg+=f' from {run_start} to {run_stop}'
+    for fn in complete_filenames :
+        msg+=f'\n\t{fn}'
+    logger.info(msg)
 
 if __name__=='__main__' :
     main()

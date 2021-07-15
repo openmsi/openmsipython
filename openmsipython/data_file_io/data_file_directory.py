@@ -1,11 +1,10 @@
 #imports
-from .data_file_stream_reader import DataFileStreamReader
 from .data_file import UploadDataFile, DownloadDataFile
 from .utilities import produce_from_queue_of_file_chunks
 from .config import RUN_OPT_CONST, DATA_FILE_HANDLING_CONST
 from ..my_kafka.my_producers import MySerializingProducer
-from ..my_kafka.my_consumers import MyDeserializingConsumer
-from ..utilities.controlled_process import ControlledProcessSingleThread
+from ..my_kafka.consumer_group import ConsumerGroup
+from ..utilities.controlled_process import ControlledProcessSingleThread, ControlledProcessMultiThreaded
 from ..utilities.misc import add_user_input, populated_kwargs
 from ..utilities.logging import Logger
 from ..utilities.my_base_class import MyBaseClass
@@ -83,7 +82,6 @@ class DataFileUploadDirectory(DataFileDirectory,ControlledProcessSingleThread) :
         topic_name  = name of the topic to produce messages to
 
         Possible keyword arguments:
-        n_threads        = the number of threads to run at once during uploading
         chunk_size       = the size of each file chunk in bytes
         max_queue_size   = maximum number of items allowed to be placed in the upload queue at once
         new_files_only   = set to True if any files that already exist in the directory should be assumed to have been produced
@@ -91,14 +89,12 @@ class DataFileUploadDirectory(DataFileDirectory,ControlledProcessSingleThread) :
         """
         #set the important variables
         kwargs = populated_kwargs(kwargs,
-                                  {'n_threads': RUN_OPT_CONST.N_DEFAULT_UPLOAD_THREADS,
-                                   'chunk_size': RUN_OPT_CONST.DEFAULT_CHUNK_SIZE,
+                                  {'chunk_size': RUN_OPT_CONST.DEFAULT_CHUNK_SIZE,
                                    'max_queue_size':RUN_OPT_CONST.DEFAULT_MAX_UPLOAD_QUEUE_SIZE,
-                                   'update_secs':RUN_OPT_CONST.DEFAULT_UPDATE_SECONDS,
                                    'new_files_only':False,
                                   },self.logger)
         #start the producer 
-        producer = MySerializingProducer.from_file(config_path,logger=self.logger)
+        self.__producer = MySerializingProducer.from_file(config_path,logger=self.logger)
         #if we're only going to upload new files, exclude what's already in the directory
         if kwargs['new_files_only'] :
             self.__find_new_files(to_upload=False)
@@ -110,15 +106,15 @@ class DataFileUploadDirectory(DataFileDirectory,ControlledProcessSingleThread) :
             msg+='files in '
         msg+=f'{self.dirpath} to the {topic_name} topic using {kwargs["n_threads"]} threads'
         self.logger.info(msg)
-        upload_queue = Queue(kwargs['max_queue_size'])
-        upload_threads = []
+        self.__upload_queue = Queue(kwargs['max_queue_size'])
+        self.__upload_threads = []
         for ti in range(kwargs['n_threads']) :
-            t = Thread(target=produce_from_queue_of_file_chunks,args=(upload_queue,
-                                                                      producer,
+            t = Thread(target=produce_from_queue_of_file_chunks,args=(self.__upload_queue,
+                                                                      self.__producer,
                                                                       topic_name,
                                                                       self.logger))
             t.start()
-            upload_threads.append(t)
+            self.__upload_threads.append(t)
         #loop until the user inputs a command to stop
         self.run()
         #return a list of filepaths that have been uploaded
@@ -144,11 +140,10 @@ class DataFileUploadDirectory(DataFileDirectory,ControlledProcessSingleThread) :
         #check for new files in the directory if we haven't already found some to run
         if not self.have_file_to_upload :
             self.__find_new_files()
-            return
         #find the first file that's running and add some of its chunks to the upload queue 
         for datafile in self.data_files_by_path.values() :
             if datafile.upload_in_progress or datafile.waiting_to_upload :
-                datafile.add_chunks_to_upload_queue(upload_queue,**kwargs)
+                datafile.add_chunks_to_upload_queue(self.__upload_queue,**kwargs)
                 break
 
     def _on_check(self) :
@@ -167,15 +162,15 @@ class DataFileUploadDirectory(DataFileDirectory,ControlledProcessSingleThread) :
         while self.n_partially_done_files>0 :
             for datafile in self.data_files_by_path.values() :
                 if datafile.upload_in_progress :
-                    datafile.add_chunks_to_upload_queue(upload_queue,**kwargs)
+                    datafile.add_chunks_to_upload_queue(self.__upload_queue,**kwargs)
                     break
         #stop the uploading threads by adding "None"s to their queues and joining them
-        for ut in upload_threads :
-            upload_queue.put(None)
-        for ut in upload_threads :
+        for ut in self.__upload_threads :
+            self.__upload_queue.put(None)
+        for ut in self.__upload_threads :
             ut.join()
         self.logger.info('Waiting for all enqueued messages to be delivered (this may take a moment)....')
-        producer.flush() #don't move on until all enqueued messages have been sent/received
+        self.__producer.flush() #don't move on until all enqueued messages have been sent/received
         self.logger.info('Done!')
 
     def __find_new_files(self,to_upload=True) :
@@ -193,7 +188,7 @@ class DataFileUploadDirectory(DataFileDirectory,ControlledProcessSingleThread) :
         except FileNotFoundError :
             return
 
-class DataFileDownloadDirectory(DataFileDirectory,DataFileStreamReader) :
+class DataFileDownloadDirectory(DataFileDirectory,ControlledProcessMultiThreaded,ConsumerGroup) :
     """
     Class representing a directory into which files are being reconstructed
     """
@@ -207,76 +202,37 @@ class DataFileDownloadDirectory(DataFileDirectory,DataFileStreamReader) :
     #################### PUBLIC FUNCTIONS ####################
 
     def __init__(self,*args,**kwargs) :
+        kwargs = populated_kwargs(kwargs,{'n_consumers':kwargs.get('n_threads')})
         super().__init__(*args,**kwargs)
+        self.__n_msgs_read = 0
         self.__completely_reconstructed_filenames = set()
         self.__thread_locks_by_filepath = {}
 
     def reconstruct(self) :
         """
-        Consumes messages into a queue and processes them using several parallel threads to reconstruct 
-        the files to which they correspond. Runs until the user inputs a command to shut it down.
-        Returns the total number of messages consumed, as well as the number of files whose reconstruction 
-        was completed during the run. 
+        Consumes messages processes them using several parallel threads to reconstruct the files to which 
+        they correspond. Runs until the user inputs a command to shut it down. Returns the total number of 
+        messages consumed, as well as the number of files whose reconstruction was completed during the run. 
         """
         self.logger.info(f'Will reconstruct files from messages in the {self.topic_name} topic using {self.n_threads} threads')
-        #start up all of the threads
-        self._threads = []
         lock = Lock()
-        for i in range(self.n_threads) :
-            self._threads.append(Thread(target=self.__process_messages_worker,
-                                        args=(lock)))
-            self._threads[-1].start()
-        #loop until the user inputs a command to stop
-        last_update = time.time()
-        while True:
-            if kwargs['update_secs']!=-1 and time.time()-last_update>kwargs['update_secs']:
-                self.logger.debug('.')
-                last_update = time.time()
-            if not self.user_input_queue.empty():
-                cmd = self.user_input_queue.get()
-                if cmd.lower() in ('q','quit') :
-                    self.user_input_queue.task_done()
-                    break
-                elif cmd.lower() in ('c','check') :
-                    self.logger.debug(f'{self.__n_msgs_read} messages read, {len(self.__completely_reconstructed_filenames)} files completely reconstructed so far')
-        #stop the processes by adding "None" to the queues 
-        for i in range(len(self._threads)) :
-            self._queues[i].put(None)
-        #join all the threads
-        for t in self._threads :
-            t.join()
+        self.run([(lock,self.consumers[i]) for i in range(self.n_threads)])
         return self.__n_msgs_read, self.__completely_reconstructed_filenames
 
     #################### PRIVATE HELPER FUNCTIONS ####################
 
-    def __process_messages_worker(self,lock) :
+    def _run_worker(self,lock,consumer) :
         """
-        Read messages from a Queue as they are consumed and try to reconstruct them in the directory as DataFileChunks, 
+        Consume messages expected to be DataFileChunks and try to write their data to disk in the directory, 
         paying attention to whether/how the files they're coming from end up fully reconstructed or mismatched with their original hashes.
-        Several iterations of this function are meant to run in parallel threads, speeding up the processing of the DataFileStreamReader Queue.
+        Several iterations of this function run in parallel threads as part of a ControlledProcessMultiThreaded
         """
-        #start the infinite loop
-        while True:
-            #try to get something from the queue
-            try :
-                dfc = self._queues[list_index].get(block=False)
-            #if there's nothing there, try to add a message consumed from the topic and then start over
-            except Empty :
-                try :
-                    consumed_msg = consumer.poll(0)
-                except Exception as e :
-                    self.logger.warning(f'WARNING: encountered an error in a call to consumer.poll() and will skip the offending message. Error: {e}')
-                    continue
-                if consumed_msg is not None and consumed_msg.error() is None :
-                    self._queues[list_index].put(consumed_msg.value())
+        #start the loop for while the controlled process is alive
+        while self.alive :
+            #consume a DataFileChunk message from the topic
+            dfc = consumer.get_next_message()
+            if dfc is None :
                 continue
-            #if instead the queue had "None" in it then shut down the task
-            if dfc is None:
-                #make sure the thread can be joined
-                self._queues[list_index].task_done()
-                #close the consumer
-                consumer.close()
-                break
             #set the chunk's rootdir to the working directory
             if dfc.rootdir is not None :
                 self.logger.error(f'ERROR: message with key {dfc.message_key} has rootdir={dfc.rootdir} (should be None as it was just consumed)!',RuntimeError)
@@ -299,3 +255,12 @@ class DataFileDownloadDirectory(DataFileDirectory,DataFileStreamReader) :
             elif return_value in (DATA_FILE_HANDLING_CONST.FILE_IN_PROGRESS,DATA_FILE_HANDLING_CONST.CHUNK_ALREADY_WRITTEN_CODE) :
                 with lock :
                     self.__n_msgs_read+=1
+        print('BROKE OUT OF LOOP')
+
+    def _on_check(self) :
+        self.logger.debug(f'{self.__n_msgs_read} messages read, {len(self.__completely_reconstructed_filenames)} files completely reconstructed so far')
+
+    def _on_shutdown(self) :
+        super()._on_shutdown()
+        for consumer in self.consumers :
+            consumer.close()

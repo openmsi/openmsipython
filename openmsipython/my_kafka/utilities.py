@@ -39,3 +39,21 @@ def get_replaced_configs(configs,replacement_type) :
     else :
         raise ValueError(f'ERROR: unrecognized replacement_type "{replacement_type}" in get_replaced_configs!')
     return get_transformed_configs(configs,names_classes)
+
+def get_next_message(consumer,logger,*poll_args,**poll_kwargs) :
+    """
+    Call "poll" for the given consumer and return any successfully consumed message; otherwise log a warning if there's an error
+    """
+    try :
+        consumed_msg = consumer.poll(*poll_args,**poll_kwargs)
+    except Exception as e :
+        logger.warning(f'WARNING: encountered an error in a call to consumer.poll() and will skip the offending message. Error: {e}')
+        return
+    if consumed_msg is not None and consumed_msg.error() is None and consumed_msg.value() is not None :
+        return consumed_msg.value()
+    else :
+        warnmsg = f'WARNING: unexpected consumed message, consumed_msg = {consumed_msg}'
+        if consumed_msg is not None :
+            warnmsg+= f', consumed_msg.error() = {consumed_msg.error()}, consumed_msg.value() = {consumed_msg.value()}'
+        logger.warning(warnmsg)
+        return

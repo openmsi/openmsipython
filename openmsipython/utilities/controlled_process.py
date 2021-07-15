@@ -2,7 +2,7 @@
 from .misc import add_user_input
 from .logging import Logger
 from .my_base_class import MyBaseClass
-from ..data_file_io.config import RUN_OPT_CONST
+from .config import UTIL_CONST
 from queue import Queue
 from threading import Thread
 from abc import ABC, abstractmethod
@@ -21,7 +21,7 @@ class ControlledProcess(ABC,MyBaseClass) :
 
     #################### PUBLIC FUNCTIONS ####################
 
-    def __init__(self,*args,update_secs=RUN_OPT_CONST.DEFAULT_UPDATE_SECONDS,**other_kwargs) :
+    def __init__(self,*args,update_secs=UTIL_CONST.DEFAULT_UPDATE_SECONDS,**other_kwargs) :
         """
         update_secs = number of seconds to wait between printing a progress character to the console to indicate the program is alive
 
@@ -65,7 +65,7 @@ class ControlledProcess(ABC,MyBaseClass) :
             if cmd.lower() in ('q','quit') : # shut down the process
                 self.shutdown()
             elif cmd.lower() in ('c','check') : # run the on_check function
-                self.on_check()
+                self._on_check()
 
     #################### ABSTRACT METHODS ####################
 
@@ -107,6 +107,8 @@ class ControlledProcessSingleThread(ControlledProcess,ABC) :
         super().run()
         while self.alive :
             self._run_iteration()
+            self._print_still_alive()
+            self._check_control_command_queue()
 
     @abstractmethod
     def _run_iteration(self) :
@@ -114,8 +116,7 @@ class ControlledProcessSingleThread(ControlledProcess,ABC) :
         The function that is run in an infinite loop while the process is alive
         Not implemented in the base class, except to print the "still alive" character and check the control command queue
         """
-        self._print_still_alive()
-        self._check_control_command_queue()
+        pass
 
 class ControlledProcessMultiThreaded(ControlledProcess,ABC) :
     """
@@ -126,7 +127,7 @@ class ControlledProcessMultiThreaded(ControlledProcess,ABC) :
     def n_threads(self):
         return self.__n_threads
 
-    def __init__(self,*args,n_threads=RUN_OPT_CONST.DEFAULT_N_THREADS,**kwargs) :
+    def __init__(self,*args,n_threads=UTIL_CONST.DEFAULT_N_THREADS,**kwargs) :
         """
         n_threads = number of threads to use
         """
@@ -150,13 +151,20 @@ class ControlledProcessMultiThreaded(ControlledProcess,ABC) :
                 args_per_thread = self.__n_threads*args_per_thread
         #create and start the independent threads
         self.__threads = []
-        for i in range(n_threads) :
+        for i in range(self.__n_threads) :
             self.__threads.append(Thread(target=self._run_worker,args=args_per_thread[i]))
             self.__threads[-1].start()
         #loop while the process is alive, checking the control command queue and printing the "still alive" character
         while self.alive :
             self._print_still_alive()
             self._check_control_command_queue()
+
+    def _on_shutdown(self) :
+        """
+        Can override this method further in subclasses, just be sure to also call super()._on_shutdown() to join threads
+        """
+        for t in self.__threads :
+            t.join()
 
     @abstractmethod
     def _run_worker(self,*args) :
