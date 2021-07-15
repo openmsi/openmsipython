@@ -37,7 +37,8 @@ class ConsumerGroup(MyBaseClass) :
         #create a Consumer for each thread and subscribe it to the topic
         self.__consumers = []
         for i in range(n_consumers) :
-            consumer = MyDeserializingConsumer.from_file(config_path,logger=self.__logger,group_id=consumer_group_ID)
-            #consumer.subscribe([self.__topic_name])
+            consumer = MyDeserializingConsumer.from_file(config_path,logger=self.__logger)#,group_id=consumer_group_ID)
             self.__consumers.append(consumer)
+        for consumer in self.__consumers :
+            consumer.subscribe([self.__topic_name])
         super().__init__(*args,**other_kwargs)

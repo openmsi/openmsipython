@@ -49,11 +49,11 @@ def get_next_message(consumer,logger,*poll_args,**poll_kwargs) :
     except Exception as e :
         logger.warning(f'WARNING: encountered an error in a call to consumer.poll() and will skip the offending message. Error: {e}')
         return
-    if consumed_msg is not None and consumed_msg.error() is None and consumed_msg.value() is not None :
+    if consumed_msg is not None :
+        if consumed_msg.error() is not None or consumed_msg.value() is None :
+            warnmsg = f'WARNING: unexpected consumed message, consumed_msg = {consumed_msg}'
+            warnmsg+= f', consumed_msg.error() = {consumed_msg.error()}, consumed_msg.value() = {consumed_msg.value()}'
+            logger.warning(warnmsg)
         return consumed_msg.value()
     else :
-        warnmsg = f'WARNING: unexpected consumed message, consumed_msg = {consumed_msg}'
-        if consumed_msg is not None :
-            warnmsg+= f', consumed_msg.error() = {consumed_msg.error()}, consumed_msg.value() = {consumed_msg.value()}'
-        logger.warning(warnmsg)
         return

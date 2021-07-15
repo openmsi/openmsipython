@@ -117,7 +117,7 @@ class UploadDataFile(DataFile) :
         If the given queue is full this function will do absolutely nothing and will just return.
 
         Possible keyword arguments:
-        n_threads  = the number of threads running during uploading; at most this number of chunks will be added per call to this function
+        n_threads  = the number of threads running during uploading; at most 5*this number of chunks will be added per call to this function
                      if this argument isn't given, every chunk will be added
         chunk_size = the size of each file chunk in bytes (used to create the list of file chunks if it doesn't already exist)
                      the default value will be used if this argument isn't given
@@ -131,7 +131,7 @@ class UploadDataFile(DataFile) :
             kwargs = populated_kwargs(kwargs,{'chunk_size': RUN_OPT_CONST.DEFAULT_CHUNK_SIZE},self.logger)
             self._build_list_of_file_chunks(kwargs['chunk_size'])
         if kwargs.get('n_threads') is not None :
-            n_chunks_to_add = kwargs['n_threads']
+            n_chunks_to_add = 5*kwargs['n_threads']
         else :
             n_chunks_to_add = len(self.__chunks_to_upload)
         ic = 0

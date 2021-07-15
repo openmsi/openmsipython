@@ -230,7 +230,7 @@ class DataFileDownloadDirectory(DataFileDirectory,ControlledProcessMultiThreaded
         #start the loop for while the controlled process is alive
         while self.alive :
             #consume a DataFileChunk message from the topic
-            dfc = consumer.get_next_message()
+            dfc = consumer.get_next_message(0)
             if dfc is None :
                 continue
             #set the chunk's rootdir to the working directory
@@ -255,7 +255,6 @@ class DataFileDownloadDirectory(DataFileDirectory,ControlledProcessMultiThreaded
             elif return_value in (DATA_FILE_HANDLING_CONST.FILE_IN_PROGRESS,DATA_FILE_HANDLING_CONST.CHUNK_ALREADY_WRITTEN_CODE) :
                 with lock :
                     self.__n_msgs_read+=1
-        print('BROKE OUT OF LOOP')
 
     def _on_check(self) :
         self.logger.debug(f'{self.__n_msgs_read} messages read, {len(self.__completely_reconstructed_filenames)} files completely reconstructed so far')

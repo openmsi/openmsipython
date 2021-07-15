@@ -3,7 +3,7 @@ from .utilities import get_replaced_configs, get_next_message
 from ..utilities.config_file_parser import ConfigFileParser
 from ..utilities.logging import Logger
 from confluent_kafka import Consumer, DeserializingConsumer
-import uuid
+import uuid, copy
 
 class MyConsumer(Consumer) :
     """
@@ -71,7 +71,7 @@ class MyDeserializingConsumer(DeserializingConsumer) :
         if 'group.id' in configs.keys() and configs['group.id'].lower()=='new' :
             configs['group.id']=str(uuid.uuid1())
         #if one of several recognized deserializers have been given as config paramenters for the key/value deserializer, replace them with the actual class
-        configs = get_replaced_configs(configs,'deserialization')
+        configs = copy.copy(get_replaced_configs(configs,'deserialization'))
         return cls(configs,kwargs.get('logger'))
 
     def get_next_message(self,*poll_args,**poll_kwargs) :
