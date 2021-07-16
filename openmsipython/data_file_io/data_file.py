@@ -5,13 +5,15 @@ from .config import DATA_FILE_HANDLING_CONST, RUN_OPT_CONST
 from ..my_kafka.my_producers import MySerializingProducer
 from ..utilities.misc import populated_kwargs
 from ..utilities.logging import Logger
-from threading import Thread
+from ..utilities.my_base_class import MyBaseClass
+from abc import ABC, abstractmethod
+from threading import Thread, Lock
 from queue import Queue
 from contextlib import nullcontext
 from hashlib import sha512
 import pathlib, os
 
-class DataFile() :
+class DataFile(MyBaseClass) :
     """
     Base class for representing a single data file
     """
@@ -50,6 +52,10 @@ class UploadDataFile(DataFile) :
 
     #################### PROPERTIES ####################
 
+    @property
+    def select_bytes(self) :
+        return []   # in child classes this can be a list of tuples of (start_byte,stop_byte) 
+                    # in the file that will be the only ranges of bytes added when creating the list of chunks
     @property
     def rootdir(self) :
         return self.__rootdir
@@ -190,21 +196,41 @@ class UploadDataFile(DataFile) :
         """
         Build the full list of DataFileChunks for this file given a chunk size (in bytes)
         """
+        #first make sure the choices of select_bytes are valid if necessary and sort them by their start byte to keep the file hash in order
+        if self.select_bytes!=[] :
+            if type(self.select_bytes)!=list :
+                raise ValueError(f'ERROR: select_bytes={self.select_bytes} but is expected to be a list!')
+            for sbt in self.select_bytes :
+                if type(sbt)!=tuple or len(sbt)!=2 :
+                    raise ValueError(f'ERROR: found {sbt} in select_bytes but all elements are expected to be two-entry tuples!')
+                elif sbt[0]>=sbt[1] :
+                    raise ValueError(f'ERROR: found {sbt} in select_bytes but start byte cannot be >= stop byte!')
+            sorted_select_bytes = sorted(self.select_bytes,key=lambda x: x[0])
         #start a hash for the file and the lists of chunks
         file_hash = sha512()
         chunks = []
+        isb = 0 #index for the current sorted_select_bytes entry if necessary
         #read the binary data in the file as chunks of the given size, adding each chunk to the list 
-        with open(self.filepath, "rb") as fp :
+        with open(self.filepath,'rb') as fp :
             chunk_offset = 0
+            file_offset = 0 if self.select_bytes==[] else sorted_select_bytes[isb][0]
+            n_bytes_to_read = chunk_size if self.select_bytes==[] else min(chunk_size,sorted_select_bytes[isb][1]-file_offset)
             chunk = fp.read(chunk_size)
-            while len(chunk) > 0:
-                chunk_length = len(chunk)
+            while len(chunk) > 0 :
                 file_hash.update(chunk)
                 chunk_hash = sha512()
                 chunk_hash.update(chunk)
                 chunk_hash = chunk_hash.digest()
-                chunks.append([chunk_hash,chunk_offset,chunk_length])
+                chunk_length = len(chunk)
+                chunks.append([chunk_hash,file_offset,chunk_length])
                 chunk_offset += chunk_length
+                file_offset += chunk_length
+                if self.select_bytes!=[] and file_offset==sorted_select_bytes[isb][1] :
+                    isb+=1
+                    if isb>(len(sorted_select_bytes)-1) :
+                        break
+                    file_offset=sorted_select_bytes[isb][0]
+                n_bytes_to_read = chunk_size if self.select_bytes==[] else min(chunk_size,sorted_select_bytes[isb][1]-file_offset)
                 chunk = fp.read(chunk_size)
         file_hash = file_hash.digest()
         self.logger.info(f'File {self.filepath} has a total of {len(chunks)} chunks')
@@ -212,25 +238,30 @@ class UploadDataFile(DataFile) :
         for ic,c in enumerate(chunks,start=1) :
             self.__chunks_to_upload.append(DataFileChunk(self.filepath,self.filename,file_hash,c[0],c[1],c[2],ic,len(chunks),rootdir=self.__rootdir))
 
-class DownloadDataFile(DataFile) :
+class DownloadDataFile(DataFile,ABC) :
     """
-    Class to represent a data file that will be reconstructed from messages downloaded from a topic
+    Class to represent a data file that will be read as messages from a topic
     """
 
-    #################### PUBLIC FUNCTIONS ####################
+    @property
+    @abstractmethod
+    def check_file_hash(self) :
+        pass #the hash of the data in the file after it was read; not implemented in the base class
 
     def __init__(self,*args,**kwargs) :
         super().__init__(*args,**kwargs)
-        #create the parent directory of the file if it doesn't exist yet (in case the file is in a new subdirectory)
-        if not self.filepath.parent.is_dir() :
-            self.filepath.parent.mkdir(parents=True)
         #start an empty set of this file's downloaded offsets
         self._chunk_offsets_downloaded = set()
+        #a thread lock to guarantee that only one thread does certain critical things to the file at once
 
-    def write_chunk_to_disk(self,dfc,thread_lock=nullcontext()) :
+    def add_chunk(self,dfc,thread_lock=nullcontext(),*args,**kwargs) :
         """
-        Add the data from a given file chunk to this file on disk
-        dfc         = the DataFileChunk object whose data should be added
+        A function to process a chunk that's been read from a topic
+        Returns a number of codes based on what effect adding the chunk had
+        
+        This function calls _on_add_chunk, 
+        
+        dfc = the DataFileChunk object whose data should be added
         thread_lock = the lock object to acquire/release so that race conditions don't affect 
                       reconstruction of the files (optional, only needed if running this function asynchronously)
         """
@@ -240,28 +271,96 @@ class DownloadDataFile(DataFile) :
         #if this chunk's offset has already been written to disk, return the "already written" code
         if dfc.chunk_offset in self._chunk_offsets_downloaded :
             return DATA_FILE_HANDLING_CONST.CHUNK_ALREADY_WRITTEN_CODE
-        #lock the current thread while data is written to the file
+        #acquire the thread lock to make sure this process is the only one dealing with this particular file
+        with thread_lock:
+            #call the function to actually add the chunk
+            self._on_add_chunk(dfc,*args,**kwargs)
+            #add the offset of the added chunk to the set of reconstructed file chunks
+            self._chunk_offsets_downloaded.add(dfc.chunk_offset)
+            #if this chunk was the last that needed to be added, check the hashes to make sure the file is the same as it was originally
+            if len(self._chunk_offsets_downloaded)==dfc.n_total_chunks :
+                if self.check_file_hash!=dfc.file_hash :
+                    return DATA_FILE_HANDLING_CONST.FILE_HASH_MISMATCH_CODE
+                else :
+                    return DATA_FILE_HANDLING_CONST.FILE_SUCCESSFULLY_RECONSTRUCTED_CODE
+            else :
+                return DATA_FILE_HANDLING_CONST.FILE_IN_PROGRESS
+
+    @abstractmethod
+    def _on_add_chunk(dfc,*args,**kwargs) :
+        """
+        A function to actually process a new chunk being added to the file
+        This function is executed while a thread lock is acquired so it will never run asynchronously
+        Also any DataFileChunks passed to this function are guaranteed to have unique offsets
+        Not implemented in the base class
+        """
+        pass
+
+class DownloadDataFileToDisk(DownloadDataFile) :
+    """
+    Class to represent a data file that will be reconstructed on disk using messages read from a topic
+    """
+
+    @property
+    def check_file_hash(self) :
+        check_file_hash = sha512()
+        with open(self._filepath,'rb') as fp :
+            data = fp.read()
+        check_file_hash.update(data)
+        return check_file_hash.digest()
+
+    def __init__(self,*args,**kwargs) :
+        super().__init__(*args,**kwargs)
+        #create the parent directory of the file if it doesn't exist yet (in case the file is in a new subdirectory)
+        if not self.filepath.parent.is_dir() :
+            self.filepath.parent.mkdir(parents=True)
+
+    def _on_add_chunk(self,dfc) :
+        """
+        Add the data from a given file chunk to this file on disk
+        """
         mode = 'r+b' if self.filepath.is_file() else 'w+b'
         with open(self.filepath,mode) as fp :
-            with thread_lock :
-                fp.seek(dfc.chunk_offset)
-                fp.write(dfc.data)
-                fp.flush()
-                os.fsync(fp.fileno())
-                fp.close()
-        #add the offset of the added chunk to the set of reconstructed file chunks
-        self._chunk_offsets_downloaded.add(dfc.chunk_offset)
-        #if this chunk was the last that needed to be added, check the hashes to make sure the file is the same as it was originally
-        if len(self._chunk_offsets_downloaded)==dfc.n_total_chunks :
-            check_file_hash = sha512()
-            with thread_lock :
-                with open(self.filepath,'rb') as fp :
-                    data = fp.read()
-            check_file_hash.update(data)
-            check_file_hash = check_file_hash.digest()
-            if check_file_hash!=dfc.file_hash :
-                return DATA_FILE_HANDLING_CONST.FILE_HASH_MISMATCH_CODE
-            else :
-                return DATA_FILE_HANDLING_CONST.FILE_SUCCESSFULLY_RECONSTRUCTED_CODE
-        else :
-            return DATA_FILE_HANDLING_CONST.FILE_IN_PROGRESS
+            fp.seek(dfc.chunk_offset)
+            fp.write(dfc.data)
+            fp.flush()
+            os.fsync(fp.fileno())
+            fp.close()
+
+class DownloadDataFileToMemory(DownloadDataFile) :
+    """
+    Class to represent a data file that will be held in memory and populated by the contents of messages from a topic
+    """
+
+    @property
+    def bytestring(self) :
+        if self.__bytestring is None :
+            self.__create_bytestring()
+        return self.__bytestring
+    @property
+    def check_file_hash(self) :
+        check_file_hash = sha512()
+        check_file_hash.update(self.bytestring)
+        return check_file_hash.digest()
+
+    def __init__(self,*args,**kwargs) :
+        super().__init__(*args,**kwargs)
+        #start a dictionary of the file data by their offsets
+        self.__chunk_data_by_offset = {}
+        #placeholder for the eventual full data bytestring
+        self.__bytestring = None
+
+    def _on_add_chunk(self,dfc) :
+        """
+        Add the data from a given file chunk to the dictionary of data by offset
+        """
+        self.__chunk_data_by_offset[dfc.chunk_offset] = dfc.data
+
+    def __create_bytestring(self) :
+        """
+        Makes all of the data held in the dictionary into a single bytestring ordered by offset of each chunk
+        """
+        bytestring = b''
+        for data in [self.__chunk_data_by_offset[offset] for offset in sorted(self.__chunk_data_by_offset.keys())] :
+            bytestring+=data
+        self.__bytestring = bytestring

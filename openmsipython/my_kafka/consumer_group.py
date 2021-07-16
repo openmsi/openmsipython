@@ -35,9 +35,11 @@ class ConsumerGroup(MyBaseClass) :
         if self.__logger is None :
             self.__logger = Logger(pathlib.Path(__file__).name.split('.')[0])
         #create a Consumer for each thread and subscribe it to the topic
+        print(f'other_kwargs = {other_kwargs}')
+        config_dict = MyDeserializingConsumer.get_config_dict(config_path,group_id=consumer_group_ID,**other_kwargs)
         self.__consumers = []
         for i in range(n_consumers) :
-            consumer = MyDeserializingConsumer.from_file(config_path,logger=self.__logger)#,group_id=consumer_group_ID)
+            consumer = MyDeserializingConsumer(config_dict,other_kwargs.get('logger'))
             self.__consumers.append(consumer)
         for consumer in self.__consumers :
             consumer.subscribe([self.__topic_name])

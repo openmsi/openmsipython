@@ -1,5 +1,5 @@
 #imports
-from .data_file import UploadDataFile, DownloadDataFile
+from .data_file import UploadDataFile, DownloadDataFileToDisk
 from .utilities import produce_from_queue_of_file_chunks
 from .config import RUN_OPT_CONST, DATA_FILE_HANDLING_CONST
 from ..my_kafka.my_producers import MySerializingProducer
@@ -35,7 +35,6 @@ class DataFileDirectory(MyBaseClass) :
         Possible keyword arguments:
         logger = the logger object to use (a new one will be created if none is supplied)
         """
-        kwargs = populated_kwargs(kwargs,{'new_files_only':False})
         self.__dirpath = dirpath.resolve()
         self.__logger = kwargs.get('logger')
         if self.__logger is None :
@@ -50,6 +49,9 @@ class DataFileUploadDirectory(DataFileDirectory,ControlledProcessSingleThread) :
 
     #################### PROPERTIES ####################
 
+    @property
+    def other_datafile_kwargs(self) :
+        return {} # Overload this in child classes to send extra keyword arguments to the individual datafile constructors
     @property
     def progress_msg(self) :
         self.__find_new_files()
@@ -73,6 +75,10 @@ class DataFileUploadDirectory(DataFileDirectory,ControlledProcessSingleThread) :
         return len(self.partially_done_file_paths)
 
     #################### PUBLIC FUNCTIONS ####################
+
+    def __init__(self,dirpath,datafiletype=UploadDataFile,**kwargs) :
+        self.__datafiletpye = datafiletype
+        super().__init__(dirpath,**kwargs)
 
     def upload_files_as_added(self,config_path,topic_name,**kwargs) :
         """
@@ -184,7 +190,11 @@ class DataFileUploadDirectory(DataFileDirectory,ControlledProcessSingleThread) :
             for filepath in self.dirpath.rglob('*') :
                 filepath = filepath.resolve()
                 if self.filepath_should_be_uploaded(filepath) and (filepath not in self.data_files_by_path.keys()):
-                    self.data_files_by_path[filepath]=UploadDataFile(filepath,to_upload=to_upload,rootdir=self.dirpath,logger=self.logger)
+                    self.data_files_by_path[filepath]=self.__datafiletype(filepath,
+                                                                          to_upload=to_upload,
+                                                                          rootdir=self.dirpath,
+                                                                          logger=self.logger,
+                                                                          self.other_datafile_kwargs)
         except FileNotFoundError :
             return
 
@@ -214,7 +224,7 @@ class DataFileDownloadDirectory(DataFileDirectory,ControlledProcessMultiThreaded
         they correspond. Runs until the user inputs a command to shut it down. Returns the total number of 
         messages consumed, as well as the number of files whose reconstruction was completed during the run. 
         """
-        self.logger.info(f'Will reconstruct files from messages in the {self.topic_name} topic using {self.n_threads} threads')
+        self.logger.info(f'Will reconstruct files from messages in the {self.topic_name} topic using {self.n_threads} thread{"s" if self.n_threads>1 else ""}')
         lock = Lock()
         self.run([(lock,self.consumers[i]) for i in range(self.n_threads)])
         return self.__n_msgs_read, self.__completely_reconstructed_filenames
@@ -239,9 +249,9 @@ class DataFileDownloadDirectory(DataFileDirectory,ControlledProcessMultiThreaded
             dfc.rootdir = self.dirpath
             #add the chunk's data to the file that's being reconstructed
             if dfc.filepath not in self.data_files_by_path.keys() :
-                self.data_files_by_path[dfc.filepath] = DownloadDataFile(dfc.filepath,logger=self.logger)
+                self.data_files_by_path[dfc.filepath] = DownloadDataFileToDisk(dfc.filepath,logger=self.logger)
                 self.__thread_locks_by_filepath[dfc.filepath] = Lock()
-            return_value = self.data_files_by_path[dfc.filepath].write_chunk_to_disk(dfc,self.__thread_locks_by_filepath[dfc.filepath])
+            return_value = self.data_files_by_path[dfc.filepath].add_chunk(dfc,self.__thread_locks_by_filepath[dfc.filepath])
             if return_value==DATA_FILE_HANDLING_CONST.FILE_HASH_MISMATCH_CODE :
                 self.logger.error(f'ERROR: file hashes for file {dfc.filename} not matched after reconstruction!',RuntimeError)
             elif return_value==DATA_FILE_HANDLING_CONST.FILE_SUCCESSFULLY_RECONSTRUCTED_CODE :
