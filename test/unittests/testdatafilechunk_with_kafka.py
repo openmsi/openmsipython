@@ -34,8 +34,11 @@ class TestDataFileChunkWithKafka(unittest.TestCase) :
     def test_chunk_of_nonexistent_file(self) :
         nonexistent_file_path = pathlib.Path(__file__).parent / 'never_name_a_file_this.txt'
         self.assertFalse(nonexistent_file_path.is_file())
-        chunk_to_fail = DataFileChunk(nonexistent_file_path,nonexistent_file_path.name,self.test_chunk_1.file_hash,self.test_chunk_1.chunk_hash,
-                                      self.test_chunk_1.chunk_offset,self.test_chunk_1.chunk_size,self.test_chunk_1.chunk_i,self.test_chunk_1.n_total_chunks)
+        chunk_to_fail = DataFileChunk(nonexistent_file_path,nonexistent_file_path.name,
+                                      self.test_chunk_1.file_hash,self.test_chunk_1.chunk_hash,
+                                      self.test_chunk_1.chunk_offset_read,self.test_chunk_1.chunk_offset_write,
+                                      self.test_chunk_1.chunk_size,
+                                      self.test_chunk_1.chunk_i,self.test_chunk_1.n_total_chunks)
         LOGGER.set_stream_level(logging.INFO)
         LOGGER.info('\nExpecting two errors below:')
         LOGGER.set_stream_level(logging.ERROR)

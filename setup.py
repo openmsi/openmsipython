@@ -13,6 +13,7 @@ setupkwargs = dict(
                              'data_file_upload_directory=openmsipython.data_file_io.data_file_upload_directory:main',
                              'data_file_download_directory=openmsipython.data_file_io.data_file_download_directory:main',
                              'manage_service=openmsipython.services.manage_service:main',
+                             'lecroy_file_upload_directory=openmsipython.pdv.lecroy_file_upload_directory:main'
                             ],
     },
     python_requires='>=3.7,<3.8',

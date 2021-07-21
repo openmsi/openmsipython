@@ -35,7 +35,10 @@ class TestSerialization(unittest.TestCase) :
             ul_dfc._populate_with_file_data(LOGGER)
             self.test_ul_chunk_objects[chunk_i] = ul_dfc
             subdir_as_path = pathlib.Path('').joinpath(*(pathlib.PurePosixPath(TEST_CONST.TEST_DATA_FILE_SUB_DIR_NAME).parts))
-            dl_dfc = DataFileChunk(subdir_as_path/ul_dfc.filename,ul_dfc.filename,ul_dfc.file_hash,ul_dfc.chunk_hash,ul_dfc.chunk_offset,ul_dfc.chunk_size,
+            dl_dfc = DataFileChunk(subdir_as_path/ul_dfc.filename,ul_dfc.filename,
+                                   ul_dfc.file_hash,ul_dfc.chunk_hash,
+                                   None,ul_dfc.chunk_offset_write,
+                                   ul_dfc.chunk_size,
                                    ul_dfc.chunk_i,ul_dfc.n_total_chunks,data=ul_dfc.data)
             dl_dfc.rootdir = TEST_CONST.TEST_RECO_DIR_PATH
             self.test_dl_chunk_objects[chunk_i] = dl_dfc

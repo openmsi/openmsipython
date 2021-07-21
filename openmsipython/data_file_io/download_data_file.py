@@ -37,14 +37,14 @@ class DownloadDataFile(DataFile,ABC) :
         if dfc.filepath!=self.filepath :
             self.logger.error(f'ERROR: filepath mismatch between data file chunk {dfc._filepath} and data file {self.filepath}',ValueError)
         #if this chunk's offset has already been written to disk, return the "already written" code
-        if dfc.chunk_offset in self._chunk_offsets_downloaded :
+        if dfc.chunk_offset_write in self._chunk_offsets_downloaded :
             return DATA_FILE_HANDLING_CONST.CHUNK_ALREADY_WRITTEN_CODE
         #acquire the thread lock to make sure this process is the only one dealing with this particular file
         with thread_lock:
             #call the function to actually add the chunk
             self._on_add_chunk(dfc,*args,**kwargs)
             #add the offset of the added chunk to the set of reconstructed file chunks
-            self._chunk_offsets_downloaded.add(dfc.chunk_offset)
+            self._chunk_offsets_downloaded.add(dfc.chunk_offset_write)
             #if this chunk was the last that needed to be added, check the hashes to make sure the file is the same as it was originally
             if len(self._chunk_offsets_downloaded)==dfc.n_total_chunks :
                 if self.check_file_hash!=dfc.file_hash :
@@ -89,7 +89,7 @@ class DownloadDataFileToDisk(DownloadDataFile) :
         """
         mode = 'r+b' if self.filepath.is_file() else 'w+b'
         with open(self.filepath,mode) as fp :
-            fp.seek(dfc.chunk_offset)
+            fp.seek(dfc.chunk_offset_write)
             fp.write(dfc.data)
             fp.flush()
             os.fsync(fp.fileno())
@@ -122,7 +122,7 @@ class DownloadDataFileToMemory(DownloadDataFile) :
         """
         Add the data from a given file chunk to the dictionary of data by offset
         """
-        self.__chunk_data_by_offset[dfc.chunk_offset] = dfc.data
+        self.__chunk_data_by_offset[dfc.chunk_offset_write] = dfc.data
 
     def __create_bytestring(self) :
         """

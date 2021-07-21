@@ -51,24 +51,26 @@ class DataFileChunk() :
 
     #################### SPECIAL FUNCTIONS ####################
 
-    def __init__(self,filepath,filename,file_hash,chunk_hash,chunk_offset,chunk_size,chunk_i,n_total_chunks,rootdir=None,data=None) :
+    def __init__(self,filepath,filename,file_hash,chunk_hash,chunk_offset_read,chunk_offset_write,chunk_size,chunk_i,n_total_chunks,rootdir=None,data=None) :
         """
-        filepath       = path to this chunk's file (fully resolved if being produced, may be relative if it was consumed)
-        filename       = the name of the file
-        file_hash      = hash of this chunk's entire file data
-        chunk_hash     = hash of this chunk's data
-        chunk_offset   = offset (in bytes) of this chunk within the original file
-        chunk_size     = size of this chunk (in bytes)
-        chunk_i        = index of this chunk within the larger file
-        n_total_chunks = the total number of chunks to expect from the original file
-        rootdir        = path to the "root" directory; anything in the filepath beyond here is considered a subdirectory (optional, can also be set later)
-        data           = the actual binary data of this chunk of the file (can be set later if this chunk is being produced and not consumed)
+        filepath           = path to this chunk's file (fully resolved if being produced, may be relative if it was consumed)
+        filename           = the name of the file
+        file_hash          = hash of this chunk's entire file data
+        chunk_hash         = hash of this chunk's data
+        chunk_offset_read  = offset (in bytes) of this chunk within the original file
+        chunk_offset_write = offset (in bytes) of this chunk within the reconstructed file (may be different due to excluding some bytes in uploading)
+        chunk_size         = size of this chunk (in bytes)
+        chunk_i            = index of this chunk within the larger file
+        n_total_chunks     = the total number of chunks to expect from the original file
+        rootdir            = path to the "root" directory; anything in the filepath beyond here is considered a subdirectory (optional, can also be set later)
+        data               = the actual binary data of this chunk of the file (can be set later if this chunk is being produced and not consumed)
         """
         self.__filepath = filepath
         self.filename = filename
         self.file_hash = file_hash
         self.chunk_hash = chunk_hash
-        self.chunk_offset = chunk_offset
+        self.chunk_offset_read = chunk_offset_read
+        self.chunk_offset_write = chunk_offset_write
         self.chunk_size = chunk_size
         self.chunk_i = chunk_i
         self.n_total_chunks = n_total_chunks
@@ -82,7 +84,8 @@ class DataFileChunk() :
         retval = self.filename == other.filename
         retval = retval and self.file_hash == other.file_hash
         retval = retval and self.chunk_hash == other.chunk_hash
-        retval = retval and self.chunk_offset == other.chunk_offset
+        retval = retval and self.chunk_offset_read == other.chunk_offset_read
+        retval = retval and self.chunk_offset_write == other.chunk_offset_write
         retval = retval and self.chunk_size == other.chunk_size
         retval = retval and self.chunk_i == other.chunk_i
         retval = retval and self.n_total_chunks == other.n_total_chunks
@@ -143,18 +146,18 @@ class DataFileChunk() :
             logger.error(f'ERROR: file {self.filepath} does not exist!',FileNotFoundError)
         #get the data from the file
         with open(self.filepath, "rb") as fp:
-            fp.seek(self.chunk_offset)
+            fp.seek(self.chunk_offset_read)
             data = fp.read(self.chunk_size)
         #make sure it's of the expected size
         if len(data) != self.chunk_size:
-            msg = f'ERROR: chunk {self.chunk_hash} size {len(data)} != expected size {self.chunk_size} in file {self.filepath}, offset {self.chunk_offset}'
+            msg = f'ERROR: chunk {self.chunk_hash} size {len(data)} != expected size {self.chunk_size} in file {self.filepath}, offset {self.chunk_offset_read}'
             logger.error(msg,ValueError)
         #check that its hash matches what was found at the time of putting it in the queue
         check_chunk_hash = sha512()
         check_chunk_hash.update(data)
         check_chunk_hash = check_chunk_hash.digest()
         if self.chunk_hash != check_chunk_hash:
-            msg = f'ERROR: chunk hash {check_chunk_hash} != expected hash {self.chunk_hash} in file {self.filepath}, offset {self.chunk_offset}'
+            msg = f'ERROR: chunk hash {check_chunk_hash} != expected hash {self.chunk_hash} in file {self.filepath}, offset {self.chunk_offset_read}'
             logger.error(msg,ValueError)
         #set the chunk's data value
         self.__data = data

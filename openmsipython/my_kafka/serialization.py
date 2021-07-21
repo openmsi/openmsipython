@@ -20,7 +20,7 @@ class DataFileChunkSerializer(Serializer) :
             ordered_properties.append(str(file_chunk_obj.filename))
             ordered_properties.append(file_chunk_obj.file_hash)
             ordered_properties.append(file_chunk_obj.chunk_hash)
-            ordered_properties.append(file_chunk_obj.chunk_offset)
+            ordered_properties.append(file_chunk_obj.chunk_offset_write)
             ordered_properties.append(file_chunk_obj.chunk_i)
             ordered_properties.append(file_chunk_obj.n_total_chunks)
             ordered_properties.append(file_chunk_obj.subdir_str)
@@ -43,7 +43,8 @@ class DataFileChunkDeserializer(Deserializer) :
                 filename = str(ordered_properties[0].decode())
                 file_hash = ordered_properties[1]
                 chunk_hash = ordered_properties[2]
-                chunk_offset = int(ordered_properties[3])
+                chunk_offset_read = None
+                chunk_offset_write = int(ordered_properties[3])
                 chunk_i = int(ordered_properties[4])
                 n_total_chunks = int(ordered_properties[5])
                 subdir_str = str(ordered_properties[6].decode())
@@ -55,13 +56,13 @@ class DataFileChunkDeserializer(Deserializer) :
             check_chunk_hash.update(data)
             check_chunk_hash = check_chunk_hash.digest()
             if check_chunk_hash!=chunk_hash :
-                raise RuntimeError(f'ERROR: chunk hash {check_chunk_hash} != expected hash {chunk_hash} in file {filename}, offset {chunk_offset}')
+                raise RuntimeError(f'ERROR: chunk hash {check_chunk_hash} != expected hash {chunk_hash} in file {filename}, offset {chunk_offset_write}')
             #set the filepath based on the subdirectory string
             if subdir_str=='' :
                 filepath = pathlib.Path(filename)
             subdir_path = pathlib.PurePosixPath(subdir_str)
             filepath = pathlib.Path('').joinpath(*(subdir_path.parts),filename)
-            return DataFileChunk(filepath,filename,file_hash,chunk_hash,chunk_offset,len(data),chunk_i,n_total_chunks,data=data)
+            return DataFileChunk(filepath,filename,file_hash,chunk_hash,chunk_offset_read,chunk_offset_write,len(data),chunk_i,n_total_chunks,data=data)
         except Exception as e :
             raise SerializationError(f'ERROR: failed to deserialize a DataFileChunk! Exception: {e}')
 

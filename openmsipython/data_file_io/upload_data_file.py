@@ -191,7 +191,7 @@ class UploadDataFile(DataFile,Runnable) :
                 chunk_hash.update(chunk)
                 chunk_hash = chunk_hash.digest()
                 chunk_length = len(chunk)
-                chunks.append([chunk_hash,file_offset,chunk_length])
+                chunks.append([chunk_hash,file_offset,chunk_offset,chunk_length])
                 chunk_offset += chunk_length
                 file_offset += chunk_length
                 if self.select_bytes!=[] and file_offset==sorted_select_bytes[isb][1] :
@@ -200,12 +200,13 @@ class UploadDataFile(DataFile,Runnable) :
                         break
                     file_offset=sorted_select_bytes[isb][0]
                 n_bytes_to_read = chunk_size if self.select_bytes==[] else min(chunk_size,sorted_select_bytes[isb][1]-file_offset)
+                fp.seek(file_offset)
                 chunk = fp.read(n_bytes_to_read)
         file_hash = file_hash.digest()
         self.logger.info(f'File {self.filepath} has a total of {len(chunks)} chunks')
         #add all the chunks to the final list as DataFileChunk objects
         for ic,c in enumerate(chunks,start=1) :
-            self.__chunks_to_upload.append(DataFileChunk(self.filepath,self.filename,file_hash,c[0],c[1],c[2],ic,len(chunks),rootdir=self.__rootdir))
+            self.__chunks_to_upload.append(DataFileChunk(self.filepath,self.filename,file_hash,c[0],c[1],c[2],c[3],ic,len(chunks),rootdir=self.__rootdir))
 
     #################### CLASS METHODS ####################
 
@@ -222,7 +223,7 @@ class UploadDataFile(DataFile,Runnable) :
         filename = pathlib.Path(__file__).name.split('.')[0]
         logger = Logger(filename,filepath=(pathlib.Path(args.filepath).parent)/f'{filename}.log')
         #make the DataFile for the single specified file
-        upload_file = UploadDataFile(args.filepath,logger=logger)
+        upload_file = cls(args.filepath,logger=logger)
         #chunk and upload the file
         upload_file.upload_whole_file(args.config,args.topic_name,
                                       n_threads=args.n_threads,

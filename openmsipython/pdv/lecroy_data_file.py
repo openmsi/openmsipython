@@ -1,5 +1,6 @@
 #imports
-from ..data_file_io.data_file import UploadDataFile, DownloadDataFileToMemory
+from ..data_file_io.upload_data_file import UploadDataFile
+from ..data_file_io.download_data_file import DownloadDataFileToMemory
 from .config import LECROY_CONST
 
 class UploadLecroyDataFile(UploadDataFile) :
@@ -12,8 +13,8 @@ class UploadLecroyDataFile(UploadDataFile) :
         return self.__select_bytes
     
     def __init__(self,filepath,header_rows=LECROY_CONST.HEADER_ROWS,
-                 rows_to_skip=LECROY_CONST.LECROY_FILE_ROWS_TO_SKIP,
-                 rows_to_select=LECROY_CONST.LECROY_FILE_ROWS_TO_SELECT,
+                 rows_to_skip=LECROY_CONST.ROWS_TO_SKIP,
+                 rows_to_select=LECROY_CONST.ROWS_TO_SELECT,
                  **kwargs) :
         super().__init__(filepath,**kwargs)
         self.__select_bytes = self.__get_select_bytes(header_rows,rows_to_skip,rows_to_select)

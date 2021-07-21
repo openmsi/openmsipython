@@ -47,8 +47,8 @@ class DataFileUploadDirectory(DataFileDirectory,Runnable,ControlledProcessSingle
 
     #################### PUBLIC FUNCTIONS ####################
 
-    def __init__(self,dirpath,datafiletype=UploadDataFile,**kwargs) :
-        self.__datafiletype = datafiletype
+    def __init__(self,dirpath,datafile_type=UploadDataFile,**kwargs) :
+        self.__datafile_type = datafile_type
         super().__init__(dirpath,**kwargs)
 
     def upload_files_as_added(self,config_path,topic_name,**kwargs) :
@@ -163,7 +163,7 @@ class DataFileUploadDirectory(DataFileDirectory,Runnable,ControlledProcessSingle
             for filepath in self.dirpath.rglob('*') :
                 filepath = filepath.resolve()
                 if self.filepath_should_be_uploaded(filepath) and (filepath not in self.data_files_by_path.keys()):
-                    self.data_files_by_path[filepath]=self.__datafiletype(filepath,
+                    self.data_files_by_path[filepath]=self.__datafile_type(filepath,
                                                                           to_upload=to_upload,
                                                                           rootdir=self.dirpath,
                                                                           logger=self.logger,
@@ -186,7 +186,7 @@ class DataFileUploadDirectory(DataFileDirectory,Runnable,ControlledProcessSingle
         filename = pathlib.Path(__file__).name.split('.')[0]
         logger = Logger(filename,filepath=pathlib.Path(args.upload_dir)/f'{filename}.log')
         #make the DataFileDirectory for the specified directory
-        upload_file_directory = DataFileUploadDirectory(args.upload_dir,update_secs=args.update_seconds,logger=logger)
+        upload_file_directory = cls(args.upload_dir,update_secs=args.update_seconds,logger=logger)
         #listen for new files in the directory and run uploads as they come in until the process is shut down
         run_start = datetime.datetime.now()
         if args.new_files_only :

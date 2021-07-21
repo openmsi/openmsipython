@@ -104,12 +104,12 @@ class DataFileDownloadDirectory(DataFileDirectory,Runnable,ControlledProcessMult
         #get the logger
         filename = pathlib.Path(__file__).name.split('.')[0]
         logger = Logger(filename,filepath=pathlib.Path(args.output_dir)/f'{filename}.log')
-        #make the DataFileDirectory
-        reconstructor_directory = DataFileDownloadDirectory(args.output_dir,args.config,args.topic_name,
-                                                            n_threads=args.n_threads,
-                                                            consumer_group_ID=args.consumer_group_ID,
-                                                            update_secs=args.update_seconds,
-                                                            logger=logger)
+        #make the download directory
+        reconstructor_directory = cls(args.output_dir,args.config,args.topic_name,
+                                      n_threads=args.n_threads,
+                                      consumer_group_ID=args.consumer_group_ID,
+                                      update_secs=args.update_seconds,
+                                      logger=logger)
         #start the reconstructor running (returns total number of chunks read and total number of files completely reconstructed)
         run_start = datetime.datetime.now()
         logger.info(f'Listening for files to reconstruct in {args.output_dir}')

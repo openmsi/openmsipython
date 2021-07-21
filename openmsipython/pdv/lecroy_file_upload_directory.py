@@ -1,7 +1,7 @@
 #imports
+from ..data_file_io.data_file_upload_directory import DataFileUploadDirectory
 from .lecroy_data_file import UploadLecroyDataFile
 from .config import LECROY_CONST
-from ..data_file_io.data_file_directory import DataFileUploadDirectory
 
 class LecroyFileUploadDirectory(DataFileUploadDirectory) :
     """
@@ -16,8 +16,8 @@ class LecroyFileUploadDirectory(DataFileUploadDirectory) :
 
     def __init__(self,dirpath,
                  header_rows=LECROY_CONST.HEADER_ROWS,
-                 rows_to_skip=LECROY_CONST.LECROY_FILE_ROWS_TO_SKIP,
-                 rows_to_select=LECROY_CONST.LECROY_FILE_ROWS_TO_SELECT,
+                 rows_to_skip=LECROY_CONST.ROWS_TO_SKIP,
+                 rows_to_select=LECROY_CONST.ROWS_TO_SELECT,
                  **kwargs) :
         """
         dirpath = path to the directory to watch
@@ -29,3 +29,11 @@ class LecroyFileUploadDirectory(DataFileUploadDirectory) :
         self.__rows_to_skip = rows_to_skip
         self.__rows_to_select = rows_to_select
         super().__init__(dirpath,datafile_type=UploadLecroyDataFile,**kwargs)
+
+#################### MAIN METHOD TO RUN FROM COMMAND LINE ####################
+
+def main(args=None) :
+    LecroyFileUploadDirectory.run_from_command_line(args)
+
+if __name__=='__main__' :
+    main()

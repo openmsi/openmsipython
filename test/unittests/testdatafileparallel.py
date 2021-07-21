@@ -73,7 +73,10 @@ class TestDownloadDataFile(unittest.TestCase) :
             for ic,dfc in enumerate(ul_datafile.chunks_to_upload) :
                 dfc._populate_with_file_data(logger=LOGGER)
                 subdir_as_path = pathlib.Path('').joinpath(*(pathlib.PurePosixPath(TEST_CONST.TEST_DATA_FILE_SUB_DIR_NAME).parts))
-                dfc_as_dl = DataFileChunk(subdir_as_path/dfc.filename,dfc.filename,dfc.file_hash,dfc.chunk_hash,dfc.chunk_offset,dfc.chunk_size,
+                dfc_as_dl = DataFileChunk(subdir_as_path/dfc.filename,dfc.filename,
+                                          dfc.file_hash,dfc.chunk_hash,
+                                          None,dfc.chunk_offset_write,
+                                          dfc.chunk_size,
                                           dfc.chunk_i,dfc.n_total_chunks,data=dfc.data)
                 dfc_as_dl.rootdir = TEST_CONST.TEST_RECO_DIR_PATH
                 if dl_datafile is None :
@@ -98,7 +101,10 @@ class TestDownloadDataFile(unittest.TestCase) :
             hash_missing_some_chunks.digest()
             for ic,dfc in enumerate(ul_datafile.chunks_to_upload) :
                 subdir_as_path = pathlib.Path('').joinpath(*(pathlib.PurePosixPath(TEST_CONST.TEST_DATA_FILE_SUB_DIR_NAME).parts))
-                dfc_as_dl = DataFileChunk(subdir_as_path/dfc.filename,dfc.filename,dfc.file_hash,dfc.chunk_hash,dfc.chunk_offset,dfc.chunk_size,
+                dfc_as_dl = DataFileChunk(subdir_as_path/dfc.filename,dfc.filename,
+                                          dfc.file_hash,dfc.chunk_hash,
+                                          None,dfc.chunk_offset_write,
+                                          dfc.chunk_size,
                                           dfc.chunk_i,dfc.n_total_chunks,data=dfc.data)
                 dfc_as_dl.rootdir = TEST_CONST.TEST_RECO_DIR_PATH
                 if ic==len(ul_datafile.chunks_to_upload)-1 :
