@@ -1,6 +1,6 @@
 #imports
 from config import TEST_CONST
-from openmsipython.data_file_io.data_file_directory import DataFileUploadDirectory
+from openmsipython.data_file_io.data_file_upload_directory import DataFileUploadDirectory
 from openmsipython.utilities.logging import Logger
 import unittest, pathlib, logging, shutil
 

@@ -1,12 +1,12 @@
 #imports
-from .misc import add_user_input
-from .logging import Logger
-from .my_base_class import MyBaseClass
-from .config import UTIL_CONST
+import pathlib, time
 from queue import Queue
 from threading import Thread
 from abc import ABC, abstractmethod
-import time
+from .config import UTIL_CONST
+from .misc import add_user_input
+from .logging import Logger
+from .my_base_class import MyBaseClass
 
 class ControlledProcess(ABC,MyBaseClass) :
     """
@@ -18,6 +18,9 @@ class ControlledProcess(ABC,MyBaseClass) :
     @property
     def alive(self) :
         return self.__alive
+    @property
+    def control_command_queue(self) :
+        return self.__control_command_queue
 
     #################### PUBLIC FUNCTIONS ####################
 

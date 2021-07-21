@@ -1,6 +1,7 @@
 #imports
 from config import TEST_CONST
-from openmsipython.data_file_io.data_file import UploadDataFile, DownloadDataFile
+from openmsipython.data_file_io.upload_data_file import UploadDataFile
+from openmsipython.data_file_io.download_data_file import DownloadDataFileToDisk
 from openmsipython.data_file_io.data_file_chunk import DataFileChunk
 from openmsipython.data_file_io.config import RUN_OPT_CONST, DATA_FILE_HANDLING_CONST
 from openmsipython.utilities.logging import Logger
@@ -76,11 +77,11 @@ class TestDownloadDataFile(unittest.TestCase) :
                                           dfc.chunk_i,dfc.n_total_chunks,data=dfc.data)
                 dfc_as_dl.rootdir = TEST_CONST.TEST_RECO_DIR_PATH
                 if dl_datafile is None :
-                    dl_datafile = DownloadDataFile(dfc_as_dl.filepath,logger=LOGGER)
-                check = dl_datafile.write_chunk_to_disk(dfc_as_dl)
+                    dl_datafile = DownloadDataFileToDisk(dfc_as_dl.filepath,logger=LOGGER)
+                check = dl_datafile.add_chunk(dfc_as_dl)
                 #try writing every tenth chunk twice; should return "chunk already added"
                 if ic%10==0 :
-                    check2 = dl_datafile.write_chunk_to_disk(dfc_as_dl)
+                    check2 = dl_datafile.add_chunk(dfc_as_dl)
                     self.assertEqual(check2,DATA_FILE_HANDLING_CONST.CHUNK_ALREADY_WRITTEN_CODE)
                 expected_check_value = DATA_FILE_HANDLING_CONST.FILE_IN_PROGRESS
                 if ic==len(ul_datafile.chunks_to_upload)-1 :
@@ -102,7 +103,7 @@ class TestDownloadDataFile(unittest.TestCase) :
                 dfc_as_dl.rootdir = TEST_CONST.TEST_RECO_DIR_PATH
                 if ic==len(ul_datafile.chunks_to_upload)-1 :
                     dfc_as_dl.file_hash=hash_missing_some_chunks
-                check = dl_datafile.write_chunk_to_disk(dfc_as_dl)
+                check = dl_datafile.add_chunk(dfc_as_dl)
                 expected_check_value = DATA_FILE_HANDLING_CONST.FILE_IN_PROGRESS
                 if ic==len(ul_datafile.chunks_to_upload)-1 :
                     expected_check_value = DATA_FILE_HANDLING_CONST.FILE_HASH_MISMATCH_CODE 

@@ -61,7 +61,7 @@ class MyDeserializingConsumer(DeserializingConsumer) :
         logger = the logger object to use
         !!!!! any other keyword arguments will be added to the configuration (with underscores replaced with dots) !!!!!
         """
-        return cls(self.__class__.get_config_dict(config_file_path,**kwargs),kwargs.get('logger'))
+        return cls(cls.get_config_dict(config_file_path,**kwargs),kwargs.get('logger'))
 
     @staticmethod
     def get_config_dict(config_file_path,**kwargs) :

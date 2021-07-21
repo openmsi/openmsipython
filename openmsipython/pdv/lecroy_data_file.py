@@ -1,5 +1,6 @@
 #imports
 from ..data_file_io.data_file import UploadDataFile, DownloadDataFileToMemory
+from .config import LECROY_CONST
 
 class UploadLecroyDataFile(UploadDataFile) :
     """

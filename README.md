@@ -85,7 +85,7 @@ To install the Service and start it running, type the following command in the `
 
 where `[path_to_config_file]` is the path to a configuration file containing at least an `[openmsi_directory_stream_service]` section in it as described above. While the script runs, you will be prompted to input the usernames and passwords to the Kafka "test" and "production" clusters; you should have those from somewhere else if you're looking to install the Service. 
 
-If the script completes successfully, you should be able to see the Service listed (and running) in the Windows Service Manager window that pops up when you type `mmc Services.msc`. Starting and running the Service will create a log file called `upload_data_files_added_to_directory.log` in the watched directory. At any time you can check what's in this file to see the files that have been added to the directory and produced to the topic, along with other information.
+If the script completes successfully, you should be able to see the Service listed (and running) in the Windows Service Manager window that pops up when you type `mmc Services.msc`. Starting and running the Service will create a log file called `data_file_upload_directory.log` in the watched directory. At any time you can check what's in this file to see the files that have been added to the directory and produced to the topic, along with other information.
 
 ### Management, use, and output
 
@@ -145,10 +145,10 @@ Options for running the code include:
 1. Changing the maximum number of parallel threads allowed to run at a time: add the `--n_threads [threads]` argument where `[threads]` is the desired number of parallel threads to allow (the default is 5 threads).
 1. Changing the size of the individual file chunks: add the `--chunk_size [n_bytes]` argument where `[n_bytes]` is the desired chunk size in bytes. `[n_bytes]` must be a nonzero power of two (the default is 16384).
 
-### upload_data_files_added_to_directory
+### data_file_upload_directory
 This module uploads any files that are added to a given directory path to a topic on a cluster using the same "chunking" idea as above. It also preserves subdirectory structure relative to the watched directory.This program is a platform-independent version of the Open MSI Directory Stream Service that runs interactively on the command line. To run it in the most common use case, enter the following command and arguments:
 
-`upload_data_files_added_to_directory [directory_path] --config [config_file_path] --topic_name [name_of_topic]`
+`data_file_upload_directory [directory_path] --config [config_file_path] --topic_name [name_of_topic]`
 
 where `[directory_path]` is the path to a directory to monitor for files to upload, `[config_file_path]` is the path to a config file including at least `[cluster]` and `[producer]` sections, and `[topic_name]` is the name of the topic to produce to. Running the code will automatically enqueue any files in the directory, and any others that are added during runtime, to be produced. 
 
@@ -160,10 +160,10 @@ Options for running the code include:
 1. Changing the number of messages that are allowed to be internally queued at once (that is, queued before being produced): add the `--queue_max_size [n_messages]` argument where `[n_messages]` is the desired number of messages allowed in the internal queue (the default is 3000 messages). This internal queue is used to make sure that there's some buffer between recognizing a file exists to be uploaded and producing all of its associated messages to the topic; its size should be set to some number of messages such that the total size of the internal queue is capped at a few batches of messages ("`batch.size`" in the producer config). The default values supplied are well compatible.
 1. Changing how often the "still alive" character is printed to the console: add the `--update_seconds [seconds]` argument where `[seconds]` is the number of seconds to wait between printing the character to the console from the main thread (the default is 30 seconds). Giving -1 for this argument disables printing the "still alive" character entirely.
 
-### reconstruct_data_files
+### data_file_download_directory
 This module subscribes a group of consumers to a topic on a cluster and passively listens in several parallel threads for messages that are file chunks of the type produced by `upload_data_file`. It reconstructs files produced to the topic from their individual chunks and puts the reconstructed files in a specified directory, preserving any subdirectory structure on the production end. To run it in the most common use case, enter the following command and arguments:
 
-`reconstruct_data_files [working_directory_path] --config [config_file_path] --topic_name [topic_name]`
+`data_file_download_directory [working_directory_path] --config [config_file_path] --topic_name [topic_name]`
 
 where `[working_directory_path]` is the path to the directory that the reconstructed files should be put in (if it doesn't exist it will be created), `[config_file_path]` is the path to a config file including at least `[cluster]` and `[consumer]` sections, and `[topic_name]` is the name of the topic to subscribe to/consume messages from. 
 
@@ -205,7 +205,6 @@ The following items are currently planned to be implemented ASAP:
 
 ## Questions that will arise later (inFAQs?)
 
-1. What happens to subdirectories?  Can we watch a single “uber-directory” and then populate it with subdirectories by sample or date or student, etc?
 1. What are best practices for topic creation and naming?  Should we have a new topic for each student, for each instrument, for each “kind” of data, ...?
 1. Would it be possible to have an environment and dependency definition? YAML??
 1. How do I know (and trust!) my data made it and is safe?

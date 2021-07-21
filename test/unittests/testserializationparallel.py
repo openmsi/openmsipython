@@ -1,7 +1,7 @@
 #imports
 from config import TEST_CONST
 from openmsipython.my_kafka.serialization import DataFileChunkSerializer, DataFileChunkDeserializer
-from openmsipython.data_file_io.data_file import UploadDataFile
+from openmsipython.data_file_io.upload_data_file import UploadDataFile
 from openmsipython.data_file_io.data_file_chunk import DataFileChunk
 from openmsipython.data_file_io.config import RUN_OPT_CONST
 from openmsipython.utilities.logging import Logger
