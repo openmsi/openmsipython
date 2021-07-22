@@ -48,8 +48,13 @@ class DataFileUploadDirectory(DataFileDirectory,Runnable,ControlledProcessSingle
     #################### PUBLIC FUNCTIONS ####################
 
     def __init__(self,dirpath,datafile_type=UploadDataFile,**kwargs) :
-        self.__datafile_type = datafile_type
         super().__init__(dirpath,**kwargs)
+        if not issubclass(datafile_type,UploadDataFile) :
+            errmsg = 'ERROR: DataFileUploadDirectory requires a datafile_type that is a subclass of '
+            errmsg+= f'UploadDataFile but {datafile_type} was given!'
+            self.logger.error(errmsg,ValueError)
+        self.__datafile_type = datafile_type
+        
 
     def upload_files_as_added(self,config_path,topic_name,**kwargs) :
         """

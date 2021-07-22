@@ -52,7 +52,7 @@ class DownloadDataFile(DataFile,ABC) :
             return DATA_FILE_HANDLING_CONST.CHUNK_ALREADY_WRITTEN_CODE
         #the filepath of this DownloadDataFile and of the given DataFileChunk must match
         if dfc.filepath!=self.filepath :
-            self.logger.error(f'ERROR: filepath mismatch between data file chunk {dfc._filepath} and data file {self.filepath}',ValueError)
+            self.logger.error(f'ERROR: filepath mismatch between data file chunk with {dfc.filepath} and data file with {self.filepath}',ValueError)
         #modify the filepath to include any append to the name
         full_filepath = self.__class__.get_full_filepath(dfc)
         if self.__full_filepath is None :
@@ -68,14 +68,15 @@ class DownloadDataFile(DataFile,ABC) :
             self._on_add_chunk(dfc,*args,**kwargs)
             #add the offset of the added chunk to the set of reconstructed file chunks
             self._chunk_offsets_downloaded.add(dfc.chunk_offset_write)
-            #if this chunk was the last that needed to be added, check the hashes to make sure the file is the same as it was originally
-            if len(self._chunk_offsets_downloaded)==dfc.n_total_chunks :
-                if self.check_file_hash!=dfc.file_hash :
-                    return DATA_FILE_HANDLING_CONST.FILE_HASH_MISMATCH_CODE
-                else :
-                    return DATA_FILE_HANDLING_CONST.FILE_SUCCESSFULLY_RECONSTRUCTED_CODE
+            self._chunk_offsets_downloaded.update()
+        #if this chunk was the last that needed to be added, check the hashes to make sure the file is the same as it was originally
+        if len(self._chunk_offsets_downloaded)==dfc.n_total_chunks :
+            if self.check_file_hash!=dfc.file_hash :
+                return DATA_FILE_HANDLING_CONST.FILE_HASH_MISMATCH_CODE
             else :
-                return DATA_FILE_HANDLING_CONST.FILE_IN_PROGRESS
+                return DATA_FILE_HANDLING_CONST.FILE_SUCCESSFULLY_RECONSTRUCTED_CODE
+        else :
+            return DATA_FILE_HANDLING_CONST.FILE_IN_PROGRESS
 
     @abstractmethod
     def _on_add_chunk(dfc,*args,**kwargs) :

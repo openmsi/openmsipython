@@ -1,5 +1,6 @@
 #imports
 import pathlib
+from ..utilities.misc import populated_kwargs
 from ..utilities.logging import Logger
 from ..utilities.my_base_class import MyBaseClass
 
@@ -31,4 +32,5 @@ class DataFileDirectory(MyBaseClass) :
         if self.__logger is None :
             self.__logger = Logger(pathlib.Path(__file__).name.split('.')[0])
         self.data_files_by_path = {}
+        kwargs = populated_kwargs(kwargs,{'logger':self.__logger})
         super().__init__(*args,**kwargs)

@@ -13,12 +13,14 @@ setupkwargs = dict(
                              'data_file_upload_directory=openmsipython.data_file_io.data_file_upload_directory:main',
                              'data_file_download_directory=openmsipython.data_file_io.data_file_download_directory:main',
                              'manage_service=openmsipython.services.manage_service:main',
-                             'lecroy_file_upload_directory=openmsipython.pdv.lecroy_file_upload_directory:main'
+                             'lecroy_file_upload_directory=openmsipython.pdv.lecroy_file_upload_directory:main',
+                             'pdv_plot_maker=openmsipython.pdv.pdv_plot_maker:main',
                             ],
     },
     python_requires='>=3.7,<3.8',
     install_requires=['confluent-kafka>=1.6.0',
                       'msgpack>=1.0.0',
+                      'pandas>=1.3.0',
                      ],
     extras_require = {'test': ['pyflakes>=2.2.0',],},
 )

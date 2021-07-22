@@ -14,5 +14,8 @@ class LecroyConstants :
     @property
     def ROWS_TO_SELECT(self) :
         return int(120e3)  # default number of rows to select after initial skip in raw files
+    @property
+    def SKIMMED_FILENAME_APPEND(self) :
+        return '_skimmed' # string to append to filenames to indicate that they don't include all of their original data
 
 LECROY_CONST = LecroyConstants()

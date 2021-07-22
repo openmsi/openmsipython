@@ -11,20 +11,22 @@ CONFIG_FILE_DIR = pathlib.Path(__file__).parent.parent / 'my_kafka' / 'config_fi
 
 #################### MISC. FUNCTIONS ####################
 
-#helper function to convert a string or path argument into a path to a file, checking if it exists
+#convert a string or path argument into a path to a file, checking if it exists
 def existing_file(argstring) :
     if pathlib.Path.is_file(pathlib.Path(argstring)) :
         return pathlib.Path(argstring).resolve()
     raise FileNotFoundError(f'ERROR: file {argstring} does not exist!')
 
-#helper function to convert a string or path argument into a directory path, checking if it exists
+#convert a string or path argument into a directory path, checking if it exists
 def existing_dir(argstring) :
     if pathlib.Path.is_dir(pathlib.Path(argstring)) :
         return pathlib.Path(argstring).resolve()
     raise FileNotFoundError(f'ERROR: directory {argstring} does not exist!')
 
-#helper function to convert a string or path argument into a directory path, creating it if necessary
+#convert a string or path argument into a directory path, creating it if necessary
 def create_dir(argstring) :
+    if argstring is None : #Then the argument wasn't given and nothing should be done
+        return None
     if pathlib.Path.is_dir(pathlib.Path(argstring)) :
         return pathlib.Path(argstring).resolve()
     try :
@@ -33,7 +35,7 @@ def create_dir(argstring) :
     except Exception as e :
         raise RuntimeError(f'ERROR: failed to create directory with name {argstring}! error: {e}')
 
-#helper function to convert a string or path argument into a config file path (raise an exception if the file can't be found)
+#convert a string or path argument into a config file path (raise an exception if the file can't be found)
 def config_path(configarg) :
     if isinstance(configarg,str) and '.' not in configarg :
         configarg+=CONFIG_FILE_EXT
@@ -43,7 +45,7 @@ def config_path(configarg) :
         return (CONFIG_FILE_DIR / configarg).resolve()
     raise ValueError(f'ERROR: config argument {configarg} is not a recognized config file!')
 
-#helper function to make sure a given value is a nonzero integer power of two (or can be converted to one)
+#make sure a given value is a nonzero integer power of two (or can be converted to one)
 def int_power_of_two(argval) :
     if not isinstance(argval,int) :
         try :
@@ -52,6 +54,16 @@ def int_power_of_two(argval) :
             raise ValueError(f'ERROR: could not convert {argval} to an integer in int_power_of_two! Exception: {e}')
     if argval<=0 or math.ceil(math.log2(argval))!=math.floor(math.log2(argval)) :
         raise ValueError(f'ERROR: invalid argument: {argval} must be a (nonzero) power of two!')
+    return argval
+
+#make sure a given value is a positive integer
+def positive_int(argval) :
+    try :
+        argval = int(argval)
+    except Exception as e :
+        raise ValueError(f'ERROR: could not convert {argval} to an integer in positive_int! Exception: {e}')
+    if (not isinstance(argval,int)) or (argval<1) :
+        raise ValueError(f'ERROR: invalid argument: {argval} must be a positive integer!')
     return argval
 
 #################### MYARGUMENTPARSER CLASS ####################
@@ -74,7 +86,7 @@ class MyArgumentParser(ArgumentParser) :
         'topic_name':{'positional':False,
                       'kwargs':{'default':RUN_OPT_CONST.DEFAULT_TOPIC_NAME,'help':'Name of the topic to produce to or consume from'}},
         'n_threads':{'positional':False,
-                     'kwargs':{'default':UTIL_CONST.DEFAULT_N_THREADS,'type':int,'help':'Maximum number of threads to use'}},
+                     'kwargs':{'default':UTIL_CONST.DEFAULT_N_THREADS,'type':positive_int,'help':'Maximum number of threads to use'}},
         'chunk_size':{'positional':False,
                       'kwargs':{'default':RUN_OPT_CONST.DEFAULT_CHUNK_SIZE,'type':int_power_of_two,
                                 'help':'Max size (in bytes) of chunks into which files should be broken as they are uploaded'}},
@@ -92,6 +104,12 @@ class MyArgumentParser(ArgumentParser) :
         'consumer_group_ID':{'positional':False,
                              'kwargs':{'default':str(uuid.uuid1()),
                                        'help':'ID to use for all consumers in the group (by default a new, unique, ID will be created)'}},
+        'pdv_plot_type':{'positional':False,
+                         'kwargs':{'choices':['spall','velocity'],'default':'spall',
+                                   'help':'Type of analysis to perform ("spall" or "velocity")'}},
+        'optional_output_dir':{'positional':False,
+                               'kwargs':{'type':create_dir,
+                                         'help':'Path to directory to put output in'}},
     }
 
     def __init__(self,*argnames,**kwargs) :
@@ -101,7 +119,13 @@ class MyArgumentParser(ArgumentParser) :
         parsed_argnames = []
         for argname in argnames :
             if argname in self.ARGUMENTS.keys() :
-                argname_to_add = argname if self.ARGUMENTS[argname]['positional'] else f'--{argname}'
+                if self.ARGUMENTS[argname]['positional'] :
+                    argname_to_add = argname 
+                else :
+                    if argname.startswith('optional_') :
+                        argname_to_add = f'--{argname[len("optional_"):]}'
+                    else :
+                        argname_to_add = f'--{argname}'
                 if 'default' in self.ARGUMENTS[argname]['kwargs'].keys() :
                     if 'help' in self.ARGUMENTS[argname]['kwargs'].keys() :
                         self.ARGUMENTS[argname]['kwargs']['help']+=f" (default = {self.ARGUMENTS[argname]['kwargs']['default']})"

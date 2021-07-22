@@ -13,7 +13,7 @@ class LecroyFileUploadDirectory(DataFileUploadDirectory) :
         return {'header_rows':self.__header_rows,
                 'rows_to_skip':self.__rows_to_skip,
                 'rows_to_select':self.__rows_to_select,
-                'filename_append':'_skimmed',
+                'filename_append':LECROY_CONST.SKIMMED_FILENAME_APPEND,
                 }
 
     def __init__(self,dirpath,

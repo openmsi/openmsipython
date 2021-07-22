@@ -19,31 +19,43 @@ class DataFileDownloadDirectory(DataFileDirectory,Runnable,ControlledProcessMult
     #################### PROPERTIES ####################
 
     @property
+    def other_datafile_kwargs(self) :
+        return {} #Overload this in child classes to define additional keyword arguments that should go to the specific datafile constructor
+    @property
     def n_msgs_read(self) :
         return self.__n_msgs_read
     @property
-    def completely_reconstructed_filenames(self) :
-        return self.__completely_reconstructed_filenames
+    def completely_reconstructed_filepaths(self) :
+        return self.__completely_reconstructed_filepaths
 
     #################### PUBLIC FUNCTIONS ####################
 
-    def __init__(self,*args,**kwargs) :
+    def __init__(self,*args,datafile_type=DownloadDataFileToDisk,**kwargs) :
+        """
+        datafile_type = the type of datafile that the consumed messages should be assumed to represent
+        In this class datafile_type should be something that extends DownloadDataFileToDisk
+        """    
         kwargs = populated_kwargs(kwargs,{'n_consumers':kwargs.get('n_threads')})
         super().__init__(*args,**kwargs)
+        if not issubclass(datafile_type,DownloadDataFileToDisk) :
+            errmsg = 'ERROR: DataFileDownloadDirectory requires a datafile_type that is a subclass of '
+            errmsg+= f'DownloadDataFileToDisk but {datafile_type} was given!'
+            self.logger.error(errmsg,ValueError)
+        self.__datafile_type = datafile_type
         self.__n_msgs_read = 0
-        self.__completely_reconstructed_filenames = set()
+        self.__completely_reconstructed_filepaths = set()
         self.__thread_locks_by_filepath = {}
 
     def reconstruct(self) :
         """
-        Consumes messages processes them using several parallel threads to reconstruct the files to which 
+        Consumes messages and writes their data to disk using several parallel threads to reconstruct the files to which 
         they correspond. Runs until the user inputs a command to shut it down. Returns the total number of 
         messages consumed, as well as the number of files whose reconstruction was completed during the run. 
         """
         self.logger.info(f'Will reconstruct files from messages in the {self.topic_name} topic using {self.n_threads} thread{"s" if self.n_threads>1 else ""}')
         lock = Lock()
         self.run([(lock,self.consumers[i]) for i in range(self.n_threads)])
-        return self.__n_msgs_read, self.__completely_reconstructed_filenames
+        return self.__n_msgs_read, self.__completely_reconstructed_filepaths
 
     #################### PRIVATE HELPER FUNCTIONS ####################
 
@@ -65,7 +77,7 @@ class DataFileDownloadDirectory(DataFileDirectory,Runnable,ControlledProcessMult
             dfc.rootdir = self.dirpath
             #add the chunk's data to the file that's being reconstructed
             if dfc.filepath not in self.data_files_by_path.keys() :
-                self.data_files_by_path[dfc.filepath] = DownloadDataFileToDisk(dfc.filepath,logger=self.logger)
+                self.data_files_by_path[dfc.filepath] = self.__datafile_type(dfc.filepath,logger=self.logger,**self.other_datafile_kwargs)
                 self.__thread_locks_by_filepath[dfc.filepath] = Lock()
             return_value = self.data_files_by_path[dfc.filepath].add_chunk(dfc,self.__thread_locks_by_filepath[dfc.filepath])
             if return_value==DATA_FILE_HANDLING_CONST.FILE_HASH_MISMATCH_CODE :
@@ -75,7 +87,7 @@ class DataFileDownloadDirectory(DataFileDirectory,Runnable,ControlledProcessMult
                 with lock :
                     if dfc.filepath in self.data_files_by_path :
                         self.__n_msgs_read+=1
-                        self.__completely_reconstructed_filenames.add(dfc.filepath)
+                        self.__completely_reconstructed_filepaths.add(dfc.filepath)
                         del self.data_files_by_path[dfc.filepath]
                         del self.__thread_locks_by_filepath[dfc.filepath]
             elif return_value in (DATA_FILE_HANDLING_CONST.FILE_IN_PROGRESS,DATA_FILE_HANDLING_CONST.CHUNK_ALREADY_WRITTEN_CODE) :
@@ -83,7 +95,7 @@ class DataFileDownloadDirectory(DataFileDirectory,Runnable,ControlledProcessMult
                     self.__n_msgs_read+=1
 
     def _on_check(self) :
-        self.logger.debug(f'{self.__n_msgs_read} messages read, {len(self.__completely_reconstructed_filenames)} files completely reconstructed so far')
+        self.logger.debug(f'{self.__n_msgs_read} messages read, {len(self.__completely_reconstructed_filepaths)} files completely reconstructed so far')
 
     def _on_shutdown(self) :
         super()._on_shutdown()
