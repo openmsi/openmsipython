@@ -39,7 +39,7 @@ class TestSerialization(unittest.TestCase) :
                                    ul_dfc.file_hash,ul_dfc.chunk_hash,
                                    None,ul_dfc.chunk_offset_write,
                                    ul_dfc.chunk_size,
-                                   ul_dfc.chunk_i,ul_dfc.n_total_chunks,data=ul_dfc.data)
+                                   ul_dfc.chunk_i,ul_dfc.n_total_chunks,filename_append=ul_dfc.filename_append,data=ul_dfc.data)
             dl_dfc.rootdir = TEST_CONST.TEST_RECO_DIR_PATH
             self.test_dl_chunk_objects[chunk_i] = dl_dfc
 

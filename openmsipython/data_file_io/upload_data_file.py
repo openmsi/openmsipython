@@ -70,7 +70,7 @@ class UploadDataFile(DataFile,Runnable) :
 
     #################### PUBLIC FUNCTIONS ####################
 
-    def __init__(self,*args,to_upload=True,rootdir=None,**kwargs) :
+    def __init__(self,*args,to_upload=True,rootdir=None,filename_append='',**kwargs) :
         """
         to_upload = if False, the file will be ignored for purposes of uploading to a topic (default is True)
         rootdir = path to the "root" directory that this file is in; anything in the path beyond this root directory 
@@ -82,6 +82,7 @@ class UploadDataFile(DataFile,Runnable) :
             self.__rootdir = self.filepath.parent
         else :
             self.__rootdir = rootdir
+        self.__filename_append = filename_append
         self.__fully_enqueued = False
         self.__chunks_to_upload = []
 
@@ -206,7 +207,7 @@ class UploadDataFile(DataFile,Runnable) :
         self.logger.info(f'File {self.filepath} has a total of {len(chunks)} chunks')
         #add all the chunks to the final list as DataFileChunk objects
         for ic,c in enumerate(chunks,start=1) :
-            self.__chunks_to_upload.append(DataFileChunk(self.filepath,self.filename,file_hash,c[0],c[1],c[2],c[3],ic,len(chunks),rootdir=self.__rootdir))
+            self.__chunks_to_upload.append(DataFileChunk(self.filepath,self.filename,file_hash,c[0],c[1],c[2],c[3],ic,len(chunks),rootdir=self.__rootdir,filename_append=self.__filename_append))
 
     #################### CLASS METHODS ####################
 

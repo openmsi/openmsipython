@@ -42,12 +42,14 @@ class TestDataFileChunk(unittest.TestCase) :
                                             self.test_chunk_1.file_hash,self.test_chunk_1.chunk_hash,
                                             self.test_chunk_1.chunk_offset_read,self.test_chunk_1.chunk_offset_write,
                                             self.test_chunk_1.chunk_size,self.test_chunk_1.chunk_i,
-                                            self.test_chunk_1.n_total_chunks,rootdir=self.test_chunk_1.rootdir,data=self.test_chunk_1.data)
+                                            self.test_chunk_1.n_total_chunks,rootdir=self.test_chunk_1.rootdir,
+                                            filename_append=self.test_chunk_1.filename_append,data=self.test_chunk_1.data)
         test_chunk_2_copied = DataFileChunk(self.test_chunk_2.filepath,self.test_chunk_2.filename,
                                             self.test_chunk_2.file_hash,self.test_chunk_2.chunk_hash,
                                             self.test_chunk_2.chunk_offset_read,self.test_chunk_2.chunk_offset_write,
                                             self.test_chunk_2.chunk_size,self.test_chunk_2.chunk_i,
-                                            self.test_chunk_2.n_total_chunks,rootdir=self.test_chunk_1.rootdir,data=self.test_chunk_2.data)
+                                            self.test_chunk_2.n_total_chunks,rootdir=self.test_chunk_1.rootdir,
+                                            filename_append=self.test_chunk_2.filename_append,data=self.test_chunk_2.data)
         self.assertEqual(self.test_chunk_1,test_chunk_1_copied)
         self.assertEqual(self.test_chunk_2,test_chunk_2_copied)
         self.assertFalse(self.test_chunk_1==2)
@@ -61,12 +63,14 @@ class TestDataFileChunk(unittest.TestCase) :
                                                self.test_chunk_1.file_hash,self.test_chunk_1.chunk_hash,
                                                self.test_chunk_1.chunk_offset_read,self.test_chunk_1.chunk_offset_write,
                                                self.test_chunk_1.chunk_size,
-                                               self.test_chunk_1.chunk_i,self.test_chunk_1.n_total_chunks,data=self.test_chunk_1.data)
+                                               self.test_chunk_1.chunk_i,self.test_chunk_1.n_total_chunks,
+                                               filename_append=self.test_chunk_1.filename_append,data=self.test_chunk_1.data)
         copied_as_downloaded_2 = DataFileChunk(subdir_as_path/self.test_chunk_2.filename,self.test_chunk_2.filename,
                                                self.test_chunk_2.file_hash,self.test_chunk_2.chunk_hash,
                                                self.test_chunk_2.chunk_offset_read,self.test_chunk_2.chunk_offset_write,
                                                self.test_chunk_2.chunk_size,
-                                               self.test_chunk_2.chunk_i,self.test_chunk_2.n_total_chunks,data=self.test_chunk_2.data)
+                                               self.test_chunk_2.chunk_i,self.test_chunk_2.n_total_chunks,
+                                               filename_append=self.test_chunk_1.filename_append,data=self.test_chunk_2.data)
         self.assertIsNone(copied_as_downloaded_1.rootdir)
         self.assertIsNone(copied_as_downloaded_2.rootdir)
         self.assertEqual(copied_as_downloaded_1.subdir_str,subdir_as_path.as_posix())

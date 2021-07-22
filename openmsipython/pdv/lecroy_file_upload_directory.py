@@ -12,7 +12,9 @@ class LecroyFileUploadDirectory(DataFileUploadDirectory) :
     def other_datafile_kwargs(self) :
         return {'header_rows':self.__header_rows,
                 'rows_to_skip':self.__rows_to_skip,
-                'rows_to_select':self.__rows_to_select}
+                'rows_to_select':self.__rows_to_select,
+                'filename_append':'_skimmed',
+                }
 
     def __init__(self,dirpath,
                  header_rows=LECROY_CONST.HEADER_ROWS,

@@ -51,7 +51,8 @@ class DataFileChunk() :
 
     #################### SPECIAL FUNCTIONS ####################
 
-    def __init__(self,filepath,filename,file_hash,chunk_hash,chunk_offset_read,chunk_offset_write,chunk_size,chunk_i,n_total_chunks,rootdir=None,data=None) :
+    def __init__(self,filepath,filename,file_hash,chunk_hash,chunk_offset_read,chunk_offset_write,chunk_size,chunk_i,n_total_chunks,
+                 rootdir=None,filename_append='',data=None) :
         """
         filepath           = path to this chunk's file (fully resolved if being produced, may be relative if it was consumed)
         filename           = the name of the file
@@ -63,6 +64,7 @@ class DataFileChunk() :
         chunk_i            = index of this chunk within the larger file
         n_total_chunks     = the total number of chunks to expect from the original file
         rootdir            = path to the "root" directory; anything in the filepath beyond here is considered a subdirectory (optional, can also be set later)
+        filename_append    = string to append to the stem of the filename when the file is reconstructed
         data               = the actual binary data of this chunk of the file (can be set later if this chunk is being produced and not consumed)
         """
         self.__filepath = filepath
@@ -75,6 +77,7 @@ class DataFileChunk() :
         self.chunk_i = chunk_i
         self.n_total_chunks = n_total_chunks
         self.__rootdir = rootdir
+        self.filename_append = filename_append
         self.__data = data
 
     def __eq__(self,other) :
@@ -90,6 +93,7 @@ class DataFileChunk() :
         retval = retval and self.chunk_i == other.chunk_i
         retval = retval and self.n_total_chunks == other.n_total_chunks
         retval = retval and self.subdir_str == other.subdir_str
+        retval = retval and self.filename_append == other.filename_append
         retval = retval and self.__data == other.data
         return retval
 

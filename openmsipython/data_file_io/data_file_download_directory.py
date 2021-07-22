@@ -69,9 +69,9 @@ class DataFileDownloadDirectory(DataFileDirectory,Runnable,ControlledProcessMult
                 self.__thread_locks_by_filepath[dfc.filepath] = Lock()
             return_value = self.data_files_by_path[dfc.filepath].add_chunk(dfc,self.__thread_locks_by_filepath[dfc.filepath])
             if return_value==DATA_FILE_HANDLING_CONST.FILE_HASH_MISMATCH_CODE :
-                self.logger.error(f'ERROR: file hashes for file {dfc.filename} not matched after reconstruction!',RuntimeError)
+                self.logger.error(f'ERROR: file hashes for file {self.data_files_by_path[dfc.filepath].filename} not matched after reconstruction!',RuntimeError)
             elif return_value==DATA_FILE_HANDLING_CONST.FILE_SUCCESSFULLY_RECONSTRUCTED_CODE :
-                self.logger.info(f'File {dfc.filepath.relative_to(dfc.rootdir)} successfully reconstructed locally from stream')
+                self.logger.info(f'File {self.data_files_by_path[dfc.filepath].full_filepath.relative_to(dfc.rootdir)} successfully reconstructed locally from stream')
                 with lock :
                     if dfc.filepath in self.data_files_by_path :
                         self.__n_msgs_read+=1

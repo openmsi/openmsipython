@@ -11,6 +11,20 @@ class DownloadDataFile(DataFile,ABC) :
     Class to represent a data file that will be read as messages from a topic
     """
 
+    @staticmethod
+    def get_full_filepath(dfc) :
+        """
+        Return the full filepath of a file that will be written to disk given one of its DataFileChunks
+        """
+        if dfc.filename_append=='' :
+            return dfc.filepath 
+        else :
+            return dfc.filepath.parent/(dfc.filepath.name.split('.')[0]+dfc.filename_append+'.'+('.'.join(dfc.filepath.name.split('.')[1:])))
+
+    @property
+    def full_filepath(self) :
+        return self.__full_filepath
+
     @property
     @abstractmethod
     def check_file_hash(self) :
@@ -20,7 +34,7 @@ class DownloadDataFile(DataFile,ABC) :
         super().__init__(*args,**kwargs)
         #start an empty set of this file's downloaded offsets
         self._chunk_offsets_downloaded = set()
-        #a thread lock to guarantee that only one thread does certain critical things to the file at once
+        self.__full_filepath = None
 
     def add_chunk(self,dfc,thread_lock=nullcontext(),*args,**kwargs) :
         """
@@ -33,12 +47,21 @@ class DownloadDataFile(DataFile,ABC) :
         thread_lock = the lock object to acquire/release so that race conditions don't affect 
                       reconstruction of the files (optional, only needed if running this function asynchronously)
         """
-        #the filepath of this DownloadDataFile and of the given DataFileChunk must match
-        if dfc.filepath!=self.filepath :
-            self.logger.error(f'ERROR: filepath mismatch between data file chunk {dfc._filepath} and data file {self.filepath}',ValueError)
         #if this chunk's offset has already been written to disk, return the "already written" code
         if dfc.chunk_offset_write in self._chunk_offsets_downloaded :
             return DATA_FILE_HANDLING_CONST.CHUNK_ALREADY_WRITTEN_CODE
+        #the filepath of this DownloadDataFile and of the given DataFileChunk must match
+        if dfc.filepath!=self.filepath :
+            self.logger.error(f'ERROR: filepath mismatch between data file chunk {dfc._filepath} and data file {self.filepath}',ValueError)
+        #modify the filepath to include any append to the name
+        full_filepath = self.__class__.get_full_filepath(dfc)
+        if self.__full_filepath is None :
+            self.__full_filepath = full_filepath
+            self.filename = self.__full_filepath.name
+        elif self.__full_filepath!=full_filepath :
+            errmsg = f'ERROR: filepath for data file chunk {dfc.chunk_i}/{dfc.n_total_chunks} with offset {dfc.chunk_offset_write}'
+            errmsg+= f' is {full_filepath} but the file being reconstructed is expected to have filepath {self.__full_filepath}'
+            raise ValueError(errmsg)
         #acquire the thread lock to make sure this process is the only one dealing with this particular file
         with thread_lock:
             #call the function to actually add the chunk
@@ -72,7 +95,7 @@ class DownloadDataFileToDisk(DownloadDataFile) :
     @property
     def check_file_hash(self) :
         check_file_hash = sha512()
-        with open(self.filepath,'rb') as fp :
+        with open(self.full_filepath,'rb') as fp :
             data = fp.read()
         check_file_hash.update(data)
         return check_file_hash.digest()
@@ -87,8 +110,8 @@ class DownloadDataFileToDisk(DownloadDataFile) :
         """
         Add the data from a given file chunk to this file on disk
         """
-        mode = 'r+b' if self.filepath.is_file() else 'w+b'
-        with open(self.filepath,mode) as fp :
+        mode = 'r+b' if self.full_filepath.is_file() else 'w+b'
+        with open(self.full_filepath,mode) as fp :
             fp.seek(dfc.chunk_offset_write)
             fp.write(dfc.data)
             fp.flush()

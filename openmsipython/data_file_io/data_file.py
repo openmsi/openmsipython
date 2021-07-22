@@ -16,6 +16,9 @@ class DataFile(MyBaseClass) :
     @property
     def filename(self):
         return self.__filename
+    @filename.setter
+    def filename(self,fn) :
+        self.__filename = fn
     @property
     def logger(self):
         return self.__logger
