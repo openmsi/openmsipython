@@ -22,6 +22,7 @@ class PDVPlotMaker(DataFileStreamProcessor,Runnable) :
         return {'header_rows':self.__header_rows}
 
     def __init__(self,output_dir,pdv_plot_type,config_path,topic_name,header_rows=LECROY_CONST.HEADER_ROWS,**otherkwargs) :
+        self.__output_dir = output_dir
         if not self.__output_dir.is_dir() :
             self.__output_dir.mkdir(parents=True)
         super().__init__(config_path,topic_name,datafile_type=DownloadLecroyDataFile,**otherkwargs)
@@ -32,7 +33,6 @@ class PDVPlotMaker(DataFileStreamProcessor,Runnable) :
             self.__pdv_analysis_type = PDVVelocityAnalysis
         else :
             self.logger.error(f'ERROR: unrecognized pdv_plot_type {pdv_plot_type}',ValueError)
-        self.__output_dir = output_dir
         self.__header_rows = header_rows
         self.__figure = plt.figure(figsize=(10,6),dpi=300)
         self.__thread_lock = Lock() #use to make sure only one thread is writing to the Figure at once

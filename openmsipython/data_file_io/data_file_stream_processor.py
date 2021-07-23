@@ -9,7 +9,7 @@ from ..my_kafka.consumer_group import ConsumerGroup
 from .config import DATA_FILE_HANDLING_CONST
 from .download_data_file import DownloadDataFileToMemory
 
-class DataFileStreamProcessor(ConsumerGroup,ControlledProcessMultiThreaded,LogOwner,ABC) :
+class DataFileStreamProcessor(ControlledProcessMultiThreaded,LogOwner,ConsumerGroup,ABC) :
     """
     A class to consume DataFileChunk messages into memory and perform some operation(s) when entire files are available
     """
