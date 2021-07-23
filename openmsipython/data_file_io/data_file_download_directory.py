@@ -1,17 +1,16 @@
 #imports
-import pathlib, datetime
+import datetime
 from threading import Lock
 from ..utilities.argument_parsing import MyArgumentParser
 from ..utilities.controlled_process import ControlledProcessMultiThreaded
 from ..utilities.runnable import Runnable
 from ..utilities.misc import populated_kwargs
-from ..utilities.logging import Logger
 from ..my_kafka.consumer_group import ConsumerGroup
 from .config import DATA_FILE_HANDLING_CONST
 from .download_data_file import DownloadDataFileToDisk
 from .data_file_directory import DataFileDirectory
 
-class DataFileDownloadDirectory(DataFileDirectory,Runnable,ControlledProcessMultiThreaded,ConsumerGroup) :
+class DataFileDownloadDirectory(DataFileDirectory,ControlledProcessMultiThreaded,ConsumerGroup,Runnable) :
     """
     Class representing a directory into which files are being reconstructed
     """
@@ -68,7 +67,7 @@ class DataFileDownloadDirectory(DataFileDirectory,Runnable,ControlledProcessMult
         #start the loop for while the controlled process is alive
         while self.alive :
             #consume a DataFileChunk message from the topic
-            dfc = consumer.get_next_message(0)
+            dfc = consumer.get_next_message(self.logger,0)
             if dfc is None :
                 continue
             #set the chunk's rootdir to the working directory
@@ -113,22 +112,19 @@ class DataFileDownloadDirectory(DataFileDirectory,Runnable,ControlledProcessMult
             #make the argument parser
             parser = MyArgumentParser('output_dir','config','topic_name','n_threads','update_seconds','consumer_group_ID')
         args = parser.parse_args(args=args)
-        #get the logger
-        filename = pathlib.Path(__file__).name.split('.')[0]
-        logger = Logger(filename,filepath=pathlib.Path(args.output_dir)/f'{filename}.log')
         #make the download directory
         reconstructor_directory = cls(args.output_dir,args.config,args.topic_name,
                                       n_threads=args.n_threads,
                                       consumer_group_ID=args.consumer_group_ID,
                                       update_secs=args.update_seconds,
-                                      logger=logger)
+                                     )
         #start the reconstructor running (returns total number of chunks read and total number of files completely reconstructed)
         run_start = datetime.datetime.now()
-        logger.info(f'Listening for files to reconstruct in {args.output_dir}')
+        reconstructor_directory.logger.info(f'Listening for files to reconstruct in {args.output_dir}')
         n_msgs,complete_filenames = reconstructor_directory.reconstruct()
         run_stop = datetime.datetime.now()
         #shut down when that function returns
-        logger.info(f'File reconstructor writing to {args.output_dir} shut down')
+        reconstructor_directory.logger.info(f'File reconstructor writing to {args.output_dir} shut down')
         msg = f'{n_msgs} total messages were consumed'
         if len(complete_filenames)>0 :
             msg+=f' and the following {len(complete_filenames)} file'
@@ -137,7 +133,7 @@ class DataFileDownloadDirectory(DataFileDirectory,Runnable,ControlledProcessMult
         msg+=f' from {run_start} to {run_stop}'
         for fn in complete_filenames :
             msg+=f'\n\t{fn}'
-        logger.info(msg)
+        reconstructor_directory.logger.info(msg)
 
 #################### MAIN METHOD TO RUN FROM COMMAND LINE ####################
 

@@ -1,10 +1,9 @@
 #imports
-import pathlib, datetime
+import datetime
 import matplotlib.pyplot as plt
 import pandas as pd
 from io import BytesIO
 from threading import Lock
-from ..utilities.logging import Logger
 from ..utilities.runnable import Runnable
 from ..utilities.argument_parsing import MyArgumentParser
 from ..data_file_io.data_file_stream_processor import DataFileStreamProcessor
@@ -23,6 +22,8 @@ class PDVPlotMaker(DataFileStreamProcessor,Runnable) :
         return {'header_rows':self.__header_rows}
 
     def __init__(self,output_dir,pdv_plot_type,config_path,topic_name,header_rows=LECROY_CONST.HEADER_ROWS,**otherkwargs) :
+        if not self.__output_dir.is_dir() :
+            self.__output_dir.mkdir(parents=True)
         super().__init__(config_path,topic_name,datafile_type=DownloadLecroyDataFile,**otherkwargs)
         self.__pdv_analysis_type = None
         if pdv_plot_type=='spall' :
@@ -65,8 +66,6 @@ class PDVPlotMaker(DataFileStreamProcessor,Runnable) :
                                                     pyplot_figure=self.__figure)
                 analysis.run()
                 #save the plot and reset the figure
-                if not self.__output_dir.is_dir() :
-                    self.__output_dir.mkdir(parents=True)
                 self.__figure.savefig(self.__output_dir/self.__pdv_analysis_type.plot_file_name_from_input_file_name(datafile.filepath.name,LECROY_CONST.SKIMMED_FILENAME_APPEND),bbox_inches='tight')
                 self.__figure.clear()
         except Exception as e :
@@ -83,18 +82,15 @@ class PDVPlotMaker(DataFileStreamProcessor,Runnable) :
             parser = MyArgumentParser('output_dir','pdv_plot_type','config','topic_name',
                                       'n_threads','update_seconds','consumer_group_ID')
         args = parser.parse_args(args=args)
-        #get the logger
-        filename = pathlib.Path(__file__).name.split('.')[0]
-        logger = Logger(filename,filepath=pathlib.Path(args.output_dir)/f'{filename}.log' if args.output_dir is not None else None)
         #make the plot maker
         plot_maker = cls(args.output_dir,args.pdv_plot_type,args.config,args.topic_name,
                          n_threads=args.n_threads,
                          update_secs=args.update_seconds,
                          consumer_group_ID=args.consumer_group_ID,
-                         logger=logger)
+                         logger_file=args.output_dir)
         #start the plot maker running (returns total number of messages read and names of plot files created)
         run_start = datetime.datetime.now()
-        logger.info(f'Listening to the {args.topic_name} topic to find Lecroy data files and create {args.pdv_plot_type} plots')
+        plot_maker.logger.info(f'Listening to the {args.topic_name} topic to find Lecroy data files and create {args.pdv_plot_type} plots')
         n_msgs,plot_filepaths = plot_maker.make_plots_as_available()
         run_stop = datetime.datetime.now()
         #shut down when that function returns
@@ -102,7 +98,7 @@ class PDVPlotMaker(DataFileStreamProcessor,Runnable) :
         if args.output_dir is not None :
             msg+=f'writing to {args.output_dir} '
         msg+= 'shut down'
-        logger.info(msg)
+        plot_maker.logger.info(msg)
         msg = f'{n_msgs} total messages were consumed'
         if len(plot_filepaths)>0 :
             msg+=f' and the following {len(plot_filepaths)} plot file'
@@ -111,7 +107,7 @@ class PDVPlotMaker(DataFileStreamProcessor,Runnable) :
         msg+=f' from {run_start} to {run_stop}'
         for fn in plot_filepaths :
             msg+=f'\n\t{fn}'
-        logger.info(msg)
+        plot_maker.logger.info(msg)
 
 #################### MAIN METHOD TO RUN FROM COMMAND LINE ####################
 

@@ -5,7 +5,6 @@ from queue import Queue
 from ..utilities.argument_parsing import MyArgumentParser
 from ..utilities.runnable import Runnable
 from ..utilities.controlled_process import ControlledProcessSingleThread
-from ..utilities.logging import Logger
 from ..utilities.misc import populated_kwargs
 from ..my_kafka.my_producers import MySerializingProducer
 from .utilities import produce_from_queue_of_file_chunks
@@ -13,7 +12,7 @@ from .config import RUN_OPT_CONST
 from .data_file_directory import DataFileDirectory
 from .upload_data_file import UploadDataFile
 
-class DataFileUploadDirectory(DataFileDirectory,Runnable,ControlledProcessSingleThread) :
+class DataFileUploadDirectory(DataFileDirectory,ControlledProcessSingleThread,Runnable) :
     """
     Class representing a directory being watched for new files to be added so they can be uploaded
     """
@@ -155,7 +154,6 @@ class DataFileUploadDirectory(DataFileDirectory,Runnable,ControlledProcessSingle
             ut.join()
         self.logger.info('Waiting for all enqueued messages to be delivered (this may take a moment)....')
         self.__producer.flush() #don't move on until all enqueued messages have been sent/received
-        self.logger.info('Done!')
 
     def __find_new_files(self,to_upload=True) :
         """
@@ -187,24 +185,21 @@ class DataFileUploadDirectory(DataFileDirectory,Runnable,ControlledProcessSingle
             #make the argument parser
             parser = MyArgumentParser('upload_dir','config','topic_name','n_threads','chunk_size','queue_max_size','update_seconds','new_files_only')
         args = parser.parse_args(args=args)
-        #make a new logger
-        filename = pathlib.Path(__file__).name.split('.')[0]
-        logger = Logger(filename,filepath=pathlib.Path(args.upload_dir)/f'{filename}.log')
         #make the DataFileDirectory for the specified directory
-        upload_file_directory = cls(args.upload_dir,update_secs=args.update_seconds,logger=logger)
+        upload_file_directory = cls(args.upload_dir,update_secs=args.update_seconds)
         #listen for new files in the directory and run uploads as they come in until the process is shut down
         run_start = datetime.datetime.now()
         if args.new_files_only :
-            logger.info(f'Listening for files to be added to {args.upload_dir}...')
+            upload_file_directory.logger.info(f'Listening for files to be added to {args.upload_dir}...')
         else :
-            logger.info(f'Uploading files in/added to {args.upload_dir}...')
+            upload_file_directory.logger.info(f'Uploading files in/added to {args.upload_dir}...')
         uploaded_filepaths = upload_file_directory.upload_files_as_added(args.config,args.topic_name,
                                                                          n_threads=args.n_threads,
                                                                          chunk_size=args.chunk_size,
                                                                          max_queue_size=args.queue_max_size,
                                                                          new_files_only=args.new_files_only)
         run_stop = datetime.datetime.now()
-        logger.info(f'Done listening to {args.upload_dir} for files to upload')
+        upload_file_directory.logger.info(f'Done listening to {args.upload_dir} for files to upload')
         final_msg = f'The following {len(uploaded_filepaths)} file'
         if len(uploaded_filepaths)==1 :
             final_msg+=' was'
@@ -213,7 +208,7 @@ class DataFileUploadDirectory(DataFileDirectory,Runnable,ControlledProcessSingle
         final_msg+=f' uploaded between {run_start} and {run_stop}:\n'
         for fp in uploaded_filepaths :
             final_msg+=f'\t{fp}\n'
-        logger.info(final_msg)
+        upload_file_directory.logger.info(final_msg)
 
 #################### MAIN METHOD TO RUN FROM COMMAND LINE ####################
 

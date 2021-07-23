@@ -1,7 +1,6 @@
 #imports
 from .utilities import get_replaced_configs, get_next_message
 from ..utilities.config_file_parser import ConfigFileParser
-from ..utilities.logging import Logger
 from confluent_kafka import Consumer, DeserializingConsumer
 import uuid
 
@@ -10,11 +9,10 @@ class MyConsumer(Consumer) :
     Class to extend Kafka Consumers for specific scenarios
     """
 
-    def __init__(self,config_dict,logger) :
-        if logger is not None :
-            self.__logger = logger
-        else :
-            self.__logger = Logger(self.__class__)
+    def __init__(self,config_dict) :
+        """
+        config_dict = dictionary of configuration parameters to set up the Consumer
+        """
         super().__init__(config_dict)
 
     @classmethod
@@ -22,11 +20,9 @@ class MyConsumer(Consumer) :
         """
         config_file_path = path to the config file to use in defining this consumer
 
-        Possible keyword arguments:
-        logger = the logger object to use
-        !!!!! any other keyword arguments will be added to the configuration (with underscores replaced with dots) !!!!!
+        !!!!! any keyword arguments (that aren't 'logger') will be added to the configuration (with underscores replaced with dots) !!!!!
         """
-        parser = ConfigFileParser(config_file_path,**kwargs)
+        parser = ConfigFileParser(config_file_path,logger=kwargs.get('logger'))
         configs = parser.get_config_dict_for_groups(['cluster','consumer'])
         for argname,arg in kwargs.items() :
             if argname=='logger' :
@@ -35,21 +31,20 @@ class MyConsumer(Consumer) :
         #if the group.id has been set as "new" generate a new group ID
         if 'group.id' in configs.keys() and configs['group.id'].lower()=='new' :
             configs['group.id']=str(uuid.uuid1())
-        return cls(configs,kwargs.get('logger'))
+        return cls(configs)
     
-    def get_next_message(self,*poll_args,**poll_kwargs) :
-        return get_next_message(self,self.__logger,*poll_args,**poll_kwargs)
+    def get_next_message(self,logger,*poll_args,**poll_kwargs) :
+        return get_next_message(self,logger,*poll_args,**poll_kwargs)
 
 class MyDeserializingConsumer(DeserializingConsumer) :
     """
     Class to extend Kafka Consumers for specific scenarios
     """
 
-    def __init__(self,config_dict,logger) :
-        if logger is not None :
-            self.__logger = logger
-        else :
-            self.__logger = Logger(self.__class__)
+    def __init__(self,config_dict) :
+        """
+        config_dict = dictionary of configuration parameters to set up the DeserializingConsumer
+        """
         super().__init__(config_dict)
 
     @classmethod
@@ -57,18 +52,16 @@ class MyDeserializingConsumer(DeserializingConsumer) :
         """
         config_file_path = path to the config file to use in defining this consumer
 
-        Possible keyword arguments:
-        logger = the logger object to use
-        !!!!! any other keyword arguments will be added to the configuration (with underscores replaced with dots) !!!!!
+        !!!!! any keyword arguments (that aren't 'logger') will be added to the configuration (with underscores replaced with dots) !!!!!
         """
-        return cls(cls.get_config_dict(config_file_path,**kwargs),kwargs.get('logger'))
+        return cls(cls.get_config_dict(config_file_path,**kwargs))
 
     @staticmethod
     def get_config_dict(config_file_path,**kwargs) :
         """
         Return the configuration dictionary to use based on a given config file and including any replacements in the keyword arguments
         """
-        parser = ConfigFileParser(config_file_path,**kwargs)
+        parser = ConfigFileParser(config_file_path,logger=kwargs.get('logger'))
         configs = parser.get_config_dict_for_groups(['cluster','consumer'])
         for argname,arg in kwargs.items() :
             if argname=='logger' :
@@ -81,5 +74,5 @@ class MyDeserializingConsumer(DeserializingConsumer) :
         configs = get_replaced_configs(configs,'deserialization')
         return configs
 
-    def get_next_message(self,*poll_args,**poll_kwargs) :
-        return get_next_message(self,self.__logger,*poll_args,**poll_kwargs) 
+    def get_next_message(self,logger,*poll_args,**poll_kwargs) :
+        return get_next_message(self,logger,*poll_args,**poll_kwargs) 

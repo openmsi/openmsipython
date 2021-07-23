@@ -1,10 +1,7 @@
-# Constants relevant to PDV analysis
-
 class LecroyConstants :
     """
     Constants for working with Lecroy oscilloscope files
     """
-
     @property
     def HEADER_ROWS(self) :
         return 5           # the number of rows making up the header to the file

@@ -1,5 +1,5 @@
 #imports
-import logging, pathlib
+import logging
 
 class MyFormatter(logging.Formatter) :
     """
@@ -29,13 +29,13 @@ class Logger :
     def formatter(self):
         return MyFormatter('[%(name)s at %(asctime)s] %(message)s','%Y-%m-%d %H:%M:%S')
 
-    def __init__(self,name=None,streamlevel=logging.DEBUG,filepath=None,filelevel=logging.INFO) :
+    def __init__(self,logger_name=None,streamlevel=logging.DEBUG,logger_filepath=None,filelevel=logging.INFO) :
         """
         name = the name for this logger to use (probably something like the top module that owns it)
         """
-        self._name = name
+        self._name = logger_name
         if self._name is None :
-            self._name = pathlib.Path(__file__).name.split('.')[0]
+            self._name = self.__name__
         self._logger_obj = logging.getLogger(self._name)
         self._logger_obj.setLevel(logging.DEBUG)
         self._streamhandler = logging.StreamHandler()
@@ -43,8 +43,8 @@ class Logger :
         self._streamhandler.setFormatter(self.formatter)
         self._logger_obj.addHandler(self._streamhandler)
         self._filehandler = None
-        if filepath is not None :
-            self.add_file_handler(filepath)
+        if logger_filepath is not None :
+            self.add_file_handler(logger_filepath)
 
     #set the level of the underlying logger
     def set_level(self,level) :
@@ -86,3 +86,23 @@ class Logger :
         if exception_type is not None :
             raise exception_type(msg)
 
+class LogOwner :
+    """
+    Any subclasses extending this one will have access to a Logger defined by the first class in the MRO to extend it
+    """
+
+    @property
+    def logger(self) :
+        return self.__logger
+
+    def __init__(self,*args,logger=None,logger_name=None,streamlevel=logging.DEBUG,logger_file=None,filelevel=logging.INFO,**other_kwargs) :
+        if logger is not None :
+            self.__logger = logger
+        else :
+            if logger_name is None :
+                logger_name = self.__class__.__name__
+            logger_filepath = logger_file
+            if logger_file is not None and logger_file.is_dir() :
+                logger_filepath = logger_file / f'{self.__class__.__name__}.log'
+            self.__logger = Logger(logger_name,streamlevel,logger_filepath,filelevel)
+        super().__init__(*args,**other_kwargs)

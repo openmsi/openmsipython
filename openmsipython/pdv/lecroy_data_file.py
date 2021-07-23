@@ -45,7 +45,6 @@ class DownloadLecroyDataFile(DownloadDataFileToMemory) :
     @property
     def header_rows(self):
         return self.__header_rows
-    
 
     def __init__(self,*args,header_rows=LECROY_CONST.HEADER_ROWS,**kwargs) :
         super().__init__(*args,**kwargs)

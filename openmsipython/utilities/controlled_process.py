@@ -1,14 +1,13 @@
 #imports
-import pathlib, time
+import time
 from queue import Queue
 from threading import Thread
 from abc import ABC, abstractmethod
 from .config import UTIL_CONST
 from .misc import add_user_input
-from .logging import Logger
-from .my_base_class import MyBaseClass
+from .logging import LogOwner
 
-class ControlledProcess(ABC,MyBaseClass) :
+class ControlledProcess(LogOwner,ABC) :
     """
     A class to use when running processes that should remain active until they are explicitly shut down
     """
@@ -27,14 +26,8 @@ class ControlledProcess(ABC,MyBaseClass) :
     def __init__(self,*args,update_secs=UTIL_CONST.DEFAULT_UPDATE_SECONDS,**other_kwargs) :
         """
         update_secs = number of seconds to wait between printing a progress character to the console to indicate the program is alive
-
-        Possible other keyword arguments:
-        logger = the logger object to use (a new one will be created if none is supplied)
         """
         self.__update_secs = update_secs
-        self.__logger = other_kwargs.get('logger')
-        if self.__logger is None :
-            self.__logger = Logger(pathlib.Path(__file__).name.split('.')[0])
         #start up a Queue that will hold the control commands
         self.__control_command_queue = Queue()
         #use a daemon thread to allow a user to input control commands from the command line while the process is running

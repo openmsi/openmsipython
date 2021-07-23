@@ -7,7 +7,7 @@ from hashlib import sha512
 import time, pathlib
 
 # DataFileChunk Class 
-class DataFileChunk() :
+class DataFileChunk :
     """
     Class to deal with single chunks of file info
     """
@@ -144,7 +144,7 @@ class DataFileChunk() :
     def _populate_with_file_data(self,logger=None) :
         #create a new logger if one isn't given
         if logger is None :
-            logger = Logger(pathlib.Path(__file__).name.split('.')[0])
+            logger = Logger(self.__name__)
         #make sure the file exists
         if not self.filepath.is_file() :
             logger.error(f'ERROR: file {self.filepath} does not exist!',FileNotFoundError)

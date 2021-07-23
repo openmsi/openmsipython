@@ -16,11 +16,9 @@ class MyProducer(Producer) :
         """
         config_file_path = path to the config file to use in defining this producer
 
-        Possible keyword arguments:
-        logger = the logger object to use
-        !!!!! any other keyword arguments will be added to the configuration (with underscores replaced with dots) !!!!!
+        !!!!! any keyword arguments (that aren't 'logger') will be added to the configuration (with underscores replaced with dots) !!!!!
         """
-        parser = ConfigFileParser(config_file_path,**kwargs)
+        parser = ConfigFileParser(config_file_path,logger=kwargs.get('logger'))
         configs = parser.get_config_dict_for_groups(['cluster','producer'])
         for argname,arg in kwargs.items() :
             if argname=='logger' :
@@ -41,11 +39,9 @@ class MySerializingProducer(SerializingProducer) :
         """
         config_file_path = path to the config file to use in defining this producer
 
-        Possible keyword arguments:
-        logger = the logger object to use
-        !!!!! any other keyword arguments will be added to the configuration (with underscores replaced with dots) !!!!!
+        !!!!! any keyword arguments (that aren't 'logger') will be added to the configuration (with underscores replaced with dots) !!!!!
         """
-        parser = ConfigFileParser(config_file_path,**kwargs)
+        parser = ConfigFileParser(config_file_path,logger=kwargs.get('logger'))
         configs = parser.get_config_dict_for_groups(['cluster','producer'])
         for argname,arg in kwargs.items() :
             if argname=='logger' :

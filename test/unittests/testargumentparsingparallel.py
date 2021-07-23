@@ -1,5 +1,6 @@
 #imports
-from openmsipython.utilities.argument_parsing import existing_file, existing_dir, create_dir, config_path, int_power_of_two, CONFIG_FILE_EXT, CONFIG_FILE_DIR
+from openmsipython.utilities.config import UTIL_CONST
+from openmsipython.utilities.argument_parsing import existing_file, existing_dir, create_dir, config_path, int_power_of_two
 from openmsipython.data_file_io.config import RUN_OPT_CONST
 import unittest, pathlib
 
@@ -70,15 +71,15 @@ class TestArgumentParsing(unittest.TestCase) :
 
     #test the config_path argument parser callback
     def test_config_path(self) :
-        default_config_file_path = (CONFIG_FILE_DIR / f'{RUN_OPT_CONST.DEFAULT_CONFIG_FILE}{CONFIG_FILE_EXT}').resolve()
+        default_config_file_path = (UTIL_CONST.CONFIG_FILE_DIR / f'{RUN_OPT_CONST.DEFAULT_CONFIG_FILE}{UTIL_CONST.CONFIG_FILE_EXT}').resolve()
         self.assertEqual(config_path(RUN_OPT_CONST.DEFAULT_CONFIG_FILE),default_config_file_path)
         self.assertEqual(config_path(str(default_config_file_path)),default_config_file_path)
-        prod_config_file_path = (CONFIG_FILE_DIR / f'prod{CONFIG_FILE_EXT}').resolve()
+        prod_config_file_path = (UTIL_CONST.CONFIG_FILE_DIR / f'prod{UTIL_CONST.CONFIG_FILE_EXT}').resolve()
         self.assertEqual(config_path('prod'),prod_config_file_path)
         self.assertEqual(config_path(str(prod_config_file_path)),prod_config_file_path)
         does_not_exist_config_file_name = 'never_make_a_file_called_this.fake_file_ext'
         self.assertFalse((pathlib.Path() / does_not_exist_config_file_name).is_file())
-        self.assertFalse((CONFIG_FILE_DIR / does_not_exist_config_file_name).is_file())
+        self.assertFalse((UTIL_CONST.CONFIG_FILE_DIR / does_not_exist_config_file_name).is_file())
         with self.assertRaises(ValueError) :
             _ = config_path(does_not_exist_config_file_name)
         with self.assertRaises(TypeError) :

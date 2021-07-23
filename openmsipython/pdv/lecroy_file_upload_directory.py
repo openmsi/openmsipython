@@ -1,7 +1,7 @@
 #imports
 from ..data_file_io.data_file_upload_directory import DataFileUploadDirectory
-from .lecroy_data_file import UploadLecroyDataFile
 from .config import LECROY_CONST
+from .lecroy_data_file import UploadLecroyDataFile
 
 class LecroyFileUploadDirectory(DataFileUploadDirectory) :
     """

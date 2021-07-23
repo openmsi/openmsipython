@@ -1,11 +1,9 @@
 #imports
-import pathlib, uuid
+import uuid
 from ..utilities.config import UTIL_CONST
-from ..utilities.logging import Logger
-from ..utilities.my_base_class import MyBaseClass
 from .my_consumers import MyDeserializingConsumer
 
-class ConsumerGroup(MyBaseClass) :
+class ConsumerGroup :
     """
     Class for working with a group of consumers
     """
@@ -27,20 +25,15 @@ class ConsumerGroup(MyBaseClass) :
         keyword arguments:
         consumer_group_ID = ID to use for all consumers in the group (a new & unique ID is created by default)
         n_consumers = the number of Consumers to create in the group
-
-        possible other keyword arguments: 
-        logger = the logger object to use (a new one will be created if none is supplied)
         """
         self.__topic_name = topic_name
-        self.__logger = other_kwargs.get('logger')
-        if self.__logger is None :
-            self.__logger = Logger(pathlib.Path(__file__).name.split('.')[0])
         #create a Consumer for each thread and subscribe it to the topic
         config_dict = self._consumer_type.get_config_dict(config_path,group_id=consumer_group_ID,**other_kwargs)
         self.__consumers = []
         for i in range(n_consumers) :
-            consumer = MyDeserializingConsumer(config_dict,other_kwargs.get('logger'))
+            consumer = MyDeserializingConsumer(config_dict)
             self.__consumers.append(consumer)
         for consumer in self.__consumers :
             consumer.subscribe([self.__topic_name])
         super().__init__(*args,**other_kwargs)
+        

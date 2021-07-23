@@ -1,10 +1,10 @@
 #imports
-from .data_file import DataFile
-from abc import ABC, abstractmethod
-from contextlib import nullcontext
-from .config import DATA_FILE_HANDLING_CONST
-from hashlib import sha512
 import os
+from hashlib import sha512
+from contextlib import nullcontext
+from abc import ABC, abstractmethod
+from .config import DATA_FILE_HANDLING_CONST
+from .data_file import DataFile
 
 class DownloadDataFile(DataFile,ABC) :
     """
@@ -61,7 +61,7 @@ class DownloadDataFile(DataFile,ABC) :
         elif self.__full_filepath!=full_filepath :
             errmsg = f'ERROR: filepath for data file chunk {dfc.chunk_i}/{dfc.n_total_chunks} with offset {dfc.chunk_offset_write}'
             errmsg+= f' is {full_filepath} but the file being reconstructed is expected to have filepath {self.__full_filepath}'
-            raise ValueError(errmsg)
+            self.logger.error(errmsg,ValueError)
         #acquire the thread lock to make sure this process is the only one dealing with this particular file
         with thread_lock:
             #call the function to actually add the chunk

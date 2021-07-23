@@ -1,13 +1,8 @@
 #imports
-from .config import UTIL_CONST
-from ..data_file_io.config import RUN_OPT_CONST
-from argparse import ArgumentParser
 import pathlib, math, uuid
-
-#################### FILE-SCOPE CONSTANTS ####################
-
-CONFIG_FILE_EXT = '.config'
-CONFIG_FILE_DIR = pathlib.Path(__file__).parent.parent / 'my_kafka' / 'config_files'
+from argparse import ArgumentParser
+from ..data_file_io.config import RUN_OPT_CONST
+from .config import UTIL_CONST
 
 #################### MISC. FUNCTIONS ####################
 
@@ -38,11 +33,11 @@ def create_dir(argstring) :
 #convert a string or path argument into a config file path (raise an exception if the file can't be found)
 def config_path(configarg) :
     if isinstance(configarg,str) and '.' not in configarg :
-        configarg+=CONFIG_FILE_EXT
+        configarg+=UTIL_CONST.CONFIG_FILE_EXT
     if pathlib.Path.is_file(pathlib.Path(configarg)) :
         return pathlib.Path(configarg).resolve()
-    if pathlib.Path.is_file(CONFIG_FILE_DIR / configarg) :
-        return (CONFIG_FILE_DIR / configarg).resolve()
+    if pathlib.Path.is_file(UTIL_CONST.CONFIG_FILE_DIR / configarg) :
+        return (UTIL_CONST.CONFIG_FILE_DIR / configarg).resolve()
     raise ValueError(f'ERROR: config argument {configarg} is not a recognized config file!')
 
 #make sure a given value is a nonzero integer power of two (or can be converted to one)
@@ -82,7 +77,7 @@ class MyArgumentParser(ArgumentParser) :
                       'kwargs':{'type':existing_dir,'help':'Path to the directory to watch for files to upload'}},
         'config':{'positional':False,
                   'kwargs':{'default':RUN_OPT_CONST.DEFAULT_CONFIG_FILE,'type':config_path,
-                            'help':f'Name of config file to use in {CONFIG_FILE_DIR.resolve()}, or path to a file in a different location'}},
+                            'help':f'Name of config file to use in {UTIL_CONST.CONFIG_FILE_DIR.resolve()}, or path to a file in a different location'}},
         'topic_name':{'positional':False,
                       'kwargs':{'default':RUN_OPT_CONST.DEFAULT_TOPIC_NAME,'help':'Name of the topic to produce to or consume from'}},
         'n_threads':{'positional':False,

@@ -1,12 +1,10 @@
 #imports
-import pathlib
 from threading import Thread
 from queue import Queue
 from hashlib import sha512
 from .data_file import DataFile
 from ..utilities.argument_parsing import MyArgumentParser
 from ..utilities.runnable import Runnable
-from ..utilities.logging import Logger
 from ..utilities.misc import populated_kwargs
 from ..my_kafka.my_producers import MySerializingProducer
 from .config import RUN_OPT_CONST
@@ -72,9 +70,11 @@ class UploadDataFile(DataFile,Runnable) :
 
     def __init__(self,*args,to_upload=True,rootdir=None,filename_append='',**kwargs) :
         """
-        to_upload = if False, the file will be ignored for purposes of uploading to a topic (default is True)
-        rootdir = path to the "root" directory that this file is in; anything in the path beyond this root directory 
-                  will be added to the DataFileChunk so that it will be reconstructed inside a subdirectory
+        to_upload       = if False, the file will be ignored for purposes of uploading to a topic (default is True)
+        rootdir         = path to the "root" directory that this file is in; anything in the path beyond this root directory 
+                          will be added to the DataFileChunk so that it will be reconstructed inside a subdirectory
+        filename_append = a string that should be appended to the end of the filename stem to distinguish the file that's produced 
+                          from its original file on disk
         """
         super().__init__(*args,**kwargs)
         self.__to_upload = to_upload
@@ -169,12 +169,12 @@ class UploadDataFile(DataFile,Runnable) :
         #first make sure the choices of select_bytes are valid if necessary and sort them by their start byte to keep the file hash in order
         if self.select_bytes!=[] :
             if type(self.select_bytes)!=list :
-                raise ValueError(f'ERROR: select_bytes={self.select_bytes} but is expected to be a list!')
+                self.logger.error(f'ERROR: select_bytes={self.select_bytes} but is expected to be a list!',ValueError)
             for sbt in self.select_bytes :
                 if type(sbt)!=tuple or len(sbt)!=2 :
-                    raise ValueError(f'ERROR: found {sbt} in select_bytes but all elements are expected to be two-entry tuples!')
+                    self.logger.error(f'ERROR: found {sbt} in select_bytes but all elements are expected to be two-entry tuples!',ValueError)
                 elif sbt[0]>=sbt[1] :
-                    raise ValueError(f'ERROR: found {sbt} in select_bytes but start byte cannot be >= stop byte!')
+                    self.logger.error(f'ERROR: found {sbt} in select_bytes but start byte cannot be >= stop byte!',ValueError)
             sorted_select_bytes = sorted(self.select_bytes,key=lambda x: x[0])
         #start a hash for the file and the lists of chunks
         file_hash = sha512()
@@ -220,16 +220,13 @@ class UploadDataFile(DataFile,Runnable) :
             #make the argument parser
             parser = MyArgumentParser('filepath','config','topic_name','n_threads','chunk_size')
         args = parser.parse_args(args=args)
-        #make a new logger
-        filename = pathlib.Path(__file__).name.split('.')[0]
-        logger = Logger(filename,filepath=(pathlib.Path(args.filepath).parent)/f'{filename}.log')
         #make the DataFile for the single specified file
-        upload_file = cls(args.filepath,logger=logger)
+        upload_file = cls(args.filepath)
         #chunk and upload the file
         upload_file.upload_whole_file(args.config,args.topic_name,
                                       n_threads=args.n_threads,
                                       chunk_size=args.chunk_size)
-        logger.info(f'Done uploading {args.filepath}')
+        upload_file.logger.info(f'Done uploading {args.filepath}')
 
 
 #################### MAIN METHOD TO RUN FROM COMMAND LINE ####################

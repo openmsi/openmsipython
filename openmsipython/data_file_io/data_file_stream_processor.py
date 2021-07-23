@@ -3,13 +3,13 @@ import pathlib
 from threading import Lock
 from abc import ABC, abstractmethod
 from ..utilities.misc import populated_kwargs
-from ..utilities.logging import Logger
+from ..utilities.logging import LogOwner
 from ..utilities.controlled_process import ControlledProcessMultiThreaded
 from ..my_kafka.consumer_group import ConsumerGroup
 from .config import DATA_FILE_HANDLING_CONST
 from .download_data_file import DownloadDataFileToMemory
 
-class DataFileStreamProcessor(ControlledProcessMultiThreaded,ConsumerGroup,ABC) :
+class DataFileStreamProcessor(ConsumerGroup,ControlledProcessMultiThreaded,LogOwner,ABC) :
     """
     A class to consume DataFileChunk messages into memory and perform some operation(s) when entire files are available
     """
@@ -22,22 +22,16 @@ class DataFileStreamProcessor(ControlledProcessMultiThreaded,ConsumerGroup,ABC) 
     @property
     def n_msgs_read(self) :
         return self.__n_msgs_read
-    @property
-    def logger(self) :
-        return self.__logger
 
     #################### PUBLIC FUNCTIONS ####################
 
     def __init__(self,*args,datafile_type=DownloadDataFileToMemory,**kwargs) :
-        self.__logger = kwargs.get('logger')
-        if self.__logger is None :
-            self.__logger = Logger(pathlib.Path(__file__).name.split('.')[0])
-        kwargs = populated_kwargs(kwargs,{'n_consumers':kwargs.get('n_threads'),'logger':self.__logger})
+        kwargs = populated_kwargs(kwargs,{'n_consumers':kwargs.get('n_threads')})
         super().__init__(*args,**kwargs)
         if not issubclass(datafile_type,DownloadDataFileToMemory) :
             errmsg = 'ERROR: DataFileStreamProcessor requires a datafile_type that is a subclass of '
             errmsg+= f'DownloadDataFileToMemory but {datafile_type} was given!'
-            self.__logger.error(errmsg,ValueError)
+            self.logger.error(errmsg,ValueError)
         self.__datafile_type = datafile_type
         self.__n_msgs_read = 0
         self.__processed_filenames = set()
@@ -80,7 +74,7 @@ class DataFileStreamProcessor(ControlledProcessMultiThreaded,ConsumerGroup,ABC) 
         #start the loop for while the controlled process is alive
         while self.alive :
             #consume a message from the topic
-            dfc = consumer.get_next_message(0)
+            dfc = consumer.get_next_message(self.logger,0)
             if dfc is None :
                 continue
             #set the chunk's rootdir to the current directory

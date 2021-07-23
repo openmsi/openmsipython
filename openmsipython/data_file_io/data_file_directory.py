@@ -1,36 +1,24 @@
 #imports
-import pathlib
 from ..utilities.misc import populated_kwargs
-from ..utilities.logging import Logger
-from ..utilities.my_base_class import MyBaseClass
+from ..utilities.logging import LogOwner
 
-class DataFileDirectory(MyBaseClass) :
+class DataFileDirectory(LogOwner) :
     """
     Base class representing any directory holding data files
     """
-
-    #################### PROPERTIES ####################
 
     @property
     def dirpath(self) :
         return self.__dirpath
     @property
-    def logger(self) :
-        return self.__logger
-
-    #################### PUBLIC FUNCTIONS ####################
+    def data_files_by_path(self) :
+        return self.__data_files_by_path
 
     def __init__(self,dirpath,*args,**kwargs) :
         """
         dirpath = path to the directory 
-        
-        Possible keyword arguments:
-        logger = the logger object to use (a new one will be created if none is supplied)
         """
         self.__dirpath = dirpath.resolve()
-        self.__logger = kwargs.get('logger')
-        if self.__logger is None :
-            self.__logger = Logger(pathlib.Path(__file__).name.split('.')[0])
-        self.data_files_by_path = {}
-        kwargs = populated_kwargs(kwargs,{'logger':self.__logger})
+        self.__data_files_by_path = {}
+        kwargs = populated_kwargs(kwargs,{'logger_file':self.__dirpath})
         super().__init__(*args,**kwargs)

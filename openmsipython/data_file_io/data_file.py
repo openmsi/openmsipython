@@ -1,9 +1,8 @@
 #imports
-import pathlib
-from ..utilities.logging import Logger
-from ..utilities.my_base_class import MyBaseClass
+from ..utilities.misc import populated_kwargs
+from ..utilities.logging import LogOwner
 
-class DataFile(MyBaseClass) :
+class DataFile(LogOwner) :
     """
     Base class for representing a single data file
     """
@@ -19,21 +18,15 @@ class DataFile(MyBaseClass) :
     @filename.setter
     def filename(self,fn) :
         self.__filename = fn
-    @property
-    def logger(self):
-        return self.__logger
 
     #################### PUBLIC FUNCTIONS ####################
 
-    def __init__(self,filepath,**kwargs) :
+    def __init__(self,filepath,*args,**kwargs) :
         """
         filepath = path to the file
-        
-        Possible keyword arguments:
-        logger    = the logger object for this file's messages to use (a new one will be created if none is supplied)
         """
         self.__filepath = filepath.resolve()
         self.__filename = self.__filepath.name
-        self.__logger = kwargs.get('logger')
-        if self.__logger is None :
-            self.__logger = Logger(pathlib.Path(__file__).name.split('.')[0])
+        kwargs = populated_kwargs(kwargs,{'logger_file':self.__filepath.parent})
+        super().__init__(*args,**kwargs)
+
