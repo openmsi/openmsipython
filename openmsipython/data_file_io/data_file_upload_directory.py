@@ -181,9 +181,8 @@ class DataFileUploadDirectory(DataFileDirectory,ControlledProcessSingleThread,Ru
         """
         Function to run the upload directory right from the command line
         """
-        if args is None :
-            #make the argument parser
-            parser = MyArgumentParser('upload_dir','config','topic_name','n_threads','chunk_size','queue_max_size','update_seconds','new_files_only')
+        parser = MyArgumentParser('upload_dir','config','topic_name','chunk_size','queue_max_size','update_seconds','new_files_only',
+                                  n_threads=RUN_OPT_CONST.N_DEFAULT_UPLOAD_THREADS)
         args = parser.parse_args(args=args)
         #make the DataFileDirectory for the specified directory
         upload_file_directory = cls(args.upload_dir,update_secs=args.update_seconds)

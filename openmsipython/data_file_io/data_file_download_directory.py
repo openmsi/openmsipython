@@ -6,7 +6,7 @@ from ..utilities.controlled_process import ControlledProcessMultiThreaded
 from ..utilities.runnable import Runnable
 from ..utilities.misc import populated_kwargs
 from ..my_kafka.consumer_group import ConsumerGroup
-from .config import DATA_FILE_HANDLING_CONST
+from .config import DATA_FILE_HANDLING_CONST, RUN_OPT_CONST
 from .download_data_file import DownloadDataFileToDisk
 from .data_file_directory import DataFileDirectory
 
@@ -108,9 +108,8 @@ class DataFileDownloadDirectory(DataFileDirectory,ControlledProcessMultiThreaded
         """
         Run the download directory right from the command line
         """
-        if args is None :
-            #make the argument parser
-            parser = MyArgumentParser('output_dir','config','topic_name','n_threads','update_seconds','consumer_group_ID')
+        parser = MyArgumentParser('output_dir','config','topic_name','update_seconds','consumer_group_ID',
+                                  n_threads=RUN_OPT_CONST.N_DEFAULT_DOWNLOAD_THREADS)
         args = parser.parse_args(args=args)
         #make the download directory
         reconstructor_directory = cls(args.output_dir,args.config,args.topic_name,

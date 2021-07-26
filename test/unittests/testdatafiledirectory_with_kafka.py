@@ -90,7 +90,9 @@ class TestDataFileDirectoryWithKafka(unittest.TestCase) :
                                          RUN_OPT_CONST.DEFAULT_TOPIC_NAME,
                                          n_threads=RUN_OPT_CONST.N_DEFAULT_DOWNLOAD_THREADS,
                                          update_secs=UPDATE_SECS,
-                                         logger=LOGGER)
+                                         consumer_group_ID='run_data_file_download_directory',
+                                         logger=LOGGER,
+                                         )
         #start reconstruct in a separate thread so we can time it out
         download_thread = MyThread(target=dfdd.reconstruct)
         download_thread.start()

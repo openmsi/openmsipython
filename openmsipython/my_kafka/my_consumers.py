@@ -29,8 +29,11 @@ class MyConsumer(Consumer) :
                 continue
             configs[argname.replace('_','.')]=arg
         #if the group.id has been set as "new" generate a new group ID
-        if 'group.id' in configs.keys() and configs['group.id'].lower()=='new' :
+        if 'group.id' in configs.keys() and configs['group.id'].lower()=='create_new' :
             configs['group.id']=str(uuid.uuid1())
+        #if the auto.offset.reset was given as "none" then remove it from the configs
+        if 'auto.offset.reset' in configs.keys() and configs['auto.offset.reset']=='none' :
+            del configs['auto.offset.reset']
         return cls(configs)
     
     def get_next_message(self,logger,*poll_args,**poll_kwargs) :
@@ -68,8 +71,11 @@ class MyDeserializingConsumer(DeserializingConsumer) :
                 continue
             configs[argname.replace('_','.')]=arg
         #if the group.id has been set as "new" generate a new group ID
-        if 'group.id' in configs.keys() and configs['group.id'].lower()=='new' :
+        if 'group.id' in configs.keys() and configs['group.id'].lower()=='create_new' :
             configs['group.id']=str(uuid.uuid1())
+        #if the auto.offset.reset was given as "none" then remove it from the configs
+        if 'auto.offset.reset' in configs.keys() and configs['auto.offset.reset']=='none' :
+            del configs['auto.offset.reset']
         #if one of several recognized deserializers have been given as config paramenters for the key/value deserializer, replace them with the actual class
         configs = get_replaced_configs(configs,'deserialization')
         return configs

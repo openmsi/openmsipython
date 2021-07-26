@@ -104,31 +104,46 @@ class MyArgumentParser(ArgumentParser) :
                                    'help':'Type of analysis to perform ("spall" or "velocity")'}},
         'optional_output_dir':{'positional':False,
                                'kwargs':{'type':create_dir,
-                                         'help':'Path to directory to put output in'}},
+                                         'help':'Optional path to directory to put output in'}},
     }
 
-    def __init__(self,*argnames,**kwargs) :
-        if len(argnames)<1 :
-            raise ValueError('ERROR: must give at least one argument name to create an argument parser!')
-        super().__init__(**kwargs)
-        parsed_argnames = []
-        for argname in argnames :
-            if argname in self.ARGUMENTS.keys() :
-                if self.ARGUMENTS[argname]['positional'] :
-                    argname_to_add = argname 
+    def __init__(self,*args,**kwargs) :
+        if len(args)<1 and len(kwargs)<1 :
+            raise ValueError('ERROR: must specify at least one desired argument to create an argument parser!')
+        super().__init__()
+        for argname in args :
+            argname_to_add, kwargs_for_arg = self.__get_argname_and_kwargs(argname)
+            self.add_argument(argname_to_add,**kwargs_for_arg)
+        for argname,argdefault in kwargs.items() :
+            argname_to_add, kwargs_for_arg = self.__get_argname_and_kwargs(argname,argdefault)
+            self.add_argument(argname_to_add,**kwargs_for_arg)
+
+    def __get_argname_and_kwargs(self,argname,new_default=None) :
+        """
+        Return the name and kwargs dict for a particular argument
+
+        argname = the given name of the argument, will be matched to a name in ARGUMENTS
+        new_default = an optional parameter given to override the default already specified in ARGUMENTS
+        """
+        if argname in self.ARGUMENTS.keys() :
+            if self.ARGUMENTS[argname]['positional'] :
+                argname_to_add = argname 
+            else :
+                if argname.startswith('optional_') :
+                    argname_to_add = f'--{argname[len("optional_"):]}'
                 else :
-                    if argname.startswith('optional_') :
-                        argname_to_add = f'--{argname[len("optional_"):]}'
-                    else :
-                        argname_to_add = f'--{argname}'
-                if 'default' in self.ARGUMENTS[argname]['kwargs'].keys() :
-                    if 'help' in self.ARGUMENTS[argname]['kwargs'].keys() :
-                        self.ARGUMENTS[argname]['kwargs']['help']+=f" (default = {self.ARGUMENTS[argname]['kwargs']['default']})"
-                    else :
-                        self.ARGUMENTS[argname]['kwargs']['help']=f"default = {self.ARGUMENTS[argname]['kwargs']['default']}"
-                self.add_argument(argname_to_add,**self.ARGUMENTS[argname]['kwargs'])
-                parsed_argnames.append(argname)
-        if tuple(parsed_argnames)!=argnames :
-            errmsg = f'ERROR: some requested arguments could not be identified ({[a for a in argnames if a not in parsed_argnames]}'
-            errmsg+=' not parsed)'
-            raise ValueError(errmsg)
+                    argname_to_add = f'--{argname}'
+            if new_default is not None :
+                if 'default' in self.ARGUMENTS[argname].keys() and type(new_default)!=type(self.ARGUMENTS[argname]['default']) :
+                    errmsg = f'ERROR: new default value {new_default} for argument {argname} is of a different type than expected '
+                    errmsg+= f'based on the old default ({self.ARGUMENTS[argname]["default"]})!'
+                    raise ValueError(errmsg)
+                self.ARGUMENTS[argname]['default'] = new_default
+            if 'default' in self.ARGUMENTS[argname]['kwargs'].keys() :
+                if 'help' in self.ARGUMENTS[argname]['kwargs'].keys() :
+                    self.ARGUMENTS[argname]['kwargs']['help']+=f" (default = {self.ARGUMENTS[argname]['kwargs']['default']})"
+                else :
+                    self.ARGUMENTS[argname]['kwargs']['help']=f"default = {self.ARGUMENTS[argname]['kwargs']['default']}"
+            return argname_to_add, self.ARGUMENTS[argname]['kwargs']
+        else :
+            raise ValueError(f'ERROR: argument {argname} is not recognized as an option!')

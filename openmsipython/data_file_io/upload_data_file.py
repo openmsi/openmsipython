@@ -216,9 +216,8 @@ class UploadDataFile(DataFile,Runnable) :
         """
         Run the upload data file directly from the command line
         """
-        if args is None :
-            #make the argument parser
-            parser = MyArgumentParser('filepath','config','topic_name','n_threads','chunk_size')
+        #make the argument parser
+        parser = MyArgumentParser('filepath','config','topic_name','chunk_size',n_threads=RUN_OPT_CONST.N_DEFAULT_UPLOAD_THREADS)
         args = parser.parse_args(args=args)
         #make the DataFile for the single specified file
         upload_file = cls(args.filepath)

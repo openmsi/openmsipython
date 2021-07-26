@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 from io import BytesIO
 from threading import Lock
+from ..data_file_io.config import RUN_OPT_CONST
 from ..utilities.runnable import Runnable
 from ..utilities.argument_parsing import MyArgumentParser
 from ..data_file_io.data_file_stream_processor import DataFileStreamProcessor
@@ -77,10 +78,9 @@ class PDVPlotMaker(DataFileStreamProcessor,Runnable) :
         """
         Run the plot maker from the command line
         """
-        if args is None :
-            #make the argument parser
-            parser = MyArgumentParser('output_dir','pdv_plot_type','config','topic_name',
-                                      'n_threads','update_seconds','consumer_group_ID')
+        #make the argument parser
+        parser = MyArgumentParser('output_dir','pdv_plot_type','config','topic_name','update_seconds',
+                                  'consumer_group_ID',n_threads=RUN_OPT_CONST.N_DEFAULT_DOWNLOAD_THREADS)
         args = parser.parse_args(args=args)
         #make the plot maker
         plot_maker = cls(args.output_dir,args.pdv_plot_type,args.config,args.topic_name,

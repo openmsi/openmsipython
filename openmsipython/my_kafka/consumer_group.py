@@ -35,5 +35,5 @@ class ConsumerGroup :
             self.__consumers.append(consumer)
         for consumer in self.__consumers :
             consumer.subscribe([self.__topic_name])
-        super().__init__(*args,**other_kwargs)
+        #super().__init__(*args,**other_kwargs)
         
