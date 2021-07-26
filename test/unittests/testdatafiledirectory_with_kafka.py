@@ -1,26 +1,11 @@
 #imports
 from config import TEST_CONST
+from utilities import MyThread
 from openmsipython.data_file_io.data_file_upload_directory import DataFileUploadDirectory
 from openmsipython.data_file_io.data_file_download_directory import DataFileDownloadDirectory
 from openmsipython.data_file_io.config import RUN_OPT_CONST
 from openmsipython.utilities.logging import Logger
-from threading import Thread
 import unittest, pathlib, time, logging, shutil, filecmp
-
-#A small utility class to reraise any exceptions thrown in a child thread when join() is called
-class MyThread(Thread) :
-    def __init__(self,*args,**kwargs) :
-        super().__init__(*args,**kwargs)
-        self.exc = None
-    def run(self,*args,**kwargs) :
-        try :
-            super().run(*args,**kwargs)
-        except Exception as e :
-            self.exc = e
-    def join(self,*args,**kwargs) :
-        super().join(*args,**kwargs)
-        if self.exc is not None :
-            raise self.exc
 
 #constants
 LOGGER = Logger(pathlib.Path(__file__).name.split('.')[0],logging.ERROR)

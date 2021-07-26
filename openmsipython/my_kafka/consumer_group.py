@@ -34,6 +34,4 @@ class ConsumerGroup :
             consumer = MyDeserializingConsumer(config_dict)
             self.__consumers.append(consumer)
         for consumer in self.__consumers :
-            consumer.subscribe([self.__topic_name])
-        #super().__init__(*args,**other_kwargs)
-        
+            consumer.subscribe([self.__topic_name])        

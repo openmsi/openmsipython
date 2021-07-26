@@ -22,6 +22,9 @@ class DataFileStreamProcessor(ControlledProcessMultiThreaded,LogOwner,ConsumerGr
     @property
     def n_msgs_read(self) :
         return self.__n_msgs_read
+    @property
+    def processed_filepaths(self) :
+        return self.__processed_filepaths
 
     #################### PUBLIC FUNCTIONS ####################
 
@@ -34,7 +37,7 @@ class DataFileStreamProcessor(ControlledProcessMultiThreaded,LogOwner,ConsumerGr
             self.logger.error(errmsg,ValueError)
         self.__datafile_type = datafile_type
         self.__n_msgs_read = 0
-        self.__processed_filenames = set()
+        self.__processed_filepaths = set()
         self.__download_files_by_filepath = {}
         self.__thread_locks_by_filepath = {}
 
@@ -49,7 +52,7 @@ class DataFileStreamProcessor(ControlledProcessMultiThreaded,LogOwner,ConsumerGr
         self.logger.info(msg)
         lock = Lock()
         self.run([(lock,self.consumers[i]) for i in range(self.n_threads)])
-        return self.__n_msgs_read, self.__processed_filenames
+        return self.__n_msgs_read, self.__processed_filepaths
 
     #################### PRIVATE HELPER FUNCTIONS ####################
 
@@ -63,7 +66,7 @@ class DataFileStreamProcessor(ControlledProcessMultiThreaded,LogOwner,ConsumerGr
         pass
 
     def _on_check(self) :
-        self.logger.debug(f'{self.__n_msgs_read} messages read, {len(self.__processed_filenames)} files fully processed so far')
+        self.logger.debug(f'{self.__n_msgs_read} messages read, {len(self.__processed_filepaths)} files fully processed so far')
 
     def _run_worker(self,lock,consumer) :
         """
@@ -96,16 +99,18 @@ class DataFileStreamProcessor(ControlledProcessMultiThreaded,LogOwner,ConsumerGr
                 if processing_retval is None :
                     self.logger.info(f'Fully-read file {self.__download_files_by_filepath[dfc.filepath].full_filepath.relative_to(dfc.rootdir)} successfully processed')
                     with lock :
-                        self.__processed_filenames.add(dfc.filepath)
+                        self.__processed_filepaths.add(dfc.filepath)
+                        self.__processed_filepaths.update()
                 #warn if it wasn't processed correctly
                 else :
                     warnmsg = f'WARNING: Fully-read file {self.__download_files_by_filepath[dfc.filepath].full_filepath.relative_to(dfc.rootdir)} '
                     warnmsg+= f'was not able to be processed. Exception: {processing_retval}. The messages for this file will need to be '
                     warnmsg+= 'consumed again if the file is to be processed!'
                     self.logger.warning(warnmsg)
-                self.__n_msgs_read+=1                        
-                del self.__download_files_by_filepath[dfc.filepath]
-                del self.__thread_locks_by_filepath[dfc.filepath]
+                with lock :
+                    self.__n_msgs_read+=1                        
+                    del self.__download_files_by_filepath[dfc.filepath]
+                    del self.__thread_locks_by_filepath[dfc.filepath]
             #if the message was consumed and everything is moving along fine
             elif return_value in (DATA_FILE_HANDLING_CONST.FILE_IN_PROGRESS,DATA_FILE_HANDLING_CONST.CHUNK_ALREADY_WRITTEN_CODE) :
                 with lock :

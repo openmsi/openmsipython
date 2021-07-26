@@ -1,13 +1,32 @@
 #imports
 from openmsipython.utilities.config import UTIL_CONST
-from openmsipython.utilities.argument_parsing import existing_file, existing_dir, create_dir, config_path, int_power_of_two
+from openmsipython.utilities.argument_parsing import MyArgumentParser, existing_file, existing_dir, create_dir
+from openmsipython.utilities.argument_parsing import config_path, int_power_of_two, positive_int
 from openmsipython.data_file_io.config import RUN_OPT_CONST
-import unittest, pathlib
+from config import TEST_CONST
+import unittest, pathlib, shutil, os
 
 class TestArgumentParsing(unittest.TestCase) :
     """
     Class for testing functions in utilities/argument_parsing.py
     """
+
+    #test MyArgumentParser by just adding a bunch of arguments
+    def test_my_argument_parser(self) :
+        parser = MyArgumentParser('filepath','output_dir','upload_dir','config','topic_name','queue_max_size','new_files_only',
+                                  'consumer_group_ID','pdv_plot_type','optional_output_dir',
+                                  n_threads=5,chunk_size=128,update_seconds=60)
+        args = [os.fspath(TEST_CONST.TEST_DATA_FILE_PATH),
+                'TEST_OUTPUT',
+                os.fspath(TEST_CONST.TEST_DATA_FILE_ROOT_DIR_PATH),
+                '--n_threads','100',
+                '--new_files_only']
+        args = parser.parse_args(args=args)
+        self.assertEqual(args.n_threads,100)
+        self.assertTrue((pathlib.Path() / 'TEST_OUTPUT').is_dir())
+        shutil.rmtree(pathlib.Path() / 'TEST_OUTPUT')
+        with self.assertRaises(ValueError) :
+            parser = MyArgumentParser('never_name_a_command_line_arg_this')
 
     #test the existing_file argument parser callback
     def test_existing_file(self) :
@@ -99,3 +118,17 @@ class TestArgumentParsing(unittest.TestCase) :
             _ = int_power_of_two(-4)
         with self.assertRaises(ValueError) :
             _ = int_power_of_two(None)
+
+    #test the positive_int argument parser callback
+    def test_positive_int(self) :
+        self.assertEqual(positive_int(3),3)
+        self.assertEqual(positive_int('5'),5)
+        self.assertEqual(positive_int(22.0),22)
+        with self.assertRaises(ValueError) :
+            _ = positive_int('hello : )')
+        with self.assertRaises(ValueError) :
+            _ = positive_int('-3')
+        with self.assertRaises(ValueError) :
+            _ = positive_int(-5)
+        with self.assertRaises(ValueError) :
+            _ = positive_int(None)
