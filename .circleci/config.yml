@@ -45,7 +45,7 @@ jobs:
   parallel-tests-no-kafka:
     docker:
       - image: cimg/python:3.7
-    parallelism: 4
+    #parallelism: 4
     steps:
       - attach_workspace:
           at: .
