@@ -105,7 +105,7 @@ class TestControlledProcess(unittest.TestCase) :
             self.assertTrue(cpmt.checked)
             self.assertFalse(cpmt.on_shutdown_called)
             cpmt.control_command_queue.put('q')
-            time.sleep(0.2)
+            time.sleep(1.0)
             self.assertTrue(cpmt.on_shutdown_called)
             run_thread.join(timeout=TIMEOUT_SECS)
             if run_thread.is_alive() :

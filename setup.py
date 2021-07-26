@@ -21,6 +21,7 @@ setupkwargs = dict(
     install_requires=['confluent-kafka>=1.6.0',
                       'msgpack>=1.0.0',
                       'pandas>=1.3.0',
+                      'matplotlib>=3.4.0'
                      ],
     extras_require = {'test': ['pyflakes>=2.2.0',],},
 )
