@@ -11,15 +11,12 @@ workflows:
     # For more details on extending your workflow, see the configuration docs: https://circleci.com/docs/2.0/configuration-reference/#workflows 
     jobs:
       - build-and-code-check
-      - parallel-tests-no-kafka:
+      - run-tests:
           requires:
             - build-and-code-check
-      - sequential-tests-with-kafka:
-          requires:
-            - parallel-tests-no-kafka
       - check-repo:
           requires:
-            - sequential-tests-with-kafka
+            - run-tests
 
 ################# JOBS #################
 jobs:
@@ -41,28 +38,8 @@ jobs:
           root: .
           paths:
             - .
-  # Run unittests that don't interact with the kafka cluster at all in parallel
-  parallel-tests-no-kafka:
-    docker:
-      - image: cimg/python:3.7
-    parallelism: 4
-    steps:
-      - attach_workspace:
-          at: .
-      - python/install-packages:
-          pkg-manager: pip
-      - run:
-          name: run non-Kafka tests
-          command: |
-            cd test/unittests
-            TESTCLASSES=$(circleci tests glob "test*parallel.py" | sed -e 's/.py//' | circleci tests split)
-            python -m unittest $TESTCLASSES -v
-      - persist_to_workspace:
-          root: .
-          paths:
-              - .
-  # Run unittests that DO interact with the kafka cluster sequentially
-  sequential-tests-with-kafka:
+  # Run unittests 
+  run-tests:
     docker:
       - image: cimg/python:3.7
     steps:
@@ -72,7 +49,7 @@ jobs:
           pkg-manager: pip
       - run:
           name: run tests
-          command: python -m unittest discover -s test/unittests -v -p test*_with_kafka.py
+          command: python -m unittest discover -s test/unittests -v -p test*.py
       - persist_to_workspace:
           root: .
           paths:
