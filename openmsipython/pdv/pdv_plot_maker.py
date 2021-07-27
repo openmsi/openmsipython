@@ -8,7 +8,7 @@ from ..data_file_io.config import RUN_OPT_CONST
 from ..utilities.runnable import Runnable
 from ..utilities.argument_parsing import MyArgumentParser
 from ..data_file_io.data_file_stream_processor import DataFileStreamProcessor
-from ..submodules.pdv_analysis.pdv_analysis import PDVSpallAnalysis, PDVVelocityAnalysis
+from .pdv_analysis import PDVSpallAnalysis, PDVVelocityAnalysis
 from .lecroy_data_file import DownloadLecroyDataFile
 from .config import LECROY_CONST
 
