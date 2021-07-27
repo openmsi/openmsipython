@@ -1,6 +1,6 @@
 #imports
 from openmsipython.my_kafka.serialization import DataFileChunkSerializer
-from openmsipython.data_file_io.data_file import UploadDataFile
+from openmsipython.data_file_io.upload_data_file import UploadDataFile
 from openmsipython.data_file_io.config import RUN_OPT_CONST
 from openmsipython.utilities.logging import Logger
 import pathlib, logging, shutil, filecmp
@@ -52,8 +52,8 @@ def rebuild_binary_file_chunks_for_serialization_reference() :
     #populate and serialize a few chunks and save them as binary data
     dfcs = DataFileChunkSerializer()
     for i in range(3) :
-        df._chunks_to_upload[i]._populate_with_file_data(LOGGER)
-        binary_data = dfcs(df._chunks_to_upload[i])
+        df.chunks_to_upload[i]._populate_with_file_data(LOGGER)
+        binary_data = dfcs(df.chunks_to_upload[i])
         fn = f'{TEST_DATA_FILE_NAME.split(".")[0]}_test_chunk_{i}.bin'
         with open(NEW_TEST_DATA_DIR/fn,'wb') as fp :
             fp.write(binary_data)

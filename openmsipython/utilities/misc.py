@@ -1,15 +1,15 @@
-#Some miscellaneous helper functions
-
 #imports
-import sys, inspect
+import sys, inspect, time
 
-#helper function to listen for and add user input to a queue
+#listen for and add user input to a queue
 def add_user_input(input_queue) :
-    #constantly listen for user input
+    #listen for user input at one second intervals
     while True :
+        time.sleep(1)
         input_queue.put(sys.stdin.read(1))
 
-#helper function to return a kwargs dictionary where every possible entry from the defaults has a valid value
+#return a kwargs dictionary where every possible entry from the defaults has a valid value
+#can use this to make sure certain entries are present in kwargs
 def populated_kwargs(given_kwargs,defaults,logger=None) :
     #for all the needed keys
     for key in defaults.keys() :

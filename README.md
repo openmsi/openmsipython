@@ -1,5 +1,5 @@
 # <div align="center"> Open MSI Python Code </div>
-#### <div align="center">***v0.0.1***</div>
+#### <div align="center">***v0.0.2***</div>
 
 #### <div align="center">David Elbert<sup>1</sup>, Maggie Eminizer<sup>2</sup>, Sam Tabrisky<sup>3</sup></div>
 
@@ -85,7 +85,7 @@ To install the Service and start it running, type the following command in the `
 
 where `[path_to_config_file]` is the path to a configuration file containing at least an `[openmsi_directory_stream_service]` section in it as described above. While the script runs, you will be prompted to input the usernames and passwords to the Kafka "test" and "production" clusters; you should have those from somewhere else if you're looking to install the Service. 
 
-If the script completes successfully, you should be able to see the Service listed (and running) in the Windows Service Manager window that pops up when you type `mmc Services.msc`. Starting and running the Service will create a log file called `upload_data_files_added_to_directory.log` in the watched directory. At any time you can check what's in this file to see the files that have been added to the directory and produced to the topic, along with other information.
+If the script completes successfully, you should be able to see the Service listed (and running) in the Windows Service Manager window that pops up when you type `mmc Services.msc`. Starting and running the Service will create a log file called `data_file_upload_directory.log` in the watched directory. At any time you can check what's in this file to see the files that have been added to the directory and produced to the topic, along with other information.
 
 ### Management, use, and output
 
@@ -126,7 +126,7 @@ The different sections recognized by the `openmsipython` code are:
     - `key.serializer` and `value.serializer` to change methods used to convert message keys and values (respectively) to byte arrays. The `openmsipython` code provides an additional option called [`DataFileChunkSerializer`](./openmsipython/my_kafka/serialization.py#L10-#L29) as a message value serializer to pack chunks of data files.
 1. `[consumer]` to configure a Consumer used by a program. Again here any [parameters recognized by Kafka Consumers](https://docs.confluent.io/platform/current/installation/configuration/consumer-configs.html) in general are valid, but some of the most useful are:
     - `group.id` to group Consumers amongst one another. Giving "`new`" for this parameter will create a new group ID every time the code is run.
-    - `auto.offset.reset` to tell the Consumer where in the log to start consuming messages. "`earliest`" will start at the beginning of the topic every time.
+    - `auto.offset.reset` to tell the Consumer where in the log to start consuming messages if no previously-committed offset for the consumer group can be found. "`earliest`" will start at the beginning of the topic and "`latest`" will start at the end. Giving "`none`" for this parameter will remove it from the configs, and an error will be thrown if no previously-committed offset for the consumer group can be found.
     - `fetch.min.bytes` to change how many bytes must accumulate before a batch of messages is consumed from the topic (consuming batches of messages is also subject to a timeout, so changing this parameter will only ever adjust the tradeoff between throughput and latency, but will not prevent any messages from being consumed in general)
     - `key.deserializer` and `value.deserializer` to change methods used to convert message keys and values (respectively) from byte arrays to objects. The `openmsipython` code provides an additional option called [`DataFileChunkDeserializer`](./openmsipython/my_kafka/serialization.py#L31-#L58) to convert a chunk of a data file as a byte array to a [DataFileChunk object](./openmsipython/data_file_io/data_file_chunk.py#L7).
 
@@ -145,10 +145,10 @@ Options for running the code include:
 1. Changing the maximum number of parallel threads allowed to run at a time: add the `--n_threads [threads]` argument where `[threads]` is the desired number of parallel threads to allow (the default is 5 threads).
 1. Changing the size of the individual file chunks: add the `--chunk_size [n_bytes]` argument where `[n_bytes]` is the desired chunk size in bytes. `[n_bytes]` must be a nonzero power of two (the default is 16384).
 
-### upload_data_files_added_to_directory
+### data_file_upload_directory
 This module uploads any files that are added to a given directory path to a topic on a cluster using the same "chunking" idea as above. It also preserves subdirectory structure relative to the watched directory.This program is a platform-independent version of the Open MSI Directory Stream Service that runs interactively on the command line. To run it in the most common use case, enter the following command and arguments:
 
-`upload_data_files_added_to_directory [directory_path] --config [config_file_path] --topic_name [name_of_topic]`
+`data_file_upload_directory [directory_path] --config [config_file_path] --topic_name [name_of_topic]`
 
 where `[directory_path]` is the path to a directory to monitor for files to upload, `[config_file_path]` is the path to a config file including at least `[cluster]` and `[producer]` sections, and `[topic_name]` is the name of the topic to produce to. Running the code will automatically enqueue any files in the directory, and any others that are added during runtime, to be produced. 
 
@@ -160,10 +160,10 @@ Options for running the code include:
 1. Changing the number of messages that are allowed to be internally queued at once (that is, queued before being produced): add the `--queue_max_size [n_messages]` argument where `[n_messages]` is the desired number of messages allowed in the internal queue (the default is 3000 messages). This internal queue is used to make sure that there's some buffer between recognizing a file exists to be uploaded and producing all of its associated messages to the topic; its size should be set to some number of messages such that the total size of the internal queue is capped at a few batches of messages ("`batch.size`" in the producer config). The default values supplied are well compatible.
 1. Changing how often the "still alive" character is printed to the console: add the `--update_seconds [seconds]` argument where `[seconds]` is the number of seconds to wait between printing the character to the console from the main thread (the default is 30 seconds). Giving -1 for this argument disables printing the "still alive" character entirely.
 
-### reconstruct_data_files
+### data_file_download_directory
 This module subscribes a group of consumers to a topic on a cluster and passively listens in several parallel threads for messages that are file chunks of the type produced by `upload_data_file`. It reconstructs files produced to the topic from their individual chunks and puts the reconstructed files in a specified directory, preserving any subdirectory structure on the production end. To run it in the most common use case, enter the following command and arguments:
 
-`reconstruct_data_files [working_directory_path] --config [config_file_path] --topic_name [topic_name]`
+`data_file_download_directory [working_directory_path] --config [config_file_path] --topic_name [topic_name]`
 
 where `[working_directory_path]` is the path to the directory that the reconstructed files should be put in (if it doesn't exist it will be created), `[config_file_path]` is the path to a config file including at least `[cluster]` and `[consumer]` sections, and `[topic_name]` is the name of the topic to subscribe to/consume messages from. 
 
@@ -177,17 +177,18 @@ Options for running the code include:
 There are several tests for the codebase already written (and more will be added over time). The repo also has a continuous integration workflow set up on CircleCI, and the checks in that workflow must pass successfully on any branch being merged into main.  
 
 ### Running tests interactively 
-If you're editing the code, you can make sure it doesn't break anything currently being tested by running `python test/run_all_tests.py` from just inside the directory of the repo. If you'd like to add more tests, you can include any classes that extend `unittest.TestCase` in the `test/unittests` subdirectory. If you name their files anything that starts with `test` the `run_all_tests.py` script will run them automatically. `run_all_tests.py` needs `pyflakes` installed, which you can get right from this repo by running `pip install . [test]` (with or without the `--editable` or `-e` flag(s)).
+If you're editing the code, you can make sure it doesn't break anything currently being tested by running `python test/run_all_tests.py` from just inside the directory of the repo. If you'd like to add more tests, you can include any classes that extend `unittest.TestCase` in the `test/unittests` subdirectory. If you name their files anything that starts with `test` the `run_all_tests.py` script will run them automatically. If any new test methods interact with the Kafka cluster, you should end their names with "`kafka`" so that `run_all_tests.py` can exclude them if requested. Running the tests also requires that `pyflakes` be installed, which you can get right from this repo by running `pip install . [test]` (with or without the `--editable` or `-e` flag(s)).
 
 There are also a few options you can add to `run_all_tests.py` if you only want to run some subset of the available tests:
 1. Add the "`--no_pyflakes`" flag to skip the pyflakes test
 1. Add the "`--no_unittests`" flag to skip the unittests entirely, OR
-1. Add the "`--no_kafka`" flag to skip running tests that need to communicate with the Kafka cluster (this just makes the `unittest discover` pattern `test*parallel.py` instead of `test*.py`, so you have to name the files with "Non-Kafka" tests something that starts with "`test`" and ends in "`parallel.py`".)
+1. Add the "`--no_kafka`" flag to skip running tests that need to communicate with the Kafka cluster. Adding this flag automatically skips any test methods whose names end with "`kafka`"; you will see that they were skipped at the end of the output.
 1. Add the "`--no_repo`" flag to skip the test of whether the Git repo is still clean after running all tests
+1. Add the "`--failfast`" flag to stop executing the script early if any individual test(s) fail. Normally all tests are run regardless of how many fail, but including this flag will stop the run as soon as any test fails.
 
 ### Continuous Integration with CircleCI
 
-Continuous integration for the repo is set up using CircleCI. On the website you can manually run tests on any branch you'd like, and the tests will also automatically be run when pull requests are submitted. The names of the files in `test/unittests` are important for these CircleCI tests to run: anything that doesn't interact with the Kafka cluster should go in a file called `test*parallel.py` so that it can be run in parallel to speed things up, and anything that DOES interact with the Kafka cluster should be called `test*_with_kafka.py` so that the `unittest discover` command that's run can find it at that step. The configuration for CircleCI is in the [`.circleci/config.yml`](./.circleci/config.yml) file. Running tests successfully on CircleCI requires that the Project on the CircleCI has environment variables for the test cluster username and password registered within it.
+Continuous integration for the repo is set up using CircleCI. On the website you can manually run tests on any branch you'd like, and the tests will also automatically be run when pull requests are submitted. The configuration for CircleCI is in the [`.circleci/config.yml`](./.circleci/config.yml) file. Running tests successfully on CircleCI requires that the Project on CircleCI has environment variables for the test cluster username and password registered within it.
 
 ### Rebuilding static test data
 Some of the tests rely on static example data in `test/data`. If you need to regenerate these data under some new conditions (i.e., because you've changed default options someplace), you can run `python test/rebuild_test_reference_data.py` and follow the prompts it gives you to replace the necessary files. You can also add to that script if you write any new tests that rely on example data. Static test data should be committed to the repo like any other file, and they'll be picked up both interactively and on CircleCI.
@@ -199,13 +200,11 @@ The following items are currently planned to be implemented ASAP:
 1. Adding a safer and more graceful shutdown when stopping the Open MSI Directory Stream Service so that no external lag time needs to be considered
 1. Allowing watching directories where large files are in the process of being created/saved instead of just directories where fully-created files are being added
 1. Implementing other data types and serialization schemas, likely using Avro
-1. Further improving logging
 1. Create pypi and conda installations. Pypi method using twine here: https://github.com/bast/pypi-howto. Putting on conda-forge is a heavier lift. Need to decide if it's worth it; probably not for such an immature package.
 1. Python 3.8 and 3.9 support (what's the problem now?  can this be the basis of the first unittest?)
 
 ## Questions that will arise later (inFAQs?)
 
-1. What happens to subdirectories?  Can we watch a single “uber-directory” and then populate it with subdirectories by sample or date or student, etc?
 1. What are best practices for topic creation and naming?  Should we have a new topic for each student, for each instrument, for each “kind” of data, ...?
 1. Would it be possible to have an environment and dependency definition? YAML??
 1. How do I know (and trust!) my data made it and is safe?

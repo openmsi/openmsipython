@@ -1,8 +1,8 @@
 #imports
-from ..utilities.logging import Logger
-import os, pathlib, configparser
+import os, configparser
+from ..utilities.logging import LogOwner
 
-class ConfigFileParser :
+class ConfigFileParser(LogOwner) :
     """
     A class to parse configurations from files
     """
@@ -15,19 +15,14 @@ class ConfigFileParser :
 
     #################### PUBLIC FUNCTIONS ####################
 
-    def __init__(self,config_path,**kwargs) :
+    def __init__(self,config_path,*args,**kwargs) :
         """
         config_path = path to the config file to parse
-
-        Possible keyword arguments:
-        logger = the logger object to use
         """
+        super().__init__(*args,**kwargs)
         self._filepath = config_path
-        self._logger = kwargs.get('logger')
-        if self._logger is None :
-            self._logger = Logger(pathlib.Path(__file__).name.split('.')[0])
         if not config_path.is_file() :
-            self._logger.error(f'ERROR: configuration file {config_path} does not exist!',FileNotFoundError)
+            self.logger.error(f'ERROR: configuration file {config_path} does not exist!',FileNotFoundError)
         self._config = configparser.ConfigParser()
         self._config.read(config_path)
     
@@ -42,13 +37,13 @@ class ConfigFileParser :
         config_dict = {}
         for group_name in group_names :
             if group_name not in self._config :
-                self._logger.error(f'ERROR: {group_name} is not a recognized section in {self._filepath}!',ValueError)
+                self.logger.error(f'ERROR: {group_name} is not a recognized section in {self._filepath}!',ValueError)
             for key, value in self._config[group_name].items() :
                 #if the value is an environment variable, expand it on the current system
                 if value.startswith('$') :
                     exp_value = os.path.expandvars(value)
                     if exp_value == value :
-                        self._logger.error(f'ERROR: Expanding {value} in {self._filepath} as an environment variable failed (must be set on system)',ValueError)
+                        self.logger.error(f'ERROR: Expanding {value} in {self._filepath} as an environment variable failed (must be set on system)',ValueError)
                     else :
                         value = exp_value
                 config_dict[key] = value

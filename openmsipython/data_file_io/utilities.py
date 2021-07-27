@@ -1,8 +1,9 @@
 #Several utility functions
 
-#a helper function to produce every file chunk in a given queue to the given topic using the given producer
 def produce_from_queue_of_file_chunks(queue,producer,topic_name,logger) :
-    #upload all the file chunks in the queue in a single thread
+    """
+    produce every file chunk in a given queue to the given topic using the given producer
+    """
     file_chunk = queue.get()
     while file_chunk is not None :
         file_chunk.produce_to_topic(producer,topic_name,logger)
@@ -11,7 +12,7 @@ def produce_from_queue_of_file_chunks(queue,producer,topic_name,logger) :
     queue.task_done()
 
 #a very small class (and instance thereof) to hold a logger object to use in the producer callback 
-# (literally exists because I don't think I can add extra keyword or other arguments to the callback function)
+# (literally exists because I don't think I can add extra keyword or other arguments to the producer callback function)
 class ProducerCallbackLogger :
 
     @property

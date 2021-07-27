@@ -1,5 +1,8 @@
+# Misc. other stuff I don't like
+__pycache__/
 *.pyc
 .ipynb_checkpoints
+
 # Compiled source #
 ###################
 *.com

@@ -38,18 +38,15 @@ class RunOptionConstants :
         return 'test' # name of the topic to produce to by default
     @property
     def N_DEFAULT_UPLOAD_THREADS(self) :
-        return 5      # default number of threads to use when uploading a file
+        return 10      # default number of threads to use when uploading a file
     @property
     def N_DEFAULT_DOWNLOAD_THREADS(self) :
-        return 5      # default number of threads to use when downloading chunks of a file
+        return 4      # default number of threads to use when downloading chunks of a file
     @property
     def DEFAULT_CHUNK_SIZE(self) :
         return 16384  # default size in bytes of each file upload chunk
     @property
     def DEFAULT_MAX_UPLOAD_QUEUE_SIZE(self) :
         return 3000   # default maximum number of items allowed in the upload Queue at once
-    @property
-    def DEFAULT_UPDATE_SECONDS(self) :
-        return 30     # how many seconds to wait by default between printing the "still alive" character/message for a running process
 
 RUN_OPT_CONST = RunOptionConstants()
