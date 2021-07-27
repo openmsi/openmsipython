@@ -37,7 +37,7 @@ class DataFileStreamProcessor(ControlledProcessMultiThreaded,LogOwner,ConsumerGr
             self.logger.error(errmsg,ValueError)
         self.__datafile_type = datafile_type
         self.__n_msgs_read = 0
-        self.__processed_filepaths = set()
+        self.__processed_filepaths = []
         self.__download_files_by_filepath = {}
         self.__thread_locks_by_filepath = {}
 
@@ -98,9 +98,7 @@ class DataFileStreamProcessor(ControlledProcessMultiThreaded,LogOwner,ConsumerGr
                 #if it was able to be processed
                 if processing_retval is None :
                     self.logger.info(f'Fully-read file {self.__download_files_by_filepath[dfc.filepath].full_filepath.relative_to(dfc.rootdir)} successfully processed')
-                    with lock :
-                        self.__processed_filepaths.add(dfc.filepath)
-                        self.__processed_filepaths.update()
+                    self.__processed_filepaths.append(dfc.filepath)
                 #warn if it wasn't processed correctly
                 else :
                     warnmsg = f'WARNING: Fully-read file {self.__download_files_by_filepath[dfc.filepath].full_filepath.relative_to(dfc.rootdir)} '

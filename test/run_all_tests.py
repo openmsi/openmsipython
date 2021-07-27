@@ -1,6 +1,6 @@
 #imports
+import unittest, subprocess, pathlib
 from argparse import ArgumentParser
-import subprocess, pathlib
 
 #constants
 TOP_DIR_PATH = (pathlib.Path(__file__).parent.parent).resolve()
@@ -20,6 +20,8 @@ def main(args=None) :
                                help='Add this flag to skip running the unittest checks')
     parser.add_argument('--no_repo', action='store_true',
                         help='Add this flag to skip running the Git repository checks')
+    parser.add_argument('--failfast', action='store_true',
+                        help='Add this flag to exit after the first failed test')
     args = parser.parse_args(args=args)
     #test pyflakes
     if args.no_pyflakes :
@@ -35,16 +37,27 @@ def main(args=None) :
     if args.no_unittests :
         print('SKIPPING UNITTESTS')
     else :
-        print(f'Running all unittests in {UNITTEST_DIR_PATH}...')
-        cmd = f'python -m unittest discover -s {UNITTEST_DIR_PATH} -v'
+        print(f'Running unittests in {UNITTEST_DIR_PATH}...')
+        loader = unittest.TestLoader()
+        suites = loader.discover(UNITTEST_DIR_PATH)
+        if len(loader.errors)>0 :
+            print('ERROR: encountered the following errors in loading tests:')
+            for error in loader.errors :
+                print(f'\t{error}')
+            return
         if args.no_kafka :
-            cmd+=' -p test*parallel.py'
-        p = subprocess.Popen(cmd,
-                             stdout=subprocess.PIPE,stderr=subprocess.STDOUT,shell=True,universal_newlines=True)
-        for stdout_line in p.stdout :
-            print(stdout_line,end='')
-        return_code = p.wait()
-        if return_code>0 :
+            for suite in suites :
+                for test_group in suite._tests :
+                    for test in test_group :
+                        if (test._testMethodName).endswith('kafka') :
+                            test_name = test._testMethodName
+                            setattr(test, test_name, unittest.skip('tests that interact with the kafka cluster are being skipped')(getattr(test, test_name)))
+        runner_kwargs = {'verbosity':3}
+        if args.failfast :
+            runner_kwargs['failfast'] = True
+        runner = unittest.TextTestRunner(**runner_kwargs)
+        result = runner.run(suites)
+        if len(result.errors)>0 or len(result.failures)>0 :
             raise RuntimeError('ERROR: some unittest(s) failed! See output above for details.')
             return
         print('All unittest checks complete : )')

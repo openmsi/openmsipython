@@ -33,7 +33,7 @@ class DownloadDataFile(DataFile,ABC) :
     def __init__(self,*args,**kwargs) :
         super().__init__(*args,**kwargs)
         #start an empty set of this file's downloaded offsets
-        self._chunk_offsets_downloaded = set()
+        self._chunk_offsets_downloaded = []
         self.__full_filepath = None
 
     def add_chunk(self,dfc,thread_lock=nullcontext(),*args,**kwargs) :
@@ -66,9 +66,8 @@ class DownloadDataFile(DataFile,ABC) :
         with thread_lock:
             #call the function to actually add the chunk
             self._on_add_chunk(dfc,*args,**kwargs)
-            #add the offset of the added chunk to the set of reconstructed file chunks
-            self._chunk_offsets_downloaded.add(dfc.chunk_offset_write)
-            self._chunk_offsets_downloaded.update()
+        #add the offset of the added chunk to the set of reconstructed file chunks
+        self._chunk_offsets_downloaded.append(dfc.chunk_offset_write)
         #if this chunk was the last that needed to be added, check the hashes to make sure the file is the same as it was originally
         if len(self._chunk_offsets_downloaded)==dfc.n_total_chunks :
             if self.check_file_hash!=dfc.file_hash :

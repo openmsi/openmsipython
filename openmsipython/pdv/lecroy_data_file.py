@@ -27,7 +27,6 @@ class UploadLecroyDataFile(UploadDataFile) :
         n_header_bytes = 0
         n_rows_to_skip_bytes = 0
         n_rows_to_select_bytes = 0
-        self.logger.info(f'header_rows = {header_rows}, rows_to_skip = {rows_to_skip}, rows_to_select = {rows_to_select}')
         with open(self.filepath,'rb') as fp :
             for i in range(header_rows) :
                 n_header_bytes+=len(fp.readline())

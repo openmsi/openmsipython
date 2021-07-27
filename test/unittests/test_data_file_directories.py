@@ -1,20 +1,20 @@
 #imports
-from config import TEST_CONST
-from utilities import MyThread
-from openmsipython.data_file_io.data_file_upload_directory import DataFileUploadDirectory
-from openmsipython.data_file_io.data_file_download_directory import DataFileDownloadDirectory
+import unittest, pathlib, time, logging, shutil, filecmp
 from openmsipython.data_file_io.config import RUN_OPT_CONST
 from openmsipython.utilities.logging import Logger
-import unittest, pathlib, time, logging, shutil, filecmp
+from openmsipython.data_file_io.data_file_upload_directory import DataFileUploadDirectory
+from openmsipython.data_file_io.data_file_download_directory import DataFileDownloadDirectory
+from config import TEST_CONST
+from utilities import MyThread
 
 #constants
 LOGGER = Logger(pathlib.Path(__file__).name.split('.')[0],logging.ERROR)
 UPDATE_SECS = 5
 TIMEOUT_SECS = 90
 
-class TestDataFileDirectoryWithKafka(unittest.TestCase) :
+class TestDataFileDirectories(unittest.TestCase) :
     """
-    Class for testing DataFileDirectory functions that interact with the Kafka cluster
+    Class for testing DataFileUploadDirectory and DataFileDownloadDirectory functions
     """
 
     #called by the test method below
@@ -100,7 +100,7 @@ class TestDataFileDirectoryWithKafka(unittest.TestCase) :
                 time_waited+=5
             #After timing out, stalling, or completely reconstructing the test file, put the "quit" command into the input queue, which SHOULD stop the method running
             LOGGER.set_stream_level(logging.INFO)
-            LOGGER.info('Quitting download thread in run_data_file_download_directory; will timeout after 5 seconds....')
+            LOGGER.info(f'Quitting download thread in run_data_file_download_directory after reading {dfdd.n_msgs_read} messages; will timeout after 5 seconds....')
             LOGGER.set_stream_level(logging.ERROR)
             dfdd.control_command_queue.put('q')
             #wait for the download thread to finish
@@ -128,6 +128,35 @@ class TestDataFileDirectoryWithKafka(unittest.TestCase) :
                 shutil.rmtree(TEST_CONST.TEST_RECO_DIR_PATH)
 
     #below we test both upload_files_as_added and then reconstruct, in that order
-    def test_upload_and_download_directories(self) :
+    def test_upload_and_download_directories_kafka(self) :
         self.run_data_file_upload_directory()
         self.run_data_file_download_directory()
+
+    def test_filepath_should_be_uploaded(self) :
+        dfd = DataFileUploadDirectory(TEST_CONST.TEST_DATA_DIR_PATH,logger=LOGGER)
+        LOGGER.set_stream_level(logging.INFO)
+        LOGGER.info('\nExpecting three errors below:')
+        LOGGER.set_stream_level(logging.ERROR)
+        with self.assertRaises(TypeError) :
+            dfd.filepath_should_be_uploaded(None)
+        with self.assertRaises(TypeError) :
+            dfd.filepath_should_be_uploaded(5)
+        with self.assertRaises(TypeError) :
+            dfd.filepath_should_be_uploaded('this is a string not a path!')
+        self.assertFalse(dfd.filepath_should_be_uploaded(TEST_CONST.TEST_DATA_DIR_PATH/'.this_file_is_hidden'))
+        self.assertFalse(dfd.filepath_should_be_uploaded(TEST_CONST.TEST_DATA_DIR_PATH/'this_file_is_a_log_file.log'))
+        for fp in TEST_CONST.TEST_DATA_DIR_PATH.rglob('*') :
+            check = True
+            if fp.is_dir() :
+                check=False
+            elif fp.name.startswith('.') or fp.name.endswith('.log') :
+                check=False
+            self.assertEqual(dfd.filepath_should_be_uploaded(fp.resolve()),check)
+        subdir_path = TEST_CONST.TEST_DATA_DIR_PATH / 'this_subdirectory_should_not_be_uploaded'
+        subdir_path.mkdir()
+        try :
+            self.assertFalse(dfd.filepath_should_be_uploaded(subdir_path))
+        except Exception as e :
+            raise e
+        finally : 
+            shutil.rmtree(subdir_path)

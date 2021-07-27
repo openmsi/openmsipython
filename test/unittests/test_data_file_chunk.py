@@ -2,6 +2,7 @@
 from config import TEST_CONST
 from openmsipython.data_file_io.upload_data_file import UploadDataFile
 from openmsipython.data_file_io.data_file_chunk import DataFileChunk
+from openmsipython.my_kafka.my_producers import MySerializingProducer
 from openmsipython.data_file_io.config import RUN_OPT_CONST
 from openmsipython.utilities.logging import Logger
 import unittest, pathlib, logging
@@ -11,7 +12,7 @@ LOGGER = Logger(pathlib.Path(__file__).name.split('.')[0],logging.ERROR)
 
 class TestDataFileChunk(unittest.TestCase) :
     """
-    Class for testing DataFileChunk functions (without interacting with the Kafka cluster)
+    Class for testing behavior of DataFileChunks
     """
 
     def setUp(self) :
@@ -22,6 +23,30 @@ class TestDataFileChunk(unittest.TestCase) :
         self.test_chunk_2 = udf.chunks_to_upload[1]
         self.test_chunk_1._populate_with_file_data(logger=LOGGER)
         self.test_chunk_2._populate_with_file_data(logger=LOGGER)
+
+    def test_produce_to_topic_kafka(self) :
+        producer = MySerializingProducer.from_file(TEST_CONST.TEST_CONFIG_FILE_PATH,logger=LOGGER)
+        self.test_chunk_1.produce_to_topic(producer,RUN_OPT_CONST.DEFAULT_TOPIC_NAME,logger=LOGGER)
+        producer.flush()
+        self.test_chunk_2.produce_to_topic(producer,RUN_OPT_CONST.DEFAULT_TOPIC_NAME,logger=LOGGER)
+        producer.flush()
+
+    def test_chunk_of_nonexistent_file_kafka(self) :
+        nonexistent_file_path = pathlib.Path(__file__).parent / 'never_name_a_file_this.txt'
+        self.assertFalse(nonexistent_file_path.is_file())
+        chunk_to_fail = DataFileChunk(nonexistent_file_path,nonexistent_file_path.name,
+                                      self.test_chunk_1.file_hash,self.test_chunk_1.chunk_hash,
+                                      self.test_chunk_1.chunk_offset_read,self.test_chunk_1.chunk_offset_write,
+                                      self.test_chunk_1.chunk_size,
+                                      self.test_chunk_1.chunk_i,self.test_chunk_1.n_total_chunks)
+        LOGGER.set_stream_level(logging.INFO)
+        LOGGER.info('\nExpecting two errors below:')
+        LOGGER.set_stream_level(logging.ERROR)
+        with self.assertRaises(FileNotFoundError) :
+            chunk_to_fail._populate_with_file_data(logger=LOGGER)
+        producer = MySerializingProducer.from_file(TEST_CONST.TEST_CONFIG_FILE_PATH,logger=LOGGER)
+        with self.assertRaises(FileNotFoundError) :
+            chunk_to_fail.produce_to_topic(producer,RUN_OPT_CONST.DEFAULT_TOPIC_NAME,logger=LOGGER)
 
     def test_eq(self) :
         test_chunk_1_copied_no_data = DataFileChunk(self.test_chunk_1.filepath,self.test_chunk_1.filename,

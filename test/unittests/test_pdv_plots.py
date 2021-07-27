@@ -101,7 +101,7 @@ class TestPDVPlots(unittest.TestCase) :
                 time_waited+=5
             #After timing out, stalling, or completely reconstructing the test file, put the "quit" command into the input queue, which SHOULD stop the method running
             LOGGER.set_stream_level(logging.INFO)
-            LOGGER.info('Quitting download thread in run_pdv_plot_maker; will timeout after 5 seconds....')
+            LOGGER.info(f'Quitting download thread in run_pdv_plot_maker after reading {pdvpm.n_msgs_read} messages; will timeout after 5 seconds....')
             LOGGER.set_stream_level(logging.ERROR)
             pdvpm.control_command_queue.put('q')
             #wait for the download thread to finish
@@ -126,6 +126,6 @@ class TestPDVPlots(unittest.TestCase) :
             if TEST_CONST.TEST_RECO_DIR_PATH.is_dir() :
                 shutil.rmtree(TEST_CONST.TEST_RECO_DIR_PATH)
 
-    def test_making_pdv_plots(self) :
+    def test_making_pdv_plots_kafka(self) :
         self.run_lecroy_file_upload_directory()
         self.run_pdv_plot_maker()

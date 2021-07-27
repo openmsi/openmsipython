@@ -34,7 +34,7 @@ class TestDataFileStreamProcessor(unittest.TestCase) :
     Class for testing behavior of a DataFileStreamProcessor
     """
 
-    def test_data_file_stream_processor(self) :
+    def test_data_file_stream_processor_kafka(self) :
         """
         Upload a data file and then use a DataFileStreamProcessor to read its data back
         """
@@ -71,7 +71,7 @@ class TestDataFileStreamProcessor(unittest.TestCase) :
                 time.sleep(5)
                 time_waited+=5
             LOGGER.set_stream_level(logging.INFO)
-            LOGGER.info('Quitting download thread in test_data_file_stream_processor; will timeout after 5 seconds....')
+            LOGGER.info(f'Quitting download thread in test_data_file_stream_processor after processing {dfsp.n_msgs_read} messages; will timeout after 5 seconds....')
             LOGGER.set_stream_level(logging.ERROR)
             dfsp.control_command_queue.put('q')
             stream_thread.join(timeout=5)

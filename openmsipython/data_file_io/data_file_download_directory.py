@@ -42,7 +42,7 @@ class DataFileDownloadDirectory(DataFileDirectory,ControlledProcessMultiThreaded
             self.logger.error(errmsg,ValueError)
         self.__datafile_type = datafile_type
         self.__n_msgs_read = 0
-        self.__completely_reconstructed_filepaths = set()
+        self.__completely_reconstructed_filepaths = []
         self.__thread_locks_by_filepath = {}
 
     def reconstruct(self) :
@@ -83,10 +83,10 @@ class DataFileDownloadDirectory(DataFileDirectory,ControlledProcessMultiThreaded
                 self.logger.error(f'ERROR: file hashes for file {self.data_files_by_path[dfc.filepath].filename} not matched after reconstruction!',RuntimeError)
             elif return_value==DATA_FILE_HANDLING_CONST.FILE_SUCCESSFULLY_RECONSTRUCTED_CODE :
                 self.logger.info(f'File {self.data_files_by_path[dfc.filepath].full_filepath.relative_to(dfc.rootdir)} successfully reconstructed locally from stream')
+                self.__completely_reconstructed_filepaths.append(dfc.filepath)
                 with lock :
                     if dfc.filepath in self.data_files_by_path :
                         self.__n_msgs_read+=1
-                        self.__completely_reconstructed_filepaths.add(dfc.filepath)
                         del self.data_files_by_path[dfc.filepath]
                         del self.__thread_locks_by_filepath[dfc.filepath]
             elif return_value in (DATA_FILE_HANDLING_CONST.FILE_IN_PROGRESS,DATA_FILE_HANDLING_CONST.CHUNK_ALREADY_WRITTEN_CODE) :
