@@ -1,5 +1,5 @@
 #imports
-import pathlib
+import pathlib, traceback
 from threading import Lock
 from abc import ABC, abstractmethod
 from ..utilities.misc import populated_kwargs
@@ -85,9 +85,10 @@ class DataFileStreamProcessor(ControlledProcessMultiThreaded,LogOwner,ConsumerGr
                 self.logger.error(f'ERROR: message with key {dfc.message_key} has rootdir={dfc.rootdir} (should be None as it was just consumed)!',RuntimeError)
             dfc.rootdir = (pathlib.Path()).resolve()
             #add the chunk's data to the file that's being reconstructed
-            if dfc.filepath not in self.__download_files_by_filepath.keys() :
-                self.__download_files_by_filepath[dfc.filepath] = self.__datafile_type(dfc.filepath,logger=self.logger,**self.other_datafile_kwargs)
-                self.__thread_locks_by_filepath[dfc.filepath] = Lock()
+            with lock :
+                if dfc.filepath not in self.__download_files_by_filepath.keys() :
+                    self.__download_files_by_filepath[dfc.filepath] = self.__datafile_type(dfc.filepath,logger=self.logger,**self.other_datafile_kwargs)
+                    self.__thread_locks_by_filepath[dfc.filepath] = Lock()
             return_value = self.__download_files_by_filepath[dfc.filepath].add_chunk(dfc,self.__thread_locks_by_filepath[dfc.filepath])
             #if the file hashes didn't match
             if return_value==DATA_FILE_HANDLING_CONST.FILE_HASH_MISMATCH_CODE :
@@ -101,9 +102,16 @@ class DataFileStreamProcessor(ControlledProcessMultiThreaded,LogOwner,ConsumerGr
                     self.__processed_filepaths.append(dfc.filepath)
                 #warn if it wasn't processed correctly
                 else :
+                    if isinstance(processing_retval,Exception) :
+                        try :
+                            raise processing_retval
+                        except Exception :
+                            self.logger.info(traceback.format_exc())
+                    else :
+                        self.logger.error(f'Return value from _process_downloaded_data_file = {processing_retval}')
                     warnmsg = f'WARNING: Fully-read file {self.__download_files_by_filepath[dfc.filepath].full_filepath.relative_to(dfc.rootdir)} '
-                    warnmsg+= f'was not able to be processed. Exception: {processing_retval}. The messages for this file will need to be '
-                    warnmsg+= 'consumed again if the file is to be processed!'
+                    warnmsg+= 'was not able to be processed. Check log lines above for more details on the specific error. '
+                    warnmsg+= 'The messages for this file will need to be consumed again if the file is to be processed!'
                     self.logger.warning(warnmsg)
                 with lock :
                     self.__n_msgs_read+=1                        

@@ -1,9 +1,10 @@
 #imports
 import datetime
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import pandas as pd
 from io import BytesIO
-from threading import Lock
 from ..data_file_io.config import RUN_OPT_CONST
 from ..utilities.runnable import Runnable
 from ..utilities.argument_parsing import MyArgumentParser
@@ -35,8 +36,6 @@ class PDVPlotMaker(DataFileStreamProcessor,Runnable) :
         else :
             self.logger.error(f'ERROR: unrecognized pdv_plot_type {pdv_plot_type}',ValueError)
         self.__header_rows = header_rows
-        self.__figure = plt.figure(figsize=(10,6),dpi=300)
-        self.__thread_lock = Lock() #use to make sure only one thread is writing to the Figure at once
 
     def make_plots_as_available(self) :
         """
@@ -57,18 +56,18 @@ class PDVPlotMaker(DataFileStreamProcessor,Runnable) :
             time = data['Time'].to_numpy()
             voltage = data['Ampl'].to_numpy()
             #run the analysis using the data
-            with self.__thread_lock :
-                analysis = self.__pdv_analysis_type(file=datafile.filepath,
-                                                    time=time,
-                                                    voltage=voltage,
-                                                    output_dir=self.__output_dir,
-                                                    N=512,
-                                                    overlap_frac=0.85,
-                                                    pyplot_figure=self.__figure)
-                analysis.run()
-                #save the plot and reset the figure
-                self.__figure.savefig(self.__output_dir/self.__pdv_analysis_type.plot_file_name_from_input_file_name(datafile.filepath.name,LECROY_CONST.SKIMMED_FILENAME_APPEND),bbox_inches='tight')
-                self.__figure.clear()
+            fig = plt.figure(figsize=(10,6),dpi=300)
+            analysis = self.__pdv_analysis_type(file=datafile.filepath,
+                                                time=time,
+                                                voltage=voltage,
+                                                output_dir=self.__output_dir,
+                                                N=512,
+                                                overlap_frac=0.85,
+                                                pyplot_figure=fig)#self.__figure)
+            analysis.run()
+            #save the plot and close the figure
+            fig.savefig(self.__output_dir/self.__pdv_analysis_type.plot_file_name_from_input_file_name(datafile.filepath.name,LECROY_CONST.SKIMMED_FILENAME_APPEND),bbox_inches='tight')
+            plt.close()
         except Exception as e :
             return e
         return None
