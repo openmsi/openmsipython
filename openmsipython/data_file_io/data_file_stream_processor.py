@@ -101,7 +101,7 @@ class DataFileStreamProcessor(ControlledProcessMultiThreaded,LogOwner,ConsumerGr
                     self.__processed_filepaths.append(dfc.filepath)
                 #warn if it wasn't processed correctly
                 else :
-                    if issubtype(processing_retval,Exception) :
+                    if isinstance(processing_retval,Exception) :
                         self.logger.exception(processing_retval)
                     else :
                         self.logger.error(f'Return value from _process_downloaded_data_file = {processing_retval}')
