@@ -85,9 +85,10 @@ class DataFileStreamProcessor(ControlledProcessMultiThreaded,LogOwner,ConsumerGr
                 self.logger.error(f'ERROR: message with key {dfc.message_key} has rootdir={dfc.rootdir} (should be None as it was just consumed)!',RuntimeError)
             dfc.rootdir = (pathlib.Path()).resolve()
             #add the chunk's data to the file that's being reconstructed
-            if dfc.filepath not in self.__download_files_by_filepath.keys() :
-                self.__download_files_by_filepath[dfc.filepath] = self.__datafile_type(dfc.filepath,logger=self.logger,**self.other_datafile_kwargs)
-                self.__thread_locks_by_filepath[dfc.filepath] = Lock()
+            with lock :
+                if dfc.filepath not in self.__download_files_by_filepath.keys() :
+                    self.__download_files_by_filepath[dfc.filepath] = self.__datafile_type(dfc.filepath,logger=self.logger,**self.other_datafile_kwargs)
+                    self.__thread_locks_by_filepath[dfc.filepath] = Lock()
             return_value = self.__download_files_by_filepath[dfc.filepath].add_chunk(dfc,self.__thread_locks_by_filepath[dfc.filepath])
             #if the file hashes didn't match
             if return_value==DATA_FILE_HANDLING_CONST.FILE_HASH_MISMATCH_CODE :

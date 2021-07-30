@@ -134,11 +134,11 @@ class MyArgumentParser(ArgumentParser) :
                 else :
                     argname_to_add = f'--{argname}'
             if new_default is not None :
-                if 'default' in self.ARGUMENTS[argname].keys() and type(new_default)!=type(self.ARGUMENTS[argname]['default']) :
+                if 'default' in self.ARGUMENTS[argname]['kwargs'].keys() and type(new_default)!=type(self.ARGUMENTS[argname]['kwargs']['default']) :
                     errmsg = f'ERROR: new default value {new_default} for argument {argname} is of a different type than expected '
-                    errmsg+= f'based on the old default ({self.ARGUMENTS[argname]["default"]})!'
+                    errmsg+= f'based on the old default ({self.ARGUMENTS[argname]["kwargs"]["default"]})!'
                     raise ValueError(errmsg)
-                self.ARGUMENTS[argname]['default'] = new_default
+                self.ARGUMENTS[argname]['kwargs']['default'] = new_default
             if 'default' in self.ARGUMENTS[argname]['kwargs'].keys() :
                 if 'help' in self.ARGUMENTS[argname]['kwargs'].keys() :
                     self.ARGUMENTS[argname]['kwargs']['help']+=f" (default = {self.ARGUMENTS[argname]['kwargs']['default']})"

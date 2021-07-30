@@ -2,6 +2,7 @@
 import os
 from hashlib import sha512
 from contextlib import nullcontext
+from threading import current_thread
 from abc import ABC, abstractmethod
 from .config import DATA_FILE_HANDLING_CONST
 from .data_file import DataFile
@@ -48,7 +49,9 @@ class DownloadDataFile(DataFile,ABC) :
                       reconstruction of the files (optional, only needed if running this function asynchronously)
         """
         #if this chunk's offset has already been written to disk, return the "already written" code
-        if dfc.chunk_offset_write in self._chunk_offsets_downloaded :
+        with thread_lock :
+            already_written = dfc.chunk_offset_write in self._chunk_offsets_downloaded
+        if already_written :
             return DATA_FILE_HANDLING_CONST.CHUNK_ALREADY_WRITTEN_CODE
         #the filepath of this DownloadDataFile and of the given DataFileChunk must match
         if dfc.filepath!=self.filepath :
@@ -66,10 +69,11 @@ class DownloadDataFile(DataFile,ABC) :
         with thread_lock:
             #call the function to actually add the chunk
             self._on_add_chunk(dfc,*args,**kwargs)
-        #add the offset of the added chunk to the set of reconstructed file chunks
-        self._chunk_offsets_downloaded.append(dfc.chunk_offset_write)
-        #if this chunk was the last that needed to be added, check the hashes to make sure the file is the same as it was originally
-        if len(self._chunk_offsets_downloaded)==dfc.n_total_chunks :
+            #add the offset of the added chunk to the set of reconstructed file chunks
+            self._chunk_offsets_downloaded.append(dfc.chunk_offset_write)
+            #if this chunk was the last that needed to be added, check the hashes to make sure the file is the same as it was originally
+            last_chunk = len(self._chunk_offsets_downloaded)==dfc.n_total_chunks
+        if last_chunk :
             if self.check_file_hash!=dfc.file_hash :
                 return DATA_FILE_HANDLING_CONST.FILE_HASH_MISMATCH_CODE
             else :

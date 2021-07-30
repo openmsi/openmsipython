@@ -75,9 +75,10 @@ class DataFileDownloadDirectory(DataFileDirectory,ControlledProcessMultiThreaded
                 self.logger.error(f'ERROR: message with key {dfc.message_key} has rootdir={dfc.rootdir} (should be None as it was just consumed)!',RuntimeError)
             dfc.rootdir = self.dirpath
             #add the chunk's data to the file that's being reconstructed
-            if dfc.filepath not in self.data_files_by_path.keys() :
-                self.data_files_by_path[dfc.filepath] = self.__datafile_type(dfc.filepath,logger=self.logger,**self.other_datafile_kwargs)
-                self.__thread_locks_by_filepath[dfc.filepath] = Lock()
+            with lock :
+                if dfc.filepath not in self.data_files_by_path.keys() :
+                    self.data_files_by_path[dfc.filepath] = self.__datafile_type(dfc.filepath,logger=self.logger,**self.other_datafile_kwargs)
+                    self.__thread_locks_by_filepath[dfc.filepath] = Lock()
             return_value = self.data_files_by_path[dfc.filepath].add_chunk(dfc,self.__thread_locks_by_filepath[dfc.filepath])
             if return_value==DATA_FILE_HANDLING_CONST.FILE_HASH_MISMATCH_CODE :
                 self.logger.error(f'ERROR: file hashes for file {self.data_files_by_path[dfc.filepath].filename} not matched after reconstruction!',RuntimeError)

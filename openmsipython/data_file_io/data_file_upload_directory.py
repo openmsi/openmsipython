@@ -1,5 +1,5 @@
 #imports
-import pathlib, datetime
+import pathlib, datetime, time
 from threading import Thread
 from queue import Queue
 from ..utilities.argument_parsing import MyArgumentParser
@@ -163,9 +163,11 @@ class DataFileUploadDirectory(DataFileDirectory,ControlledProcessSingleThread,Ru
         """
         #This is in a try/except in case a subdirectory is renamed while this method is running; it'll just return and try again
         try :
+            time.sleep(0.25) # wait just a little bit here so that the watched directory isn't just constantly pinged
             for filepath in self.dirpath.rglob('*') :
                 filepath = filepath.resolve()
                 if self.filepath_should_be_uploaded(filepath) and (filepath not in self.data_files_by_path.keys()):
+                    time.sleep(0.25) # wait again in case the file has JUST shown up
                     self.data_files_by_path[filepath]=self.__datafile_type(filepath,
                                                                           to_upload=to_upload,
                                                                           rootdir=self.dirpath,
