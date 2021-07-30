@@ -1,5 +1,5 @@
 #imports
-import logging
+import logging, traceback
 
 class MyFormatter(logging.Formatter) :
     """
@@ -13,8 +13,6 @@ class MyFormatter(logging.Formatter) :
         """
         If a message starts with a newline, start the actual logging line with the newline before any of the rest
         """
-        if not isinstance(record,str) :
-            return super().format(record)
         formatted = ''
         if record.msg.startswith('\n') :
             record.msg = record.msg.lstrip('\n')
@@ -80,16 +78,12 @@ class Logger :
             msg = f'WARNING: {msg}'
         self._logger_obj.warning(msg)
 
-    def exception(self,exc) :
-        self._logger_obj.exception(exc)
-
     #log an error message and optionally raise an exception with the same message
     def error(self,msg,exception_type=None,*args,**kwargs) :
         if not msg.startswith('ERROR:') :
             msg = f'ERROR: {msg}'
         self._logger_obj.error(msg,*args,**kwargs)
         if exception_type is not None :
-            self._logger_obj.exception(exception_type(msg))
             raise exception_type(msg)
 
 class LogOwner :

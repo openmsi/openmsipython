@@ -1,5 +1,5 @@
 #imports
-import pathlib
+import pathlib, traceback
 from threading import Lock
 from abc import ABC, abstractmethod
 from ..utilities.misc import populated_kwargs
@@ -102,7 +102,10 @@ class DataFileStreamProcessor(ControlledProcessMultiThreaded,LogOwner,ConsumerGr
                 #warn if it wasn't processed correctly
                 else :
                     if isinstance(processing_retval,Exception) :
-                        self.logger.exception(processing_retval)
+                        try :
+                            raise processing_retval
+                        except Exception as e :
+                            self.logger.info(traceback.format_exc())
                     else :
                         self.logger.error(f'Return value from _process_downloaded_data_file = {processing_retval}')
                     warnmsg = f'WARNING: Fully-read file {self.__download_files_by_filepath[dfc.filepath].full_filepath.relative_to(dfc.rootdir)} '
