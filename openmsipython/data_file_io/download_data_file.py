@@ -2,7 +2,6 @@
 import os
 from hashlib import sha512
 from contextlib import nullcontext
-from threading import current_thread
 from abc import ABC, abstractmethod
 from .config import DATA_FILE_HANDLING_CONST
 from .data_file import DataFile

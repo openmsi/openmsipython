@@ -5,7 +5,6 @@ matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import pandas as pd
 from io import BytesIO
-from threading import Lock
 from ..data_file_io.config import RUN_OPT_CONST
 from ..utilities.runnable import Runnable
 from ..utilities.argument_parsing import MyArgumentParser

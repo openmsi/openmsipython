@@ -1,5 +1,5 @@
 #imports
-import logging, traceback
+import logging
 
 class MyFormatter(logging.Formatter) :
     """
