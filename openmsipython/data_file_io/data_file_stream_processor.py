@@ -101,9 +101,13 @@ class DataFileStreamProcessor(ControlledProcessMultiThreaded,LogOwner,ConsumerGr
                     self.__processed_filepaths.append(dfc.filepath)
                 #warn if it wasn't processed correctly
                 else :
+                    if issubtype(processing_retval,Exception) :
+                        self.logger.exception(processing_retval)
+                    else :
+                        self.logger.error(f'Return value from _process_downloaded_data_file = {processing_retval}')
                     warnmsg = f'WARNING: Fully-read file {self.__download_files_by_filepath[dfc.filepath].full_filepath.relative_to(dfc.rootdir)} '
-                    warnmsg+= f'was not able to be processed. Exception: {processing_retval}. The messages for this file will need to be '
-                    warnmsg+= 'consumed again if the file is to be processed!'
+                    warnmsg+= f'was not able to be processed. Check log lines above for more details on the specific error. '
+                    warnmsg+= 'The messages for this file will need to be consumed again if the file is to be processed!'
                     self.logger.warning(warnmsg)
                 with lock :
                     self.__n_msgs_read+=1                        
