@@ -13,6 +13,8 @@ class MyFormatter(logging.Formatter) :
         """
         If a message starts with a newline, start the actual logging line with the newline before any of the rest
         """
+        if not isinstance(record,str) :
+            return record
         formatted = ''
         if record.msg.startswith('\n') :
             record.msg = record.msg.lstrip('\n')
