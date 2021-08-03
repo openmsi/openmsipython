@@ -72,27 +72,32 @@ class DataFileDownloadDirectory(DataFileDirectory,ControlledProcessMultiThreaded
                 continue
             #set the chunk's rootdir to the working directory
             if dfc.rootdir is not None :
-                self.logger.error(f'ERROR: message with key {dfc.message_key} has rootdir={dfc.rootdir} (should be None as it was just consumed)!',RuntimeError)
+                errmsg = f'ERROR: message with key {dfc.message_key} has rootdir={dfc.rootdir} (should be None as it was just consumed)! '
+                errmsg+= 'Will ignore this message and continue.'
+                self.logger.error(errmsg)
             dfc.rootdir = self.dirpath
             #add the chunk's data to the file that's being reconstructed
             with lock :
+                self.__n_msgs_read+=1
                 if dfc.filepath not in self.data_files_by_path.keys() :
                     self.data_files_by_path[dfc.filepath] = self.__datafile_type(dfc.filepath,logger=self.logger,**self.other_datafile_kwargs)
                     self.__thread_locks_by_filepath[dfc.filepath] = Lock()
             return_value = self.data_files_by_path[dfc.filepath].add_chunk(dfc,self.__thread_locks_by_filepath[dfc.filepath])
-            if return_value==DATA_FILE_HANDLING_CONST.FILE_HASH_MISMATCH_CODE :
-                self.logger.error(f'ERROR: file hashes for file {self.data_files_by_path[dfc.filepath].filename} not matched after reconstruction!',RuntimeError)
+            if return_value in (DATA_FILE_HANDLING_CONST.FILE_IN_PROGRESS,DATA_FILE_HANDLING_CONST.CHUNK_ALREADY_WRITTEN_CODE) :
+                continue
+            elif return_value==DATA_FILE_HANDLING_CONST.FILE_HASH_MISMATCH_CODE :
+                warnmsg = f'WARNING: hashes for file {self.data_files_by_path[dfc.filepath].filename} not matched after reconstruction! '
+                warnmsg+= 'All data have been written to disk but likely not as they were uploaded.'
+                self.logger.warning(warnmsg)
+                with lock :
+                    del self.data_files_by_path[dfc.filepath]
+                    del self.__thread_locks_by_filepath[dfc.filepath]
             elif return_value==DATA_FILE_HANDLING_CONST.FILE_SUCCESSFULLY_RECONSTRUCTED_CODE :
-                self.logger.info(f'File {self.data_files_by_path[dfc.filepath].full_filepath.relative_to(dfc.rootdir)} successfully reconstructed locally from stream')
+                self.logger.info(f'File {self.data_files_by_path[dfc.filepath].full_filepath.relative_to(dfc.rootdir)} successfully reconstructed from stream')
                 self.__completely_reconstructed_filepaths.append(dfc.filepath)
                 with lock :
-                    if dfc.filepath in self.data_files_by_path :
-                        self.__n_msgs_read+=1
-                        del self.data_files_by_path[dfc.filepath]
-                        del self.__thread_locks_by_filepath[dfc.filepath]
-            elif return_value in (DATA_FILE_HANDLING_CONST.FILE_IN_PROGRESS,DATA_FILE_HANDLING_CONST.CHUNK_ALREADY_WRITTEN_CODE) :
-                with lock :
-                    self.__n_msgs_read+=1
+                    del self.data_files_by_path[dfc.filepath]
+                    del self.__thread_locks_by_filepath[dfc.filepath]
 
     def _on_check(self) :
         self.logger.debug(f'{self.__n_msgs_read} messages read, {len(self.__completely_reconstructed_filepaths)} files completely reconstructed so far')

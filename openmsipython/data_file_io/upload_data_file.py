@@ -1,4 +1,5 @@
 #imports
+import traceback
 from threading import Thread
 from queue import Queue
 from hashlib import sha512
@@ -105,7 +106,15 @@ class UploadDataFile(DataFile,Runnable) :
             return
         if len(self.__chunks_to_upload)==0 :
             kwargs = populated_kwargs(kwargs,{'chunk_size': RUN_OPT_CONST.DEFAULT_CHUNK_SIZE},self.logger)
-            self._build_list_of_file_chunks(kwargs['chunk_size'])
+            try :
+                self._build_list_of_file_chunks(kwargs['chunk_size'])
+            except Exception :
+                self.logger.info(traceback.format_exc())
+                errmsg = f'ERROR: was not able to break {self.filepath.relative_to(self.__rootdir) if self.__rootdir is not None else self.filepath} '
+                errmsg+= 'into chunks for uploading. Check log lines above for details on what went wrong. File will not be uploaded.'
+                self.logger.error(errmsg)
+                self.__to_upload = False
+                return
         if kwargs.get('n_threads') is not None :
             n_chunks_to_add = 5*kwargs['n_threads']
         else :
