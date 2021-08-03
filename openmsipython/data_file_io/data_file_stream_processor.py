@@ -95,6 +95,9 @@ class DataFileStreamProcessor(ControlledProcessMultiThreaded,LogOwner,ConsumerGr
                 self.logger.error(f'ERROR: file hashes for file {self.__download_files_by_filepath[dfc.filepath].filename} not matched after being fully read!',RuntimeError)
             #if the file has had all of its messages read successfully
             elif return_value==DATA_FILE_HANDLING_CONST.FILE_SUCCESSFULLY_RECONSTRUCTED_CODE :
+                with lock :
+                    self.__n_msgs_read+=1
+                self.logger.info(f'Processing {self.__download_files_by_filepath[dfc.filepath].full_filepath.relative_to(dfc.rootdir)}...')
                 processing_retval = self._process_downloaded_data_file(self.__download_files_by_filepath[dfc.filepath])
                 #if it was able to be processed
                 if processing_retval is None :
@@ -114,7 +117,6 @@ class DataFileStreamProcessor(ControlledProcessMultiThreaded,LogOwner,ConsumerGr
                     warnmsg+= 'The messages for this file will need to be consumed again if the file is to be processed!'
                     self.logger.warning(warnmsg)
                 with lock :
-                    self.__n_msgs_read+=1                        
                     del self.__download_files_by_filepath[dfc.filepath]
                     del self.__thread_locks_by_filepath[dfc.filepath]
             #if the message was consumed and everything is moving along fine

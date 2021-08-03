@@ -167,6 +167,15 @@ class DataFileUploadDirectory(DataFileDirectory,ControlledProcessSingleThread,Ru
             for filepath in self.dirpath.rglob('*') :
                 filepath = filepath.resolve()
                 if self.filepath_should_be_uploaded(filepath) and (filepath not in self.data_files_by_path.keys()):
+                    #wait until the file is actually available
+                    file_ready = False
+                    while not file_ready :
+                        try :
+                            fp = open(filepath)
+                            fp.close()
+                            file_ready = True
+                        except PermissionError :
+                            wait(0.5)
                     time.sleep(0.25) # wait again in case the file has JUST shown up
                     self.data_files_by_path[filepath]=self.__datafile_type(filepath,
                                                                           to_upload=to_upload,
