@@ -175,8 +175,7 @@ class DataFileUploadDirectory(DataFileDirectory,ControlledProcessSingleThread,Ru
                             fp.close()
                             file_ready = True
                         except PermissionError :
-                            wait(0.5)
-                    time.sleep(0.25) # wait again in case the file has JUST shown up
+                            time.sleep(0.5)
                     self.data_files_by_path[filepath]=self.__datafile_type(filepath,
                                                                           to_upload=to_upload,
                                                                           rootdir=self.dirpath,
