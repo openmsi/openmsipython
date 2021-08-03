@@ -1,13 +1,15 @@
 #imports
+import sys, pathlib, os
 from argparse import ArgumentParser
 from subprocess import Popen, PIPE, STDOUT, check_output, CalledProcessError
-import sys, pathlib, os
+from ..data_file_io.data_file_upload_directory import main as DATA_FILE_UPLOAD_DIRECTORY_MAIN
+from ..pdv.lecroy_file_upload_directory import main as LECROY_FILE_UPLOAD_DIRECTORY_MAIN
 
 #################### FILE-SCOPE CONSTANTS ####################
 
-SERVICE_NAME = 'OpenMSIDirectoryStreamService'
-SERVICE_DISPLAY_NAME = 'Open MSI Directory Stream Service'
-SERVICE_DESCRIPTION = 'Automatically produce to a Kafka topic any files added to a watched directory'
+MAINS_BY_NAME = {'DataFileUploadDirectory': DATA_FILE_UPLOAD_DIRECTORY_MAIN,
+                 'LecroyFileUploadDirectory': LECROY_FILE_UPLOAD_DIRECTORY_MAIN,
+                }
 NSSM_DOWNLOAD_URL = 'https://nssm.cc/release/nssm-2.24.zip'
 PYTHON_CODE_PATH = pathlib.Path(__file__).parent.parent / 'services' / 'openmsi_directory_stream_service.py'
 UNITTEST_DIR_PATH = (pathlib.Path(__file__).parent.parent.parent / 'test' / 'unittests').resolve()
@@ -80,7 +82,7 @@ def find_install_NSSM() :
         print('Done.')
 
 #install the Service using NSSM
-def install_service(config_file_path) :
+def install_service(service_name) :
     if config_file_path is None :
         raise RuntimeError('ERROR: installing the Service requires a config file, specified with the "--config" flag!')
     #set the environment variables needed to run in test and prod by default from user input
@@ -102,45 +104,45 @@ def install_service(config_file_path) :
     #find or install NSSM in the current directory
     find_install_NSSM()
     #install the service using NSSM
-    print(f'Installing {SERVICE_NAME}...')
-    cmd = f'.\\nssm.exe install \"{SERVICE_NAME}\" \"{sys.executable}\" \"{PYTHON_CODE_PATH} {pathlib.Path(config_file_path).resolve()}\"'
+    print(f'Installing {service_name}...')
+    cmd = f'.\\nssm.exe install \"{service_name}\" \"{sys.executable}\" \"{PYTHON_CODE_PATH} {pathlib.Path(config_file_path).resolve()}\"'
     run_cmd_in_subprocess(['powershell.exe',cmd])
-    run_cmd_in_subprocess(['powershell.exe',f'.\\nssm.exe set {SERVICE_NAME} DisplayName {SERVICE_DISPLAY_NAME}'])
-    run_cmd_in_subprocess(['powershell.exe',f'.\\nssm.exe set {SERVICE_NAME} Description {SERVICE_DESCRIPTION}'])
+    run_cmd_in_subprocess(['powershell.exe',f'.\\nssm.exe set {service_name} DisplayName {SERVICE_DISPLAY_NAME}'])
+    run_cmd_in_subprocess(['powershell.exe',f'.\\nssm.exe set {service_name} Description {SERVICE_DESCRIPTION}'])
     print('Done')
 
 #start the Service
-def start_service() :
+def start_service(service_name) :
     #start the service using net
-    print(f'Starting {SERVICE_NAME}...')
-    cmd = f'net start {SERVICE_NAME}'
+    print(f'Starting {service_name}...')
+    cmd = f'net start {service_name}'
     run_cmd_in_subprocess(['powershell.exe',cmd])
     print('Done')
 
 #use NSSM to get the status of the service
-def service_status() :
+def service_status(service_name) :
     #find or install NSSM in the current directory
     find_install_NSSM()
     #get the service status
-    cmd = f'.\\nssm.exe status {SERVICE_NAME}'
+    cmd = f'.\\nssm.exe status {service_name}'
     result = run_cmd_in_subprocess(['powershell.exe',cmd])
     print(result.decode())
 
 #stop the Service
-def stop_service() :
+def stop_service(service_name) :
     #stop the service using net
-    print(f'Stopping {SERVICE_NAME}...')
-    cmd = f'net stop {SERVICE_NAME}'
+    print(f'Stopping {service_name}...')
+    cmd = f'net stop {service_name}'
     run_cmd_in_subprocess(['powershell.exe',cmd])
     print('Done')
 
 #remove the Service
-def remove_service() :
+def remove_service(service_name) :
     #find or install NSSM in the current directory
     find_install_NSSM()
     #remove the service using NSSM
-    print(f'Removing {SERVICE_NAME}...')
-    cmd = f'.\\nssm.exe remove {SERVICE_NAME} confirm'
+    print(f'Removing {service_name}...')
+    cmd = f'.\\nssm.exe remove {service_name} confirm'
     run_cmd_in_subprocess(['powershell.exe',cmd])
     print('Service successfully removed')
     #remove the environment variables that were set when the service was installed
@@ -166,23 +168,48 @@ def remove_service() :
 
 def main() :
     #get the arguments
-    parser = ArgumentParser()
-    #first positional argument: run mode
-    parser.add_argument('run_mode', choices=['install_and_start','install','start','status','stop','remove','stop_and_remove'])
-    #optional arguments
-    parser.add_argument('--config', help='Path to the config file to use in setting up the Service')
-    args = parser.parse_args()
-    #run some of the helper functions above based on the run mode
-    if args.run_mode in ['install','install_and_start'] :
-        install_service(args.config)
-    if args.run_mode in ['start','install_and_start'] :
-        start_service()
-    if args.run_mode in ['status'] :
-        service_status()
-    if args.run_mode in ['stop','stop_and_remove'] :
-        stop_service()
-    if args.run_mode in ['remove','stop_and_remove'] :
-        remove_service()
+    parser = ArgumentParser(add_help=False)
+    #first positional argument: service name
+    parser.add_argument('service_name', choices=['DataFileUploadDirectory','LecroyFileUploadDirectory'],
+                        help='The name of the service to work with')
+    #second positional argument: run mode
+    parser.add_argument('run_mode', choices=['install_and_start','install','start','status','stop','remove','stop_and_remove'],
+                        help='What to do with the service')
+    #add a replacement for the help arguments
+    parser.add_argument('-h', '--help', action='store_true', help='show help messages for this program and any that it would invoke and exit')
+    #print the applicable "help" messages
+    help_printed = False
+    if '-h' in sys.argv[1:min(len(sys.argv),4)] or '--help' in sys.argv[1:min(len(sys.argv),4)] :
+        parser.print_help()
+        help_printed = True
+        args = parser.parse_args(sys.argv[1:min(len(sys.argv),4)])
+    else :
+        args = parser.parse_args(sys.argv[1:min(len(sys.argv),3)])
+    if args.help :
+        if not help_printed :
+            parser.print_help()
+        if args.service_name is not None and args.service_name in MAINS_BY_NAME :
+            print('\n---------- help for program that would be run as a service -----------\n')
+            MAINS_BY_NAME[args.service_name](['--help'])
+        else :
+            print('Add a valid service_name argument to see details on the possible command line arguments for that service')
+        return
+    #Add "Service" to the given name of the service
+    service_name = args.service_name+'Service'
+    print(f'other_args = {other_args}')
+    ##run some of the helper functions above based on the run mode
+    #if args.run_mode in ['install','install_and_start'] :
+    #    #set the python code that will be run based on the service name
+    #    mainfunc = MAINS_BY_NAME[args.service_name]
+    #    install_service(service_name)
+    #if args.run_mode in ['start','install_and_start'] :
+    #    start_service(service_name)
+    #if args.run_mode in ['status'] :
+    #    service_status(service_name)
+    #if args.run_mode in ['stop','stop_and_remove'] :
+    #    stop_service(service_name)
+    #if args.run_mode in ['remove','stop_and_remove'] :
+    #    remove_service(service_name)
 
 #run the main function, giving the run command and the config file path from the command line
 if __name__=='__main__' :

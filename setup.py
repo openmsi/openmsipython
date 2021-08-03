@@ -12,7 +12,7 @@ setupkwargs = dict(
         'console_scripts' : ['upload_data_file=openmsipython.data_file_io.upload_data_file:main',
                              'data_file_upload_directory=openmsipython.data_file_io.data_file_upload_directory:main',
                              'data_file_download_directory=openmsipython.data_file_io.data_file_download_directory:main',
-                             'manage_service=openmsipython.services.manage_service:main',
+                             'manage_service=openmsipython.services.manage_services:main',
                              'lecroy_file_upload_directory=openmsipython.pdv.lecroy_file_upload_directory:main',
                              'pdv_plot_maker=openmsipython.pdv.pdv_plot_maker:main',
                             ],
