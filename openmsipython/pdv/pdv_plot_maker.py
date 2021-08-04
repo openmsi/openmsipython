@@ -73,13 +73,18 @@ class PDVPlotMaker(DataFileStreamProcessor,Runnable) :
         return None
 
     @classmethod
+    def get_argument_parser(cls) :
+        parser = MyArgumentParser('output_dir','pdv_plot_type','config','topic_name','update_seconds',
+                                  'consumer_group_ID',n_threads=RUN_OPT_CONST.N_DEFAULT_DOWNLOAD_THREADS)
+        return parser
+
+    @classmethod
     def run_from_command_line(cls,args=None) :
         """
         Run the plot maker from the command line
         """
         #make the argument parser
-        parser = MyArgumentParser('output_dir','pdv_plot_type','config','topic_name','update_seconds',
-                                  'consumer_group_ID',n_threads=RUN_OPT_CONST.N_DEFAULT_DOWNLOAD_THREADS)
+        parser = cls.get_argument_parser()
         args = parser.parse_args(args=args)
         #make the plot maker
         plot_maker = cls(args.output_dir,args.pdv_plot_type,args.config,args.topic_name,

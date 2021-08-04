@@ -110,12 +110,17 @@ class DataFileDownloadDirectory(DataFileDirectory,ControlledProcessMultiThreaded
     #################### CLASS METHODS ####################
 
     @classmethod
+    def get_argument_parser(cls) :
+        parser = MyArgumentParser('output_dir','config','topic_name','update_seconds','consumer_group_ID',
+                                  n_threads=RUN_OPT_CONST.N_DEFAULT_DOWNLOAD_THREADS)
+        return parser
+
+    @classmethod
     def run_from_command_line(cls,args=None) :
         """
         Run the download directory right from the command line
         """
-        parser = MyArgumentParser('output_dir','config','topic_name','update_seconds','consumer_group_ID',
-                                  n_threads=RUN_OPT_CONST.N_DEFAULT_DOWNLOAD_THREADS)
+        parser = cls.get_argument_parser()
         args = parser.parse_args(args=args)
         #make the download directory
         reconstructor_directory = cls(args.output_dir,args.config,args.topic_name,

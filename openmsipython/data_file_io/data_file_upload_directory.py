@@ -187,12 +187,17 @@ class DataFileUploadDirectory(DataFileDirectory,ControlledProcessSingleThread,Ru
     #################### CLASS METHODS ####################
 
     @classmethod
+    def get_command_line_arguments(cls) :
+        args = ['upload_dir','config','topic_name','chunk_size','queue_max_size','update_seconds','new_files_only']
+        kwargs = {'n_threads':RUN_OPT_CONST.N_DEFAULT_UPLOAD_THREADS}
+        return args, kwargs
+
+    @classmethod
     def run_from_command_line(cls,args=None) :
         """
         Function to run the upload directory right from the command line
         """
-        parser = MyArgumentParser('upload_dir','config','topic_name','chunk_size','queue_max_size','update_seconds','new_files_only',
-                                  n_threads=RUN_OPT_CONST.N_DEFAULT_UPLOAD_THREADS)
+        parser = cls.get_argument_parser()
         args = parser.parse_args(args=args)
         #make the DataFileDirectory for the specified directory
         upload_file_directory = cls(args.upload_dir,update_secs=args.update_seconds)

@@ -221,12 +221,17 @@ class UploadDataFile(DataFile,Runnable) :
     #################### CLASS METHODS ####################
 
     @classmethod
+    def get_argument_parser(cls) :
+        parser = MyArgumentParser('filepath','config','topic_name','chunk_size',n_threads=RUN_OPT_CONST.N_DEFAULT_UPLOAD_THREADS)
+        return parser
+
+    @classmethod
     def run_from_command_line(cls,args=None) :
         """
         Run the upload data file directly from the command line
         """
         #make the argument parser
-        parser = MyArgumentParser('filepath','config','topic_name','chunk_size',n_threads=RUN_OPT_CONST.N_DEFAULT_UPLOAD_THREADS)
+        parser = cls.get_argument_parser()
         args = parser.parse_args(args=args)
         #make the DataFile for the single specified file
         upload_file = cls(args.filepath)
