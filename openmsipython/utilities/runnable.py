@@ -9,7 +9,7 @@ class Runnable(ABC) :
 
     @classmethod
     @abstractmethod
-    def get_command_line_arguments() :
+    def get_command_line_arguments(cls) :
         """
         child classes should implement this function to return a list of argument names 
         and a dictionary of argument names/default values to add to the argument parser

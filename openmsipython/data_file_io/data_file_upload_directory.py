@@ -2,7 +2,6 @@
 import pathlib, datetime, time
 from threading import Thread
 from queue import Queue
-from ..utilities.argument_parsing import MyArgumentParser
 from ..utilities.runnable import Runnable
 from ..utilities.controlled_process import ControlledProcessSingleThread
 from ..utilities.misc import populated_kwargs

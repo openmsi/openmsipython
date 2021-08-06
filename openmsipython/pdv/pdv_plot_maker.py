@@ -7,7 +7,6 @@ import pandas as pd
 from io import BytesIO
 from ..data_file_io.config import RUN_OPT_CONST
 from ..utilities.runnable import Runnable
-from ..utilities.argument_parsing import MyArgumentParser
 from ..data_file_io.data_file_stream_processor import DataFileStreamProcessor
 from .pdv_analysis import PDVSpallAnalysis, PDVVelocityAnalysis
 from .lecroy_data_file import DownloadLecroyDataFile
@@ -73,10 +72,10 @@ class PDVPlotMaker(DataFileStreamProcessor,Runnable) :
         return None
 
     @classmethod
-    def get_argument_parser(cls) :
-        parser = MyArgumentParser('output_dir','pdv_plot_type','config','topic_name','update_seconds',
-                                  'consumer_group_ID',n_threads=RUN_OPT_CONST.N_DEFAULT_DOWNLOAD_THREADS)
-        return parser
+    def get_command_line_arguments(cls) :
+        args = ['output_dir','pdv_plot_type','config','topic_name','update_seconds','consumer_group_ID']
+        kwargs = {'n_threads':RUN_OPT_CONST.N_DEFAULT_DOWNLOAD_THREADS}
+        return args,kwargs
 
     @classmethod
     def run_from_command_line(cls,args=None) :

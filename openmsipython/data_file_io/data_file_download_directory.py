@@ -1,7 +1,6 @@
 #imports
 import datetime
 from threading import Lock
-from ..utilities.argument_parsing import MyArgumentParser
 from ..utilities.controlled_process import ControlledProcessMultiThreaded
 from ..utilities.runnable import Runnable
 from ..utilities.misc import populated_kwargs
@@ -110,10 +109,10 @@ class DataFileDownloadDirectory(DataFileDirectory,ControlledProcessMultiThreaded
     #################### CLASS METHODS ####################
 
     @classmethod
-    def get_argument_parser(cls) :
-        parser = MyArgumentParser('output_dir','config','topic_name','update_seconds','consumer_group_ID',
-                                  n_threads=RUN_OPT_CONST.N_DEFAULT_DOWNLOAD_THREADS)
-        return parser
+    def get_command_line_arguments(cls) :
+        args = ['output_dir','config','topic_name','update_seconds','consumer_group_ID']
+        kwargs = {'n_threads':RUN_OPT_CONST.N_DEFAULT_DOWNLOAD_THREADS}
+        return args,kwargs
 
     @classmethod
     def run_from_command_line(cls,args=None) :

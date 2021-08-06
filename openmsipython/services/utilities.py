@@ -1,11 +1,7 @@
 #imports
-import sys, pathlib, os
-from argparse import ArgumentParser
-from subprocess import Popen, PIPE, STDOUT, check_output, CalledProcessError
-from ..utilities.argument_parsing import MyArgumentParser
-from ..data_file_io.data_file_upload_directory import DataFileUploadDirectory
-from ..pdv.lecroy_file_upload_directory import LecroyFileUploadDirectory
-from .config import SERVICES_CONST
+import pathlib, os
+from subprocess import check_output, CalledProcessError
+from .config import SERVICE_CONST
 
 def run_cmd_in_subprocess(args,*,shell=False) :
     """
@@ -17,8 +13,7 @@ def run_cmd_in_subprocess(args,*,shell=False) :
         result = check_output(args,shell=shell,env=os.environ)
         return result
     except CalledProcessError as e :
-        print(f'ERROR: failed to run a command. output:\n{e.output.decode}')
-        raise e
+        SERVICE_CONST.LOGGER.error(f'ERROR: failed to run a command. output:\n{e.output.decode}',e)
 
 def remove_machine_env_var(var_name) :
     """
@@ -48,20 +43,24 @@ def find_install_NSSM() :
     if 'nssm.exe' in check_output('dir',shell=True).decode() :
         return
     else :
-        print(f'Installing NSSM from {NSSM_DOWNLOAD_URL}...')
-        nssm_zip_file_name = NSSM_DOWNLOAD_URL.split('/')[-1]
+        SERVICE_CONST.LOGGER.info(f'Installing NSSM from {SERVICE_CONST.NSSM_DOWNLOAD_URL}...')
+        nssm_zip_file_name = SERVICE_CONST.NSSM_DOWNLOAD_URL.split('/')[-1]
         cmd_tuples = [
-            (f'curl {NSSM_DOWNLOAD_URL} -O',f'Invoke-WebRequest -Uri {NSSM_DOWNLOAD_URL} -OutFile {nssm_zip_file_name}'),
-            (f'tar -xf {pathlib.Path() / nssm_zip_file_name}',f'Expand-Archive {nssm_zip_file_name} -DestinationPath {pathlib.Path().resolve()}'),
-            (f'del {nssm_zip_file_name}',f'Remove-Item -Path {nssm_zip_file_name}'),
+            (f'curl {SERVICE_CONST.NSSM_DOWNLOAD_URL} -O',
+             f'Invoke-WebRequest -Uri {SERVICE_CONST.NSSM_DOWNLOAD_URL} -OutFile {nssm_zip_file_name}'),
+            (f'tar -xf {pathlib.Path() / nssm_zip_file_name}',
+             f'Expand-Archive {nssm_zip_file_name} -DestinationPath {pathlib.Path().resolve()}'),
+            (f'del {nssm_zip_file_name}',
+             f'Remove-Item -Path {nssm_zip_file_name}'),
             (f'move {pathlib.Path() / nssm_zip_file_name.rstrip(".zip") / "win64" / "nssm.exe"} {pathlib.Path()}',
-                f'Move-Item -Path {pathlib.Path()/nssm_zip_file_name.rstrip(".zip")/"win64"/"nssm.exe"} -Destination {(pathlib.Path()/"nssm.exe").resolve()}'),
-            (f'rmdir /S /Q {nssm_zip_file_name.rstrip(".zip")}',f'Remove-Item -Recurse -Force {nssm_zip_file_name.rstrip(".zip")}'),
+             f'''Move-Item -Path {pathlib.Path()/nssm_zip_file_name.rstrip(".zip")/"win64"/"nssm.exe"} \
+                 -Destination {(pathlib.Path()/"nssm.exe").resolve()}'''),
+            (f'rmdir /S /Q {nssm_zip_file_name.rstrip(".zip")}',
+             f'Remove-Item -Recurse -Force {nssm_zip_file_name.rstrip(".zip")}'),
         ]
         for cmd in cmd_tuples :
             try :
                 run_cmd_in_subprocess(['powershell.exe',cmd[1]])
             except CalledProcessError :
                 run_cmd_in_subprocess(cmd[0],shell=True)
-                
-        print('Done.')
+        SERVICE_CONST.LOGGER('Done installing NSSM')

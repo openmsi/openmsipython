@@ -4,7 +4,6 @@ from threading import Thread
 from queue import Queue
 from hashlib import sha512
 from .data_file import DataFile
-from ..utilities.argument_parsing import MyArgumentParser
 from ..utilities.runnable import Runnable
 from ..utilities.misc import populated_kwargs
 from ..my_kafka.my_producers import MySerializingProducer
@@ -221,9 +220,10 @@ class UploadDataFile(DataFile,Runnable) :
     #################### CLASS METHODS ####################
 
     @classmethod
-    def get_argument_parser(cls) :
-        parser = MyArgumentParser('filepath','config','topic_name','chunk_size',n_threads=RUN_OPT_CONST.N_DEFAULT_UPLOAD_THREADS)
-        return parser
+    def get_command_line_arguments(cls) :
+        args = ['filepath','config','topic_name','chunk_size']
+        kwargs = {'n_threads':RUN_OPT_CONST.N_DEFAULT_UPLOAD_THREADS}
+        return args,kwargs
 
     @classmethod
     def run_from_command_line(cls,args=None) :

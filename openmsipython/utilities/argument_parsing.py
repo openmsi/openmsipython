@@ -115,7 +115,7 @@ class MyArgumentParser(ArgumentParser) :
         'service_name':
             ['positional',{'help':'The name of the service to work with'}],
         'run_mode':
-            ['positional',{'choices':['install_and_start','install','start','status','stop','remove','stop_and_remove'],
+            ['positional',{'choices':['start','status','stop','remove','stop_and_remove'],
                            'help':'What to do with the service'}],
     }
 
@@ -131,17 +131,8 @@ class MyArgumentParser(ArgumentParser) :
         Overloaded from base class; MyArgumentParser actually owns its subparsers
         """
         if self.__subparsers_action_obj is not None or self.__subparsers!={} :
-            raise RuntimeError(f'ERROR: add_subparsers called for an argument parser that already has subparsers!')
+            raise RuntimeError('ERROR: add_subparsers called for an argument parser that already has subparsers!')
         self.__subparsers_action_obj = super().add_subparsers(*args,**kwargs)
-
-    #def format_help(self) :
-    #    """
-    #    Overloaded from base class to include subparser argument help messages
-    #    """
-    #    formatted_help = super().format_help()
-    #    for subparsername, subparser in self.__subparsers.items() :
-    #        formatted_help+=subparser.format_help()
-    #    return formatted_help
 
     def parse_args(self,**kwargs) :
         """
