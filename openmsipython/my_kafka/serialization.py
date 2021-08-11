@@ -54,13 +54,15 @@ class DataFileChunkDeserializer(Deserializer) :
                 filename_append = str(ordered_properties[7].decode())
                 data = ordered_properties[8]
             except Exception as e :
-                raise ValueError(f'ERROR: unrecognized value(s) when deserializing a DataFileChunk from token. Exception: {e}')
+                errmsg = f'ERROR: unrecognized value(s) when deserializing a DataFileChunk from token. Exception: {e}'
+                raise ValueError(errmsg)
             #make sure the hash of the chunk's data matches with what it was before
             check_chunk_hash = sha512()
             check_chunk_hash.update(data)
             check_chunk_hash = check_chunk_hash.digest()
             if check_chunk_hash!=chunk_hash :
-                errmsg = f'ERROR: chunk hash {check_chunk_hash} != expected hash {chunk_hash} in file {filename}, offset {chunk_offset_write}'
+                errmsg = f'ERROR: chunk hash {check_chunk_hash} != expected hash {chunk_hash} in file {filename}, '
+                errmsg+= f'offset {chunk_offset_write}'
                 raise RuntimeError(errmsg)
             #set the filepath based on the subdirectory string
             if subdir_str=='' :

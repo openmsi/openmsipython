@@ -78,7 +78,7 @@ def install_service(service_name,argslist) :
         SERVICE_CONST.LOGGER.info(msg)
         sys.exit(0)
     #test the Python code to make sure the configs are all valid
-    #test_python_code()
+    test_python_code()
     #find or install NSSM in the current directory
     find_install_NSSM()
     #write out the executable file

@@ -28,21 +28,24 @@ def populated_kwargs(given_kwargs,defaults,logger=None) :
                                 logger.error(errmsg,RuntimeError)
                             else :
                                 raise RuntimeError(errmsg)
-                        #make sure the given argument is a subtype of any of the possible classes specified in the defaults
+                        #make sure the given argument is a subtype of any of the classes specified in the defaults
                         isgood=False
                         for poss_class in (defaults[key])[1:] :
                             if issubclass(given_kwargs[key],poss_class) :
                                 isgood=True
                                 break
                         if not isgood :
-                            errmsg = f'ERROR: Class type mismatch for argument "{key}", got {given_kwargs[key]} but expected one of {(defaults[key])[1:]}'
+                            errmsg = f'ERROR: Class type mismatch for argument "{key}", got {given_kwargs[key]} '
+                            errmsg+= f'but expected one of {(defaults[key])[1:]}'
                             if logger is not None :
                                 logger.error(errmsg,RuntimeError)
                             else :
                                 raise RuntimeError(errmsg)
-                    #if the default is an object, make sure the that type of the given argument matches one of the possible types in the defaults
+                    #if the default is an object, make sure the that type of the given argument matches 
+                    #one of the possible types in the defaults
                     elif type(given_kwargs[key]) not in (defaults[key])[1:] :
-                        errmsg = f'ERROR: Type mismatch replacing argument "{key}" with {given_kwargs[key]} (expected one of '
+                        errmsg = f'ERROR: Type mismatch replacing argument "{key}" with {given_kwargs[key]} '
+                        errmsg+= '(expected one of '
                         for t in (defaults[key])[1:] :
                             errmsg+=f'{t}, '
                         errmsg+=f'but got {type(given_kwargs[key])})'
@@ -64,14 +67,16 @@ def populated_kwargs(given_kwargs,defaults,logger=None) :
                         raise RuntimeError(errmsg)
                 #make sure the given argument is a subtype of the default class
                 if not issubclass(given_kwargs[key],defaults[key]) :
-                    errmsg = f'ERROR: Class type mismatch for argument "{key}", got {given_kwargs[key]} but expected {defaults[key]}'
+                    errmsg = f'ERROR: Class type mismatch for argument "{key}", got {given_kwargs[key]} '
+                    errmsg+= f'but expected {defaults[key]}'
                     if logger is not None :
                         logger.error(errmsg,RuntimeError)
                     else :
                         raise RuntimeError(errmsg)
-            #if the single default option is just an object, make sure the gvein argument is of the same type as the default
+            #if the single default option is just an object, make sure the argument is of the same type as the default
             elif defaults[key] is not None and type(defaults[key]) is not type(given_kwargs[key]) :
-                errmsg = f'ERROR: Type mismatch replacing argument "{key}" with {given_kwargs[key]} (expected type {type(defaults[key])})'
+                errmsg = f'ERROR: Type mismatch replacing argument "{key}" with {given_kwargs[key]} '
+                errmsg+= f'(expected type {type(defaults[key])})'
                 if logger is not None :
                     logger.error(errmsg,TypeError)
                 else :

@@ -25,12 +25,14 @@ class ControlledProcess(LogOwner,ABC) :
 
     def __init__(self,*args,update_secs=UTIL_CONST.DEFAULT_UPDATE_SECONDS,**other_kwargs) :
         """
-        update_secs = number of seconds to wait between printing a progress character to the console to indicate the program is alive
+        update_secs = number of seconds to wait between printing a progress character to the console 
+                      to indicate the program is alive
         """
         self.__update_secs = update_secs
         #start up a Queue that will hold the control commands
         self.__control_command_queue = Queue()
-        #use a daemon thread to allow a user to input control commands from the command line while the process is running
+        #use a daemon thread to allow a user to input control commands from the command line 
+        #while the process is running
         user_input_thread = Thread(target=add_user_input,args=(self.__control_command_queue,))
         user_input_thread.daemon=True
         user_input_thread.start()
@@ -110,7 +112,8 @@ class ControlledProcessSingleThread(ControlledProcess,ABC) :
     def _run_iteration(self) :
         """
         The function that is run in an infinite loop while the process is alive
-        Not implemented in the base class, except to print the "still alive" character and check the control command queue
+        Not implemented in the base class, except to print the "still alive" character 
+        and check the control command queue
         """
         pass
 
@@ -140,8 +143,8 @@ class ControlledProcessMultiThreaded(ControlledProcess,ABC) :
             args_per_thread = [args_per_thread]
         if not len(args_per_thread)==self.__n_threads :
             if not len(args_per_thread)==1 :
-                errmsg = f'ERROR: ControlledProcessMultiThreaded.run was given a list of arguments with {len(args_per_thread)} entries,'
-                errmsg+= f' but was set up to use {self.__n_threads} threads!'
+                errmsg = 'ERROR: ControlledProcessMultiThreaded.run was given a list of arguments with '
+                errmsg+= f'{len(args_per_thread)} entries, but was set up to use {self.__n_threads} threads!'
                 self.logger.error(errmsg,ValueError)
             else :
                 args_per_thread = self.__n_threads*args_per_thread
@@ -165,7 +168,8 @@ class ControlledProcessMultiThreaded(ControlledProcess,ABC) :
     @abstractmethod
     def _run_worker(self,*args) :
         """
-        A function that should include a while self.alive loop for each independent thread to run until the process is shut down
+        A function that should include a while self.alive loop for each independent thread to run 
+        until the process is shut down
         Not implemented in the base class
         """
         pass

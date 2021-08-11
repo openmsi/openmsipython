@@ -30,7 +30,7 @@ class UploadDataFile(DataFile,Runnable) :
         return self.__chunks_to_upload
     @property
     def to_upload(self):
-        return self.__to_upload #whether or not this file will be considered when automatically uploading some group of data files
+        return self.__to_upload #whether or not this file will be considered when uploading some group of data files
     @property
     def fully_enqueued(self): #whether or not this file has had all of its chunks added to an upload queue somewhere
         return self.__fully_enqueued
@@ -71,10 +71,10 @@ class UploadDataFile(DataFile,Runnable) :
     def __init__(self,*args,to_upload=True,rootdir=None,filename_append='',**kwargs) :
         """
         to_upload       = if False, the file will be ignored for purposes of uploading to a topic (default is True)
-        rootdir         = path to the "root" directory that this file is in; anything in the path beyond this root directory 
+        rootdir         = path to the "root" directory that this file is in; anything in the path beyond it 
                           will be added to the DataFileChunk so that it will be reconstructed inside a subdirectory
-        filename_append = a string that should be appended to the end of the filename stem to distinguish the file that's produced 
-                          from its original file on disk
+        filename_append = a string that should be appended to the end of the filename stem to distinguish the file 
+                          that's produced from its original file on disk
         """
         super().__init__(*args,**kwargs)
         self.__to_upload = to_upload
@@ -88,17 +88,20 @@ class UploadDataFile(DataFile,Runnable) :
 
     def add_chunks_to_upload_queue(self,queue,**kwargs) :
         """
-        Add chunks of this file to a given upload queue. If the file runs out of chunks it will be marked as fully enqueued.
+        Add chunks of this file to a given upload queue. 
+        If the file runs out of chunks it will be marked as fully enqueued.
         If the given queue is full this function will do absolutely nothing and will just return.
 
         Possible keyword arguments:
-        n_threads  = the number of threads running during uploading; at most 5*this number of chunks will be added per call to this function
-                     if this argument isn't given, every chunk will be added
-        chunk_size = the size of each file chunk in bytes (used to create the list of file chunks if it doesn't already exist)
+        n_threads  = the number of threads running during uploading; at most 5*this number of chunks will be added 
+                     per call to this function if this argument isn't given, every chunk will be added
+        chunk_size = the size of each file chunk in bytes 
+                     (used to create the list of file chunks if it doesn't already exist)
                      the default value will be used if this argument isn't given
         """
         if self.__fully_enqueued :
-            warnmsg = f'WARNING: add_chunks_to_upload_queue called for fully enqueued file {self.filepath}, nothing else will be added.'
+            warnmsg = f'WARNING: add_chunks_to_upload_queue called for fully enqueued file {self.filepath}, '
+            warnmsg+= 'nothing else will be added.'
             self.logger.warning(warnmsg)
             return
         if queue.full() :
@@ -109,8 +112,9 @@ class UploadDataFile(DataFile,Runnable) :
                 self._build_list_of_file_chunks(kwargs['chunk_size'])
             except Exception :
                 self.logger.info(traceback.format_exc())
-                errmsg = f'ERROR: was not able to break {self.filepath.relative_to(self.__rootdir) if self.__rootdir is not None else self.filepath} '
-                errmsg+= 'into chunks for uploading. Check log lines above for details on what went wrong. File will not be uploaded.'
+                fp = self.filepath.relative_to(self.__rootdir) if self.__rootdir is not None else self.filepath
+                errmsg = f'ERROR: was not able to break {fp} into chunks for uploading. '
+                errmsg+= 'Check log lines above for details on what went wrong. File will not be uploaded.'
                 self.logger.error(errmsg)
                 self.__to_upload = False
                 return
@@ -174,15 +178,18 @@ class UploadDataFile(DataFile,Runnable) :
         """
         Build the full list of DataFileChunks for this file given a chunk size (in bytes)
         """
-        #first make sure the choices of select_bytes are valid if necessary and sort them by their start byte to keep the file hash in order
+        #first make sure the choices of select_bytes are valid if necessary 
+        #and sort them by their start byte to keep the file hash in order
         if self.select_bytes!=[] :
             if type(self.select_bytes)!=list :
                 self.logger.error(f'ERROR: select_bytes={self.select_bytes} but is expected to be a list!',ValueError)
             for sbt in self.select_bytes :
                 if type(sbt)!=tuple or len(sbt)!=2 :
-                    self.logger.error(f'ERROR: found {sbt} in select_bytes but all elements are expected to be two-entry tuples!',ValueError)
+                    errmsg = f'ERROR: found {sbt} in select_bytes but all elements are expected to be two-entry tuples!'
+                    self.logger.error(errmsg,ValueError)
                 elif sbt[0]>=sbt[1] :
-                    self.logger.error(f'ERROR: found {sbt} in select_bytes but start byte cannot be >= stop byte!',ValueError)
+                    errmsg = f'ERROR: found {sbt} in select_bytes but start byte cannot be >= stop byte!'
+                    self.logger.error(errmsg,ValueError)
             sorted_select_bytes = sorted(self.select_bytes,key=lambda x: x[0])
         #start a hash for the file and the lists of chunks
         file_hash = sha512()
@@ -192,7 +199,9 @@ class UploadDataFile(DataFile,Runnable) :
         with open(self.filepath,'rb') as fp :
             chunk_offset = 0
             file_offset = 0 if self.select_bytes==[] else sorted_select_bytes[isb][0]
-            n_bytes_to_read = chunk_size if self.select_bytes==[] else min(chunk_size,sorted_select_bytes[isb][1]-file_offset)
+            n_bytes_to_read = chunk_size 
+            if self.select_bytes!=[] :
+                n_bytes_to_read = min(chunk_size,sorted_select_bytes[isb][1]-file_offset)
             chunk = fp.read(n_bytes_to_read)
             while len(chunk) > 0 :
                 file_hash.update(chunk)
@@ -208,14 +217,18 @@ class UploadDataFile(DataFile,Runnable) :
                     if isb>(len(sorted_select_bytes)-1) :
                         break
                     file_offset=sorted_select_bytes[isb][0]
-                n_bytes_to_read = chunk_size if self.select_bytes==[] else min(chunk_size,sorted_select_bytes[isb][1]-file_offset)
+                n_bytes_to_read = chunk_size 
+                if self.select_bytes!=[] :
+                    n_bytes_to_read = min(chunk_size,sorted_select_bytes[isb][1]-file_offset)
                 fp.seek(file_offset)
                 chunk = fp.read(n_bytes_to_read)
         file_hash = file_hash.digest()
         self.logger.info(f'File {self.filepath} has a total of {len(chunks)} chunks')
         #add all the chunks to the final list as DataFileChunk objects
         for ic,c in enumerate(chunks,start=1) :
-            self.__chunks_to_upload.append(DataFileChunk(self.filepath,self.filename,file_hash,c[0],c[1],c[2],c[3],ic,len(chunks),rootdir=self.__rootdir,filename_append=self.__filename_append))
+            self.__chunks_to_upload.append(DataFileChunk(self.filepath,self.filename,file_hash,
+                                                         c[0],c[1],c[2],c[3],ic,len(chunks),
+                                                         rootdir=self.__rootdir,filename_append=self.__filename_append))
 
     #################### CLASS METHODS ####################
 

@@ -16,7 +16,8 @@ class MyProducer(Producer) :
         """
         config_file_path = path to the config file to use in defining this producer
 
-        !!!!! any keyword arguments (that aren't 'logger') will be added to the configuration (with underscores replaced with dots) !!!!!
+        !!!!! any keyword arguments (that aren't 'logger') will be added to the configuration !!!!!
+        (with underscores replaced with dots)
         """
         parser = ConfigFileParser(config_file_path,logger=kwargs.get('logger'))
         configs = parser.get_config_dict_for_groups(['cluster','producer'])
@@ -39,7 +40,8 @@ class MySerializingProducer(SerializingProducer) :
         """
         config_file_path = path to the config file to use in defining this producer
 
-        !!!!! any keyword arguments (that aren't 'logger') will be added to the configuration (with underscores replaced with dots) !!!!!
+        !!!!! any keyword arguments (that aren't 'logger') will be added to the configuration !!!!!
+        (with underscores replaced with dots)
         """
         parser = ConfigFileParser(config_file_path,logger=kwargs.get('logger'))
         configs = parser.get_config_dict_for_groups(['cluster','producer'])
@@ -47,6 +49,7 @@ class MySerializingProducer(SerializingProducer) :
             if argname=='logger' :
                 continue
             configs[argname.replace('_','.')]=arg
-        #if one of several recognized serializers have been given as config paramenters for the key/value serializer, replace them with the actual class
+        #if one of several recognized serializers have been given as config paramenters for the key/value serializer, 
+        #replace them with the actual class
         configs = get_replaced_configs(configs,'serialization')
         return cls(configs)

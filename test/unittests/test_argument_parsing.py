@@ -14,8 +14,8 @@ class TestArgumentParsing(unittest.TestCase) :
     #test MyArgumentParser by just adding a bunch of arguments
     def test_my_argument_parser(self) :
         parser = MyArgumentParser()
-        parser.add_arguments('filepath','output_dir','upload_dir','config','topic_name','queue_max_size','new_files_only',
-                             'consumer_group_ID','pdv_plot_type','optional_output_dir',
+        parser.add_arguments('filepath','output_dir','upload_dir','config','topic_name','queue_max_size',
+                             'new_files_only','consumer_group_ID','pdv_plot_type','optional_output_dir',
                              n_threads=5,chunk_size=128,update_seconds=60)
         args = [os.fspath(TEST_CONST.TEST_DATA_FILE_PATH),
                 'TEST_OUTPUT',
@@ -37,7 +37,10 @@ class TestArgumentParsing(unittest.TestCase) :
         self.assertEqual(existing_file(this_file_path),this_file_path)
         this_file_path_str = str(this_file_path)
         self.assertEqual(existing_file(this_file_path_str),this_file_path)
-        does_not_exist_file_path = (pathlib.Path(__file__).parent / 'never_make_a_directory_called_this' / 'nor_a_file_called_this.fake_file_ext').resolve()
+        does_not_exist_file_path = pathlib.Path(__file__).parent 
+        does_not_exist_file_path = does_not_exist_file_path / 'never_make_a_directory_called_this' 
+        does_not_exist_file_path = does_not_exist_file_path / 'nor_a_file_called_this.fake_file_ext'
+        does_not_exist_file_path = does_not_exist_file_path.resolve()
         self.assertFalse(does_not_exist_file_path.is_file())
         with self.assertRaises(FileNotFoundError) :
             _ = existing_file(does_not_exist_file_path)
@@ -92,7 +95,9 @@ class TestArgumentParsing(unittest.TestCase) :
 
     #test the config_path argument parser callback
     def test_config_path(self) :
-        default_config_file_path = (UTIL_CONST.CONFIG_FILE_DIR / f'{RUN_OPT_CONST.DEFAULT_CONFIG_FILE}{UTIL_CONST.CONFIG_FILE_EXT}').resolve()
+        default_config_file_path = UTIL_CONST.CONFIG_FILE_DIR 
+        default_config_file_path = default_config_file_path / f'{RUN_OPT_CONST.DEFAULT_CONFIG_FILE}{UTIL_CONST.CONFIG_FILE_EXT}'
+        default_config_file_path = default_config_file_path.resolve()
         self.assertEqual(config_path(RUN_OPT_CONST.DEFAULT_CONFIG_FILE),default_config_file_path)
         self.assertEqual(config_path(str(default_config_file_path)),default_config_file_path)
         prod_config_file_path = (UTIL_CONST.CONFIG_FILE_DIR / f'prod{UTIL_CONST.CONFIG_FILE_EXT}').resolve()

@@ -40,7 +40,8 @@ class TestDataFileStreamProcessor(unittest.TestCase) :
         Upload a data file and then use a DataFileStreamProcessor to read its data back
         """
         #upload the data file
-        upload_datafile = UploadDataFile(TEST_CONST.TEST_DATA_FILE_2_PATH,rootdir=TEST_CONST.TEST_DATA_DIR_PATH,logger=LOGGER)
+        upload_datafile = UploadDataFile(TEST_CONST.TEST_DATA_FILE_2_PATH,
+                                         rootdir=TEST_CONST.TEST_DATA_DIR_PATH,logger=LOGGER)
         upload_datafile.upload_whole_file(TEST_CONST.TEST_CONFIG_FILE_PATH,TOPIC_NAME,
                                         n_threads=RUN_OPT_CONST.N_DEFAULT_UPLOAD_THREADS,
                                         chunk_size=RUN_OPT_CONST.DEFAULT_CHUNK_SIZE)
@@ -62,9 +63,12 @@ class TestDataFileStreamProcessor(unittest.TestCase) :
             current_messages_read = -1
             time_waited = 0
             LOGGER.set_stream_level(logging.INFO)
-            LOGGER.info(f'Waiting to read other test file from the "{TOPIC_NAME}" topic in test_data_file_stream_processor (will timeout after {TIMEOUT_SECS} seconds)...')
+            msg = f'Waiting to read other test file from the "{TOPIC_NAME}" topic in test_data_file_stream_processor '
+            msg+= f'(will timeout after {TIMEOUT_SECS} seconds)...'
+            LOGGER.info(msg)
             LOGGER.set_stream_level(logging.ERROR)
-            while (TEST_CONST.TEST_DATA_FILE_2_NAME not in dfsp.completed_bytestrings_by_filename.keys()) and current_messages_read<dfsp.n_msgs_read and time_waited<TIMEOUT_SECS :
+            while ( (TEST_CONST.TEST_DATA_FILE_2_NAME not in dfsp.completed_bytestrings_by_filename.keys()) and 
+                    current_messages_read<dfsp.n_msgs_read and time_waited<TIMEOUT_SECS ) :
                 current_messages_read = dfsp.n_msgs_read
                 LOGGER.set_stream_level(logging.INFO)
                 LOGGER.info(f'\t{current_messages_read} messages read after waiting {time_waited} seconds....')
@@ -72,12 +76,15 @@ class TestDataFileStreamProcessor(unittest.TestCase) :
                 time.sleep(5)
                 time_waited+=5
             LOGGER.set_stream_level(logging.INFO)
-            LOGGER.info(f'Quitting download thread in test_data_file_stream_processor after processing {dfsp.n_msgs_read} messages; will timeout after 5 seconds....')
+            msg = 'Quitting download thread in test_data_file_stream_processor after processing '
+            msg+= f'{dfsp.n_msgs_read} messages; will timeout after 5 seconds....'
+            LOGGER.info(msg)
             LOGGER.set_stream_level(logging.ERROR)
             dfsp.control_command_queue.put('q')
             stream_thread.join(timeout=5)
             if stream_thread.is_alive() :
-                raise TimeoutError('ERROR: download thread in test_data_file_stream_processor timed out after 5 seconds!')
+                errmsg = 'ERROR: download thread in test_data_file_stream_processor timed out after 5 seconds!'
+                raise TimeoutError(errmsg)
             #make sure the contents of the file in memory are the same as the original
             self.assertTrue(TEST_CONST.TEST_DATA_FILE_2_NAME in dfsp.completed_bytestrings_by_filename.keys())
             ref_bytestring = None
@@ -92,6 +99,7 @@ class TestDataFileStreamProcessor(unittest.TestCase) :
                     dfsp.control_command_queue.put('q')
                     stream_thread.join(timeout=5)
                     if stream_thread.is_alive() :
-                        raise TimeoutError('ERROR: download thread in test_data_file_stream_processor timed out after 5 seconds!')
+                        errmsg = 'ERROR: download thread in test_data_file_stream_processor timed out after 5 seconds!'
+                        raise TimeoutError(errmsg)
                 except Exception as e :
                     raise e

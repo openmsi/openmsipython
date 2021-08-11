@@ -1,6 +1,7 @@
 #imports
 from .serialization import DataFileChunkSerializer, DataFileChunkDeserializer
-from confluent_kafka.serialization import DoubleSerializer, IntegerSerializer, StringSerializer, DoubleDeserializer, IntegerDeserializer, StringDeserializer
+from confluent_kafka.serialization import DoubleSerializer, IntegerSerializer, StringSerializer
+from confluent_kafka.serialization import DoubleDeserializer, IntegerDeserializer, StringDeserializer
 
 def get_transformed_configs(configs,names_to_classes) :
     """
@@ -42,12 +43,16 @@ def get_replaced_configs(configs,replacement_type) :
 
 def get_next_message(consumer,logger,*poll_args,**poll_kwargs) :
     """
-    Call "poll" for the given consumer and return any successfully consumed message; otherwise log a warning if there's an error
+    Call "poll" for the given consumer and return any successfully consumed message
+    otherwise log a warning if there's an error
     """
+    consumed_msg = None
     try :
         consumed_msg = consumer.poll(*poll_args,**poll_kwargs)
     except Exception as e :
-        logger.warning(f'WARNING: encountered an error in a call to consumer.poll() and will skip the offending message. Error: {e}')
+        warnmsg = 'WARNING: encountered an error in a call to consumer.poll() and will skip the offending message. '
+        warnmsg+= f'Error: {e}'
+        logger.warning(warnmsg)
         return
     if consumed_msg is not None :
         if consumed_msg.error() is not None or consumed_msg.value() is None :

@@ -20,7 +20,8 @@ class MyConsumer(Consumer) :
         """
         config_file_path = path to the config file to use in defining this consumer
 
-        !!!!! any keyword arguments (that aren't 'logger') will be added to the configuration (with underscores replaced with dots) !!!!!
+        !!!!! any keyword arguments (that aren't 'logger') will be added to the configuration !!!!!
+        (with underscores replaced with dots)
         """
         parser = ConfigFileParser(config_file_path,logger=kwargs.get('logger'))
         configs = parser.get_config_dict_for_groups(['cluster','consumer'])
@@ -55,14 +56,16 @@ class MyDeserializingConsumer(DeserializingConsumer) :
         """
         config_file_path = path to the config file to use in defining this consumer
 
-        !!!!! any keyword arguments (that aren't 'logger') will be added to the configuration (with underscores replaced with dots) !!!!!
+        !!!!! any keyword arguments (that aren't 'logger') will be added to the configuration !!!!!
+        (with underscores replaced with dots)
         """
         return cls(cls.get_config_dict(config_file_path,**kwargs))
 
     @staticmethod
     def get_config_dict(config_file_path,**kwargs) :
         """
-        Return the configuration dictionary to use based on a given config file and including any replacements in the keyword arguments
+        Return the configuration dictionary to use based on a given config file 
+        and including any replacements in the keyword arguments
         """
         parser = ConfigFileParser(config_file_path,logger=kwargs.get('logger'))
         configs = parser.get_config_dict_for_groups(['cluster','consumer'])
@@ -76,7 +79,8 @@ class MyDeserializingConsumer(DeserializingConsumer) :
         #if the auto.offset.reset was given as "none" then remove it from the configs
         if 'auto.offset.reset' in configs.keys() and configs['auto.offset.reset']=='none' :
             del configs['auto.offset.reset']
-        #if one of several recognized deserializers have been given as config paramenters for the key/value deserializer, replace them with the actual class
+        #if one of several recognized deserializers have been given as config paramenters 
+        #for the key/value deserializer, replace them with the actual class
         configs = get_replaced_configs(configs,'deserialization')
         return configs
 

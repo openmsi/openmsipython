@@ -5,7 +5,8 @@ from .lecroy_data_file import UploadLecroyDataFile
 
 class LecroyFileUploadDirectory(DataFileUploadDirectory) :
     """
-    A class to select the relevant data from a Lecroy oscilloscope file and upload it to a kafka topic as a group of messages
+    A class to select the relevant data from a Lecroy oscilloscope file 
+    and upload it to a kafka topic as a group of messages
     """
 
     @property

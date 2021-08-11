@@ -22,7 +22,8 @@ class PDVPlotMaker(DataFileStreamProcessor,Runnable) :
     def other_datafile_kwargs(self) :
         return {'header_rows':self.__header_rows}
 
-    def __init__(self,output_dir,pdv_plot_type,config_path,topic_name,header_rows=LECROY_CONST.HEADER_ROWS,**otherkwargs) :
+    def __init__(self,output_dir,pdv_plot_type,config_path,topic_name,
+                 header_rows=LECROY_CONST.HEADER_ROWS,**otherkwargs) :
         self.__output_dir = output_dir
         if not self.__output_dir.is_dir() :
             self.__output_dir.mkdir(parents=True)
@@ -41,7 +42,11 @@ class PDVPlotMaker(DataFileStreamProcessor,Runnable) :
         When new files are fully available in memory, make plots of the data they contain
         """
         _,processed_data_filepaths = self.process_files_as_read()
-        created_plot_paths = [self.__output_dir/self.__pdv_analysis_type.plot_file_name_from_input_file_name(pdfp.name,LECROY_CONST.SKIMMED_FILENAME_APPEND) for pdfp in processed_data_filepaths]
+        created_plot_paths = []
+        for pdfp in processed_data_filepaths :
+            fn = self.__pdv_analysis_type.plot_file_name_from_input_file_name(pdfp.name,
+                                                                              LECROY_CONST.SKIMMED_FILENAME_APPEND)
+            created_plot_paths.append(self.__output_dir/fn)
         return self.n_msgs_read, created_plot_paths
 
     def _process_downloaded_data_file(self,datafile) :
@@ -65,7 +70,9 @@ class PDVPlotMaker(DataFileStreamProcessor,Runnable) :
                                                 pyplot_figure=fig)#self.__figure)
             analysis.run()
             #save the plot and close the figure
-            fig.savefig(self.__output_dir/self.__pdv_analysis_type.plot_file_name_from_input_file_name(datafile.filepath.name,LECROY_CONST.SKIMMED_FILENAME_APPEND),bbox_inches='tight')
+            fn = self.__pdv_analysis_type.plot_file_name_from_input_file_name(datafile.filepath.name,
+                                                                              LECROY_CONST.SKIMMED_FILENAME_APPEND)
+            fig.savefig(self.__output_dir/fn,bbox_inches='tight')
             plt.close()
         except Exception as e :
             return e
@@ -93,7 +100,9 @@ class PDVPlotMaker(DataFileStreamProcessor,Runnable) :
                          logger_file=args.output_dir)
         #start the plot maker running (returns total number of messages read and names of plot files created)
         run_start = datetime.datetime.now()
-        plot_maker.logger.info(f'Listening to the {args.topic_name} topic to find Lecroy data files and create {args.pdv_plot_type} plots')
+        msg = f'Listening to the {args.topic_name} topic to find Lecroy data files and create '
+        msg+= f'{args.pdv_plot_type} plots'
+        plot_maker.logger.info(msg)
         n_msgs,plot_filepaths = plot_maker.make_plots_as_available()
         run_stop = datetime.datetime.now()
         #shut down when that function returns
