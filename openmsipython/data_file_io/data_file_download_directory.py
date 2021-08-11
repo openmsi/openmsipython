@@ -1,7 +1,6 @@
 #imports
-import datetime
+import datetime, time
 from threading import Lock
-from ..utilities.argument_parsing import MyArgumentParser
 from ..utilities.controlled_process import ControlledProcessMultiThreaded
 from ..utilities.runnable import Runnable
 from ..utilities.misc import populated_kwargs
@@ -19,13 +18,22 @@ class DataFileDownloadDirectory(DataFileDirectory,ControlledProcessMultiThreaded
 
     @property
     def other_datafile_kwargs(self) :
-        return {} #Overload this in child classes to define additional keyword arguments that should go to the specific datafile constructor
+        return {} #Overload this in child classes to define additional keyword arguments 
+                  #that should go to the specific datafile constructor
     @property
     def n_msgs_read(self) :
         return self.__n_msgs_read
     @property
     def completely_reconstructed_filepaths(self) :
         return self.__completely_reconstructed_filepaths
+    @property
+    def progress_msg(self) :
+        progress_msg = 'The following files have been recognized so far:\n'
+        for datafile in self.data_files_by_path.values() :
+            progress_msg+=f'\t{datafile.full_filepath} (in progress)\n'
+        for fp in self.completely_reconstructed_filepaths :
+            progress_msg+=f'\t{fp} (completed)\n'
+        return progress_msg
 
     #################### PUBLIC FUNCTIONS ####################
 
@@ -43,15 +51,17 @@ class DataFileDownloadDirectory(DataFileDirectory,ControlledProcessMultiThreaded
         self.__datafile_type = datafile_type
         self.__n_msgs_read = 0
         self.__completely_reconstructed_filepaths = []
-        self.__thread_locks_by_filepath = {}
+        self.__thread_locks = {}
 
     def reconstruct(self) :
         """
-        Consumes messages and writes their data to disk using several parallel threads to reconstruct the files to which 
-        they correspond. Runs until the user inputs a command to shut it down. Returns the total number of 
-        messages consumed, as well as the number of files whose reconstruction was completed during the run. 
+        Consumes messages and writes their data to disk using several parallel threads to reconstruct the files 
+        to which they correspond. Runs until the user inputs a command to shut it down. Returns the total number 
+        of messages consumed, as well as the number of files whose reconstruction was completed during the run. 
         """
-        self.logger.info(f'Will reconstruct files from messages in the {self.topic_name} topic using {self.n_threads} thread{"s" if self.n_threads>1 else ""}')
+        msg = f'Will reconstruct files from messages in the {self.topic_name} topic using {self.n_threads} '
+        msg+= f'thread{"s" if self.n_threads!=1 else ""}'
+        self.logger.info(msg)
         lock = Lock()
         self.run([(lock,self.consumers[i]) for i in range(self.n_threads)])
         return self.__n_msgs_read, self.__completely_reconstructed_filepaths
@@ -61,7 +71,8 @@ class DataFileDownloadDirectory(DataFileDirectory,ControlledProcessMultiThreaded
     def _run_worker(self,lock,consumer) :
         """
         Consume messages expected to be DataFileChunks and try to write their data to disk in the directory, 
-        paying attention to whether/how the files they're coming from end up fully reconstructed or mismatched with their original hashes.
+        paying attention to whether/how the files they're coming from end up fully reconstructed or mismatched 
+        with their original hashes.
         Several iterations of this function run in parallel threads as part of a ControlledProcessMultiThreaded
         """
         #start the loop for while the controlled process is alive
@@ -69,38 +80,48 @@ class DataFileDownloadDirectory(DataFileDirectory,ControlledProcessMultiThreaded
             #consume a DataFileChunk message from the topic
             dfc = consumer.get_next_message(self.logger,0)
             if dfc is None :
+                time.sleep(0.25) #wait just a bit to not over-tax things
                 continue
             #set the chunk's rootdir to the working directory
             if dfc.rootdir is not None :
-                errmsg = f'ERROR: message with key {dfc.message_key} has rootdir={dfc.rootdir} (should be None as it was just consumed)! '
-                errmsg+= 'Will ignore this message and continue.'
+                errmsg = f'ERROR: message with key {dfc.message_key} has rootdir={dfc.rootdir} '
+                errmsg+= '(should be None as it was just consumed)! Will ignore this message and continue.'
                 self.logger.error(errmsg)
             dfc.rootdir = self.dirpath
             #add the chunk's data to the file that's being reconstructed
             with lock :
                 self.__n_msgs_read+=1
                 if dfc.filepath not in self.data_files_by_path.keys() :
-                    self.data_files_by_path[dfc.filepath] = self.__datafile_type(dfc.filepath,logger=self.logger,**self.other_datafile_kwargs)
-                    self.__thread_locks_by_filepath[dfc.filepath] = Lock()
-            return_value = self.data_files_by_path[dfc.filepath].add_chunk(dfc,self.__thread_locks_by_filepath[dfc.filepath])
-            if return_value in (DATA_FILE_HANDLING_CONST.FILE_IN_PROGRESS,DATA_FILE_HANDLING_CONST.CHUNK_ALREADY_WRITTEN_CODE) :
+                    self.data_files_by_path[dfc.filepath] = self.__datafile_type(dfc.filepath,
+                                                                                 logger=self.logger,
+                                                                                 **self.other_datafile_kwargs)
+                    self.__thread_locks[dfc.filepath] = Lock()
+            return_value = self.data_files_by_path[dfc.filepath].add_chunk(dfc,self.__thread_locks[dfc.filepath])
+            if return_value in (DATA_FILE_HANDLING_CONST.FILE_IN_PROGRESS,
+                                DATA_FILE_HANDLING_CONST.CHUNK_ALREADY_WRITTEN_CODE) :
                 continue
             elif return_value==DATA_FILE_HANDLING_CONST.FILE_HASH_MISMATCH_CODE :
-                warnmsg = f'WARNING: hashes for file {self.data_files_by_path[dfc.filepath].filename} not matched after reconstruction! '
-                warnmsg+= 'All data have been written to disk but likely not as they were uploaded.'
+                warnmsg = f'WARNING: hashes for file {self.data_files_by_path[dfc.filepath].filename} not matched '
+                warnmsg+= 'after reconstruction! All data have been written to disk, but not as they were uploaded.'
                 self.logger.warning(warnmsg)
                 with lock :
                     del self.data_files_by_path[dfc.filepath]
-                    del self.__thread_locks_by_filepath[dfc.filepath]
+                    del self.__thread_locks[dfc.filepath]
             elif return_value==DATA_FILE_HANDLING_CONST.FILE_SUCCESSFULLY_RECONSTRUCTED_CODE :
-                self.logger.info(f'File {self.data_files_by_path[dfc.filepath].full_filepath.relative_to(dfc.rootdir)} successfully reconstructed from stream')
+                msg = f'File {self.data_files_by_path[dfc.filepath].full_filepath.relative_to(dfc.rootdir)} '
+                msg+= 'successfully reconstructed from stream'
+                self.logger.info(msg)
                 self.__completely_reconstructed_filepaths.append(dfc.filepath)
                 with lock :
                     del self.data_files_by_path[dfc.filepath]
-                    del self.__thread_locks_by_filepath[dfc.filepath]
+                    del self.__thread_locks[dfc.filepath]
 
     def _on_check(self) :
-        self.logger.debug(f'{self.__n_msgs_read} messages read, {len(self.__completely_reconstructed_filepaths)} files completely reconstructed so far')
+        msg = f'{self.__n_msgs_read} messages read, {len(self.__completely_reconstructed_filepaths)} files '
+        msg+= 'completely reconstructed so far'
+        self.logger.debug(msg)
+        if len(self.data_files_by_path)>0 or len(self.__completely_reconstructed_filepaths)>0 :
+            self.logger.debug(self.progress_msg)
 
     def _on_shutdown(self) :
         super()._on_shutdown()
@@ -110,12 +131,17 @@ class DataFileDownloadDirectory(DataFileDirectory,ControlledProcessMultiThreaded
     #################### CLASS METHODS ####################
 
     @classmethod
+    def get_command_line_arguments(cls) :
+        args = ['output_dir','config','topic_name','update_seconds','consumer_group_ID']
+        kwargs = {'n_threads':RUN_OPT_CONST.N_DEFAULT_DOWNLOAD_THREADS}
+        return args,kwargs
+
+    @classmethod
     def run_from_command_line(cls,args=None) :
         """
         Run the download directory right from the command line
         """
-        parser = MyArgumentParser('output_dir','config','topic_name','update_seconds','consumer_group_ID',
-                                  n_threads=RUN_OPT_CONST.N_DEFAULT_DOWNLOAD_THREADS)
+        parser = cls.get_argument_parser()
         args = parser.parse_args(args=args)
         #make the download directory
         reconstructor_directory = cls(args.output_dir,args.config,args.topic_name,
@@ -123,7 +149,7 @@ class DataFileDownloadDirectory(DataFileDirectory,ControlledProcessMultiThreaded
                                       consumer_group_ID=args.consumer_group_ID,
                                       update_secs=args.update_seconds,
                                      )
-        #start the reconstructor running (returns total number of chunks read and total number of files completely reconstructed)
+        #start the reconstructor running
         run_start = datetime.datetime.now()
         reconstructor_directory.logger.info(f'Listening for files to reconstruct in {args.output_dir}')
         n_msgs,complete_filenames = reconstructor_directory.reconstruct()

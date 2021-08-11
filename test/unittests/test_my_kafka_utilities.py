@@ -1,6 +1,7 @@
 #imports
 from openmsipython.my_kafka.serialization import DataFileChunkSerializer, DataFileChunkDeserializer
-from confluent_kafka.serialization import DoubleSerializer, IntegerSerializer, StringSerializer, DoubleDeserializer, IntegerDeserializer, StringDeserializer
+from confluent_kafka.serialization import DoubleSerializer, IntegerSerializer, StringSerializer
+from confluent_kafka.serialization import DoubleDeserializer, IntegerDeserializer, StringDeserializer
 from openmsipython.my_kafka.utilities import get_transformed_configs, get_replaced_configs
 import unittest
 
@@ -77,4 +78,4 @@ class TestMyKafkaUtilities(unittest.TestCase) :
         with self.assertRaises(AttributeError) :
             _ = get_transformed_configs(None,None)
         with self.assertRaises(AttributeError) :
-            _ = get_transformed_configs(test_config_dict,'never make this a recognized parameter group replacement name')
+            _ = get_transformed_configs(test_config_dict,'never make this a recognized parameter group name')

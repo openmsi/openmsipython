@@ -27,7 +27,8 @@ class TestSerialization(unittest.TestCase) :
             msg+= f'in {TEST_CONST.TEST_DATA_DIR_PATH}!'
             raise RuntimeError(msg)
         #make the dictionary of reference DataFileChunk objects
-        data_file = UploadDataFile(TEST_CONST.TEST_DATA_FILE_PATH,rootdir=TEST_CONST.TEST_DATA_FILE_ROOT_DIR_PATH,logger=LOGGER)
+        data_file = UploadDataFile(TEST_CONST.TEST_DATA_FILE_PATH,
+                                   rootdir=TEST_CONST.TEST_DATA_FILE_ROOT_DIR_PATH,logger=LOGGER)
         data_file._build_list_of_file_chunks(RUN_OPT_CONST.DEFAULT_CHUNK_SIZE)
         self.test_ul_chunk_objects = {}; self.test_dl_chunk_objects = {}
         for chunk_i in self.test_chunk_binaries.keys() :
@@ -39,7 +40,8 @@ class TestSerialization(unittest.TestCase) :
                                    ul_dfc.file_hash,ul_dfc.chunk_hash,
                                    None,ul_dfc.chunk_offset_write,
                                    ul_dfc.chunk_size,
-                                   ul_dfc.chunk_i,ul_dfc.n_total_chunks,filename_append=ul_dfc.filename_append,data=ul_dfc.data)
+                                   ul_dfc.chunk_i,ul_dfc.n_total_chunks,
+                                   filename_append=ul_dfc.filename_append,data=ul_dfc.data)
             dl_dfc.rootdir = TEST_CONST.TEST_RECO_DIR_PATH
             self.test_dl_chunk_objects[chunk_i] = dl_dfc
 

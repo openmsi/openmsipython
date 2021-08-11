@@ -2,7 +2,6 @@
 import pathlib, datetime, time
 from threading import Thread
 from queue import Queue
-from ..utilities.argument_parsing import MyArgumentParser
 from ..utilities.runnable import Runnable
 from ..utilities.controlled_process import ControlledProcessSingleThread
 from ..utilities.misc import populated_kwargs
@@ -21,7 +20,7 @@ class DataFileUploadDirectory(DataFileDirectory,ControlledProcessSingleThread,Ru
 
     @property
     def other_datafile_kwargs(self) :
-        return {} # Overload this in child classes to send extra keyword arguments to the individual datafile constructors
+        return {} # Overload this in subclasses to send extra keyword arguments to the individual datafile constructors
     @property
     def progress_msg(self) :
         self.__find_new_files()
@@ -66,8 +65,9 @@ class DataFileUploadDirectory(DataFileDirectory,ControlledProcessSingleThread,Ru
         n_threads        = the number of threads to use to produce from the shared queue
         chunk_size       = the size of each file chunk in bytes
         max_queue_size   = maximum number of items allowed to be placed in the upload queue at once
-        new_files_only   = set to True if any files that already exist in the directory should be assumed to have been produced
-                           i.e., if False (the default) then even files that are already in the directory will be enqueued to the producer
+        new_files_only   = set to True if any files that already exist in the directory should be ignored
+                           i.e., if False (the default) then even files that are already in the directory will be 
+                           enqueued to the producer
         """
         #set the important variables
         kwargs = populated_kwargs(kwargs,
@@ -126,7 +126,9 @@ class DataFileUploadDirectory(DataFileDirectory,ControlledProcessSingleThread,Ru
         #find the first file that's running and add some of its chunks to the upload queue 
         for datafile in self.data_files_by_path.values() :
             if datafile.upload_in_progress or datafile.waiting_to_upload :
-                datafile.add_chunks_to_upload_queue(self.__upload_queue,n_threads=len(self.__upload_threads),chunk_size=self.__chunk_size)
+                datafile.add_chunks_to_upload_queue(self.__upload_queue,
+                                                    n_threads=len(self.__upload_threads),
+                                                    chunk_size=self.__chunk_size)
                 return
 
     def _on_check(self) :
@@ -145,7 +147,9 @@ class DataFileUploadDirectory(DataFileDirectory,ControlledProcessSingleThread,Ru
         while self.n_partially_done_files>0 :
             for datafile in self.data_files_by_path.values() :
                 if datafile.upload_in_progress :
-                    datafile.add_chunks_to_upload_queue(self.__upload_queue,n_threads=len(self.__upload_threads),chunk_size=self.__chunk_size)
+                    datafile.add_chunks_to_upload_queue(self.__upload_queue,
+                                                        n_threads=len(self.__upload_threads),
+                                                        chunk_size=self.__chunk_size)
                     break
         #stop the uploading threads by adding "None"s to their queues and joining them
         for ut in self.__upload_threads :
@@ -159,9 +163,11 @@ class DataFileUploadDirectory(DataFileDirectory,ControlledProcessSingleThread,Ru
         """
         Search the directory for any unrecognized files and add them to _data_files_by_path
 
-        to_upload = if False, new files found will NOT be marked for uploading (default is new files are expected to be uploaded)
+        to_upload = if False, new files found will NOT be marked for uploading 
+                    (default is new files are expected to be uploaded)
         """
-        #This is in a try/except in case a subdirectory is renamed while this method is running; it'll just return and try again
+        #This is in a try/except in case a file is moved or a subdirectory is renamed while this method is running
+        #it'll just return and try again if so
         try :
             time.sleep(0.25) # wait just a little bit here so that the watched directory isn't just constantly pinged
             for filepath in self.dirpath.rglob('*') :
@@ -187,12 +193,17 @@ class DataFileUploadDirectory(DataFileDirectory,ControlledProcessSingleThread,Ru
     #################### CLASS METHODS ####################
 
     @classmethod
+    def get_command_line_arguments(cls) :
+        args = ['upload_dir','config','topic_name','chunk_size','queue_max_size','update_seconds','new_files_only']
+        kwargs = {'n_threads':RUN_OPT_CONST.N_DEFAULT_UPLOAD_THREADS}
+        return args, kwargs
+
+    @classmethod
     def run_from_command_line(cls,args=None) :
         """
         Function to run the upload directory right from the command line
         """
-        parser = MyArgumentParser('upload_dir','config','topic_name','chunk_size','queue_max_size','update_seconds','new_files_only',
-                                  n_threads=RUN_OPT_CONST.N_DEFAULT_UPLOAD_THREADS)
+        parser = cls.get_argument_parser()
         args = parser.parse_args(args=args)
         #make the DataFileDirectory for the specified directory
         upload_file_directory = cls(args.upload_dir,update_secs=args.update_seconds)

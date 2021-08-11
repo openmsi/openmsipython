@@ -28,7 +28,8 @@ def main(args=None) :
         print('SKIPPING PYFLAKES TEST')
     else :
         print('testing code consistency with pyflakes...')
-        p = subprocess.Popen(f'cd {TOP_DIR_PATH}; pyflakes .; cd {CWD}; exit 0',stdout=subprocess.PIPE,stderr=subprocess.PIPE,shell=True,universal_newlines=True)
+        p = subprocess.Popen(f'cd {TOP_DIR_PATH}; pyflakes .; cd {CWD}; exit 0',
+                             stdout=subprocess.PIPE,stderr=subprocess.PIPE,shell=True,universal_newlines=True)
         stdout,stderr = p.communicate()
         if stdout!='' :
             raise RuntimeError(f'ERROR: pyflakes check failed with output:\n{stdout}')
@@ -51,7 +52,9 @@ def main(args=None) :
                     for test in test_group :
                         if (test._testMethodName).endswith('kafka') :
                             test_name = test._testMethodName
-                            setattr(test, test_name, unittest.skip('tests that interact with the kafka cluster are being skipped')(getattr(test, test_name)))
+                            msg = 'tests that interact with the kafka cluster are being skipped'
+                            setattr(test, test_name, 
+                                    unittest.skip(msg)(getattr(test, test_name)))
         runner_kwargs = {'verbosity':3}
         if args.failfast :
             runner_kwargs['failfast'] = True

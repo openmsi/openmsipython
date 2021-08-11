@@ -15,7 +15,8 @@ class TestUploadDataFile(unittest.TestCase) :
     """
 
     def setUp(self) :
-        self.datafile = UploadDataFile(TEST_CONST.TEST_DATA_FILE_PATH,rootdir=TEST_CONST.TEST_DATA_FILE_ROOT_DIR_PATH,logger=LOGGER)
+        self.datafile = UploadDataFile(TEST_CONST.TEST_DATA_FILE_PATH,
+                                       rootdir=TEST_CONST.TEST_DATA_FILE_ROOT_DIR_PATH,logger=LOGGER)
 
     def test_upload_whole_file_kafka(self) :
         #just need to make sure this function runs without throwing any errors

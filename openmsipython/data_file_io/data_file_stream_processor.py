@@ -25,6 +25,14 @@ class DataFileStreamProcessor(ControlledProcessMultiThreaded,LogOwner,ConsumerGr
     @property
     def processed_filepaths(self) :
         return self.__processed_filepaths
+    @property
+    def progress_msg(self) :
+        progress_msg = 'The following files have been recognized so far:\n'
+        for datafile in self.__data_files_by_filepath.values() :
+            progress_msg+=f'\t{datafile.full_filepath} (in progress)\n'
+        for fp in self.processed_filepaths :
+            progress_msg+=f'\t{fp} (completed)\n'
+        return progress_msg
 
     #################### PUBLIC FUNCTIONS ####################
 
@@ -38,8 +46,8 @@ class DataFileStreamProcessor(ControlledProcessMultiThreaded,LogOwner,ConsumerGr
         self.__datafile_type = datafile_type
         self.__n_msgs_read = 0
         self.__processed_filepaths = []
-        self.__download_files_by_filepath = {}
-        self.__thread_locks_by_filepath = {}
+        self.__data_files_by_filepath = {}
+        self.__thread_locks = {}
 
     def process_files_as_read(self) :
         """
@@ -66,12 +74,16 @@ class DataFileStreamProcessor(ControlledProcessMultiThreaded,LogOwner,ConsumerGr
         pass
 
     def _on_check(self) :
-        self.logger.debug(f'{self.__n_msgs_read} messages read, {len(self.__processed_filepaths)} files fully processed so far')
+        msg = f'{self.__n_msgs_read} messages read, {len(self.__processed_filepaths)} files fully processed so far'
+        self.logger.debug(msg)
+        if len(self.__data_files_by_filepath)>0 or len(self.__processed_filepaths)>0 :
+            self.logger.debug(self.progress_msg)
 
     def _run_worker(self,lock,consumer) :
         """
         Consume messages expected to be DataFileChunks and add their data to a file being reconstructed in memory, 
-        paying attention to when each file has received all of its data and checking their contents against their original hashes.
+        paying attention to when each file has received all of its data and checking their contents against their 
+        original hashes.
         Several iterations of this function run in parallel threads as part of a ControlledProcessMultiThreaded
         """
         #start the loop for while the controlled process is alive
@@ -82,35 +94,40 @@ class DataFileStreamProcessor(ControlledProcessMultiThreaded,LogOwner,ConsumerGr
                 continue
             #set the chunk's rootdir to the current directory
             if dfc.rootdir is not None :
-                errmsg = f'ERROR: message with key {dfc.message_key} has rootdir={dfc.rootdir} (should be None as it was just consumed)! '
-                errmsg+= 'Will ignore this message and continue.'
+                errmsg = f'ERROR: message with key {dfc.message_key} has rootdir={dfc.rootdir} '
+                errmsg+= '(should be None as it was just consumed)! Will ignore this message and continue.'
                 self.logger.error(errmsg)
             dfc.rootdir = (pathlib.Path()).resolve()
             #add the chunk's data to the file that's being reconstructed
             with lock :
                 self.__n_msgs_read+=1
-                if dfc.filepath not in self.__download_files_by_filepath.keys() :
-                    self.__download_files_by_filepath[dfc.filepath] = self.__datafile_type(dfc.filepath,logger=self.logger,**self.other_datafile_kwargs)
-                    self.__thread_locks_by_filepath[dfc.filepath] = Lock()
-            return_value = self.__download_files_by_filepath[dfc.filepath].add_chunk(dfc,self.__thread_locks_by_filepath[dfc.filepath])
+                if dfc.filepath not in self.__data_files_by_filepath.keys() :
+                    self.__data_files_by_filepath[dfc.filepath] = self.__datafile_type(dfc.filepath,
+                                                                                           logger=self.logger,
+                                                                                           **self.other_datafile_kwargs)
+                    self.__thread_locks[dfc.filepath] = Lock()
+            return_value = self.__data_files_by_filepath[dfc.filepath].add_chunk(dfc,self.__thread_locks[dfc.filepath])
             #if the message was consumed and everything is moving along fine
-            if return_value in (DATA_FILE_HANDLING_CONST.FILE_IN_PROGRESS,DATA_FILE_HANDLING_CONST.CHUNK_ALREADY_WRITTEN_CODE) :
+            if return_value in (DATA_FILE_HANDLING_CONST.FILE_IN_PROGRESS,
+                                DATA_FILE_HANDLING_CONST.CHUNK_ALREADY_WRITTEN_CODE) :
                 continue
             #if the file hashes didn't match
             elif return_value==DATA_FILE_HANDLING_CONST.FILE_HASH_MISMATCH_CODE :
-                warnmsg = f'WARNING: file hashes for file {self.__download_files_by_filepath[dfc.filepath].filename} not matched '
-                warnmsg+= 'after being fully read! This file will not be processed.'
+                warnmsg = f'WARNING: file hashes for file {self.__data_files_by_filepath[dfc.filepath].filename} '
+                warnmsg+= 'not matched after being fully read! This file will not be processed.'
                 self.logger.warning(warnmsg)
                 with lock :
-                    del self.__download_files_by_filepath[dfc.filepath]
-                    del self.__thread_locks_by_filepath[dfc.filepath]
+                    del self.__data_files_by_filepath[dfc.filepath]
+                    del self.__thread_locks[dfc.filepath]
             #if the file has had all of its messages read successfully
             elif return_value==DATA_FILE_HANDLING_CONST.FILE_SUCCESSFULLY_RECONSTRUCTED_CODE :
-                self.logger.info(f'Processing {self.__download_files_by_filepath[dfc.filepath].full_filepath.relative_to(dfc.rootdir)}...')
-                processing_retval = self._process_downloaded_data_file(self.__download_files_by_filepath[dfc.filepath])
+                short_filepath = self.__data_files_by_filepath[dfc.filepath].full_filepath.relative_to(dfc.rootdir)
+                msg = f'Processing {short_filepath}...'
+                self.logger.info(msg)
+                processing_retval = self._process_downloaded_data_file(self.__data_files_by_filepath[dfc.filepath])
                 #if it was able to be processed
                 if processing_retval is None :
-                    self.logger.info(f'Fully-read file {self.__download_files_by_filepath[dfc.filepath].full_filepath.relative_to(dfc.rootdir)} successfully processed')
+                    self.logger.info(f'Fully-read file {short_filepath} successfully processed')
                     self.__processed_filepaths.append(dfc.filepath)
                 #warn if it wasn't processed correctly
                 else :
@@ -121,10 +138,10 @@ class DataFileStreamProcessor(ControlledProcessMultiThreaded,LogOwner,ConsumerGr
                             self.logger.info(traceback.format_exc())
                     else :
                         self.logger.error(f'Return value from _process_downloaded_data_file = {processing_retval}')
-                    errmsg = f'ERROR: Fully-read file {self.__download_files_by_filepath[dfc.filepath].full_filepath.relative_to(dfc.rootdir)} '
-                    errmsg+= 'was not able to be processed. Check log lines above for more details on the specific error. '
+                    errmsg = f'ERROR: Fully-read file {short_filepath} was not able to be processed. '
+                    errmsg+= 'Check log lines above for more details on the specific error. '
                     errmsg+= 'The messages for this file will need to be consumed again if the file is to be processed!'
                     self.logger.warning(errmsg)
                 with lock :
-                    del self.__download_files_by_filepath[dfc.filepath]
-                    del self.__thread_locks_by_filepath[dfc.filepath]
+                    del self.__data_files_by_filepath[dfc.filepath]
+                    del self.__thread_locks[dfc.filepath]

@@ -19,7 +19,9 @@ class DownloadDataFile(DataFile,ABC) :
         if dfc.filename_append=='' :
             return dfc.filepath 
         else :
-            return dfc.filepath.parent/(dfc.filepath.name.split('.')[0]+dfc.filename_append+'.'+('.'.join(dfc.filepath.name.split('.')[1:])))
+            filename_split = dfc.filepath.name.split('.')
+            full_fp = dfc.filepath.parent/(filename_split[0]+dfc.filename_append+'.'+('.'.join(filename_split[1:])))
+            return full_fp
 
     @property
     def full_filepath(self) :
@@ -54,15 +56,18 @@ class DownloadDataFile(DataFile,ABC) :
             return DATA_FILE_HANDLING_CONST.CHUNK_ALREADY_WRITTEN_CODE
         #the filepath of this DownloadDataFile and of the given DataFileChunk must match
         if dfc.filepath!=self.filepath :
-            self.logger.error(f'ERROR: filepath mismatch between data file chunk with {dfc.filepath} and data file with {self.filepath}',ValueError)
+            errmsg = f'ERROR: filepath mismatch between data file chunk with {dfc.filepath} and '
+            errmsg+= f'data file with {self.filepath}'
+            self.logger.error(errmsg,ValueError)
         #modify the filepath to include any append to the name
         full_filepath = self.__class__.get_full_filepath(dfc)
         if self.__full_filepath is None :
             self.__full_filepath = full_filepath
             self.filename = self.__full_filepath.name
         elif self.__full_filepath!=full_filepath :
-            errmsg = f'ERROR: filepath for data file chunk {dfc.chunk_i}/{dfc.n_total_chunks} with offset {dfc.chunk_offset_write}'
-            errmsg+= f' is {full_filepath} but the file being reconstructed is expected to have filepath {self.__full_filepath}'
+            errmsg = f'ERROR: filepath for data file chunk {dfc.chunk_i}/{dfc.n_total_chunks} with offset '
+            errmsg+= f'{dfc.chunk_offset_write} is {full_filepath} but the file being reconstructed is '
+            errmsg+= f'expected to have filepath {self.__full_filepath}'
             self.logger.error(errmsg,ValueError)
         #acquire the thread lock to make sure this process is the only one dealing with this particular file
         with thread_lock:
@@ -70,8 +75,8 @@ class DownloadDataFile(DataFile,ABC) :
             self._on_add_chunk(dfc,*args,**kwargs)
             #add the offset of the added chunk to the set of reconstructed file chunks
             self._chunk_offsets_downloaded.append(dfc.chunk_offset_write)
-            #if this chunk was the last that needed to be added, check the hashes to make sure the file is the same as it was originally
             last_chunk = len(self._chunk_offsets_downloaded)==dfc.n_total_chunks
+        #if this chunk was the last that needed to be added, check the hashes
         if last_chunk :
             if self.check_file_hash!=dfc.file_hash :
                 return DATA_FILE_HANDLING_CONST.FILE_HASH_MISMATCH_CODE

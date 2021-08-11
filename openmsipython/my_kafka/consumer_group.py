@@ -16,7 +16,8 @@ class ConsumerGroup :
     def topic_name(self) :
         return self.__topic_name
 
-    def __init__(self,config_path,topic_name,*args,consumer_group_ID=str(uuid.uuid1()),n_consumers=UTIL_CONST.DEFAULT_N_THREADS,**other_kwargs) :
+    def __init__(self,config_path,topic_name,*args,
+                 consumer_group_ID=str(uuid.uuid1()),n_consumers=UTIL_CONST.DEFAULT_N_THREADS,**other_kwargs) :
         """
         arguments:
         config_path = path to the config file that should be used to define the consumer group

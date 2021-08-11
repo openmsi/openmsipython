@@ -55,11 +55,16 @@ class Logger :
     #set the level of the filehandler
     def set_file_level(self,level) :
         if self._filehandler is None :
-            raise RuntimeError(f'ERROR: Logger with name {self._name} does not have a filehandler set but set_file_level was called!')
+            errmsg = f'ERROR: Logger {self._name} does not have a filehandler set but set_file_level was called!'
+            raise RuntimeError(errmsg)
         self._filehandler.setLevel(level)
 
     #add a filehandler to the logger
     def add_file_handler(self,filepath,level=logging.INFO) :
+        if not filepath.is_file() :
+            if not filepath.parent.is_dir() :
+                filepath.parent.mkdir(parents=True)
+            filepath.touch()
         self._filehandler = logging.FileHandler(filepath)
         self._filehandler.setLevel(level)
         self._filehandler.setFormatter(self.formatter)
@@ -95,7 +100,9 @@ class LogOwner :
     def logger(self) :
         return self.__logger
 
-    def __init__(self,*args,logger=None,logger_name=None,streamlevel=logging.DEBUG,logger_file=None,filelevel=logging.INFO,**other_kwargs) :
+    def __init__(self,*args,
+                 logger=None,logger_name=None,streamlevel=logging.DEBUG,logger_file=None,filelevel=logging.INFO,
+                 **other_kwargs) :
         if logger is not None :
             self.__logger = logger
         else :

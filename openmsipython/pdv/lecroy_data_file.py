@@ -35,7 +35,11 @@ class UploadLecroyDataFile(UploadDataFile) :
             for i in range(rows_to_select) :
                 n_rows_to_select_bytes+=len(fp.readline())
         #return the ranges for the header and the selected rows
-        return [(0,n_header_bytes),(n_header_bytes+n_rows_to_skip_bytes,n_header_bytes+n_rows_to_skip_bytes+n_rows_to_select_bytes)]
+        to_return = []
+        to_return.append((0,n_header_bytes))
+        to_return.append((n_header_bytes+n_rows_to_skip_bytes,
+                          n_header_bytes+n_rows_to_skip_bytes+n_rows_to_select_bytes))
+        return to_return
         
 class DownloadLecroyDataFile(DownloadDataFileToMemory) :
     """

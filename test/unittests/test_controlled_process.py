@@ -76,7 +76,9 @@ class TestControlledProcess(unittest.TestCase) :
             self.assertTrue(cpst.on_shutdown_called)
             run_thread.join(timeout=TIMEOUT_SECS)
             if run_thread.is_alive() :
-                raise TimeoutError(f'ERROR: running thread in test_controlled_process_single_thread timed out after {TIMEOUT_SECS} seconds!')
+                errmsg = 'ERROR: running thread in test_controlled_process_single_thread '
+                errmsg+= f'timed out after {TIMEOUT_SECS} seconds!'
+                raise TimeoutError(errmsg)
             self.assertEqual(cpst.counter,5)
         except Exception as e :
             raise e
@@ -86,7 +88,9 @@ class TestControlledProcess(unittest.TestCase) :
                     cpst.shutdown()
                     run_thread.join(timeout=5)
                     if run_thread.is_alive() :
-                        raise TimeoutError('ERROR: running thread in test_controlled_process_single_thread timed out after 5 seconds!')
+                        errmsg = 'ERROR: running thread in test_controlled_process_single_thread timed out '
+                        errmsg+= 'after 5 seconds!'
+                        raise TimeoutError(errmsg)
                 except Exception as e :
                     raise e
 
@@ -109,7 +113,9 @@ class TestControlledProcess(unittest.TestCase) :
             self.assertTrue(cpmt.on_shutdown_called)
             run_thread.join(timeout=TIMEOUT_SECS)
             if run_thread.is_alive() :
-                raise TimeoutError(f'ERROR: running thread in test_controlled_process_multi_threaded timed out after {TIMEOUT_SECS} seconds!')
+                errmsg = 'ERROR: running thread in test_controlled_process_multi_threaded '
+                errmsg+= f'timed out after {TIMEOUT_SECS} seconds!'
+                raise TimeoutError(errmsg)
             self.assertEqual(cpmt.counter,5)
         except Exception as e :
             raise e
@@ -119,7 +125,9 @@ class TestControlledProcess(unittest.TestCase) :
                     cpmt.shutdown()
                     run_thread.join(timeout=5)
                     if run_thread.is_alive() :
-                        raise TimeoutError('ERROR: running thread in test_controlled_process_multi_threaded timed out after 5 seconds!')
+                        errmsg = 'ERROR: running thread in test_controlled_process_multi_threaded '
+                        errmsg+= 'timed out after 5 seconds!'
+                        raise TimeoutError(errmsg)
                 except Exception as e :
                     raise e
 
