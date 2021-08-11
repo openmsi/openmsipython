@@ -61,147 +61,38 @@ python
 
 And if that line runs without any problems then the package was installed correctly.
 
-## Open MSI Directory Stream Service
+### Other documentation
 
-This software provides a way to stream data to a topic in a Kafka cluster using a Windows Service called "Open MSI Directory Stream Service". The Service can be installed for all users of a particular Windows machine and, once installed, it will run automatically from when the machine boots until it is stopped and/or removed.
+Installing the code provides access to several programs that share a basic scheme for user interaction. These programs share the following attributes:
+1. Their names correspond to names of Python Classes within the code base
+1. They can be run from the command line by typing their names 
+    * i.e. they are provided as "console script entry points"
+    * check the relevant section of the [setup.py](./setup.py) file for a list of all that are available
+1. They provide helpful logging output when run, and the most relevant of these logging messages are written to files called "[ClassName].log" in the directories relevant to the programs running
+1. They can be installed as Windows Services instead of run from the bare command line
 
-The Open MSI Directory Stream Service will continually monitor a specific directory for any new files that are added to it. When a new file is detected, it will break the data in the file into smaller chunks and produce each of the chunks as a message to a specific Kafka topic. Any subdirectory structure relative to the watched directory will be preserved in the messages that are sent. The `reconstuct_data_files` program discussed below, for example, can then be used to download the messages and rebuild the files on any other machine. Other routines will soon be added to perform analyses or other manipulations of the uploaded data as soon as they are available. In other words, installing the Service turns an existing directory into a "drop box" to a particular Kafka topic.  
+The documentation for specific programs can be found in a few locations within the repo. 
 
-### Setup and installation
+The readme file [here](./openmsipython/data_file_io/) explains programs used to upload entire arbitrary files by breaking them into chunks/producing those chunks as messages to a Kafka topic or download entire files by reading messages from the topic and writing data to disk.
 
-Setting up the Service requires a configuration file that tells the program which directory to monitor and which Kafka cluster/topic to produce the data to. Two examples of these configuration files are located [here (`test.config`)](./openmsipython/services/config_files/test.config) and [here (`prod.config`)](./openmsipython/services/config_files/prod.config). These files each contain four lines, explained below:
+The readme file [here](./openmsipython/pdv) explains programs used to upload specific portions of data in Lecroy Oscilloscope files and produce sheets of plots for PDV spall or velocity analyses.
 
-1. `[openmsi_directory_stream_service]` : this line begins a block in the file that contains the configuration options for the Service.
-1. `file_directory = [some directory path]` : this is where you specify the path to the directory you'd like the Service to monitor. The directory must already exist, to prevent accidental continuity or duplication errors.
-1. `cluster_producer_config = [name or path to another config file]` : this line tells the Service which Kafka cluster the messages should be produced to, and how the Producer should be configured, by pointing it to another configuration file that includes these details. The two example config files above each give names of files in the default location for Kafka configuraton files for this parameter: `test.config` tells the code to use [this file](./openmsipython/my_kafka/config_files/test.config) and `prod.config` tells the code to use [this file](./openmsipython/my_kafka/config_files/prod.config). In your files you have a couple options for this parameter: 
-    - you could use either of these two same file names as in the example files. `test.config` will produce to the "tutorial_cluster" on Kafka for testing, and `prod.config` will produce to the "openmsi_cluster" for real production cases. 
-    - you could use the name of any file that exists in `openmsipython/openmsipython/my_kafka/config_files/` when you installed the repo, or the full path to a file in any other location, that contains "`[cluster]`" and "`[producer]`" sections. If you're interested in creating one of your own configuration files like this, check [the section on config files](#more-details-on-configuration-files) below.
-    - you could completely omit the `cluster_producer_config` parameter, and instead add `[cluster]` and `[producer]` sections to the file below the `[openmsi_directory_stream_service]` section. Again check [the section on config files](#more-details-on-configuration-files) below for more details on how you can do this.
-1. `topic_name = [topic_name]` : this is the name of the topic in the cluster to produce messages to. 
+The readme file [here](./openmsipython/my_kafka) gives more details about options for configuration files used to define which kafka cluster(s) the programs interact with and how data are produced to/consumed from topics within them.
 
-To install the Service and start it running, type the following command in the `py37` environment in your Terminal or Admin mode Anaconda Prompt:
+The readme file [here](./openmsipython/services) details procedures for installing any available command-line program as a Windows Service and working with it.
 
-`manage_service install_and_start --config [path_to_config_file]`
-
-where `[path_to_config_file]` is the path to a configuration file containing at least an `[openmsi_directory_stream_service]` section in it as described above. While the script runs, you will be prompted to input the usernames and passwords to the Kafka "test" and "production" clusters; you should have those from somewhere else if you're looking to install the Service. 
-
-If the script completes successfully, you should be able to see the Service listed (and running) in the Windows Service Manager window that pops up when you type `mmc Services.msc`. Starting and running the Service will create a log file called `data_file_upload_directory.log` in the watched directory. At any time you can check what's in this file to see the files that have been added to the directory and produced to the topic, along with other information.
-
-### Management, use, and output
-
-While the Service is running, you can use the `manage_service` command to perform several actions:
-1. **check the Service status** with `manage_service status`
-2. **stop the Service running** with `manage_service stop`. If you temporarily stop the Service using this command, you can restart it afterward with `manage_service start`.
-3. **uninstall the Service completely** with `manage_service stop_and_remove` (or, if the Service is already stopped, simply `manage_service remove`)
-
-**Please note** that if you do need to stop the Service, it would be best to wait about five minutes after adding any new files to the watched directory to do so. There is a slight buffer time between a file being recognized in the directory and all of its messages being produced to the Kafka topic, so stopping the Service without a few minutes' delay may cause some messages to be dropped.
-
-Removing the Service using the `manage_service` tool will also automatically try to unset the Username and Password environment variables you added in when installing the Service. If this step fails and error message will be printed out encouraging you to manually remove these environment variables even though the Service is already removed.
-
-### More user options
-
-In addition to the location of the watched directory and the cluster/topic to produce to, you can further tune the behavior of the Service by adding other options to the `[openmsi_directory_stream_service]` section of the configuration file. These options are:
-1. `n_threads = [n_threads]` : Run the Service with `[n_threads]` threads instead of the default number (5). Using fewer threads may slightly decrease CPU usage but slightly increase the lag time between a file being added and its data being produced.
-1. `chunk_size = [n_bytes]` : Break files into chunks of size `[n_bytes]` bytes instead of the default 16384 bytes (must be an nonzero power of two)
-1. `queue_max_size = [n_messages]` : Change the size of the intermediate queue that holds messages that haven't yet been produced from the default (3000). Making the queue larger will allow files to be recognized sooner after they are added, but may increase the lag time until they are fully produced (it may also result in Kafka errors).
-1. `new_files_only = [True or False]` : Set to 'False' if you would like the Service to produce any files that already exist in the watched directory at the time it's started. By default this parameter is 'True', meaning any files that already exist in the directory when the Service is started are ignored, and only files that are newly added are produced to the topic. 
-
-## More details on configuration files
-
-Both the Open MSI Directory Stream Service and the other programs listed below depend on configuration files. This section gives a few more details about how these files can be formatted, the recognized sections they can contain, and options you can change using them.
-
-In general, a configuration file is a text file with one or more distinct and named sections. Comments can be added by using lines starting with "`#`", and other whitespace in general is ignored. Each section begins with a heading line like "`[section_name]`," and beneath that heading different parameters are supplied using lines like "`[key] = [value]`". If any parameter `value`s begin with the "`$`" character, the configuration file parser will attempt to expand those values as environment variables (this is useful to, for example, store usernames or passwords as environment variables instead of plain text in the repository). Using `value`s starting with `$` that don't correspond to a recognized environment variable will give an error.
-
-The different sections recognized by the `openmsipython` code are:
-1. `[openmsi_directory_stream_service]` for configuring the Open MSI Directory Stream Service as described above
-1. `[cluster]` to configure which Kafka cluster should be used by a program and how to connect to it. Common parameters here include:
-    - `bootstrap.servers` to detail the server on which the cluster is hosted
-    - `sasl.mechanism` and `security.protocol` to describe how programs are authenticated to interact with the cluster
-    - `sasl.username` and `sasl.password` to provide the key and secret of an API key created for the cluster
-1. `[producer]` to configure a Producer used by a program. You can add here any [parameters recognized by Kafka Producers](https://docs.confluent.io/platform/current/installation/configuration/producer-configs.html) in general, but some of the most useful are:
-    - `batch.size` to control the maximum number of messages in each batch sent to the cluster
-    - `retries` to control how many times a failed message should be retried before throwing a fatal error and moving on
-    - `linger.ms` to change how long a batch of messages should wait to become as full as possible before being sent to the cluster 
-    - `compression.type` to add or change how batches of messages are compressed before being produced (and decompressed afterward)
-    - `key.serializer` and `value.serializer` to change methods used to convert message keys and values (respectively) to byte arrays. The `openmsipython` code provides an additional option called [`DataFileChunkSerializer`](./openmsipython/my_kafka/serialization.py#L10-#L29) as a message value serializer to pack chunks of data files.
-1. `[consumer]` to configure a Consumer used by a program. Again here any [parameters recognized by Kafka Consumers](https://docs.confluent.io/platform/current/installation/configuration/consumer-configs.html) in general are valid, but some of the most useful are:
-    - `group.id` to group Consumers amongst one another. Giving "`new`" for this parameter will create a new group ID every time the code is run.
-    - `auto.offset.reset` to tell the Consumer where in the log to start consuming messages if no previously-committed offset for the consumer group can be found. "`earliest`" will start at the beginning of the topic and "`latest`" will start at the end. Giving "`none`" for this parameter will remove it from the configs, and an error will be thrown if no previously-committed offset for the consumer group can be found.
-    - `fetch.min.bytes` to change how many bytes must accumulate before a batch of messages is consumed from the topic (consuming batches of messages is also subject to a timeout, so changing this parameter will only ever adjust the tradeoff between throughput and latency, but will not prevent any messages from being consumed in general)
-    - `key.deserializer` and `value.deserializer` to change methods used to convert message keys and values (respectively) from byte arrays to objects. The `openmsipython` code provides an additional option called [`DataFileChunkDeserializer`](./openmsipython/my_kafka/serialization.py#L31-#L58) to convert a chunk of a data file as a byte array to a [DataFileChunk object](./openmsipython/data_file_io/data_file_chunk.py#L7).
-
-## Other programs
-
-The `openmsipython` code provides several platform-independent Python programs to run in addition to the Windows Service.
-
-### upload_data_file
-This module uploads a single specified file to a topic on a cluster by breaking it into chunks of a particular size and uploading those chunks in several parallel threads. To run it in the most common use case, enter the following command and arguments:
-
-`upload_data_file [file_path] --config [config_file_path] --topic_name [topic_name]`
-
-where `[file_path]` is the path to the text file to upload, `[config_file_path]` is the path to a config file including at least `[cluster]` and `[producer]` sections, and `[topic_name]` is the name of the topic to produce to. Running the code will produce all the chunks of the single file to the topic; the process will hang until receipts of delivery come back for every message that was produced.
-
-Options for running the code include:
-1. Changing the maximum number of parallel threads allowed to run at a time: add the `--n_threads [threads]` argument where `[threads]` is the desired number of parallel threads to allow (the default is 5 threads).
-1. Changing the size of the individual file chunks: add the `--chunk_size [n_bytes]` argument where `[n_bytes]` is the desired chunk size in bytes. `[n_bytes]` must be a nonzero power of two (the default is 16384).
-
-### data_file_upload_directory
-This module uploads any files that are added to a given directory path to a topic on a cluster using the same "chunking" idea as above. It also preserves subdirectory structure relative to the watched directory.This program is a platform-independent version of the Open MSI Directory Stream Service that runs interactively on the command line. To run it in the most common use case, enter the following command and arguments:
-
-`data_file_upload_directory [directory_path] --config [config_file_path] --topic_name [name_of_topic]`
-
-where `[directory_path]` is the path to a directory to monitor for files to upload, `[config_file_path]` is the path to a config file including at least `[cluster]` and `[producer]` sections, and `[topic_name]` is the name of the topic to produce to. Running the code will automatically enqueue any files in the directory, and any others that are added during runtime, to be produced. 
-
-While the main process is running, a line with a "`.`" character will be printed out every several seconds to indicate the process is still alive. At any time, typing "`check`" or "`c`" into the console will print a message specifying how many total files have been enqueued or are in progress. Messages will be printed to the console showing how many chunks each file is broken into, and the progress of actually producing those chunks to the topic. The processes can be shut down by typing "`quit`" or "`q`" into the console. Note that the process won't actually shut down until all currently enqueued messages have been delivered to the broker (or returned an error). Also note that the files will have all of their chunks enqueued almost immediately, but actually producing the chunks to the cluster will take some time.
-
-Options for running the code include:
-1. Changing the maximum number of parallel threads allowed to run at a time: add the `--n_threads [threads]` argument where `[threads]` is the desired number of parallel threads to use. The default is 5 threads.
-1. Changing the size of the individual file chunks: add the `--chunk_size [n_bytes]` argument where `[n_bytes]` is the desired chunk size in bytes. `[n_bytes]` must be a nonzero power of two (the default is 16384).
-1. Changing the number of messages that are allowed to be internally queued at once (that is, queued before being produced): add the `--queue_max_size [n_messages]` argument where `[n_messages]` is the desired number of messages allowed in the internal queue (the default is 3000 messages). This internal queue is used to make sure that there's some buffer between recognizing a file exists to be uploaded and producing all of its associated messages to the topic; its size should be set to some number of messages such that the total size of the internal queue is capped at a few batches of messages ("`batch.size`" in the producer config). The default values supplied are well compatible.
-1. Changing how often the "still alive" character is printed to the console: add the `--update_seconds [seconds]` argument where `[seconds]` is the number of seconds to wait between printing the character to the console from the main thread (the default is 30 seconds). Giving -1 for this argument disables printing the "still alive" character entirely.
-
-### data_file_download_directory
-This module subscribes a group of consumers to a topic on a cluster and passively listens in several parallel threads for messages that are file chunks of the type produced by `upload_data_file`. It reconstructs files produced to the topic from their individual chunks and puts the reconstructed files in a specified directory, preserving any subdirectory structure on the production end. To run it in the most common use case, enter the following command and arguments:
-
-`data_file_download_directory [working_directory_path] --config [config_file_path] --topic_name [topic_name]`
-
-where `[working_directory_path]` is the path to the directory that the reconstructed files should be put in (if it doesn't exist it will be created), `[config_file_path]` is the path to a config file including at least `[cluster]` and `[consumer]` sections, and `[topic_name]` is the name of the topic to subscribe to/consume messages from. 
-
-While the main process is running, a line with a "`.`" character will be printed out every several seconds to indicate the process is still alive. At any time, typing "`check`" or "`c`" into the console will print a message specifying how many total messages have been read and how many files have been completely reconstructed. When all the messages for a single file have been received and the file is completely reconstructed, a message will be printed to the console saying what file it was. The processes can be shut down at any time by typing "`quit`" or "`q`" into the console.
-
-Options for running the code include:
-1. Changing the maximum number of parallel threads allowed to run at a time: add the `--n_threads [threads]` argument where `[threads]` is the desired number of parallel threads to use (and, also, the number of consumers to allow in the group). The default is 5 threads/consumers; increasing this number may give Kafka warnings or errors intermittently as the consumer group is rebalanced.
-1. Changing how often the "still alive" character is printed to the console: add the `--update_seconds [seconds]` argument where `[seconds]` is the number of seconds to wait between printing the character to the console from the main thread (the default is 30 seconds). Giving -1 for this argument disables printing the "still alive" character entirely. 
-
-## Automatic code tests
-There are several tests for the codebase already written (and more will be added over time). The repo also has a continuous integration workflow set up on CircleCI, and the checks in that workflow must pass successfully on any branch being merged into main.  
-
-### Running tests interactively 
-If you're editing the code, you can make sure it doesn't break anything currently being tested by running `python test/run_all_tests.py` from just inside the directory of the repo. If you'd like to add more tests, you can include any classes that extend `unittest.TestCase` in the `test/unittests` subdirectory. If you name their files anything that starts with `test` the `run_all_tests.py` script will run them automatically. If any new test methods interact with the Kafka cluster, you should end their names with "`kafka`" so that `run_all_tests.py` can exclude them if requested. Running the tests also requires that `pyflakes` be installed, which you can get right from this repo by running `pip install . [test]` (with or without the `--editable` or `-e` flag(s)).
-
-There are also a few options you can add to `run_all_tests.py` if you only want to run some subset of the available tests:
-1. Add the "`--no_pyflakes`" flag to skip the pyflakes test
-1. Add the "`--no_unittests`" flag to skip the unittests entirely, OR
-1. Add the "`--no_kafka`" flag to skip running tests that need to communicate with the Kafka cluster. Adding this flag automatically skips any test methods whose names end with "`kafka`"; you will see that they were skipped at the end of the output.
-1. Add the "`--no_repo`" flag to skip the test of whether the Git repo is still clean after running all tests
-1. Add the "`--failfast`" flag to stop executing the script early if any individual test(s) fail. Normally all tests are run regardless of how many fail, but including this flag will stop the run as soon as any test fails.
-
-### Continuous Integration with CircleCI
-
-Continuous integration for the repo is set up using CircleCI. On the website you can manually run tests on any branch you'd like, and the tests will also automatically be run when pull requests are submitted. The configuration for CircleCI is in the [`.circleci/config.yml`](./.circleci/config.yml) file. Running tests successfully on CircleCI requires that the Project on CircleCI has environment variables for the test cluster username and password registered within it.
-
-### Rebuilding static test data
-Some of the tests rely on static example data in `test/data`. If you need to regenerate these data under some new conditions (i.e., because you've changed default options someplace), you can run `python test/rebuild_test_reference_data.py` and follow the prompts it gives you to replace the necessary files. You can also add to that script if you write any new tests that rely on example data. Static test data should be committed to the repo like any other file, and they'll be picked up both interactively and on CircleCI.
+The readme file [here](./test) describes the automatic testing and CI/CD setup for the project, including how to run tests interactively and add additional tests.
 
 ## To-do list
 
 The following items are currently planned to be implemented ASAP:
 
-1. Adding a safer and more graceful shutdown when stopping the Open MSI Directory Stream Service so that no external lag time needs to be considered
+1. Support for Python > 3.7 ??
+1. Adding a safer and more graceful shutdown when stopping Services so that no external lag time needs to be considered
 1. Allowing watching directories where large files are in the process of being created/saved instead of just directories where fully-created files are being added
 1. Implementing other data types and serialization schemas, likely using Avro
 1. Create pypi and conda installations. Pypi method using twine here: https://github.com/bast/pypi-howto. Putting on conda-forge is a heavier lift. Need to decide if it's worth it; probably not for such an immature package.
-1. Python 3.8 and 3.9 support (what's the problem now?  can this be the basis of the first unittest?)
+1. Re-implement PDV plots from a submodule
 
 ## Questions that will arise later (inFAQs?)
 

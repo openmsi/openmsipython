@@ -91,21 +91,20 @@ class MyArgumentParser(ArgumentParser) :
                                    as they are uploaded'''}],
         'queue_max_size':
             ['optional',{'default':RUN_OPT_CONST.DEFAULT_MAX_UPLOAD_QUEUE_SIZE,'type':int,
-                         'help':"""Maximum number of items to allow in the upload queue at a time. 
-                                 Use to limit RAM usage or throttle production rate if necessary."""}],
+                         'help':'''Maximum number of items to allow in the upload queue at a time. 
+                                 Use to limit RAM usage or throttle production rate if necessary.'''}],
         'update_seconds':
             ['optional',{'default':UTIL_CONST.DEFAULT_UPDATE_SECONDS,'type':int,
                          'help':'''Number of seconds between printing a "." to the console 
                                    to indicate the program is alive'''}],
         'new_files_only':
             ['optional',{'action':'store_true',
-                         'help':"""Add this flag to only upload files added to the directory after 
+                         'help':'''Add this flag to only upload files added to the directory after 
                                    this code is already running (by default files already existing 
-                                   in the directory at startup will be uploaded as well)"""}],
+                                   in the directory at startup will be uploaded as well)'''}],
         'consumer_group_ID':
             ['optional',{'default':str(uuid.uuid1()),
-                         'help':'''ID to use for all consumers in the group 
-                                   (by default a new, unique, ID will be created)'''}],
+                         'help':'ID to use for all consumers in the group'}],
         'pdv_plot_type':
             ['optional',{'choices':['spall','velocity'],'default':'spall',
                          'help':'Type of analysis to perform ("spall" or "velocity")'}],
@@ -119,8 +118,8 @@ class MyArgumentParser(ArgumentParser) :
                            'help':'What to do with the service'}],
         'remove_env_vars':
             ['optional',{'action':'store_true',
-                         'help':"""Add this flag to also remove username/password environment variables 
-                                   when removing a Service"""}],
+                         'help':'''Add this flag to also remove username/password environment variables 
+                                   when removing a Service'''}],
     }
 
     #################### OVERLOADED FUNCTIONS ####################
