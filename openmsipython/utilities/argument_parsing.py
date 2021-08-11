@@ -117,6 +117,10 @@ class MyArgumentParser(ArgumentParser) :
         'run_mode':
             ['positional',{'choices':['start','status','stop','remove','stop_and_remove'],
                            'help':'What to do with the service'}],
+        'remove_env_vars':
+            ['optional',{'action':'store_true',
+                         'help':"""Add this flag to also remove username/password environment variables 
+                                   when removing a Service"""}],
     }
 
     #################### OVERLOADED FUNCTIONS ####################
@@ -199,18 +203,19 @@ class MyArgumentParser(ArgumentParser) :
                     argname_to_add = f'--{argname[len("optional_"):]}'
                 else :
                     argname_to_add = f'--{argname}'
+            kwargs = self.ARGUMENTS[argname][1].copy()
             if new_default is not None :
-                if ( 'default' in self.ARGUMENTS[argname][1].keys() and 
-                    type(new_default)!=type(self.ARGUMENTS[argname][1]['default']) ) :
+                if ( 'default' in kwargs.keys() and 
+                    type(new_default)!=type(kwargs['default']) ) :
                     errmsg = f'ERROR: new default value {new_default} for argument {argname} is of a different type '
                     errmsg+= f'than expected based on the old default ({self.ARGUMENTS[argname]["kwargs"]["default"]})!'
                     raise ValueError(errmsg)
-                self.ARGUMENTS[argname][1]['default'] = new_default
-            if 'default' in self.ARGUMENTS[argname][1].keys() :
-                if 'help' in self.ARGUMENTS[argname][1].keys() :
-                    self.ARGUMENTS[argname][1]['help']+=f" (default = {self.ARGUMENTS[argname][1]['default']})"
+                kwargs['default'] = new_default
+            if 'default' in kwargs.keys() :
+                if 'help' in kwargs.keys() :
+                    kwargs['help']+=f" (default = {kwargs['default']})"
                 else :
-                    self.ARGUMENTS[argname][1]['help']=f"default = {self.ARGUMENTS[argname][1]['default']}"
-            return argname_to_add, self.ARGUMENTS[argname][1]
+                    kwargs['help']=f"default = {kwargs['default']}"
+            return argname_to_add, kwargs
         else :
             raise ValueError(f'ERROR: argument {argname} is not recognized as an option!')

@@ -44,7 +44,7 @@ class ServicesConstants :
         return 'https://nssm.cc/release/nssm-2.24.zip' # The URL to use for downloading NSSM when needed
     @property
     def NSSM_EXECUTABLE_PATH(self) :
-        return pathlib.Path(__file__.parent) / 'working_dir' / 'nssm.exe'
+        return pathlib.Path(__file__).parent / 'working_dir' / 'nssm.exe'
     @property
     def SERVICE_EXECUTABLE_NAME_STEM(self) :
         return '_python_executable.py'

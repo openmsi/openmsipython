@@ -37,7 +37,7 @@ def stop_service(service_name) :
     run_cmd_in_subprocess(['powershell.exe',cmd])
     SERVICE_CONST.LOGGER.info(f'Done stopping {service_name}')
 
-def remove_service(service_name) :
+def remove_service(service_name,remove_env_vars) :
     """
     remove the Service
     """
@@ -49,20 +49,21 @@ def remove_service(service_name) :
     run_cmd_in_subprocess(['powershell.exe',cmd])
     SERVICE_CONST.LOGGER.info('Service successfully removed')
     #remove the environment variables that were set when the service was installed
-    try :
-        remove_machine_env_var('KAFKA_TEST_CLUSTER_USERNAME')
-        remove_machine_env_var('KAFKA_TEST_CLUSTER_PASSWORD')
-        remove_machine_env_var('KAFKA_PROD_CLUSTER_USERNAME')
-        remove_machine_env_var('KAFKA_PROD_CLUSTER_PASSWORD')
-        SERVICE_CONST.LOGGER.info('Username/password environment variables successfully removed')
-    except CalledProcessError :
-        warnmsg = 'WARNING: failed to remove environment variables. You should remove any username/password '
-        warnmsg+= 'environment variables manually even though the service is uninstalled!'
-        SERVICE_CONST.LOGGER.info(warnmsg)
-    #remove NSSM from the current directory
-    if 'nssm.exe' in check_output('dir',shell=True).decode() :
+    if remove_env_vars :
         try :
-            run_cmd_in_subprocess(['powershell.exe','del nssm.exe'])
+            remove_machine_env_var('KAFKA_TEST_CLUSTER_USERNAME')
+            remove_machine_env_var('KAFKA_TEST_CLUSTER_PASSWORD')
+            remove_machine_env_var('KAFKA_PROD_CLUSTER_USERNAME')
+            remove_machine_env_var('KAFKA_PROD_CLUSTER_PASSWORD')
+            SERVICE_CONST.LOGGER.info('Username/password environment variables successfully removed')
+        except CalledProcessError :
+            warnmsg = 'WARNING: failed to remove environment variables. You should remove any username/password '
+            warnmsg+= 'environment variables manually even though the service is uninstalled!'
+            SERVICE_CONST.LOGGER.info(warnmsg)
+    #remove NSSM from the working directory
+    if SERVICE_CONST.NSSM_EXECUTABLE_PATH.is_file() :
+        try :
+            run_cmd_in_subprocess(['powershell.exe',f'del {SERVICE_CONST.NSSM_EXECUTABLE_PATH}'])
         except CalledProcessError :
             msg = f'WARNING: failed to delete {SERVICE_CONST.NSSM_EXECUTABLE_PATH}. '
             msg+= 'You are free to delete it manually if you would like.'
@@ -74,7 +75,7 @@ def remove_service(service_name) :
 def main() :
     #get the arguments
     parser = MyArgumentParser()
-    parser.add_arguments('service_name','run_mode')
+    parser.add_arguments('service_name','run_mode','remove_env_vars')
     args = parser.parse_args()
     #Add "Service" to the given name of the service
     service_name = args.service_name+'Service'
@@ -86,7 +87,7 @@ def main() :
     if args.run_mode in ['stop','stop_and_remove'] :
         stop_service(service_name)
     if args.run_mode in ['remove','stop_and_remove'] :
-        remove_service(service_name)
+        remove_service(service_name,args.remove_env_vars)
 
 if __name__=='__main__' :
     main()

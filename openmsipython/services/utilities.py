@@ -13,7 +13,8 @@ def run_cmd_in_subprocess(args,*,shell=False) :
         result = check_output(args,shell=shell,env=os.environ)
         return result
     except CalledProcessError as e :
-        SERVICE_CONST.LOGGER.error(f'ERROR: failed to run a command. output:\n{e.output.decode}',e)
+        SERVICE_CONST.LOGGER.error(f'ERROR: failed to run a command. output:\n{e.output.decode()}')
+        raise e
 
 def remove_machine_env_var(var_name) :
     """
@@ -40,7 +41,7 @@ def set_env_var_from_user_input(var_name,var_desc) :
 
 #if NSSM doesn't exist in the current directory, install it from the web
 def find_install_NSSM() :
-    if 'nssm.exe' in check_output('dir',shell=True).decode() :
+    if SERVICE_CONST.NSSM_EXECUTABLE_PATH.is_file() :
         return
     else :
         SERVICE_CONST.LOGGER.info(f'Installing NSSM from {SERVICE_CONST.NSSM_DOWNLOAD_URL}...')
@@ -54,7 +55,7 @@ def find_install_NSSM() :
              f'Remove-Item -Path {nssm_zip_file_name}'),
             (f'move {pathlib.Path() / nssm_zip_file_name.rstrip(".zip") / "win64" / "nssm.exe"} {pathlib.Path()}',
              f'''Move-Item -Path {pathlib.Path()/nssm_zip_file_name.rstrip(".zip")/"win64"/"nssm.exe"} \
-                 -Destination {(pathlib.Path()/"nssm.exe").resolve()}'''),
+                 -Destination {SERVICE_CONST.NSSM_EXECUTABLE_PATH.resolve()}'''),
             (f'rmdir /S /Q {nssm_zip_file_name.rstrip(".zip")}',
              f'Remove-Item -Recurse -Force {nssm_zip_file_name.rstrip(".zip")}'),
         ]
@@ -63,4 +64,4 @@ def find_install_NSSM() :
                 run_cmd_in_subprocess(['powershell.exe',cmd[1]])
             except CalledProcessError :
                 run_cmd_in_subprocess(cmd[0],shell=True)
-        SERVICE_CONST.LOGGER('Done installing NSSM')
+        SERVICE_CONST.LOGGER.debug('Done installing NSSM')
