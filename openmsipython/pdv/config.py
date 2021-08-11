@@ -3,6 +3,9 @@ class LecroyConstants :
     Constants for working with Lecroy oscilloscope files
     """
     @property
+    def TOPIC_NAME(self) :
+        return 'skimmed_lecroy_pdv_files' # name of the topic that should be produced to/consumed from
+    @property
     def HEADER_ROWS(self) :
         return 5           # the number of rows making up the header to the file
     @property
