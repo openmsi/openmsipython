@@ -32,6 +32,12 @@ def test_python_code() :
     """
     briefly test the python code of the Service to catch any errors
     """
+    must_rerun = set_env_vars()
+    if must_rerun :
+        msg = 'New values for environment variables have been set. '
+        msg+= 'Please close this window and rerun InstallService so that their values get picked up.'
+        SERVICE_CONST.LOGGER.info(msg)
+        sys.exit(0)
     SERVICE_CONST.LOGGER.debug('Testing code to check for errors...')
     unittest_dir_path = pathlib.Path(__file__).parent.parent.parent / 'test' / 'unittests'
     SERVICE_CONST.LOGGER.debug(f'Running all unittests in {unittest_dir_path}...')
@@ -77,8 +83,6 @@ def install_service(service_name,argslist) :
         msg+= 'Please close this window and rerun InstallService so that their values get picked up.'
         SERVICE_CONST.LOGGER.info(msg)
         sys.exit(0)
-    #test the Python code to make sure the configs are all valid
-    test_python_code()
     #find or install NSSM in the current directory
     find_install_NSSM()
     #write out the executable file
@@ -103,12 +107,17 @@ def main() :
     parser.add_subparsers(description=subp_desc,required=True,dest='service_name')
     for service_dict in SERVICE_CONST.AVAILABLE_SERVICES :
         parser.add_subparser_arguments_from_class(service_dict['class'])
+    testparser = parser.add_subparser('test')
     #parser arguments
     args = parser.parse_args()
-    #Add "Service" to the given name of the service
-    service_name = args.service_name+'Service'
-    #install the service
-    install_service(service_name,sys.argv[2:])
+    #just run the test if requested
+    if args.service_name=='test' :
+        test_python_code()
+    else :
+        #Add "Service" to the given name of the service
+        service_name = args.service_name+'Service'
+        #install the service
+        install_service(service_name,sys.argv[2:])
 
 if __name__=='__main__' :
     main()

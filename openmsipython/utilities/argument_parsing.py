@@ -164,6 +164,19 @@ class MyArgumentParser(ArgumentParser) :
             argname_to_add, kwargs_for_arg = self.__get_argname_and_kwargs(argname,argdefault)
             self.add_argument(argname_to_add,**kwargs_for_arg)
 
+    def add_subparser(self,cmd,**kwargs) :
+        """
+        Add a subparser by calling add_parser using the subparser action object
+        Returns the subparser
+        Just a wrapper around the usual UI
+        """
+        if self.__subparsers_action_obj is None :
+            errmsg = 'ERROR: add_subparser_arguments_for_class called for an argument parser that '
+            errmsg+= 'has not added subparsers!'
+            raise RuntimeError(errmsg)
+        self.__subparsers[cmd] = self.__subparsers_action_obj.add_parser(cmd,**kwargs)
+        return self.__subparsers[cmd]
+
     def add_subparser_arguments_from_class(self,class_to_add,**kwargs) :
         """
         Create a new subparser and add arguments from the given class to it
