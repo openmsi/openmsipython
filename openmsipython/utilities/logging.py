@@ -61,6 +61,10 @@ class Logger :
 
     #add a filehandler to the logger
     def add_file_handler(self,filepath,level=logging.INFO) :
+        if not filepath.is_file() :
+            if not filepath.parent.is_dir() :
+                filepath.parent.mkdir(parents=True)
+            filepath.touch()
         self._filehandler = logging.FileHandler(filepath)
         self._filehandler.setLevel(level)
         self._filehandler.setFormatter(self.formatter)
