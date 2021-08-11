@@ -11,6 +11,7 @@ from utilities import MyThread
 #constants
 LOGGER = Logger(pathlib.Path(__file__).name.split('.')[0],logging.ERROR)
 TIMEOUT_SECS = 90
+TOPIC_NAME = 'test_data_file_stream_processor'
 
 class DataFileStreamProcessorForTesting(DataFileStreamProcessor) :
     """
@@ -40,12 +41,12 @@ class TestDataFileStreamProcessor(unittest.TestCase) :
         """
         #upload the data file
         upload_datafile = UploadDataFile(TEST_CONST.TEST_DATA_FILE_2_PATH,rootdir=TEST_CONST.TEST_DATA_DIR_PATH,logger=LOGGER)
-        upload_datafile.upload_whole_file(TEST_CONST.TEST_CONFIG_FILE_PATH,RUN_OPT_CONST.DEFAULT_TOPIC_NAME,
+        upload_datafile.upload_whole_file(TEST_CONST.TEST_CONFIG_FILE_PATH,TOPIC_NAME,
                                         n_threads=RUN_OPT_CONST.N_DEFAULT_UPLOAD_THREADS,
                                         chunk_size=RUN_OPT_CONST.DEFAULT_CHUNK_SIZE)
         #Use a stream processor to read its data back into memory
         dfsp = DataFileStreamProcessorForTesting(TEST_CONST.TEST_CONFIG_FILE_PATH,
-                                                 RUN_OPT_CONST.DEFAULT_TOPIC_NAME,
+                                                 TOPIC_NAME,
                                                  n_threads=RUN_OPT_CONST.N_DEFAULT_DOWNLOAD_THREADS,
                                                  consumer_group_ID='test_data_file_stream_processor',
                                                  logger=LOGGER,
@@ -61,7 +62,7 @@ class TestDataFileStreamProcessor(unittest.TestCase) :
             current_messages_read = -1
             time_waited = 0
             LOGGER.set_stream_level(logging.INFO)
-            LOGGER.info(f'Waiting to read other test file from the "{RUN_OPT_CONST.DEFAULT_TOPIC_NAME}" topic in test_data_file_stream_processor (will timeout after {TIMEOUT_SECS} seconds)...')
+            LOGGER.info(f'Waiting to read other test file from the "{TOPIC_NAME}" topic in test_data_file_stream_processor (will timeout after {TIMEOUT_SECS} seconds)...')
             LOGGER.set_stream_level(logging.ERROR)
             while (TEST_CONST.TEST_DATA_FILE_2_NAME not in dfsp.completed_bytestrings_by_filename.keys()) and current_messages_read<dfsp.n_msgs_read and time_waited<TIMEOUT_SECS :
                 current_messages_read = dfsp.n_msgs_read

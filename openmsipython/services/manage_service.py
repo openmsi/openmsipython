@@ -73,7 +73,7 @@ def remove_service(service_name) :
 
 def main() :
     #get the arguments
-    parser = MyArgumentParser(add_help=False)
+    parser = MyArgumentParser()
     parser.add_arguments('service_name','run_mode')
     args = parser.parse_args()
     #Add "Service" to the given name of the service

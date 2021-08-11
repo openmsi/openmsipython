@@ -11,6 +11,7 @@ from utilities import MyThread
 LOGGER = Logger(pathlib.Path(__file__).name.split('.')[0],logging.ERROR)
 UPDATE_SECS = 5
 TIMEOUT_SECS = 90
+TOPIC_NAME = 'test_pdv_plots'
 
 class TestPDVPlots(unittest.TestCase) :
     """
@@ -25,7 +26,7 @@ class TestPDVPlots(unittest.TestCase) :
         lfud = LecroyFileUploadDirectory(TEST_CONST.TEST_WATCHED_DIR_PATH,rows_to_skip=10000,update_secs=UPDATE_SECS,logger=LOGGER)
         #start upload_files_as_added in a separate thread so we can time it out
         upload_thread = MyThread(target=lfud.upload_files_as_added,
-                                 args=(TEST_CONST.TEST_CONFIG_FILE_PATH,RUN_OPT_CONST.DEFAULT_TOPIC_NAME),
+                                 args=(TEST_CONST.TEST_CONFIG_FILE_PATH,TOPIC_NAME),
                                  kwargs={'n_threads':RUN_OPT_CONST.N_DEFAULT_UPLOAD_THREADS,
                                          'chunk_size':RUN_OPT_CONST.DEFAULT_CHUNK_SIZE,
                                          'max_queue_size':RUN_OPT_CONST.DEFAULT_MAX_UPLOAD_QUEUE_SIZE,
@@ -73,7 +74,7 @@ class TestPDVPlots(unittest.TestCase) :
         pdvpm = PDVPlotMaker(TEST_CONST.TEST_RECO_DIR_PATH,
                              'spall',
                              TEST_CONST.TEST_CONFIG_FILE_PATH,
-                             RUN_OPT_CONST.DEFAULT_TOPIC_NAME,
+                             TOPIC_NAME,
                              n_threads=RUN_OPT_CONST.N_DEFAULT_DOWNLOAD_THREADS,
                              update_secs=UPDATE_SECS,
                              consumer_group_ID='run_pdv_plot_maker',
@@ -90,7 +91,7 @@ class TestPDVPlots(unittest.TestCase) :
             current_messages_read = -1
             time_waited = 0
             LOGGER.set_stream_level(logging.INFO)
-            LOGGER.info(f'Waiting to read data in skimmed test file from the "{RUN_OPT_CONST.DEFAULT_TOPIC_NAME}" topic in run_pdv_plot_maker (will timeout after {TIMEOUT_SECS} seconds)...')
+            LOGGER.info(f'Waiting to read data in skimmed test file from the "{TOPIC_NAME}" topic in run_pdv_plot_maker (will timeout after {TIMEOUT_SECS} seconds)...')
             LOGGER.set_stream_level(logging.ERROR)
             while (TEST_CONST.TEST_LECROY_DATA_FILE_PATH not in pdvpm.processed_filepaths) and current_messages_read<pdvpm.n_msgs_read and time_waited<TIMEOUT_SECS :
                 current_messages_read = pdvpm.n_msgs_read

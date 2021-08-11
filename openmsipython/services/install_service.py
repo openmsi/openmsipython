@@ -29,9 +29,9 @@ def test_python_code() :
     briefly test the python code of the Service to catch any errors
     """
     SERVICE_CONST.LOGGER.debug('Testing code to check for errors...')
-    unittest_dir_path = pathlib.Path(__file__.parent.parent.parent) / 'test' / 'unittests'
+    unittest_dir_path = pathlib.Path(__file__).parent.parent.parent / 'test' / 'unittests'
     SERVICE_CONST.LOGGER.debug(f'Running all unittests in {unittest_dir_path}...')
-    cmd = f'python -m unittest discover -s {unittest_dir_path} -v'
+    cmd = f'python -m unittest discover -s {unittest_dir_path} -vf'
     p = Popen(cmd,stdout=PIPE,stderr=STDOUT,shell=True,universal_newlines=True,env=os.environ)
     for stdout_line in p.stdout :
         print(stdout_line,end='')

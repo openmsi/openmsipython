@@ -11,6 +11,7 @@ from utilities import MyThread
 LOGGER = Logger(pathlib.Path(__file__).name.split('.')[0],logging.ERROR)
 UPDATE_SECS = 5
 TIMEOUT_SECS = 90
+TOPIC_NAME = 'test_data_file_directories'
 
 class TestDataFileDirectories(unittest.TestCase) :
     """
@@ -25,7 +26,7 @@ class TestDataFileDirectories(unittest.TestCase) :
         dfud = DataFileUploadDirectory(TEST_CONST.TEST_WATCHED_DIR_PATH,update_secs=UPDATE_SECS,logger=LOGGER)
         #start upload_files_as_added in a separate thread so we can time it out
         upload_thread = MyThread(target=dfud.upload_files_as_added,
-                                 args=(TEST_CONST.TEST_CONFIG_FILE_PATH,RUN_OPT_CONST.DEFAULT_TOPIC_NAME),
+                                 args=(TEST_CONST.TEST_CONFIG_FILE_PATH,TOPIC_NAME),
                                  kwargs={'n_threads':RUN_OPT_CONST.N_DEFAULT_UPLOAD_THREADS,
                                          'chunk_size':RUN_OPT_CONST.DEFAULT_CHUNK_SIZE,
                                          'max_queue_size':RUN_OPT_CONST.DEFAULT_MAX_UPLOAD_QUEUE_SIZE,
@@ -72,7 +73,7 @@ class TestDataFileDirectories(unittest.TestCase) :
         #start up the DataFileDownloadDirectory
         dfdd = DataFileDownloadDirectory(TEST_CONST.TEST_RECO_DIR_PATH,
                                          TEST_CONST.TEST_CONFIG_FILE_PATH,
-                                         RUN_OPT_CONST.DEFAULT_TOPIC_NAME,
+                                         TOPIC_NAME,
                                          n_threads=RUN_OPT_CONST.N_DEFAULT_DOWNLOAD_THREADS,
                                          update_secs=UPDATE_SECS,
                                          consumer_group_ID='run_data_file_download_directory',
@@ -89,7 +90,7 @@ class TestDataFileDirectories(unittest.TestCase) :
             current_messages_read = -1
             time_waited = 0
             LOGGER.set_stream_level(logging.INFO)
-            LOGGER.info(f'Waiting to reconstruct test file from the "{RUN_OPT_CONST.DEFAULT_TOPIC_NAME}" topic in run_data_file_download_directory (will timeout after {TIMEOUT_SECS} seconds)...')
+            LOGGER.info(f'Waiting to reconstruct test file from the "{TOPIC_NAME}" topic in run_data_file_download_directory (will timeout after {TIMEOUT_SECS} seconds)...')
             LOGGER.set_stream_level(logging.ERROR)
             while (TEST_CONST.TEST_DATA_FILE_NAME not in dfdd.completely_reconstructed_filepaths) and current_messages_read<dfdd.n_msgs_read and time_waited<TIMEOUT_SECS:
                 current_messages_read = dfdd.n_msgs_read

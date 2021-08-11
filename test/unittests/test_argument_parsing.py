@@ -13,9 +13,10 @@ class TestArgumentParsing(unittest.TestCase) :
 
     #test MyArgumentParser by just adding a bunch of arguments
     def test_my_argument_parser(self) :
-        parser = MyArgumentParser('filepath','output_dir','upload_dir','config','topic_name','queue_max_size','new_files_only',
-                                  'consumer_group_ID','pdv_plot_type','optional_output_dir',
-                                  n_threads=5,chunk_size=128,update_seconds=60)
+        parser = MyArgumentParser()
+        parser.add_arguments('filepath','output_dir','upload_dir','config','topic_name','queue_max_size','new_files_only',
+                             'consumer_group_ID','pdv_plot_type','optional_output_dir',
+                             n_threads=5,chunk_size=128,update_seconds=60)
         args = [os.fspath(TEST_CONST.TEST_DATA_FILE_PATH),
                 'TEST_OUTPUT',
                 os.fspath(TEST_CONST.TEST_DATA_FILE_ROOT_DIR_PATH),
@@ -26,7 +27,8 @@ class TestArgumentParsing(unittest.TestCase) :
         self.assertTrue((pathlib.Path() / 'TEST_OUTPUT').is_dir())
         shutil.rmtree(pathlib.Path() / 'TEST_OUTPUT')
         with self.assertRaises(ValueError) :
-            parser = MyArgumentParser('never_name_a_command_line_arg_this')
+            parser = MyArgumentParser()
+            parser.add_arguments('never_name_a_command_line_arg_this')
 
     #test the existing_file argument parser callback
     def test_existing_file(self) :
