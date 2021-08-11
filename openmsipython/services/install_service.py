@@ -90,7 +90,6 @@ def install_service(service_name,argslist) :
     #install the service using NSSM
     SERVICE_CONST.LOGGER.info(f'Installing {service_name} from executable at {exec_filepath}...')
     cmd = f'{SERVICE_CONST.NSSM_EXECUTABLE_PATH} install {service_name} \"{sys.executable}\" \"{exec_filepath}\"'
-    print(f'cmd = {cmd}')
     run_cmd_in_subprocess(['powershell.exe',cmd])
     run_cmd_in_subprocess(['powershell.exe',
                            f'{SERVICE_CONST.NSSM_EXECUTABLE_PATH} set {service_name} DisplayName {service_name}'])
