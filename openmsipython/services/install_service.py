@@ -74,7 +74,7 @@ def install_service(service_name,argslist) :
     must_rerun = set_env_vars()
     if must_rerun :
         msg = 'New values for environment variables have been set. '
-        msg+= 'Please close this window and restart so that their values get picked up.'
+        msg+= 'Please close this window and rerun InstallService so that their values get picked up.'
         SERVICE_CONST.LOGGER.info(msg)
         sys.exit(0)
     #test the Python code to make sure the configs are all valid
