@@ -62,14 +62,14 @@ def remove_service(service_name,remove_env_vars) :
             SERVICE_CONST.LOGGER.info(warnmsg)
     else :
         SERVICE_CONST.LOGGER.info('Environment variables will be retained')
-    #remove NSSM from the working directory
-    if SERVICE_CONST.NSSM_EXECUTABLE_PATH.is_file() :
-        try :
-            run_cmd_in_subprocess(['powershell.exe',f'del {SERVICE_CONST.NSSM_EXECUTABLE_PATH}'])
-        except CalledProcessError :
-            msg = f'WARNING: failed to delete {SERVICE_CONST.NSSM_EXECUTABLE_PATH}. '
-            msg+= 'You are free to delete it manually if you would like.'
-            SERVICE_CONST.LOGGER.info()
+    ##remove NSSM from the working directory
+    #if SERVICE_CONST.NSSM_EXECUTABLE_PATH.is_file() :
+    #    try :
+    #        run_cmd_in_subprocess(['powershell.exe',f'del {SERVICE_CONST.NSSM_EXECUTABLE_PATH}'])
+    #    except CalledProcessError :
+    #        msg = f'WARNING: failed to delete {SERVICE_CONST.NSSM_EXECUTABLE_PATH}. '
+    #        msg+= 'You are free to delete it manually if you would like.'
+    #        SERVICE_CONST.LOGGER.info()
     SERVICE_CONST.LOGGER.info(f'Done removing {service_name}')
 
 #################### MAIN FUNCTION ####################
