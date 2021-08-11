@@ -55,7 +55,7 @@ def find_install_NSSM() :
              f'Remove-Item -Path {nssm_zip_file_name}'),
             (f'move {pathlib.Path() / nssm_zip_file_name.rstrip(".zip") / "win64" / "nssm.exe"} {pathlib.Path()}',
              f'''Move-Item -Path {pathlib.Path()/nssm_zip_file_name.rstrip(".zip")/"win64"/"nssm.exe"} \
-                 -Destination {SERVICE_CONST.NSSM_EXECUTABLE_PATH.resolve()}'''),
+                 -Destination {SERVICE_CONST.NSSM_EXECUTABLE_PATH}'''),
             (f'rmdir /S /Q {nssm_zip_file_name.rstrip(".zip")}',
              f'Remove-Item -Recurse -Force {nssm_zip_file_name.rstrip(".zip")}'),
         ]

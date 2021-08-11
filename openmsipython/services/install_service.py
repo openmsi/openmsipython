@@ -16,13 +16,17 @@ def set_env_vars() :
                            ('KAFKA_PROD_CLUSTER_USERNAME','Kafka PRODUCTION cluster username'),
                            ('KAFKA_PROD_CLUSTER_PASSWORD','Kafka PRODUCTION cluster password'),
                         ]
+    variables_set = False
     for env_var_tuple in env_var_names_descs :
         if os.path.expandvars(f'${env_var_tuple[0]}') == f'${env_var_tuple[0]}' :
             set_env_var_from_user_input(*env_var_tuple)
+            variables_set = True
         else :
             choice = input(f'A value for the {env_var_tuple[1]} is already set, would you like to reset it? [y/(n)]: ')
             if choice.lower() in ('yes','y') :
                 set_env_var_from_user_input(*env_var_tuple)
+                variables_set = True
+    return variables_set
 
 def test_python_code() :
     """
@@ -67,18 +71,25 @@ def install_service(service_name,argslist) :
     install the Service using NSSM
     """
     #set the environment variables
-    set_env_vars()
+    must_rerun = set_env_vars()
+    if must_rerun :
+        msg = 'New values for environment variables have been set. '
+        msg+= 'Please close this window and restart so that their values get picked up.'
+        SERVICE_CONST.LOGGER.info(msg)
+        sys.exit(0)
     #test the Python code to make sure the configs are all valid
-    test_python_code()
+    #test_python_code()
     #find or install NSSM in the current directory
     find_install_NSSM()
     #write out the executable file
     exec_filepath = write_executable_file(service_name,argslist)
     #install the service using NSSM
     SERVICE_CONST.LOGGER.info(f'Installing {service_name} from executable at {exec_filepath}...')
-    cmd = f'{SERVICE_CONST.NSSM_EXECUTABLE_PATH} install \"{service_name}\" \"{sys.executable}\" \"{exec_filepath}\"'
+    cmd = f'{SERVICE_CONST.NSSM_EXECUTABLE_PATH} install {service_name} \"{sys.executable}\" \"{exec_filepath}\"'
+    print(f'cmd = {cmd}')
     run_cmd_in_subprocess(['powershell.exe',cmd])
-    run_cmd_in_subprocess(['powershell.exe',f'{SERVICE_CONST.NSSM_EXECUTABLE_PATH} set {service_name} DisplayName {service_name}'])
+    run_cmd_in_subprocess(['powershell.exe',
+                           f'{SERVICE_CONST.NSSM_EXECUTABLE_PATH} set {service_name} DisplayName {service_name}'])
     SERVICE_CONST.LOGGER.info(f'Done installing {service_name}')
 
 #################### MAIN FUNCTION ####################

@@ -60,6 +60,8 @@ def remove_service(service_name,remove_env_vars) :
             warnmsg = 'WARNING: failed to remove environment variables. You should remove any username/password '
             warnmsg+= 'environment variables manually even though the service is uninstalled!'
             SERVICE_CONST.LOGGER.info(warnmsg)
+    else :
+        SERVICE_CONST.LOGGER.info('Environment variables will be retained')
     #remove NSSM from the working directory
     if SERVICE_CONST.NSSM_EXECUTABLE_PATH.is_file() :
         try :
