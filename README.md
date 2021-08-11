@@ -1,5 +1,5 @@
 # <div align="center"> Open MSI Python Code </div>
-#### <div align="center">***v0.0.2***</div>
+#### <div align="center">***v0.1.0***</div>
 
 #### <div align="center">David Elbert<sup>1</sup>, Maggie Eminizer<sup>2</sup>, Sam Tabrisky<sup>3</sup></div>
 
