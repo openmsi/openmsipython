@@ -106,7 +106,6 @@ def main() :
     parser.add_subparsers(description=subp_desc,required=True,dest='service_name')
     for service_dict in SERVICE_CONST.AVAILABLE_SERVICES :
         parser.add_subparser_arguments_from_class(service_dict['class'])
-    testparser = parser.add_subparser('test')
     #parser arguments
     args = parser.parse_args()
     #just run the test if requested
