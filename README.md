@@ -17,20 +17,28 @@ Developed for Open MSI (NSF DMREF award #1921959)
 
 ## Installation
 
-Programs use the python implementation of the Apache Kafka API, and are designed to run on Windows machines connected to laboratory instruments. The only base requirements are Python 3.7 (the python Kafka API is not yet implemented on Windows with later versions of Python), `git`, and `pip`. 
+Programs use the Python implementation of the Apache Kafka API, and are designed to run on Windows machines connected to laboratory instruments. The only base requirements are Python >=3.7, `git`, and `pip`. 
 
 ### Quick start with miniconda3
 
 The quickest way to get started is to use Miniconda3. Miniconda3 installers can be downloaded from [the website here](https://docs.conda.io/en/latest/miniconda.html), and installation instructions can be found on [the website here](https://conda.io/projects/conda/en/latest/user-guide/install/index.html).
 
-With Miniconda installed, next create and switch to a new environment based on Python 3.7. In a terminal window (or Anaconda Prompt in admin mode on Windows) type:
+With Miniconda installed, next create and switch to a new environment for Open MSI. In a terminal window (or Anaconda Prompt in admin mode on Windows) type:
 
 ```
-conda create -n py37 python=3.7
-conda activate py37
+conda create -n openmsi python=3
+conda activate openmsi
 ```
 
-You'll need to use that second "activate" command every time you open a Terminal window or Anaconda Prompt to switch to the `py37` environment. 
+This environment needs a special variable set to allow the Kafka Python code to find its dependencies on Windows (see [here](https://github.com/ContinuumIO/anaconda-issues/issues/12475) for more details), so after you've done the above, type the following commands to set the variable and then refresh the environment:
+
+```
+conda env config vars set CONDA_DLL_SEARCH_MODIFICATION_ENABLE=1
+conda deactivate #this command will give a warning, that's normal
+conda activate openmsi
+```
+
+You'll need to use that second "activate" command every time you open a Terminal window or Anaconda Prompt to switch to the `openmsi` environment. 
 
 Miniconda installs `pip`, and if you need to install Git you can do so with
 
@@ -40,7 +48,7 @@ Miniconda installs `pip`, and if you need to install Git you can do so with
 
 ### Cloning this repo and installing the openmsipython package
 
-While in the `py37` environment, navigate to wherever you'd like to store this code, and type:
+While in the `openmsi` environment, navigate to wherever you'd like to store this code, and type:
 
 ```
 git clone https://github.com/openmsi/openmsipython.git
@@ -87,7 +95,6 @@ The readme file [here](./test) describes the automatic testing and CI/CD setup f
 
 The following items are currently planned to be implemented ASAP:
 
-1. Support for Python > 3.7 ??
 1. Adding a safer and more graceful shutdown when stopping Services so that no external lag time needs to be considered
 1. Allowing watching directories where large files are in the process of being created/saved instead of just directories where fully-created files are being added
 1. Implementing other data types and serialization schemas, likely using Avro
