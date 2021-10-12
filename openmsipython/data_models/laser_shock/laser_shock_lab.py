@@ -1,5 +1,5 @@
 #imports
-import json, requests, getpass, fmrest
+import os, json, requests, getpass, fmrest
 from gemd.json import GEMDJson
 from gemd.entity.util import complete_material_history, make_instance
 from .laser_shock_sample import LaserShockSample
@@ -18,8 +18,12 @@ class LaserShockLab() :
 
     def __init__(self) :
         #get login credentials from the user
-        self.username = (input('Please enter your JHED username: ')).rstrip()
-        self.password = getpass.getpass(f'Please enter the JHED password for {self.username}: ')
+        self.username = os.path.expandvars('$JHED_UNAME')
+        if self.username=='$JHED_UNAME' :
+            self.username = (input('Please enter your JHED username: ')).rstrip()
+        self.password = os.path.expandvars('$JHED_PWORD')
+        if self.password=='$JHED_PWORD' :
+            self.password = getpass.getpass(f'Please enter the JHED password for {self.username}: ')
         #add all the information to the lab object based on entries in the FileMaker DB
         #self.__add_inventory()
         #self.__add_laser_characteristics()
@@ -71,7 +75,7 @@ class LaserShockLab() :
     def __get_samples(self) :
         #get records from the FileMaker server
         records = self.__get_filemaker_records('Sample',10)
-        return [LaserShockSample(record) for record in records]
+        return [LaserShockSample.from_filemaker_record(record) for record in records]
 
     def __add_launch_packages(self) :
         pass
