@@ -19,9 +19,6 @@ class LaserShockSampleSpec(MaterialSpec) :
     GEMD MaterialSpec for a sample in the Laser Shock Lab
     """
 
-    #a list of the names of elements that can make up the material composition
-    ELEMENTS = ['Mg','Al','Zr','Ti','Cu','Ni','Be']
-
     def __init__(self) :
         #define the arguments to the MaterialSpec
         name = 'Laser Shock Sample'
@@ -42,11 +39,6 @@ class LaserShockSampleSpec(MaterialSpec) :
                                            template=MaterialProcessingTemplate(),
                                            origin='specified')),
         ]
-        #create the ingredients that went into the process 
-        #(adds these ingredients as implicit to the process that produced the material)
-        for element in self.ELEMENTS :
-            matspec = MaterialSpec(name=element)
-            ingspec = IngredientSpec(name=element,material=matspec,process=process)
         #create the actual MaterialSpec
         super().__init__(name=name,process=process,properties=properties)
 
@@ -112,21 +104,26 @@ class LaserShockSample(MaterialRun) :
                     if par.name==key.replace(' ','') :
                         par.value = par_tuple[0](prop_tuple[1](value),**prop_tuple[2])
                         break
-            #add any recognized constituents by pairing them with their percentages and modifying ingredients
+            #add any recognized constituents by pairing them with their percentages and adding ingredient specs
             elif key.startswith('Constituent') :
                 if value=='N/A' :
                     continue
                 element = value
                 percent = int(record[key.replace('Constituent','Percentage')])
                 measure = record['Percentage Measure']
-                for ing in obj.process.ingredients :
-                    if ing.name==element :
-                        if measure=='Weight Percent' :
-                            ing.mass_fraction = NominalReal(0.01*percent,units='')
-                        elif measure=='Atomic Percent' :
-                            ing.number_fraction = NominalReal(0.01*percent,units='')
-                        else :
-                            raise ValueError(f'ERROR: Percentage Measure {measure} not recognized!')
+                matspec = MaterialSpec(name=element)
+                if measure=='Weight Percent' :
+                    ingspec = IngredientSpec(name=element,
+                                             material=matspec,
+                                             process=obj.process.spec,
+                                             mass_fraction=NominalReal(0.01*percent,units=''))
+                elif measure=='Atomic Percent' :
+                    ingspec = IngredientSpec(name=element,
+                                             material=matspec,
+                                             process=obj.process.spec,
+                                             number_fraction=NominalReal(0.01*percent,units=''))
+                else :
+                    raise ValueError(f'ERROR: Percentage Measure {measure} not recognized!')
             #add the name of the supplier and purchase/manufacture date as the process source
             elif key=='Supplier Name' :
                 date=record['Purchase/Manufacture Date']
