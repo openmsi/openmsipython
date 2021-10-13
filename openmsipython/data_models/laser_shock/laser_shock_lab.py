@@ -1,10 +1,10 @@
 #imports
 import os, json, requests, getpass, fmrest
 from gemd.json import GEMDJson
-from gemd.entity.util import complete_material_history, make_instance
+from gemd.entity.util import complete_material_history
 from .laser_shock_sample import LaserShockSample
 
-class LaserShockLab() :
+class LaserShockLab :
     """
     Representation of all the information in the Laser Shock Lab's FileMaker database in GEMD language
     """

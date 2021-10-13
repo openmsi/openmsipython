@@ -113,15 +113,15 @@ class LaserShockSample(MaterialRun) :
                 measure = record['Percentage Measure']
                 matspec = MaterialSpec(name=element)
                 if measure=='Weight Percent' :
-                    ingspec = IngredientSpec(name=element,
-                                             material=matspec,
-                                             process=obj.process.spec,
-                                             mass_fraction=NominalReal(0.01*percent,units=''))
+                    IngredientSpec(name=element,
+                                   material=matspec,
+                                   process=obj.process.spec,
+                                   mass_fraction=NominalReal(0.01*percent,units=''))
                 elif measure=='Atomic Percent' :
-                    ingspec = IngredientSpec(name=element,
-                                             material=matspec,
-                                             process=obj.process.spec,
-                                             number_fraction=NominalReal(0.01*percent,units=''))
+                    IngredientSpec(name=element,
+                                   material=matspec,
+                                   process=obj.process.spec,
+                                   number_fraction=NominalReal(0.01*percent,units=''))
                 else :
                     raise ValueError(f'ERROR: Percentage Measure {measure} not recognized!')
             #add the name of the supplier and purchase/manufacture date as the process source
