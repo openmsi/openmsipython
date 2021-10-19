@@ -1,6 +1,4 @@
 #imports
-from gemd.entity.util import make_instance
-from gemd.entity.source.performed_source import PerformedSource
 from gemd.entity.value.nominal_real import NominalReal
 from gemd.entity.value.discrete_categorical import DiscreteCategorical
 from gemd.entity.attribute.parameter import Parameter
@@ -12,7 +10,8 @@ from gemd.entity.object.measurement_spec import MeasurementSpec
 from gemd.entity.object.measurement_run import MeasurementRun
 from gemd.entity.object.material_spec import MaterialSpec
 from gemd.entity.object.material_run import MaterialRun
-from .templates import MaterialProcessingTemplate, ProcessingGeometryTemplate, ProcessingRouteTemplate
+from .attribute_templates import MaterialProcessingTemplate, ProcessingGeometryTemplate, ProcessingRouteTemplate
+from .run_from_filemaker_record import MaterialRunFromFileMakerRecord
 
 class LaserShockSampleSpec(MaterialSpec) :
     """
@@ -42,14 +41,21 @@ class LaserShockSampleSpec(MaterialSpec) :
         #create the actual MaterialSpec
         super().__init__(name=name,process=process,properties=properties)
 
-class LaserShockSample(MaterialRun) :
+class LaserShockSample(MaterialRun,MaterialRunFromFileMakerRecord) :
     """
     A MaterialRun instance of the LaserShockSampleSpec 
     can be instantiated from a filemaker record
     """
 
-    #a list of record keys that will be added just as tags
-    TAG_KEYS = ['Sample ID','Supplier Product ID','Date','Performed By','Grant Funding','recordId','modId']
+    #Some constants for MaterialRunFromFileMakerRecord
+    spec_type = LaserShockSampleSpec
+    name_key = 'Sample Name'
+    notes_key = 'General Notes'
+    tag_keys = ['Sample ID','Supplier Product ID','Date','Performed By','Grant Funding','recordId','modId']
+    performed_by_key = 'Supplier Name'
+    performed_date_key = 'Purchase/Manufacture Date'
+
+    #Some more internal constants
     #a dictionary keyed by names of possible measured properties whose values are tuples of (ValueType,datatype,kwargs)
     MEASURED_PROPERTIES = {'Density':(NominalReal,float,{'units':'kg/m^3'}),
                            'Bulk Wave  Speed':(NominalReal,float,{'units':'m/s'}),
@@ -61,87 +67,74 @@ class LaserShockSample(MaterialRun) :
     #whose values are tuples of (ValueType,datatype,kwargs)
     OTHER_PARS = {'Processing Temperature':(NominalReal,float,{'units':'C'})}
 
+    @property
     @classmethod
-    def from_filemaker_record(cls,record) :
-        """
-        Use the information in a given FileMaker record to populate and return a LaserShockSample
-        """
-        #make a placeholder MaterialRun using the make_instance utility
-        spec = LaserShockSampleSpec()
-        obj = make_instance(spec)
-        #loop over the keys and values in the given record and use them to populate the Run
-        for key, value in zip(record.keys(),record.values()) :
-            #add tags by just appending to the list
-            if key in cls.TAG_KEYS :
-                obj.tags.append(f'{key.replace(" ","")}::{value.replace(" ","_")}')
-            #add measured properties (if any of them are given) by creating MeasurementRuns linked to this MaterialRun
-            elif key in cls.MEASURED_PROPERTIES.keys() :
-                if value=='' :
-                    continue
-                name = key.replace(' ','')
-                prop_tuple = cls.MEASURED_PROPERTIES[key]
-                meas = MeasurementRun(name=name,material=obj)
-                meas.spec = MeasurementSpec(name=name)
-                meas.properties.append(Property(name=name,
-                                                value=prop_tuple[0](prop_tuple[1](value),
-                                                                    origin='measured',**prop_tuple[2])))
-            #add the category of material it is (a property it's spec'd to have)
-            elif key=='Material Processing' :
-                for prop in obj.spec.properties :
-                    if prop.name=='MaterialProcessing' :
-                        prop.property.value=DiscreteCategorical({value:1.0})
-                        break
-            #add the discrete categorical process parameters
-            elif key in cls.DISCRETE_CATEGORICAL_PARS :
-                for par in obj.process.parameters :
-                    if par.name==key.replace(' ','') :
-                        par.value=DiscreteCategorical({value:1.0})
-                        break
-            #add the other process parameters
-            elif key in cls.OTHER_PARS.keys() :
-                par_tuple = cls.OTHER_PARS[key]
-                for par in obj.process.parameters :
-                    if par.name==key.replace(' ','') :
-                        par.value = par_tuple[0](prop_tuple[1](value),**prop_tuple[2])
-                        break
-            #add any recognized constituents by pairing them with their percentages and adding ingredient specs
-            elif key.startswith('Constituent') :
-                if value=='N/A' :
-                    continue
-                element = value
-                percent = int(record[key.replace('Constituent','Percentage')])
-                measure = record['Percentage Measure']
-                matspec = MaterialSpec(name=element)
-                if measure=='Weight Percent' :
-                    IngredientSpec(name=element,
-                                   material=matspec,
-                                   process=obj.process.spec,
-                                   mass_fraction=NominalReal(0.01*percent,units=''))
-                elif measure=='Atomic Percent' :
-                    IngredientSpec(name=element,
-                                   material=matspec,
-                                   process=obj.process.spec,
-                                   number_fraction=NominalReal(0.01*percent,units=''))
-                else :
-                    raise ValueError(f'ERROR: Percentage Measure {measure} not recognized!')
-            #add the name of the supplier and purchase/manufacture date as the process source
-            elif key=='Supplier Name' :
-                date=record['Purchase/Manufacture Date']
-                if date=='' :
-                    date = None
-                obj.process.source = PerformedSource(performed_by=value,performed_date=date)
-            #add the sample name
-            elif key=='Sample Name' :
-                obj.name = value
-            #add the general notes
-            elif key=='General Notes' :
-                obj.notes = value
-            #skip keys that are used in processing others
-            elif (key.startswith('Percentage')) or (key in ['Purchase/Manufacture Date']) :
-                continue
+    def other_keys(cls) :
+        return [*(super(LaserShockSample,cls).other_keys),
+                *(cls.MEASURED_PROPERTIES.keys()),
+                *(cls.DISCRETE_CATEGORICAL_PARS),
+                *(cls.OTHER_PARS.keys()),
+                'Material Processing',
+                *[f'Constituent {i}' for i in range(1,8)],
+                ]
+
+    @classmethod
+    def ignore_key(cls,key) :
+        if key.startswith('Percentage') :
+            return True
+        return super(LaserShockSample,cls).ignore_key(key)
+    
+    @classmethod
+    def process_other_key(cls,key,value,record,run_obj) :
+        #add measured properties (if any of them are given) by creating MeasurementRuns linked to this MaterialRun
+        if key in cls.MEASURED_PROPERTIES.keys() :
+            if value=='' :
+                return
+            name = key.replace(' ','')
+            prop_tuple = cls.MEASURED_PROPERTIES[key]
+            meas = MeasurementRun(name=name,material=run_obj)
+            meas.spec = MeasurementSpec(name=name)
+            meas.properties.append(Property(name=name,
+                                            value=prop_tuple[0](prop_tuple[1](value),
+                                                                origin='measured',**prop_tuple[2])))
+        #add the category of material it is (a property it's spec'd to have)
+        elif key=='Material Processing' :
+            for prop in run_obj.spec.properties :
+                if prop.name=='MaterialProcessing' :
+                    prop.property.value=DiscreteCategorical({value:1.0})
+                    break
+        #add the discrete categorical process parameters
+        elif key in cls.DISCRETE_CATEGORICAL_PARS :
+            for par in run_obj.process.parameters :
+                if par.name==key.replace(' ','') :
+                    par.value=DiscreteCategorical({value:1.0})
+                    break
+        #add the other process parameters
+        elif key in cls.OTHER_PARS.keys() :
+            par_tuple = cls.OTHER_PARS[key]
+            for par in run_obj.process.parameters :
+                if par.name==key.replace(' ','') :
+                    par.value = par_tuple[0](prop_tuple[1](value),**prop_tuple[2])
+                    break
+        #add any recognized constituents by pairing them with their percentages and adding ingredient specs
+        elif key.startswith('Constituent') :
+            if value=='N/A' :
+                return
+            element = value
+            percent = int(record[key.replace('Constituent','Percentage')])
+            measure = record['Percentage Measure']
+            matspec = MaterialSpec(name=element)
+            if measure=='Weight Percent' :
+                IngredientSpec(name=element,
+                               material=matspec,
+                               process=run_obj.process.spec,
+                               mass_fraction=NominalReal(0.01*percent,units=''))
+            elif measure=='Atomic Percent' :
+                IngredientSpec(name=element,
+                               material=matspec,
+                               process=run_obj.process.spec,
+                               number_fraction=NominalReal(0.01*percent,units=''))
             else :
-                errmsg = f'ERROR: unrecognized key for key,value pair ({key},{value}) in FileMaker record '
-                errmsg+= f'{record}'
-                raise ValueError(errmsg)
-        #return the completed object
-        return obj
+                raise ValueError(f'ERROR: Percentage Measure {measure} not recognized!')
+        else :
+            super(LaserShockSample,cls).process_other_key(key,value,record,run_obj)

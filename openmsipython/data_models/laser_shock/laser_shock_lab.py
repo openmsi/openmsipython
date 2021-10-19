@@ -31,7 +31,7 @@ class LaserShockLab :
         #self.__add_flyer_stacks()
         self.samples = self.__get_samples()
         #self.__add_launch_packages()
-        self.experiments = self.__get_experiments()
+        #self.experiments = self.__get_experiments()
 
     def dump_to_json_files(self) :
         """
@@ -47,12 +47,12 @@ class LaserShockLab :
             fp.write(encoder.thin_dumps(self.samples[0].spec, indent=2))
         with open('example_laser_shock_sample.json', 'w') as fp: 
             fp.write(encoder.thin_dumps(self.samples[0], indent=2))
-        with open('example_laser_shock_experiment_template.json','w') as fp :
-            fp.write(encoder.thin_dumps(self.samples[0].measurements[0].template, indent=2))
-        with open('example_laser_shock_experiment_spec.json','w') as fp :
-            fp.write(encoder.thin_dumps(self.samples[0].measurements[0].spec, indent=2))
-        with open('example_laser_shock_experiment.json','w') as fp :
-            fp.write(encoder.thin_dumps(self.samples[0].measurements[0], indent=2))
+        #with open('example_laser_shock_experiment_template.json','w') as fp :
+        #    fp.write(encoder.thin_dumps(self.samples[0].measurements[0].template, indent=2))
+        #with open('example_laser_shock_experiment_spec.json','w') as fp :
+        #    fp.write(encoder.thin_dumps(self.samples[0].measurements[0].spec, indent=2))
+        #with open('example_laser_shock_experiment.json','w') as fp :
+        #    fp.write(encoder.thin_dumps(self.samples[0].measurements[0], indent=2))
 
     #################### PRIVATE HELPER FUNCTIONS ####################
 
