@@ -3,6 +3,7 @@ import os, json, requests, getpass, fmrest
 from gemd.json import GEMDJson
 from gemd.entity.util import complete_material_history
 from .laser_shock_sample import LaserShockSample
+from .laser_shock_experiments import LaserShockExperiment
 
 class LaserShockLab :
     """
@@ -30,7 +31,7 @@ class LaserShockLab :
         #self.__add_flyer_stacks()
         self.samples = self.__get_samples()
         #self.__add_launch_packages()
-        #self.__add_experiments()
+        self.experiments = self.__get_experiments()
 
     def dump_to_json_files(self) :
         """
@@ -39,11 +40,19 @@ class LaserShockLab :
         #create the encoder
         encoder = GEMDJson()
         #dump the different parts of the lab data model to json files
-        with open('laser_shock_sample_spec.json', 'w') as fp:
-            fp.write(encoder.thin_dumps(self.samples[0].spec, indent=2))
         with open('example_laser_shock_sample_material_history.json', 'w') as fp :
-            context_list = complete_material_history(self.samples[0])
+            context_list = complete_material_history(self.samples[0]) 
             fp.write(json.dumps(context_list, indent=2))
+        with open('example_laser_shock_sample_spec.json', 'w') as fp: 
+            fp.write(encoder.thin_dumps(self.samples[0].spec, indent=2))
+        with open('example_laser_shock_sample.json', 'w') as fp: 
+            fp.write(encoder.thin_dumps(self.samples[0], indent=2))
+        with open('example_laser_shock_experiment_template.json','w') as fp :
+            fp.write(encoder.thin_dumps(self.samples[0].measurements[0].template, indent=2))
+        with open('example_laser_shock_experiment_spec.json','w') as fp :
+            fp.write(encoder.thin_dumps(self.samples[0].measurements[0].spec, indent=2))
+        with open('example_laser_shock_experiment.json','w') as fp :
+            fp.write(encoder.thin_dumps(self.samples[0].measurements[0], indent=2))
 
     #################### PRIVATE HELPER FUNCTIONS ####################
 
@@ -80,9 +89,10 @@ class LaserShockLab :
     def __add_launch_packages(self) :
         pass
 
-    def __add_experiments(self) :
-        pass
-
+    def __get_experiments(self) :
+        #get records from the FileMaker server
+        records = self.__get_filemaker_records('Experiment',120)
+        return [LaserShockExperiment.from_filemaker_record(record) for record in records]
 
 #################### MAIN FUNCTION ####################
 
