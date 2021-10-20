@@ -1,7 +1,7 @@
 # <div align="center"> Open MSI Python Code </div>
-#### <div align="center">***v0.1.0***</div>
+#### <div align="center">***v0.5.0***</div>
 
-#### <div align="center">David Elbert<sup>1</sup>, Maggie Eminizer<sup>2</sup>, Sam Tabrisky<sup>3</sup></div>
+#### <div align="center">Maggie Eminizer<sup>2</sup>, Sam Tabrisky<sup>3</sup>, David Elbert<sup>1</sup></div>
 
  <div align="center"><sup>1</sup>Hopkins Extreme Materials Institute (HEMI), PARADIM Materials Innovation Platform, and Dept. of Earth and Planetary Sciences, The Johns Hopkins University, Baltimore, MD, USA</div>
   <div align="center"><sup>2</sup>Institute for Data Intensive Engineering and Science (IDIES), Dept. of Physics and Astronomy, The Johns Hopkins University, Baltimore, MD, USA</div>
