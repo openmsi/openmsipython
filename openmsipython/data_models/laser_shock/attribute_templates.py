@@ -1,28 +1,75 @@
 #imports
-from gemd.entity.template.property_template import PropertyTemplate
-from gemd.entity.template.parameter_template import ParameterTemplate
-from gemd.entity.bounds.categorical_bounds import CategoricalBounds
+from gemd.entity.bounds import RealBounds, CategoricalBounds, CompositionBounds
+from gemd.entity.template import PropertyTemplate, ParameterTemplate, ConditionTemplate
 
-class MaterialProcessingTemplate(PropertyTemplate) :
+ATTR_TEMPL = {}
 
-    def __init__(self) :
-        super().__init__(name='Material processing',
-                         description='Possible values in the "Material Processing" menu buttons in the "Sample" layout',
-                         bounds=CategoricalBounds(['Metal','Ceramic','Polymer','BMG','HEA','Composite'])
-            )
+# Properties
 
-class ProcessingGeometryTemplate(ParameterTemplate) :
+name = 'Sample Material Processing'
+ATTR_TEMPL[name] = PropertyTemplate(
+    name=name,
+    description='Possible values in the "Material Processing" menu buttons in the "Sample" layout',
+    bounds=CategoricalBounds(['Metal','Ceramic','Polymer','BMG','HEA','Composite'])
+    )
 
-    def __init__(self) :
-        super().__init__(name='Processing geometry',
-                         description='Possible values in the "Processing Geometry" menu buttons in the "Sample" layout',
-                         bounds=CategoricalBounds(['Billet','Plate'])
-            )
+name = 'Sample Raw Material Composition'
+ATTR_TEMPL[name] = PropertyTemplate(
+    name=name,
+    description="The composition of a raw material that's processed to produce a Laser Shock Sample",
+    bounds=CompositionBounds(components=('Mg','Al','Zr','Ti','Cu','Ni','Be'))
+    )
 
-class ProcessingRouteTemplate(ParameterTemplate) :
+name = 'Density'
+ATTR_TEMPL[name] = PropertyTemplate(
+    name=name,
+    description='The density of something',
+    bounds=RealBounds(0,20e3,'kg/m^3'),
+    )
 
-    def __init__(self) :
-        super().__init__(name='Processing route',
-                         description='Possible values in the "Processing Route" menu buttons in the "Sample" layout',
-                         bounds=CategoricalBounds(['4Bc'])
-            )
+name = 'Bulk Wave Speed'
+ATTR_TEMPL[name] = PropertyTemplate(
+    name=name,
+    description='The speed at which waves propagate through a material',
+    bounds=RealBounds(0,36e3,'m/s'),
+    )
+
+name = 'Average Grain Size'
+ATTR_TEMPL[name] = PropertyTemplate(
+    name=name,
+    description='The average size of grains in a material',
+    bounds=RealBounds(0,1e3,'um')
+    )
+
+
+# Parameters
+
+name = 'Processing Route'
+ATTR_TEMPL[name] = ParameterTemplate(
+    name=name,
+    description='Possible values in the "Processing Route" dropdown menu in the "Sample" layout',
+    bounds=CategoricalBounds(['4Bc'])
+    )
+
+# Conditions
+
+name = 'Composition Measure'
+ATTR_TEMPL[name] = ConditionTemplate(
+    name=name,
+    description='Possible values of the "Percentage Measure" radial button in the "Sample" layout',
+    bounds=CategoricalBounds(['Atomic Percent','Weight Percent'])
+    )
+
+name = 'Processing Geometry'
+ATTR_TEMPL[name] = ConditionTemplate(
+    name=name,
+    description='Possible values in the "Processing Geometry" menu buttons in the "Sample" layout',
+    bounds=CategoricalBounds(['Billet','Plate'])
+    )
+
+name = 'Processing Temperature'
+ATTR_TEMPL[name] = ConditionTemplate(
+    name=name,
+    description='Temperature at which a raw material is processed to produce a Laser Shock Sample',
+    bounds=RealBounds(0,1e3,'C')
+    )

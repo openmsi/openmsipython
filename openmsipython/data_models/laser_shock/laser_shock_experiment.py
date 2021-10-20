@@ -1,27 +1,16 @@
 #imports
-from gemd.entity.util import make_instance
-from gemd.entity.object.measurement_run import MeasurementRun
-from .laser_shock_experiment_specs import LaserShockExperimentSpec
+from gemd.entity.object import MeasurementSpec
+from .run_from_filemaker_record import MeasurementRunFromFileMakerRecord
 
-class LaserShockExperiment(MeasurementRun) :
-    """
-    A MeasurementRun instance of a LaserShockExperimentSpec 
-    can be instantiated from a filemaker record
-    """
+class LaserShockExperimentSpec(MeasurementSpec) :
 
-    @classmethod
-    def from_filemaker_record(cls,record) :
-        """
-        Use the information in a given FileMaker record to populate and return a LaserShockExperiment
-        """
-        #make a placeholder Spec using the make_instance utility
-        spec = LaserShockExperimentSpec()
-        obj = make_instance(spec)
-        #loop over the keys and values in the given record and use them to populate the Run
-        for key, value in zip(record.keys(),record.values()) :
-            continue
-        #return the completed object
-        return obj
+    def __init__(self) :
+        pass
+
+class LaserShockExperiment(MeasurementRunFromFileMakerRecord) :
+    
+    def get_spec(self,record,specs) :
+        pass
 
 #Tags
 #Grant Funding: MEDE Metals

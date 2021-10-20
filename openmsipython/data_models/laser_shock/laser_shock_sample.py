@@ -1,140 +1,128 @@
 #imports
-from gemd.entity.value.nominal_real import NominalReal
-from gemd.entity.value.discrete_categorical import DiscreteCategorical
-from gemd.entity.attribute.parameter import Parameter
-from gemd.entity.attribute.property import Property
-from gemd.entity.attribute.property_and_conditions import PropertyAndConditions
-from gemd.entity.object.ingredient_spec import IngredientSpec
-from gemd.entity.object.process_spec import ProcessSpec
-from gemd.entity.object.measurement_spec import MeasurementSpec
-from gemd.entity.object.measurement_run import MeasurementRun
-from gemd.entity.object.material_spec import MaterialSpec
-from gemd.entity.object.material_run import MaterialRun
-from .attribute_templates import MaterialProcessingTemplate, ProcessingGeometryTemplate, ProcessingRouteTemplate
+from hashlib import sha512
+from gemd.entity.value import DiscreteCategorical, NominalReal, NominalComposition
+from gemd.entity.attribute import PropertyAndConditions, Property, Parameter, Condition
+from gemd.entity.object import MaterialSpec, ProcessSpec, IngredientSpec
+from .attribute_templates import ATTR_TEMPL
+from .object_templates import OBJ_TEMPL
 from .run_from_filemaker_record import MaterialRunFromFileMakerRecord
 
-class LaserShockSampleSpec(MaterialSpec) :
+class LaserShockSampleSpec :
     """
-    GEMD MaterialSpec for a sample in the Laser Shock Lab
+    General constructor for all LaserShockSample Material Specs
     """
 
-    def __init__(self) :
-        #define the arguments to the MaterialSpec
-        name = 'Laser Shock Sample'
+    def __init__(self,mat_type,pct_meas,constituents,proc_geom,proc_route,proc_temp) :
+        #keep the arguments around for quick comparison with other potential specs
+        self.args = [mat_type,pct_meas,constituents,proc_geom,proc_route,proc_temp]
+        #create the unique name for the spec
+        name_hash = sha512()
+        name_hash.update('Laser Shock Sample'.encode())
+        name_hash.update(mat_type.encode())
+        name_hash.update(pct_meas.encode())
+        for c in constituents :
+            name_hash.update(c[0].encode())
+            name_hash.update(str(c[1]).encode())
+        name_hash.update(proc_geom.encode())
+        name_hash.update(proc_route.encode())
+        name_hash.update(str(proc_temp).encode())
+        name = name_hash.hexdigest()
+        #notes
+        notes = 'One of the possible Specs for producing Samples for the Laser Shock Lab'
+        #process
         process = ProcessSpec(
-            name='Laser Shock Sample Processing',
-            parameters=[Parameter(name='ProcessingGeometry',
-                                  template=ProcessingGeometryTemplate(),
+            name=name,
+            conditions=[Condition(name='ProcessingGeometry',
+                                  value=DiscreteCategorical({proc_geom:1.0}),
+                                  template=ATTR_TEMPL['Processing Geometry'],
                                   origin='specified'),
-                        Parameter(name='ProcessingRoute',
-                                  template=ProcessingRouteTemplate(),
-                                  origin='specified'),
-                        Parameter(name='ProcessingTemperature',
+                        Condition(name='ProcessingTemperature',
+                                  value=NominalReal(proc_temp,
+                                                    ATTR_TEMPL['Processing Temperature'].bounds.default_units),
+                                  template=ATTR_TEMPL['Processing Temperature'],
                                   origin='specified')
-                ]
+                ],
+            parameters=[
+                        Parameter(name='ProcessingRoute',
+                                  value=DiscreteCategorical({proc_route:1.0}),
+                                  template=ATTR_TEMPL['Processing Route'],
+                                  origin='specified'),
+                ],
             )
-        properties = [
-            PropertyAndConditions(Property(name='MaterialProcessing',
-                                           template=MaterialProcessingTemplate(),
-                                           origin='specified')),
-        ]
+        #add the raw material as the ingredient to the process
+        comp_dict = {}
+        for c in constituents :
+            comp_dict[c[0]]=c[1]
+        raw_mat_spec = MaterialSpec(
+            name='Raw Material',
+            properties=[
+                PropertyAndConditions(Property(name='MaterialProcessing',
+                                               value=DiscreteCategorical({mat_type:1.0}),
+                                               template=ATTR_TEMPL['Sample Material Processing'],
+                                               origin='specified')),
+                PropertyAndConditions(Property(name='MaterialComposition',
+                                               value=NominalComposition(comp_dict),
+                                               template=ATTR_TEMPL['Sample Raw Material Composition'],
+                                               origin='specified'),
+                                      Condition(name='CompositionMeasure',
+                                                value=DiscreteCategorical({pct_meas:1.0}),
+                                                template=ATTR_TEMPL['Composition Measure'],
+                                                origin='specified')),
+                ],
+            template=OBJ_TEMPL['Raw Sample Material'],
+            )
+        IngredientSpec(name='Raw Material',
+                       material=raw_mat_spec,
+                       process=process,
+            )
         #create the actual MaterialSpec
-        super().__init__(name=name,process=process,properties=properties)
+        self.spec = MaterialSpec(name=name,notes=notes,process=process)
 
-class LaserShockSample(MaterialRun,MaterialRunFromFileMakerRecord) :
+class LaserShockSample(MaterialRunFromFileMakerRecord) :
     """
-    A MaterialRun instance of the LaserShockSampleSpec 
-    can be instantiated from a filemaker record
+    A MaterialSpec/MaterialRun pair representing a Sample in the Laser Shock Lab 
+    created from a record in the "Sample" layout of the FileMaker database
     """
 
     #Some constants for MaterialRunFromFileMakerRecord
-    spec_type = LaserShockSampleSpec
     name_key = 'Sample Name'
     notes_key = 'General Notes'
-    tag_keys = ['Sample ID','Supplier Product ID','Date','Performed By','Grant Funding','recordId','modId']
     performed_by_key = 'Supplier Name'
     performed_date_key = 'Purchase/Manufacture Date'
 
-    #Some more internal constants
-    #a dictionary keyed by names of possible measured properties whose values are tuples of (ValueType,datatype,kwargs)
-    MEASURED_PROPERTIES = {'Density':(NominalReal,float,{'units':'kg/m^3'}),
-                           'Bulk Wave  Speed':(NominalReal,float,{'units':'m/s'}),
-                           'Average Grain Size':(NominalReal,float,{'units':'um'}),
-                           }
-    #a list of record keys corresponding to DiscreteCategorical parameters of the process used
-    DISCRETE_CATEGORICAL_PARS = ['Processing Geometry','Processing Route']
-    #a dictionary keyed by names of non-categorical process parameters 
-    #whose values are tuples of (ValueType,datatype,kwargs)
-    OTHER_PARS = {'Processing Temperature':(NominalReal,float,{'units':'C'})}
+    @property
+    def tags_keys(self) :
+        return [*super().tags_keys,'Sample ID','Supplier Product ID','Date','Performed By','Grant Funding']
 
     @property
-    @classmethod
-    def other_keys(cls) :
-        return [*(super(LaserShockSample,cls).other_keys),
-                *(cls.MEASURED_PROPERTIES.keys()),
-                *(cls.DISCRETE_CATEGORICAL_PARS),
-                *(cls.OTHER_PARS.keys()),
-                'Material Processing',
-                *[f'Constituent {i}' for i in range(1,8)],
-                ]
+    def measured_property_dict(self) :
+        return {'Density':{'valuetype':NominalReal,
+                           'datatype':float,
+                           'template':ATTR_TEMPL['Density']},
+                'Bulk Wave  Speed':{'valuetype':NominalReal,
+                                    'datatype':float,
+                                    'template':ATTR_TEMPL['Bulk Wave Speed']},
+                'Average Grain Size':{'valuetype':NominalReal,
+                                      'datatype':float,
+                                      'template':ATTR_TEMPL['Average Grain Size']},
+            }
 
-    @classmethod
-    def ignore_key(cls,key) :
-        if key.startswith('Percentage') :
-            return True
-        return super(LaserShockSample,cls).ignore_key(key)
-    
-    @classmethod
-    def process_other_key(cls,key,value,record,run_obj) :
-        #add measured properties (if any of them are given) by creating MeasurementRuns linked to this MaterialRun
-        if key in cls.MEASURED_PROPERTIES.keys() :
-            if value=='' :
-                return
-            name = key.replace(' ','')
-            prop_tuple = cls.MEASURED_PROPERTIES[key]
-            meas = MeasurementRun(name=name,material=run_obj)
-            meas.spec = MeasurementSpec(name=name)
-            meas.properties.append(Property(name=name,
-                                            value=prop_tuple[0](prop_tuple[1](value),
-                                                                origin='measured',**prop_tuple[2])))
-        #add the category of material it is (a property it's spec'd to have)
-        elif key=='Material Processing' :
-            for prop in run_obj.spec.properties :
-                if prop.name=='MaterialProcessing' :
-                    prop.property.value=DiscreteCategorical({value:1.0})
-                    break
-        #add the discrete categorical process parameters
-        elif key in cls.DISCRETE_CATEGORICAL_PARS :
-            for par in run_obj.process.parameters :
-                if par.name==key.replace(' ','') :
-                    par.value=DiscreteCategorical({value:1.0})
-                    break
-        #add the other process parameters
-        elif key in cls.OTHER_PARS.keys() :
-            par_tuple = cls.OTHER_PARS[key]
-            for par in run_obj.process.parameters :
-                if par.name==key.replace(' ','') :
-                    par.value = par_tuple[0](prop_tuple[1](value),**prop_tuple[2])
-                    break
-        #add any recognized constituents by pairing them with their percentages and adding ingredient specs
-        elif key.startswith('Constituent') :
-            if value=='N/A' :
-                return
-            element = value
-            percent = int(record[key.replace('Constituent','Percentage')])
-            measure = record['Percentage Measure']
-            matspec = MaterialSpec(name=element)
-            if measure=='Weight Percent' :
-                IngredientSpec(name=element,
-                               material=matspec,
-                               process=run_obj.process.spec,
-                               mass_fraction=NominalReal(0.01*percent,units=''))
-            elif measure=='Atomic Percent' :
-                IngredientSpec(name=element,
-                               material=matspec,
-                               process=run_obj.process.spec,
-                               number_fraction=NominalReal(0.01*percent,units=''))
-            else :
-                raise ValueError(f'ERROR: Percentage Measure {measure} not recognized!')
-        else :
-            super(LaserShockSample,cls).process_other_key(key,value,record,run_obj)
+    def get_spec(self,record,specs) :
+        #get everything that defines the specs
+        mat_type = record.pop('Material Processing')
+        pct_meas = record.pop('Percentage Measure')
+        constituents = []
+        for i in range(1,8) :
+            element = record.pop(f'Constituent {i}')
+            percentage = record.pop(f'Percentage {i}')
+            if element!='N/A' and percentage!=0 :
+                constituents.append((element,percentage))
+        constituents.sort(key=lambda x:x[0])
+        proc_geom = record.pop('Processing Geometry')
+        proc_route = record.pop('Processing Route')
+        proc_temp = record.pop('Processing Temperature')
+        args = [mat_type,pct_meas,constituents,proc_geom,proc_route,proc_temp]
+        for spec in specs :
+            if spec.args==args :
+                return spec.spec
+        return (LaserShockSampleSpec(*args)).spec

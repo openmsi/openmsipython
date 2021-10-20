@@ -3,7 +3,7 @@ import os, json, requests, getpass, fmrest
 from gemd.json import GEMDJson
 from gemd.entity.util import complete_material_history
 from .laser_shock_sample import LaserShockSample
-from .laser_shock_experiments import LaserShockExperiment
+from .laser_shock_experiment import LaserShockExperiment
 
 class LaserShockLab :
     """
@@ -26,6 +26,7 @@ class LaserShockLab :
         if self.password=='$JHED_PWORD' :
             self.password = getpass.getpass(f'Please enter the JHED password for {self.username}: ')
         #add all the information to the lab object based on entries in the FileMaker DB
+        self.specs = []
         #self.__add_inventory()
         #self.__add_laser_characteristics()
         #self.__add_flyer_stacks()
@@ -41,12 +42,12 @@ class LaserShockLab :
         encoder = GEMDJson()
         #dump the different parts of the lab data model to json files
         with open('example_laser_shock_sample_material_history.json', 'w') as fp :
-            context_list = complete_material_history(self.samples[0]) 
+            context_list = complete_material_history(self.samples[0].run) 
             fp.write(json.dumps(context_list, indent=2))
         with open('example_laser_shock_sample_spec.json', 'w') as fp: 
-            fp.write(encoder.thin_dumps(self.samples[0].spec, indent=2))
+            fp.write(encoder.thin_dumps(self.samples[0].run.spec, indent=2))
         with open('example_laser_shock_sample.json', 'w') as fp: 
-            fp.write(encoder.thin_dumps(self.samples[0], indent=2))
+            fp.write(encoder.thin_dumps(self.samples[0].run, indent=2))
         #with open('example_laser_shock_experiment_template.json','w') as fp :
         #    fp.write(encoder.thin_dumps(self.samples[0].measurements[0].template, indent=2))
         #with open('example_laser_shock_experiment_spec.json','w') as fp :
@@ -82,17 +83,23 @@ class LaserShockLab :
         pass
 
     def __get_samples(self) :
+        samples = []
         #get records from the FileMaker server
         records = self.__get_filemaker_records('Sample',10)
-        return [LaserShockSample.from_filemaker_record(record) for record in records]
+        for record in records :
+            samples.append(LaserShockSample(record,self.specs))
+        return samples
 
     def __add_launch_packages(self) :
         pass
 
     def __get_experiments(self) :
+        experiments = []
         #get records from the FileMaker server
-        records = self.__get_filemaker_records('Experiment',120)
-        return [LaserShockExperiment.from_filemaker_record(record) for record in records]
+        records = self.__get_filemaker_records('Experiment',10)
+        for record in records :
+            experiments.append(LaserShockExperiment(record,self.specs))
+        return experiments
 
 #################### MAIN FUNCTION ####################
 
