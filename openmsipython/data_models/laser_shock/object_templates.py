@@ -7,6 +7,16 @@ OBJ_TEMPL = {}
 
 # Materials
 
+name = 'Glass ID'
+OBJ_TEMPL[name] = MaterialTemplate(
+    name=name,
+    description='A piece of glass used in the Laser Shock Lab (used in creating Flyer Stacks)',
+    properties = [ATTR_TEMPL['Glass Thickness'],
+                  ATTR_TEMPL['Glass Length'],
+                  ATTR_TEMPL['Glass Width'],
+        ],
+    )
+
 name = 'Raw Sample Material'
 OBJ_TEMPL[name] = MaterialTemplate(
     name=name,
@@ -30,11 +40,14 @@ OBJ_TEMPL[name] = MaterialTemplate(
 
 # Processes
 
-name = 'Purchasing'
+name = 'Purchasing Glass'
 OBJ_TEMPL[name] = ProcessTemplate(
     name=name,
-    description='Purchasing a material from a manufacturer',
-    allowed_names=[], # Not allowed to have any ingredients
+    description='Purchasing a piece of glass from a manufacturer',
+    parameters=[ATTR_TEMPL['Glass Supplier'],
+                ATTR_TEMPL['Glass Part Number'],
+        ],
+    allowed_names=[],
     )
 
 name = 'Sample Processing'

@@ -6,6 +6,27 @@ ATTR_TEMPL = {}
 
 # Properties
 
+name = 'Glass Thickness'
+ATTR_TEMPL[name] = PropertyTemplate(
+    name=name,
+    description='The thickness of a piece of glass',
+    bounds=RealBounds(0,2,'in')
+    )
+
+name = 'Glass Length'
+ATTR_TEMPL[name] = PropertyTemplate(
+    name=name,
+    description='The length of a piece of glass',
+    bounds=RealBounds(0,12,'in')
+    )
+
+name = 'Glass Width'
+ATTR_TEMPL[name] = PropertyTemplate(
+    name=name,
+    description='The width of a piece of glass',
+    bounds=RealBounds(0,12,'in')
+    )
+
 name = 'Sample Material Processing'
 ATTR_TEMPL[name] = PropertyTemplate(
     name=name,
@@ -44,11 +65,25 @@ ATTR_TEMPL[name] = PropertyTemplate(
 
 # Parameters
 
+name = 'Glass Supplier'
+ATTR_TEMPL[name] = ParameterTemplate(
+    name=name,
+    description='The name of a supplier from which a piece of glass was procured',
+    bounds=CategoricalBounds(['McMaster Carr']),
+    )
+
+name = 'Glass Part Number'
+ATTR_TEMPL[name] = ParameterTemplate(
+    name=name,
+    description="The manufacturer's part number for a piece of glass that was purchased",
+    bounds=CategoricalBounds(['B8476012']),
+    )
+
 name = 'Processing Route'
 ATTR_TEMPL[name] = ParameterTemplate(
     name=name,
     description='Possible values in the "Processing Route" dropdown menu in the "Sample" layout',
-    bounds=CategoricalBounds(['4Bc'])
+    bounds=CategoricalBounds(['4Bc']),
     )
 
 # Conditions

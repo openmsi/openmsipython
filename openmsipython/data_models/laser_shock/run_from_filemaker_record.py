@@ -86,26 +86,78 @@ class RunFromFileMakerRecordBase(ABC) :
         all_keys = [self.name_key,*self.tags_keys,self.notes_key,
                     *self.file_links_keys,
                     *self.other_keys]
-        missing_keys = [k for k in all_keys if k not in self.keys_used]
+        missing_keys = [k for k in all_keys if k is not None and k not in self.keys_used]
         if len(missing_keys)>0 :
             errmsg = 'ERROR: the following expected keys were not found in the record '
-            errmsg+= f'used to create a {self.__clas__.__name__} object: '
+            errmsg+= f'used to create a {self.__class__.__name__} object: '
             for k in missing_keys :
                 errmsg+=f'{k}, '
             raise ValueError(errmsg[:-2])
 
     @property
-    def run(self) :
-        return self.__run
+    @abstractmethod
+    def spec_type(self) :
+        """
+        A property for the type of spec corresponding to this Run objects
+        (must be a property of child classes)
+        """
+        pass
 
     @abstractmethod
+    def get_spec_args(self,record) :
+        """
+        Return the arguments that should be sent to the corresponding spec's 
+        constructor method given a FileMaker record
+        (must be implemented in child classes)
+        """
+        pass
+
     def get_spec(self,record,specs) :
         """
         A function to return the Spec for this Run given a FileMaker record
         and some existing specs that might be reused
-        (must be implemented in child classes)
         """
-        pass
+        args = self.get_spec_args(record)
+        for spec in specs :
+            if spec.args==args :
+                return spec.spec
+        new_spec = self.spec_type(*args)
+        specs.append(new_spec)
+        return new_spec.spec
+
+    def ignore_key(self,key) :
+        """
+        Returns "True" for any key that can be ignored, either because 
+        they don't contain any useful informationor because they are 
+        used in processing other individual keys
+        """
+        return False
+
+    def process_other_key(self,key,value,record) :
+        """
+        A function to process a specified key and value uniquely within the child class 
+        instead of automatically in this base class
+
+        This function in the base class just throws an error, nothing should call this
+
+        Parameters:
+        key    = the key to process
+        value  = the value associated with this key in the record
+        record = the entire FileMaker record being used to instantiate this object
+                 (included in case processing the key requires reading other values in the record)
+
+        Should throw an error if anything goes wrong in processing the key
+        
+        In child classes it's important to call super().process_other_key(key,value,record) 
+        if the key isn't used for that child class
+        """
+        errmsg = f'ERROR: process_other_key called for key {key} on the base class for a '
+        errmsg+= f'{self.__class__.__name__} object! This key should be processed somewhere other than the base class'
+        raise NotImplementedError(errmsg)
+
+    @property
+    def run(self) :
+        return self.__run
 
     @property
     def name_key(self) :
@@ -156,36 +208,6 @@ class RunFromFileMakerRecordBase(ABC) :
         along with the entire FileMaker record
         """
         return []
-
-    def ignore_key(self,key) :
-        """
-        Returns "True" for any key that can be ignored, either because 
-        they don't contain any useful informationor because they are 
-        used in processing other individual keys
-        """
-        return False
-
-    def process_other_key(self,key,value,record) :
-        """
-        A function to process a specified key and value uniquely within the child class 
-        instead of automatically in this base class
-
-        This function in the base class just throws an error, nothing should call this
-
-        Parameters:
-        key    = the key to process
-        value  = the value associated with this key in the record
-        record = the entire FileMaker record being used to instantiate this object
-                 (included in case processing the key requires reading other values in the record)
-
-        Should throw an error if anything goes wrong in processing the key
-        
-        In child classes it's important to call super().process_other_key(key,value,record) 
-        if the key isn't used for that child class
-        """
-        errmsg = f'ERROR: process_other_key called for key {key} on the base class for a '
-        errmsg+= f'{self.__class__.__name__} object! This key should be processed somewhere other than the base class'
-        raise NotImplementedError(errmsg)
 
 class HasSourceRunFromFileMakerRecord(RunFromFileMakerRecordBase) :
     """

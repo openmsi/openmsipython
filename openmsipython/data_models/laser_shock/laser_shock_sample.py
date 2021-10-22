@@ -76,7 +76,7 @@ class LaserShockSampleSpec :
                        process=process,
             )
         #create the actual MaterialSpec
-        self.spec = MaterialSpec(name=name,notes=notes,process=process)
+        self.spec = MaterialSpec(name=name,notes=notes,process=process,template=OBJ_TEMPL['Sample'])
 
 class LaserShockSample(MaterialRunFromFileMakerRecord) :
     """
@@ -85,6 +85,7 @@ class LaserShockSample(MaterialRunFromFileMakerRecord) :
     """
 
     #Some constants for MaterialRunFromFileMakerRecord
+    spec_type = LaserShockSampleSpec
     name_key = 'Sample Name'
     notes_key = 'General Notes'
     performed_by_key = 'Supplier Name'
@@ -107,7 +108,7 @@ class LaserShockSample(MaterialRunFromFileMakerRecord) :
                                       'template':ATTR_TEMPL['Average Grain Size']},
             }
 
-    def get_spec(self,record,specs) :
+    def get_spec_args(self,record) :
         #get everything that defines the specs
         mat_type = record.pop('Material Processing')
         pct_meas = record.pop('Percentage Measure')
@@ -122,7 +123,4 @@ class LaserShockSample(MaterialRunFromFileMakerRecord) :
         proc_route = record.pop('Processing Route')
         proc_temp = record.pop('Processing Temperature')
         args = [mat_type,pct_meas,constituents,proc_geom,proc_route,proc_temp]
-        for spec in specs :
-            if spec.args==args :
-                return spec.spec
-        return (LaserShockSampleSpec(*args)).spec
+        return args

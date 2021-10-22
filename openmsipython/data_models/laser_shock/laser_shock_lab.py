@@ -2,6 +2,7 @@
 import os, json, requests, getpass, fmrest
 from gemd.json import GEMDJson
 from gemd.entity.util import complete_material_history
+from .laser_shock_glass_ID import LaserShockGlassID
 from .laser_shock_sample import LaserShockSample
 from .laser_shock_experiment import LaserShockExperiment
 
@@ -27,6 +28,7 @@ class LaserShockLab :
             self.password = getpass.getpass(f'Please enter the JHED password for {self.username}: ')
         #add all the information to the lab object based on entries in the FileMaker DB
         self.specs = []
+        self.glassIDs = self.__getGlassIDs()
         #self.__add_inventory()
         #self.__add_laser_characteristics()
         #self.__add_flyer_stacks()
@@ -48,6 +50,10 @@ class LaserShockLab :
             fp.write(encoder.thin_dumps(self.samples[0].run.spec, indent=2))
         with open('example_laser_shock_sample.json', 'w') as fp: 
             fp.write(encoder.thin_dumps(self.samples[0].run, indent=2))
+        with open('example_laser_shock_glass_ID_spec.json', 'w') as fp: 
+            fp.write(encoder.thin_dumps(self.glassIDs[0].run.spec, indent=2))
+        with open('example_laser_shock_glass_ID.json', 'w') as fp: 
+            fp.write(encoder.thin_dumps(self.glassIDs[0].run, indent=2))
         #with open('example_laser_shock_experiment_template.json','w') as fp :
         #    fp.write(encoder.thin_dumps(self.samples[0].measurements[0].template, indent=2))
         #with open('example_laser_shock_experiment_spec.json','w') as fp :
@@ -72,6 +78,14 @@ class LaserShockLab :
         fms.login()
         #return records in the foundset
         return fms.get_records(limit=n_max_records)
+
+    def __getGlassIDs(self) :
+        glassIDs = []
+        #get records from the FileMaker server
+        records = self.__get_filemaker_records('Glass ID',10)
+        for record in records :
+            glassIDs.append(LaserShockGlassID(record,self.specs))
+        return glassIDs
 
     def __add_inventory(self) :
         pass
