@@ -1,15 +1,14 @@
 #imports
-import functools
-from abc import ABC, abstractmethod
+from abc import abstractmethod
 from gemd.entity.util import make_instance
-from gemd.entity.file_link import FileLink
 from gemd.entity.source.performed_source import PerformedSource
 from gemd.entity.attribute import Property
 from gemd.entity.object import MeasurementSpec, MeasurementRun
+from .from_filemaker_record import FromFileMakerRecordBase
 
-class RunFromFileMakerRecordBase(ABC) :
+class RunFromFileMakerRecord(FromFileMakerRecordBase) :
     """
-    An abstract base class to provide functionality for using FileMaker records 
+    An class to provide functionality for using FileMaker records 
     to create and/or link GEMD "Spec" and Run" objects
     """
 
@@ -17,8 +16,6 @@ class RunFromFileMakerRecordBase(ABC) :
         """
         Use the information in a given FileMaker record to populate this Run object
         """
-        #A list of keys whose values have been recognized and used in creating this Run
-        self.keys_used = []
         #figure out the Spec for this Run
         spec = self.get_spec(record,specs)
         #create an initial object from the spec
@@ -26,79 +23,14 @@ class RunFromFileMakerRecordBase(ABC) :
         #set the name of the Run from the Spec if there is no key defining the name
         if self.name_key is None :
             self.__run.name=self.__spec.name
-        #loop over all the keys/values for the given record and process them one at a time
-        for key, value in zip(record.keys(),record.values()) :
-            #skip any keys that have already been used
-            if key in self.keys_used :
-                continue
-            #add the name
-            elif self.name_key is not None and key==self.name_key :
-                self.__run.name = value
-                self.keys_used.append(key)
-            #add the tags
-            elif key in self.tags_keys :
-                self.__run.tags.append(f'{key.replace(" ","")}::{value.replace(" ","_")}')
-                self.keys_used.append(key)
-            #add the notes
-            elif self.notes_key is not None and key==self.notes_key :
-                self.__run.notes = value
-                self.keys_used.append(key)
-            #add the file links
-            elif key in self.file_links_keys :
-                for d in self.file_links_dicts :
-                    if ('filename' not in d.keys() or key!=d['filename']) and ('url' not in d.keys() or key!=d['url']) :
-                        continue
-                    filename=None; url=None
-                    if 'filename' in d.keys() :
-                        if key==d['filename'] :
-                            filename=value
-                        elif d['filename'] in record.keys() :
-                            filename=record[d['filename']]
-                            self.keys_used.append(d['filename'])
-                    if 'url' in d.keys() :
-                        if key==d['url'] :
-                            url=value
-                        elif d['url'] in record.keys() :
-                            url=record[d['url']]
-                            self.keys_used.append(d['url'])
-                    if filename is not None or url is not None :
-                        if self.__run.file_links is None :
-                            self.__run.file_links = []
-                        self.__run.file_links.append(FileLink(filename,url))
-            #ignore any specified keys
-            elif self.ignore_key(key) :
-                self.keys_used.append(key)
-                continue
-            #send any "other" keys to the "process_other_key" function
-            elif key in self.other_keys :
-                self.process_other_key(key,value,record)
-            #if the key hasn't been found anywhere by now, throw an error
-            else :
-                raise ValueError(f'ERROR: FileMaker record key {key} is not recognized!')
-        #make sure all the keys in the record were used in some way
-        unused_keys = [k for k in record.keys() if k not in self.keys_used]
-        if len(unused_keys)>0 :
-            errmsg = f'ERROR: the following keys were not used in creating a {self.__clas__.__name__} object: '
-            for k in unused_keys :
-                errmsg+=f'{k}, '
-            raise ValueError(errmsg[:-2])
-        #make sure the record contained all the expected keys and they were processed
-        all_keys = [self.name_key,*self.tags_keys,self.notes_key,
-                    *self.file_links_keys,
-                    *self.other_keys]
-        missing_keys = [k for k in all_keys if k is not None and k not in self.keys_used]
-        if len(missing_keys)>0 :
-            errmsg = 'ERROR: the following expected keys were not found in the record '
-            errmsg+= f'used to create a {self.__class__.__name__} object: '
-            for k in missing_keys :
-                errmsg+=f'{k}, '
-            raise ValueError(errmsg[:-2])
+        #call the base class's __init__ with the run as the object to modify
+        super().__init__(record,self.__run)
 
     @property
     @abstractmethod
     def spec_type(self) :
         """
-        A property for the type of spec corresponding to this Run objects
+        A property for the type of spec corresponding to this Run object
         (must be a property of child classes)
         """
         pass
@@ -125,91 +57,11 @@ class RunFromFileMakerRecordBase(ABC) :
         specs.append(new_spec)
         return new_spec.spec
 
-    def ignore_key(self,key) :
-        """
-        Returns "True" for any key that can be ignored, either because 
-        they don't contain any useful informationor because they are 
-        used in processing other individual keys
-        """
-        return False
-
-    def process_other_key(self,key,value,record) :
-        """
-        A function to process a specified key and value uniquely within the child class 
-        instead of automatically in this base class
-
-        This function in the base class just throws an error, nothing should call this
-
-        Parameters:
-        key    = the key to process
-        value  = the value associated with this key in the record
-        record = the entire FileMaker record being used to instantiate this object
-                 (included in case processing the key requires reading other values in the record)
-
-        Should throw an error if anything goes wrong in processing the key
-        
-        In child classes it's important to call super().process_other_key(key,value,record) 
-        if the key isn't used for that child class
-        """
-        errmsg = f'ERROR: process_other_key called for key {key} on the base class for a '
-        errmsg+= f'{self.__class__.__name__} object! This key should be processed somewhere other than the base class'
-        raise NotImplementedError(errmsg)
-
     @property
     def run(self) :
         return self.__run
 
-    @property
-    def name_key(self) :
-        """
-        The FileMaker record key whose value should be used as the name of the object
-        (must be implemented in child classes)
-        """
-        return None
-
-    @property
-    def tags_keys(self) :
-        """
-        A list of keys whose values should be added to the object as tags
-        tags will be formatted as 'name::value' where the name is the key with spaces removed
-        and value is the value in the record
-        """
-        return ['recordId','modId']
-
-    @property
-    def notes_key(self) :
-        """
-        The FileMaker record key whose value should be added as "notes" for the run object
-        """
-        return None
-
-    @property
-    @functools.lru_cache(maxsize=10)
-    def file_links_keys(self) :
-        all_keys = []
-        for d in self.file_links_dicts :
-            for k in d.keys() :
-                all_keys.append(k)
-        return all_keys
-
-    @property
-    def file_links_dicts(self) :
-        """
-        The FileMaker record keys whose values should be used to define file_links for the run object
-        Each entry in the list should be a dictionary with keys "filename" and "url"
-        """
-        return []
-
-    @property
-    def other_keys(self) :
-        """
-        A list of keys that need to be processed uniquely by the child class
-        when keys in this list are found they are sent back to the "process_other_key" function 
-        along with the entire FileMaker record
-        """
-        return []
-
-class HasSourceRunFromFileMakerRecord(RunFromFileMakerRecordBase) :
+class HasSourceFromFileMakerRecord(RunFromFileMakerRecord) :
     """
     Adds to the base class to process keys for sources 
     Exactly what the source should be added to depends on the type of Objects being created
@@ -236,7 +88,7 @@ class HasSourceRunFromFileMakerRecord(RunFromFileMakerRecordBase) :
                 self.performed_date_key,
                ]
 
-class MaterialRunFromFileMakerRecord(HasSourceRunFromFileMakerRecord) :
+class MaterialRunFromFileMakerRecord(HasSourceFromFileMakerRecord) :
     """
     Class to use for creating Material(Spec/Run) objects from FileMaker Records
     """
@@ -266,7 +118,7 @@ class MaterialRunFromFileMakerRecord(HasSourceRunFromFileMakerRecord) :
                 *self.measured_property_dict.keys(),
                ]
 
-    def process_other_key(self,key,value,record) :
+    def add_other_key(self,key,value,record) :
         #add a PerformedSource to the ProcessRun that created this material
         if self.performed_by_key is not None and key==self.performed_by_key :
             if self.run.process.source is None :
@@ -300,14 +152,14 @@ class MaterialRunFromFileMakerRecord(HasSourceRunFromFileMakerRecord) :
                                             origin='measured',
                                             template=temp))
         else :
-            super().process_other_key(key,value,record)
+            super().add_other_key(key,value,record)
 
-class MeasurementRunFromFileMakerRecord(HasSourceRunFromFileMakerRecord) :
+class MeasurementRunFromFileMakerRecord(HasSourceFromFileMakerRecord) :
     """
     Class to use for creating Measurement(Spec/Run)s based on FileMaker records
     """
 
-    def process_other_key(self,key,value,record) :
+    def add_other_key(self,key,value,record) :
         #add a PerformedSource for this measurement
         if self.performed_by_key is not None and key==self.performed_by_key :
             if self.run.source is None :
@@ -322,4 +174,4 @@ class MeasurementRunFromFileMakerRecord(HasSourceRunFromFileMakerRecord) :
                 self.run.source.performed_date = value
             self.keys_used.append(key)
         else :
-            super().process_other_key(key,value,record)
+            super().add_other_key(key,value,record)

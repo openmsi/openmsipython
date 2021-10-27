@@ -1,7 +1,7 @@
 #imports
 from abc import ABC,abstractmethod
 
-class LaserShockSpec(ABC) :
+class LaserShockSpecForRun(ABC) :
     """
     A small base class to handle keeping dynamically-created Specs unique throughout the entire Laser Shock Lab
     """

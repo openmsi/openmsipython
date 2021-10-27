@@ -5,10 +5,10 @@ from gemd.entity.attribute import PropertyAndConditions, Property, Parameter, Co
 from gemd.entity.object import MaterialSpec, ProcessSpec, IngredientSpec
 from .attribute_templates import ATTR_TEMPL
 from .object_templates import OBJ_TEMPL
-from .laser_shock_spec import LaserShockSpec
+from .laser_shock_spec_for_run import LaserShockSpecForRun
 from .run_from_filemaker_record import MaterialRunFromFileMakerRecord
 
-class LaserShockSampleSpec(LaserShockSpec) :
+class LaserShockSampleSpec(LaserShockSpecForRun) :
     """
     General constructor for all LaserShockSample Material Specs
     """

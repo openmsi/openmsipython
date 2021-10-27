@@ -3,6 +3,7 @@ import os, json, requests, getpass, fmrest
 from gemd.json import GEMDJson
 from gemd.entity.util import complete_material_history
 from .laser_shock_glass_ID import LaserShockGlassID
+#from .laser_shock_flyer_stack import LaserShockFlyerStack
 from .laser_shock_sample import LaserShockSample
 from .laser_shock_experiment import LaserShockExperiment
 
@@ -27,16 +28,14 @@ class LaserShockLab :
         if self.password=='$JHED_PWORD' :
             self.password = getpass.getpass(f'Please enter the JHED password for {self.username}: ')
         #add all the information to the lab object based on entries in the FileMaker DB
-        self.specs = []
-        #"Inventory" pages
+        self.specs_from_runs = []
+        #"Inventory" pages (create Specs)
         self.glass_IDs = self.__getGlassIDs()
         self.epoxy_IDs = self.__getEpoxyIDs()
         self.foil_IDs = self.__getFoilIDs()
         self.spacer_IDs = self.__getSpacerIDs()
         self.flyer_cutting_programs = self.__getFlyerCuttingPrograms()
         self.spacer_cutting_programs = self.__getSpacerCuttingPrograms()
-        #Information about the state of the laser
-        self.laser_states = self.__getLaserCharacteristics()
         #Flyer Stacks
         self.flyer_stacks = self.__getFlyerStacks()
         #Samples
@@ -60,10 +59,8 @@ class LaserShockLab :
             fp.write(encoder.thin_dumps(self.samples[0].run.spec, indent=2))
         with open('example_laser_shock_sample.json', 'w') as fp: 
             fp.write(encoder.thin_dumps(self.samples[0].run, indent=2))
-        with open('example_laser_shock_glass_ID_spec.json', 'w') as fp: 
-            fp.write(encoder.thin_dumps(self.glass_IDs[0].run.spec, indent=2))
         with open('example_laser_shock_glass_ID.json', 'w') as fp: 
-            fp.write(encoder.thin_dumps(self.glass_IDs[0].run, indent=2))
+            fp.write(encoder.thin_dumps(self.glass_IDs[0].spec, indent=2))
         #with open('example_laser_shock_experiment_template.json','w') as fp :
         #    fp.write(encoder.thin_dumps(self.samples[0].measurements[0].template, indent=2))
         #with open('example_laser_shock_experiment_spec.json','w') as fp :
@@ -94,7 +91,7 @@ class LaserShockLab :
         #get records from the FileMaker server
         records = self.__get_filemaker_records('Glass ID')
         for record in records :
-            glassIDs.append(LaserShockGlassID(record,self.specs))
+            glassIDs.append(LaserShockGlassID(record))
         return glassIDs
 
     def __getEpoxyIDs(self) :
@@ -112,18 +109,20 @@ class LaserShockLab :
     def __getSpacerCuttingPrograms(self) :
         return []
 
-    def __getLaserCharacteristics(self) :
-        return []
-
     def __getFlyerStacks(self) :
-        return []
+        flyerstacks = []
+        #records = self.__get_filemaker_records('Flyer Stack')
+        #for record in records :
+        #    flyerstacks.append(LaserShockFlyerStack(record,self.specs_from_runs,
+        #                                            self.glass_IDs,self.foil_IDs,self.epoxy_IDs,
+        #                                            self.flyer_cutting_programs))
+        return flyerstacks
 
     def __get_samples(self) :
         samples = []
-        #get records from the FileMaker server
         records = self.__get_filemaker_records('Sample')
         for record in records :
-            samples.append(LaserShockSample(record,self.specs))
+            samples.append(LaserShockSample(record,self.specs_from_runs))
         return samples
 
     def __getLaunchPackages(self) :
@@ -131,10 +130,9 @@ class LaserShockLab :
 
     def __get_experiments(self) :
         experiments = []
-        #get records from the FileMaker server
         records = self.__get_filemaker_records('Experiment')
         for record in records :
-            experiments.append(LaserShockExperiment(record,self.specs))
+            experiments.append(LaserShockExperiment(record,self.specs_from_runs))
         return experiments
 
 #################### MAIN FUNCTION ####################
