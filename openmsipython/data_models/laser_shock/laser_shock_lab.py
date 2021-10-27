@@ -28,11 +28,22 @@ class LaserShockLab :
             self.password = getpass.getpass(f'Please enter the JHED password for {self.username}: ')
         #add all the information to the lab object based on entries in the FileMaker DB
         self.specs = []
-        self.glassIDs = self.__getGlassIDs()
-        #self.__add_laser_characteristics()
-        #self.__add_flyer_stacks()
+        #"Inventory" pages
+        self.glass_IDs = self.__getGlassIDs()
+        self.epoxy_IDs = self.__getEpoxyIDs()
+        self.foil_IDs = self.__getFoilIDs()
+        self.spacer_IDs = self.__getSpacerIDs()
+        self.flyer_cutting_programs = self.__getFlyerCuttingPrograms()
+        self.spacer_cutting_programs = self.__getSpacerCuttingPrograms()
+        #Information about the state of the laser
+        self.laser_states = self.__getLaserCharacteristics()
+        #Flyer Stacks
+        self.flyer_stacks = self.__getFlyerStacks()
+        #Samples
         self.samples = self.__get_samples()
-        #self.__add_launch_packages()
+        #Launch packages
+        self.launch_packages = self.__getLaunchPackages()
+        #Experiments
         #self.experiments = self.__get_experiments()
 
     def dump_to_json_files(self) :
@@ -50,9 +61,9 @@ class LaserShockLab :
         with open('example_laser_shock_sample.json', 'w') as fp: 
             fp.write(encoder.thin_dumps(self.samples[0].run, indent=2))
         with open('example_laser_shock_glass_ID_spec.json', 'w') as fp: 
-            fp.write(encoder.thin_dumps(self.glassIDs[0].run.spec, indent=2))
+            fp.write(encoder.thin_dumps(self.glass_IDs[0].run.spec, indent=2))
         with open('example_laser_shock_glass_ID.json', 'w') as fp: 
-            fp.write(encoder.thin_dumps(self.glassIDs[0].run, indent=2))
+            fp.write(encoder.thin_dumps(self.glass_IDs[0].run, indent=2))
         #with open('example_laser_shock_experiment_template.json','w') as fp :
         #    fp.write(encoder.thin_dumps(self.samples[0].measurements[0].template, indent=2))
         #with open('example_laser_shock_experiment_spec.json','w') as fp :
@@ -86,11 +97,26 @@ class LaserShockLab :
             glassIDs.append(LaserShockGlassID(record,self.specs))
         return glassIDs
 
-    def __add_laser_characteristics(self) :
-        pass
+    def __getEpoxyIDs(self) :
+        return []
 
-    def __add_flyer_stacks(self) :
-        pass
+    def __getFoilIDs(self) :
+        return []
+
+    def __getSpacerIDs(self) :
+        return []
+
+    def __getFlyerCuttingPrograms(self) :
+        return []
+
+    def __getSpacerCuttingPrograms(self) :
+        return []
+
+    def __getLaserCharacteristics(self) :
+        return []
+
+    def __getFlyerStacks(self) :
+        return []
 
     def __get_samples(self) :
         samples = []
@@ -100,8 +126,8 @@ class LaserShockLab :
             samples.append(LaserShockSample(record,self.specs))
         return samples
 
-    def __add_launch_packages(self) :
-        pass
+    def __getLaunchPackages(self) :
+        return []
 
     def __get_experiments(self) :
         experiments = []
