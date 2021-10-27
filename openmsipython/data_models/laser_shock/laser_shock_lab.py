@@ -29,7 +29,6 @@ class LaserShockLab :
         #add all the information to the lab object based on entries in the FileMaker DB
         self.specs = []
         self.glassIDs = self.__getGlassIDs()
-        #self.__add_inventory()
         #self.__add_laser_characteristics()
         #self.__add_flyer_stacks()
         self.samples = self.__get_samples()
@@ -63,7 +62,7 @@ class LaserShockLab :
 
     #################### PRIVATE HELPER FUNCTIONS ####################
 
-    def __get_filemaker_records(self,layout_name,n_max_records) :
+    def __get_filemaker_records(self,layout_name,n_max_records=1000) :
         #disable warnings
         requests.packages.urllib3.disable_warnings()
         #create the server
@@ -82,13 +81,10 @@ class LaserShockLab :
     def __getGlassIDs(self) :
         glassIDs = []
         #get records from the FileMaker server
-        records = self.__get_filemaker_records('Glass ID',10)
+        records = self.__get_filemaker_records('Glass ID')
         for record in records :
             glassIDs.append(LaserShockGlassID(record,self.specs))
         return glassIDs
-
-    def __add_inventory(self) :
-        pass
 
     def __add_laser_characteristics(self) :
         pass
@@ -99,7 +95,7 @@ class LaserShockLab :
     def __get_samples(self) :
         samples = []
         #get records from the FileMaker server
-        records = self.__get_filemaker_records('Sample',10)
+        records = self.__get_filemaker_records('Sample')
         for record in records :
             samples.append(LaserShockSample(record,self.specs))
         return samples
@@ -110,7 +106,7 @@ class LaserShockLab :
     def __get_experiments(self) :
         experiments = []
         #get records from the FileMaker server
-        records = self.__get_filemaker_records('Experiment',10)
+        records = self.__get_filemaker_records('Experiment')
         for record in records :
             experiments.append(LaserShockExperiment(record,self.specs))
         return experiments

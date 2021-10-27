@@ -55,10 +55,31 @@ ATTR_TEMPL[name] = PropertyTemplate(
     bounds=RealBounds(0,36e3,'m/s'),
     )
 
+name = 'Bulk Modulus'
+ATTR_TEMPL[name] = PropertyTemplate(
+    name=name,
+    description='The bulk modulus of a material',
+    bounds=RealBounds(0,1e3,'GPa'),
+    )
+
 name = 'Average Grain Size'
 ATTR_TEMPL[name] = PropertyTemplate(
     name=name,
     description='The average size of grains in a material',
+    bounds=RealBounds(0,1e3,'um')
+    )
+
+name = 'Min Grain Size'
+ATTR_TEMPL[name] = PropertyTemplate(
+    name=name,
+    description='The minimum size of grains in a material',
+    bounds=RealBounds(0,1e3,'um')
+    )
+
+name = 'Max Grain Size'
+ATTR_TEMPL[name] = PropertyTemplate(
+    name=name,
+    description='The maximum size of grains in a material',
     bounds=RealBounds(0,1e3,'um')
     )
 
@@ -83,7 +104,14 @@ name = 'Processing Route'
 ATTR_TEMPL[name] = ParameterTemplate(
     name=name,
     description='Possible values in the "Processing Route" dropdown menu in the "Sample" layout',
-    bounds=CategoricalBounds(['4Bc']),
+    bounds=CategoricalBounds(['4Bc','Solutionized','Aged']),
+    )
+
+name = 'Processing Time'
+ATTR_TEMPL[name] = ParameterTemplate(
+    name=name,
+    description='Amount of time a Raw Material is treated to produce a Sample',
+    bounds=RealBounds(-1,1e3,'hr'),
     )
 
 # Conditions
@@ -99,12 +127,12 @@ name = 'Processing Geometry'
 ATTR_TEMPL[name] = ConditionTemplate(
     name=name,
     description='Possible values in the "Processing Geometry" menu buttons in the "Sample" layout',
-    bounds=CategoricalBounds(['Billet','Plate'])
+    bounds=CategoricalBounds(['Billet','Plate','Foil'])
     )
 
 name = 'Processing Temperature'
 ATTR_TEMPL[name] = ConditionTemplate(
     name=name,
     description='Temperature at which a raw material is processed to produce a Laser Shock Sample',
-    bounds=RealBounds(0,1e3,'C')
+    bounds=RealBounds(0,1e3,'degC')
     )

@@ -5,68 +5,84 @@ from gemd.entity.attribute import PropertyAndConditions, Property, Parameter
 from gemd.entity.object import ProcessSpec, MaterialSpec
 from .attribute_templates import ATTR_TEMPL
 from .object_templates import OBJ_TEMPL
+from .laser_shock_spec import LaserShockSpec
 from .run_from_filemaker_record import MaterialRunFromFileMakerRecord
 
-class LaserShockGlassIDSpec :
+class LaserShockGlassIDSpec(LaserShockSpec) :
     """
     General constructor for Glass ID Specs in the Laser Shock Lab
     """
 
-    def __init__(self,supplier,part_num,thickness,length,width) :
-        #save the arguments
-        self.args = [supplier,part_num,thickness,length,width]
-        #create the unique Spec name as a hash of the arguments
-        name_hash = sha512()
-        name_hash.update('Laser Shock Glass ID'.encode())
-        name_hash.update(supplier.encode())
-        name_hash.update(part_num.encode())
-        name_hash.update(str(thickness).encode())
-        name_hash.update(str(length).encode())
-        name_hash.update(str(width).encode())
-        name = name_hash.hexdigest()
+    spec_type = MaterialSpec
+
+    def __init__(self,*args,**kwargs) :
+        self.supplier = kwargs.get('supplier')
+        self.part_num = kwargs.get('part_num')
+        self.thickness = kwargs.get('thickness')
+        self.length = kwargs.get('length')
+        self.width = kwargs.get('width')
+        super().__init__(*args,**kwargs)
+
+    def get_arg_hash(self) :
+        arg_hash = sha512()
+        arg_hash.update(self.supplier.encode())
+        arg_hash.update(self.part_num.encode())
+        arg_hash.update(str(self.thickness).encode())
+        arg_hash.update(str(self.length).encode())
+        arg_hash.update(str(self.width).encode())
+        return arg_hash.hexdigest()
+
+    def get_spec_kwargs(self) :
+        spec_kwargs = {}
+        #name
+        spec_kwargs['name'] = 'Laser Shock Glass ID'
         #notes
-        notes = 'One of the possible Specs for the glass pieces used in the Laser Shock Lab'
-        #define other arguments to the MaterialSpec
-        process = ProcessSpec(
-            name=name,
+        spec_kwargs['notes'] = 'One of the possible Specs for the glass pieces used in the Laser Shock Lab'
+        #process
+        spec_kwargs['process'] = ProcessSpec(
+            name='Purchasing Glass',
             parameters=[
                 Parameter(
                     name=ATTR_TEMPL['Glass Supplier'].name,
-                    value=DiscreteCategorical({supplier:1.0}),
+                    value=DiscreteCategorical({self.supplier:1.0}),
                     template=ATTR_TEMPL['Glass Supplier'],
                     origin='specified',
                     ),
                 Parameter(
                     name=ATTR_TEMPL['Glass Part Number'].name,
-                    value=DiscreteCategorical({part_num:1.0}),
+                    value=DiscreteCategorical({self.part_num:1.0}),
                     template=ATTR_TEMPL['Glass Part Number'],
                     origin='specified',
                     ),
                 ],
+            template=OBJ_TEMPL['Purchasing Glass']
             )
-        properties=[
+        #properties
+        spec_kwargs['properties']=[
             PropertyAndConditions(Property(
                 name=ATTR_TEMPL['Glass Thickness'].name,
-                value=NominalReal(thickness,ATTR_TEMPL['Glass Thickness'].bounds.default_units),
+                value=NominalReal(self.thickness,
+                                  ATTR_TEMPL['Glass Thickness'].bounds.default_units),
                 template=ATTR_TEMPL['Glass Thickness'],
                 origin='specified',
                 )),
             PropertyAndConditions(Property(
                 name=ATTR_TEMPL['Glass Length'].name,
-                value=NominalReal(length,ATTR_TEMPL['Glass Length'].bounds.default_units),
+                value=NominalReal(self.length,
+                                  ATTR_TEMPL['Glass Length'].bounds.default_units),
                 template=ATTR_TEMPL['Glass Length'],
                 origin='specified',
                 )),
             PropertyAndConditions(Property(
                 name=ATTR_TEMPL['Glass Width'].name,
-                value=NominalReal(width,ATTR_TEMPL['Glass Width'].bounds.default_units),
+                value=NominalReal(self.width,ATTR_TEMPL['Glass Width'].bounds.default_units),
                 template=ATTR_TEMPL['Glass Width'],
                 origin='specified',
                 )),
             ]
-        #actually create the MaterialSpec
-        self.spec=MaterialSpec(name=name,notes=notes,
-                               process=process,properties=properties,template=OBJ_TEMPL['Purchasing Glass'])
+        #template
+        spec_kwargs['template']=OBJ_TEMPL['Glass ID']
+        return spec_kwargs
 
 class LaserShockGlassID(MaterialRunFromFileMakerRecord) :
     """
@@ -87,11 +103,11 @@ class LaserShockGlassID(MaterialRunFromFileMakerRecord) :
             return True
         return super().ignore_key(key)
 
-    def get_spec_args(self,record) :
-        args = []
-        args.append(record.pop('Glass Supplier'))
-        args.append(record.pop('Glass Part Number'))
-        args.append(record.pop('Glass Thickness'))
-        args.append(record.pop('Glass Length'))
-        args.append(record.pop('Glass Width'))
-        return args
+    def get_spec_kwargs(self,record) :
+        kwargs = {}
+        kwargs['supplier'] = record.pop('Glass Supplier')
+        kwargs['part_num'] = record.pop('Glass Part Number')
+        kwargs['thickness'] = record.pop('Glass Thickness')
+        kwargs['length'] = record.pop('Glass Length')
+        kwargs['width'] = record.pop('Glass Width')
+        return kwargs

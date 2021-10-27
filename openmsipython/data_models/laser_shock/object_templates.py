@@ -60,5 +60,6 @@ OBJ_TEMPL[name] = ProcessTemplate(
         ],
     parameters=[
                 ATTR_TEMPL['Processing Route'],
+                ATTR_TEMPL['Processing Time'],
         ],
     )

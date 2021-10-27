@@ -104,9 +104,9 @@ class RunFromFileMakerRecordBase(ABC) :
         pass
 
     @abstractmethod
-    def get_spec_args(self,record) :
+    def get_spec_kwargs(self,record) :
         """
-        Return the arguments that should be sent to the corresponding spec's 
+        Return the keyword arguments that should be sent to the corresponding spec's 
         constructor method given a FileMaker record
         (must be implemented in child classes)
         """
@@ -117,11 +117,11 @@ class RunFromFileMakerRecordBase(ABC) :
         A function to return the Spec for this Run given a FileMaker record
         and some existing specs that might be reused
         """
-        args = self.get_spec_args(record)
+        kwargs = self.get_spec_kwargs(record)
         for spec in specs :
-            if spec.args==args :
+            if spec.kwargs==kwargs :
                 return spec.spec
-        new_spec = self.spec_type(*args)
+        new_spec = self.spec_type(**kwargs)
         specs.append(new_spec)
         return new_spec.spec
 
@@ -287,7 +287,7 @@ class MaterialRunFromFileMakerRecord(HasSourceRunFromFileMakerRecord) :
                 return
             name = key.replace(' ','')
             d = self.measured_property_dict[key]
-            meas = MeasurementRun(name=name,material=self)
+            meas = MeasurementRun(name=name,material=self.run)
             meas.spec = MeasurementSpec(name=name)
             val = value
             if 'datatype' in d.keys() :
@@ -296,7 +296,8 @@ class MaterialRunFromFileMakerRecord(HasSourceRunFromFileMakerRecord) :
             if 'template' in d.keys() :
                 temp = d['template']
             meas.properties.append(Property(name=name,
-                                            value=d['valuetype'](val,origin='measured'),
+                                            value=d['valuetype'](val,temp.bounds.default_units),
+                                            origin='measured',
                                             template=temp))
         else :
             super().process_other_key(key,value,record)
