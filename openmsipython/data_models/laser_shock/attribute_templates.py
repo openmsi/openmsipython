@@ -1,5 +1,5 @@
 #imports
-from gemd.entity.bounds import RealBounds, CategoricalBounds, CompositionBounds
+from gemd.entity.bounds import IntegerBounds, RealBounds, CategoricalBounds, CompositionBounds
 from gemd.entity.template import PropertyTemplate, ParameterTemplate, ConditionTemplate
 
 ATTR_TEMPL = {}
@@ -25,6 +25,48 @@ ATTR_TEMPL[name] = PropertyTemplate(
     name=name,
     description='The width of a piece of glass',
     bounds=RealBounds(0,12,'in')
+    )
+
+name = 'Glass Thickness mm'
+ATTR_TEMPL[name] = PropertyTemplate(
+    name=name,
+    description='The thickness of a piece of glass',
+    bounds=RealBounds(0,50,'mm')
+    )
+
+name = 'Glass Length mm'
+ATTR_TEMPL[name] = PropertyTemplate(
+    name=name,
+    description='The length of a piece of glass',
+    bounds=RealBounds(0,300,'mm')
+    )
+
+name = 'Glass Width mm'
+ATTR_TEMPL[name] = PropertyTemplate(
+    name=name,
+    description='The width of a piece of glass',
+    bounds=RealBounds(0,300,'mm')
+    )
+
+name = 'Foil Thickness'
+ATTR_TEMPL[name] = PropertyTemplate(
+    name=name,
+    description='The thickness of a piece of foil',
+    bounds=RealBounds(0,500,'um')
+    )
+
+name = 'Epoxy Thickness'
+ATTR_TEMPL[name] = PropertyTemplate(
+    name=name,
+    description='The thickness of a layer of epoxy',
+    bounds=RealBounds(-10,100,'um')
+    )
+
+name = 'Stack Thickness'
+ATTR_TEMPL[name] = PropertyTemplate(
+    name=name,
+    description='The thickness of a glass/epoxy/foil stack at some point',
+    bounds=RealBounds(0,100,'mm')
     )
 
 name = 'Sample Material Processing'
@@ -100,6 +142,62 @@ ATTR_TEMPL[name] = ParameterTemplate(
     bounds=CategoricalBounds(['B8476012']),
     )
 
+name = 'Mixing Time'
+ATTR_TEMPL[name] = ParameterTemplate(
+    name=name,
+    description='How long a two-part epoxy is mixed for (integer number of minutes)',
+    bounds=IntegerBounds(0,30)
+    )
+
+name = 'Resting Time'
+ATTR_TEMPL[name] = ParameterTemplate(
+    name=name,
+    description='How long a two-part epoxy is rested for after mixing (integer number of minutes)',
+    bounds=IntegerBounds(0,30)
+    )
+
+name = 'Compression Weight'
+ATTR_TEMPL[name] = ParameterTemplate(
+    name=name,
+    description='How many pounds of force should be used to compress a glass/epoxy/foil stack while the epoxy cures',
+    bounds=RealBounds(0,100,'lb')
+    )
+
+name = 'Compression Time'
+ATTR_TEMPL[name] = ParameterTemplate(
+    name=name,
+    description='How long a glass/epoxy/foil stack should be compressed while the epoxy cures',
+    bounds=RealBounds(0,168,'hr')
+    )
+
+name = 'Cutting Procedure'
+ATTR_TEMPL[name] = ParameterTemplate(
+    name=name,
+    description='The procedure used to cut flyer discs out of a glass/epoxy/foil stack using the femtosecond laser',
+    bounds=CategoricalBounds(['50um Al Original v1','50um Al Optimized v1','50um Al Optimized v2 (2021-10-22)']),
+    )
+
+name = 'Flyer Spacing'
+ATTR_TEMPL[name] = ParameterTemplate(
+    name=name,
+    description='The distance between adjacent flyer discs in a Flyer Stack',
+    bounds=RealBounds(0,100,'mm'),
+    )
+
+name = 'Flyer Diameter'
+ATTR_TEMPL[name] = ParameterTemplate(
+    name=name,
+    description='The diameter of each flyer in a Flyer Stack',
+    bounds=RealBounds(0,100,'mm'),
+    )
+
+name = 'Rows X Columns'
+ATTR_TEMPL[name] = ParameterTemplate(
+    name=name,
+    description='The number of rows and columns of flyer discs that is cut out of a glass/epoxy/foil stack',
+    bounds=IntegerBounds(0,20),
+    )
+
 name = 'Processing Route'
 ATTR_TEMPL[name] = ParameterTemplate(
     name=name,
@@ -111,10 +209,17 @@ name = 'Processing Time'
 ATTR_TEMPL[name] = ParameterTemplate(
     name=name,
     description='Amount of time a Raw Material is treated to produce a Sample',
-    bounds=RealBounds(-1,1e3,'hr'),
+    bounds=RealBounds(0,1e3,'hr'),
     )
 
 # Conditions
+
+name = 'Compression Method'
+ATTR_TEMPL[name] = ConditionTemplate(
+    name=name,
+    description='Method used to compress a glass/epoxy/flyer stack',
+    bounds=CategoricalBounds(['Handclamp','Apparatus'])
+    )
 
 name = 'Composition Measure'
 ATTR_TEMPL[name] = ConditionTemplate(

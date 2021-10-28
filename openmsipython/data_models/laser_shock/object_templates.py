@@ -17,6 +17,18 @@ OBJ_TEMPL[name] = MaterialTemplate(
         ],
     )
 
+name = 'Glass Epoxy Foil Stack'
+OBJ_TEMPL[name] = MaterialTemplate(
+    name=name,
+    description='A foil adhered to a piece of glass using an epoxy',
+    )
+
+name = 'Flyer Stack'
+OBJ_TEMPL[name] = MaterialTemplate(
+    name=name,
+    description='A set of flyer discs cut out of a glass/epoxy/foil stack',
+    )
+
 name = 'Raw Sample Material'
 OBJ_TEMPL[name] = MaterialTemplate(
     name=name,
@@ -48,6 +60,36 @@ OBJ_TEMPL[name] = ProcessTemplate(
                 ATTR_TEMPL['Glass Part Number'],
         ],
     allowed_names=[],
+    )
+
+name = 'Mixing Epoxy'
+OBJ_TEMPL[name] = ProcessTemplate(
+    name=name,
+    description='Mixing a two-part epoxy',
+    parameters=[ATTR_TEMPL['Mixing Time'],
+                ATTR_TEMPL['Resting Time'],
+        ],
+    )
+
+name = 'Epoxying a Flyer Stack'
+OBJ_TEMPL[name] = ProcessTemplate(
+    name=name,
+    description='Adhering a foil to a piece of glass using an epoxy',
+    conditions=[ATTR_TEMPL['Compression Method']],
+    parameters=[ATTR_TEMPL['Compression Weight'],
+                ATTR_TEMPL['Compression Time'],
+        ],
+    )
+
+name = 'Cutting a Flyer Stack'
+OBJ_TEMPL[name] = ProcessTemplate(
+    name=name,
+    description='Cutting flyer discs out of a glass/epoxy/foil stack to make a Flyer Stack',
+    parameters=[ATTR_TEMPL['Cutting Procedure'],
+                ATTR_TEMPL['Flyer Spacing'],
+                ATTR_TEMPL['Flyer Diameter'],
+                ATTR_TEMPL['Rows X Columns']
+        ]
     )
 
 name = 'Sample Processing'

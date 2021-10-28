@@ -44,6 +44,14 @@ class LaserShockSampleSpec(LaserShockSpecForRun) :
         #notes
         spec_kwargs['notes'] = 'One of the possible Specs for producing Samples for the Laser Shock Lab'
         #process
+        other_pars = []
+        if self.proc_time!='' :
+            other_pars.append(Parameter(
+                name='ProcessingTime',
+                value=NominalReal(float(self.proc_time),ATTR_TEMPL['Processing Time'].bounds.default_units),
+                template=ATTR_TEMPL['Processing Time'],
+                origin='specified')
+            )
         spec_kwargs['process'] = ProcessSpec(
             name='Sample Processing',
             conditions=[Condition(name='ProcessingGeometry',
@@ -61,11 +69,7 @@ class LaserShockSampleSpec(LaserShockSpecForRun) :
                                   value=DiscreteCategorical({self.proc_route:1.0}),
                                   template=ATTR_TEMPL['Processing Route'],
                                   origin='specified'),
-                        Parameter(name='ProcessingTime',
-                                  value=NominalReal(self.proc_time if self.proc_time!='' else -1,
-                                                    ATTR_TEMPL['Processing Time'].bounds.default_units),
-                                  template=ATTR_TEMPL['Processing Time'],
-                                  origin='specified'),
+                        *other_pars,
                 ],
             template=OBJ_TEMPL['Sample Processing']
             )
@@ -118,25 +122,14 @@ class LaserShockSample(MaterialRunFromFileMakerRecord) :
 
     @property
     def measured_property_dict(self) :
-        return {'Density':{'valuetype':NominalReal,
-                           'datatype':float,
-                           'template':ATTR_TEMPL['Density']},
-                'Bulk Wave  Speed':{'valuetype':NominalReal,
-                                    'datatype':float,
-                                    'template':ATTR_TEMPL['Bulk Wave Speed']},
-                'Bulk Modulus':{'valuetype':NominalReal,
-                                'datatype':float,
-                                'template':ATTR_TEMPL['Bulk Modulus']},
-                'Average Grain Size':{'valuetype':NominalReal,
-                                      'datatype':float,
-                                      'template':ATTR_TEMPL['Average Grain Size']},
-                'Min Grain Size':{'valuetype':NominalReal,
+        rd = {'Bulk Wave  Speed':{'valuetype':NominalReal,
                                   'datatype':float,
-                                  'template':ATTR_TEMPL['Min Grain Size']},
-                'Max Grain Size':{'valuetype':NominalReal,
-                                  'datatype':float,
-                                  'template':ATTR_TEMPL['Max Grain Size']},
-            }
+                                  'template':ATTR_TEMPL['Bulk Wave Speed']}}
+        for name in ['Density','Bulk Modulus','Average Grain Size','Min Grain Size','Max Grain Size'] :
+            rd[name] = {'valuetype':NominalReal,
+                        'datatype':float,
+                        'template':ATTR_TEMPL[name]}
+        return rd
 
     def get_spec_kwargs(self,record) :
         kwargs = {}

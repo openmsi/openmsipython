@@ -3,7 +3,7 @@ import os, json, requests, getpass, fmrest
 from gemd.json import GEMDJson
 from gemd.entity.util import complete_material_history
 from .laser_shock_glass_ID import LaserShockGlassID
-#from .laser_shock_flyer_stack import LaserShockFlyerStack
+from .laser_shock_flyer_stack import LaserShockFlyerStack
 from .laser_shock_sample import LaserShockSample
 from .laser_shock_experiment import LaserShockExperiment
 
@@ -111,11 +111,11 @@ class LaserShockLab :
 
     def __getFlyerStacks(self) :
         flyerstacks = []
-        #records = self.__get_filemaker_records('Flyer Stack')
-        #for record in records :
-        #    flyerstacks.append(LaserShockFlyerStack(record,self.specs_from_runs,
-        #                                            self.glass_IDs,self.foil_IDs,self.epoxy_IDs,
-        #                                            self.flyer_cutting_programs))
+        records = self.__get_filemaker_records('Flyer Stack')
+        for record in records :
+            flyerstacks.append(LaserShockFlyerStack(record,self.specs_from_runs,
+                                                    self.glass_IDs,self.foil_IDs,self.epoxy_IDs,
+                                                    self.flyer_cutting_programs))
         return flyerstacks
 
     def __get_samples(self) :
