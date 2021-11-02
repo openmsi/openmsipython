@@ -5,6 +5,7 @@ from gemd.entity.util import complete_material_history
 from .laser_shock_glass_ID import LaserShockGlassID
 from .laser_shock_flyer_stack import LaserShockFlyerStack
 from .laser_shock_sample import LaserShockSample
+from .laser_shock_launch_package import LaserShockLaunchPackage
 from .laser_shock_experiment import LaserShockExperiment
 
 class LaserShockLab :
@@ -126,7 +127,13 @@ class LaserShockLab :
         return samples
 
     def __getLaunchPackages(self) :
-        return []
+        launchpackages = []
+        records = self.__get_filemaker_records('Launch Package')
+        for record in records :
+            launchpackages.append(LaserShockLaunchPackage(record,self.specs_from_runs,
+                                                          self.flyer_stacks,self.spacer_IDs,
+                                                          self.spacer_cutting_programs,self.samples))
+        return launchpackages
 
     def __get_experiments(self) :
         experiments = []

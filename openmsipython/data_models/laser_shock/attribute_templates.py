@@ -125,6 +125,27 @@ ATTR_TEMPL[name] = PropertyTemplate(
     bounds=RealBounds(0,1e3,'um')
     )
 
+name = 'Spacer Diameter'
+ATTR_TEMPL[name] = PropertyTemplate(
+    name=name,
+    description='The diameter of a spacer in a Launch Package',
+    bounds=RealBounds(0,10,'mm')
+    )
+
+name = 'Sample Diameter'
+ATTR_TEMPL[name] = PropertyTemplate(
+    name=name,
+    description='The diameter of an impact sample in a Launch Package',
+    bounds=RealBounds(0,10,'mm')
+    )
+
+name = 'Sample Thickness'
+ATTR_TEMPL[name] = PropertyTemplate(
+    name=name,
+    description='The thickness of an impact sample in a Launch Package',
+    bounds=RealBounds(0,1e3,'um')
+    )
+
 
 # Parameters
 
@@ -212,6 +233,77 @@ ATTR_TEMPL[name] = ParameterTemplate(
     bounds=RealBounds(0,1e3,'hr'),
     )
 
+name = 'Polishing Pad'
+ATTR_TEMPL[name] = ParameterTemplate(
+    name=name,
+    description='What was used to polish an impact sample intended for a Launch Package',
+    bounds=CategoricalBounds(['Diamond','Silicon Carbide']),
+    )
+
+name = 'Sample Location'
+ATTR_TEMPL[name] = ParameterTemplate(
+    name=name,
+    description='The location of an impact sample',
+    bounds=IntegerBounds(0,100),
+    )
+
+name = 'Sample Location Based Order'
+ATTR_TEMPL[name] = ParameterTemplate(
+    name=name,
+    description='The location-based order ID of an impact sample',
+    bounds=IntegerBounds(0,100),
+    )
+
+name = 'Diamond Grit'
+ATTR_TEMPL[name] = ParameterTemplate(
+    name=name,
+    description='Grit of the diamond pad used to polish an impact sample',
+    bounds=CategoricalBounds(['0.10','0.25','0.50','1.0','3.0','9.0','15','30','35','45','60']),
+    )
+
+name = 'Silicon Carbide Grit'
+ATTR_TEMPL[name] = ParameterTemplate(
+    name=name,
+    description='Grit of the silicon carbide pad used to polish an impact sample',
+    bounds=CategoricalBounds(['2000','1800','1500','1200','1000','800','600','400','320','240','180','120']),
+    )
+
+name = 'Flyer Row'
+ATTR_TEMPL[name] = ParameterTemplate(
+    name=name,
+    description='The row that a specific flyer is in within a flyer stack',
+    bounds=IntegerBounds(0,20),
+    )
+
+name = 'Flyer Column'
+ATTR_TEMPL[name] = ParameterTemplate(
+    name=name,
+    description='The column that a specific flyer is in within a flyer stack',
+    bounds=IntegerBounds(0,20),
+    )
+
+name = 'Spacer Adhesive'
+ATTR_TEMPL[name] = ParameterTemplate(
+    name=name,
+    description='The adhesive used to attach a spacer to a flyer in a Launch Package',
+    bounds=CategoricalBounds(['Loctite 460','Kapton Included Adhesive']),
+    )
+
+name = 'Sample Orientation'
+ATTR_TEMPL[name] = ParameterTemplate(
+    name=name,
+    description='The orientation of the impact sample in a Launch Package',
+    bounds=CategoricalBounds(['Extrusion Direction','Longitudinal Direction',
+                              'Transverse Direction','Normal Direction']),
+    )
+
+name = 'Sample Attachment Adhesive'
+ATTR_TEMPL[name] = ParameterTemplate(
+    name=name,
+    description='The adhesive used to attach an impact sample to a flyer/spacer in a Launch Package',
+    bounds=CategoricalBounds(['Loctite 460','Kapton Included Adhesive']),
+    )
+
 # Conditions
 
 name = 'Compression Method'
@@ -240,4 +332,32 @@ ATTR_TEMPL[name] = ConditionTemplate(
     name=name,
     description='Temperature at which a raw material is processed to produce a Laser Shock Sample',
     bounds=RealBounds(0,1e3,'degC')
+    )
+
+name = 'Impact Sample Cutting Procedure'
+ATTR_TEMPL[name] = ConditionTemplate(
+    name=name,
+    description='How an impact sample was cut from its larger piece of material',
+    bounds=CategoricalBounds(['EDM','Diamond Wire Saw','TEM Punch'])
+    )
+
+name = 'Polishing Process'
+ATTR_TEMPL[name] = ConditionTemplate(
+    name=name,
+    description='Process used to polish an impact sample intended for a Launch Package',
+    bounds=CategoricalBounds(['Individual','Large Area Plate'])
+    )
+
+name = 'Spacer Attachment Method'
+ATTR_TEMPL[name] = ConditionTemplate(
+    name=name,
+    description='Method used to attach a spacer to a flyer in a Launch Package',
+    bounds=CategoricalBounds(['Manual','Alignment Stage'])
+    )
+
+name = 'Sample Attachment Method'
+ATTR_TEMPL[name] = ConditionTemplate(
+    name=name,
+    description='Method used to attach a sample to a flyer/spacer in a Launch Package',
+    bounds=CategoricalBounds(['Manual','Alignment Stage'])
     )

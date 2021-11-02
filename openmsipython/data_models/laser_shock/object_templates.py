@@ -27,6 +27,7 @@ name = 'Flyer Stack'
 OBJ_TEMPL[name] = MaterialTemplate(
     name=name,
     description='A set of flyer discs cut out of a glass/epoxy/foil stack',
+    properties = [ATTR_TEMPL['Stack Thickness']],
     )
 
 name = 'Raw Sample Material'
@@ -46,6 +47,21 @@ OBJ_TEMPL[name] = MaterialTemplate(
                 ATTR_TEMPL['Bulk Wave Speed'],
                 ATTR_TEMPL['Average Grain Size']
         ],
+    )
+
+name = 'Impact Sample'
+OBJ_TEMPL[name] = MaterialTemplate(
+    name=name,
+    description='A piece of a Sample that has been cut and polished to be used as part of a Launch Package',
+    properties=[ATTR_TEMPL['Sample Diameter'],
+                ATTR_TEMPL['Sample Thickness']
+        ],
+    )
+
+name = 'Launch Package'
+OBJ_TEMPL[name] = MaterialTemplate(
+    name=name,
+    description='A specific flyer in a flyer stack, possibly with a spacer and/or impact sample attached',
     )
 
 # Measurements
@@ -103,5 +119,54 @@ OBJ_TEMPL[name] = ProcessTemplate(
     parameters=[
                 ATTR_TEMPL['Processing Route'],
                 ATTR_TEMPL['Processing Time'],
+        ],
+    )
+
+name = 'Impact Sample Cutting and Polishing'
+OBJ_TEMPL[name] = ProcessTemplate(
+    name=name,
+    description='Cutting and polishing an impact sample for a Launch Package',
+    conditions=[ATTR_TEMPL['Impact Sample Cutting Procedure'],
+                ATTR_TEMPL['Polishing Process']
+        ],
+    parameters=[ATTR_TEMPL['Polishing Pad'],
+                ATTR_TEMPL['Diamond Grit'],
+                ATTR_TEMPL['Silicon Carbide Grit'],
+                ATTR_TEMPL['Sample Location'],
+                ATTR_TEMPL['Sample Location Based Order'],
+        ],
+    )
+
+name = 'Choosing Flyer'
+OBJ_TEMPL[name] = ProcessTemplate(
+    name=name,
+    description='Choosing a particular flyer (row, column) from a flyer stack',
+    parameters=[
+                ATTR_TEMPL['Flyer Row'],
+                ATTR_TEMPL['Flyer Column'],
+        ],
+    )
+
+name = 'Cutting Spacer'
+OBJ_TEMPL[name] = ProcessTemplate(
+    name=name,
+    description='Cutting a spacer out of a larger piece of spacer material',
+    )
+
+name = 'Attaching Spacer'
+OBJ_TEMPL[name] = ProcessTemplate(
+    name=name,
+    description='Attaching a cut out spacer to a specific flyer in a flyer stack',
+    conditions=[ATTR_TEMPL['Spacer Attachment Method']],
+    parameters=[ATTR_TEMPL['Spacer Adhesive']],
+    )
+
+name = 'Attaching Sample'
+OBJ_TEMPL[name] = ProcessTemplate(
+    name=name,
+    description='Attaching an impact sample to a specific flyer/spacer for a Launch Package',
+    conditions=[ATTR_TEMPL['Sample Attachment Method']],
+    parameters=[ATTR_TEMPL['Sample Orientation'],
+                ATTR_TEMPL['Sample Attachment Adhesive'],
         ],
     )

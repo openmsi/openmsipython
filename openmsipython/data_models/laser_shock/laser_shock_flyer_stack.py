@@ -5,24 +5,11 @@ from gemd.entity.source import PerformedSource
 from gemd.entity.value import DiscreteCategorical, NominalInteger, NominalReal
 from gemd.entity.attribute import PropertyAndConditions, Property, Parameter, Condition
 from gemd.entity.object import ProcessSpec, MaterialSpec, MeasurementSpec, MeasurementRun, IngredientSpec
+from .utilities import search_for_single_name
 from .attribute_templates import ATTR_TEMPL
 from .object_templates import OBJ_TEMPL
 from .laser_shock_spec_for_run import LaserShockSpecForRun
 from .run_from_filemaker_record import MaterialRunFromFileMakerRecord
-
-def search_for_single_name(obj_list,name) :
-    """
-    Search a given list of objects for exactly one of them with a name matching the given name
-    If none are found in the list, returns None
-    If more than one are found a RuntimeError is thrown 
-    """
-    obj = [o for o in obj_list if o.name==name]
-    if len(obj)==0 :
-        return None
-    elif len(obj)==1 :
-        return obj[0]
-    elif len(obj)>1 :
-        raise RuntimeError(f'ERROR: more than one objects were found matching name {name}: {obj}')
 
 class LaserShockFlyerStackSpec(LaserShockSpecForRun) :
     """
