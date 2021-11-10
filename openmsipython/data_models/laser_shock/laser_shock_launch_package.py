@@ -1,5 +1,6 @@
 #imports 
-import copy, sha512
+import copy
+from hashlib import sha512
 from gemd.entity.util import make_instance
 from gemd.entity.source import PerformedSource
 from gemd.entity.value import DiscreteCategorical, NominalInteger, NominalReal
@@ -152,6 +153,7 @@ class LaserShockLaunchPackage(MaterialRunFromFileMakerRecord) :
     A representation of a Launch Package in the Laser Shock Lab, created using a FileMaker record
     """
 
+    name_key = 'Launch ID'
     performed_by_key = 'Performed By'
     performed_date_key = 'Date'
 
@@ -181,10 +183,6 @@ class LaserShockLaunchPackage(MaterialRunFromFileMakerRecord) :
                                 ing3.material=self.spacer
             elif ing.name=='Impact Sample' :
                 ing.material=self.impactsample
-
-    @property
-    def tags_keys(self) :
-        return [*super().tags_keys,'Launch ID']
 
     @property
     def other_keys(self) :

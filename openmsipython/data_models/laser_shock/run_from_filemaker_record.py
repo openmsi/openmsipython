@@ -1,6 +1,7 @@
 #imports
 from abc import abstractmethod
 from gemd.entity.util import make_instance
+from gemd.entity.value import DiscreteCategorical
 from gemd.entity.source.performed_source import PerformedSource
 from gemd.entity.attribute import Property
 from gemd.entity.object import MeasurementSpec, MeasurementRun
@@ -159,6 +160,31 @@ class MeasurementRunFromFileMakerRecord(HasSourceFromFileMakerRecord) :
     Class to use for creating Measurement(Spec/Run)s based on FileMaker records
     """
 
+    def __init__(self,*args,material=None,**kwargs) :
+        """
+        material = the MaterialRun whose properties this measurement determined
+        """
+        super().__init__(*args,**kwargs)
+        self.run.material=material
+
+    @property
+    def measured_property_dict(self) :
+        """
+        A dictionary whose keys are FileMaker record keys corresponding to single  
+        properties measured during the run. Values for each key are themselves 
+        dictionaries specifying details of the properties. 
+
+        If values in the record for any given keys are "''", the Property is not added
+        to the MeasurementRun, but the key is still marked as consumed.
+
+        The allowed keys and values for each entry's characteristic dictionary are:
+        valuetype:   the BaseValue object type for the Property
+        datatype:    datatype to which the value from the FileMaker record should be cast 
+                     when added to the Value of the Property
+        template:    the AttributeTemplate defining the Property
+        """
+        return {}
+
     def add_other_key(self,key,value,record) :
         #add a PerformedSource for this measurement
         if self.performed_by_key is not None and key==self.performed_by_key :
@@ -173,5 +199,28 @@ class MeasurementRunFromFileMakerRecord(HasSourceFromFileMakerRecord) :
             if value!='' :
                 self.run.source.performed_date = value
             self.keys_used.append(key)
+        #add measured properties (if any of them are given)
+        elif key in self.measured_property_dict.keys() :
+            self.keys_used.append(key)
+            if value=='' :
+                return
+            name = key.replace(' ','')
+            d = self.measured_property_dict[key]
+            val = value
+            if 'datatype' in d.keys() :
+                val = d['datatype'](val)
+            temp = None
+            if 'template' in d.keys() :
+                temp = d['template']
+            if d['valuetype']==DiscreteCategorical :
+                self.run.properties.append(Property(name=name,
+                                                    value=d['valuetype']({val:1.0}),
+                                                    origin='measured',
+                                                    template=temp))
+            else :
+                self.run.properties.append(Property(name=name,
+                                                    value=d['valuetype'](val,temp.bounds.default_units),
+                                                    origin='measured',
+                                                    template=temp))
         else :
             super().add_other_key(key,value,record)

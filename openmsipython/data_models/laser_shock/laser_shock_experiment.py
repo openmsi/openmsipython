@@ -1,113 +1,248 @@
 #imports
-from gemd.entity.object import MeasurementSpec
+from hashlib import sha512
+from gemd.entity.value import DiscreteCategorical, NominalReal
+from gemd.entity.attribute import Parameter, Condition
+from .utilities import search_for_single_name
+from .attribute_templates import ATTR_TEMPL
+from .object_templates import OBJ_TEMPL
+from .laser_shock_spec_for_run import LaserShockSpecForRun
 from .run_from_filemaker_record import MeasurementRunFromFileMakerRecord
 
-class LaserShockExperimentSpec(MeasurementSpec) :
+class LaserShockExperimentSpec(LaserShockSpecForRun) :
+    """
+    Dynamically-created Spec for a LaserShockExperiment (MeasurementSpec)
+    """
 
-    def __init__(self) :
-        pass
+    def __init__(self,*args,**kwargs) :
+        self.kwargs = kwargs
+        super().__init__(*args,**kwargs)
+
+    def get_arg_hash(self) :
+        """
+        Placeholder for now; I won't be using this in the very near future
+        """
+        arg_hash = sha512()
+        arg_hash.update(self.kwargs.get('exp_type').encode())
+        return arg_hash.hexdigest()
+
+    def get_spec_kwargs(self) :
+        spec_kwargs = {}
+        #name
+        exp_type = self.kwargs.get('exp_type')
+        spec_kwargs['name'] = exp_type if exp_type!='' else 'Laser Shock Experiment'
+        #notes
+        spec_kwargs['notes'] = 'A spec for performing a Laser Shock Experiment measurement'
+        #conditions
+        spec_kwargs['conditions'] = self.__get_conditions()
+        #parameters
+        spec_kwargs['parameters'] = self.__get_parameters()
+        #the template
+        spec_kwargs['template'] = OBJ_TEMPL['Laser Shock Experiment']
+        return spec_kwargs
+
+    def __get_conditions(self) :
+        """
+        Helper function to return the conditions for this measurement spec
+        """
+        conditions = []
+        conditions.append(Condition(name='Fluence',
+                                    value=NominalReal(self.kwargs.get('fluence'),
+                                                      ATTR_TEMPL['Fluence'].bounds.default_units),
+                                    template=ATTR_TEMPL['Fluence'],
+                                    origin='calculated'))
+        names = [
+            'Beam Shaper Input Beam Diameter',
+            'Beam Shaper',
+            'Camera Lens',
+            'Doubler',
+            'Camera Aperture',
+            'Lens Aperture',
+            'Camera Filter',
+            'Illumination Laser',
+            'Laser Filter',
+            'High Speed Camera',
+            'Beam Profiler Filter',
+            'Sample Recovery Method',
+            'Launch Package Holder',
+        ]
+        namesvals = [(name,self.kwargs.get(name)) for name in names]
+        for name,val in namesvals :
+            if val in ('','N/A','?') :
+                continue
+            temp = ATTR_TEMPL[name]
+            conditions.append(Condition(name=name.replace(' ',''),
+                                        value=DiscreteCategorical({val:1.0}),
+                                        template=temp,
+                                        origin='specified'))
+        names = [
+            'Energy',
+            'Theoretical Beam Diameter',
+            'PreAmp Output Power',
+            'PDV Spot Size',
+            'Base Pressure',
+            'PDV spot flyer ratio',
+            'Launch Ratio',
+        ]
+        namesvals = [(name,self.kwargs.get(name)) for name in names]
+        for name,val in namesvals :
+            if val in ('','N/A','?') :
+                continue
+            temp = ATTR_TEMPL[name]
+            conditions.append(Condition(name=name.replace(' ',''),
+                                        value=NominalReal(val,temp.bounds.default_units),
+                                        template=temp,
+                                        origin='specified'))
+        return conditions
+
+    def __get_parameters(self) :
+        """
+        Helper function to return the conditions for this measurement spec
+        """
+        parameters = []
+        names = [
+            'Effective Focal Length',
+            'Drive Laser Mode',
+            'Oscillator Setting',
+            'Amplifier Setting',
+            'Focusing Lens Arrangement',
+            'System Configuration',
+            'Speed',
+            'Exposure',
+        ]
+        namesvals = [(name,self.kwargs.get(name)) for name in names]
+        for name,val in namesvals :
+            if val=='' :
+                continue
+            temp = ATTR_TEMPL[name]
+            parameters.append(Parameter(name=name.replace(' ',''),
+                                        value=DiscreteCategorical({val:1.0}),
+                                        template=temp,
+                                        origin='specified'))
+        names = [
+            'Attenuator Angle',
+            'Booster Amp Setting',
+            'Current Set Point',
+            'Beam Profiler Gain',
+            'Beam Profiler Exposure',
+        ]
+        namesvals = [(name,self.kwargs.get(name)) for name in names]
+        for name,val in namesvals :
+            if val=='' :
+                continue
+            temp = ATTR_TEMPL[name]
+            parameters.append(Parameter(name=name.replace(' ',''),
+                                        value=NominalReal(val,temp.bounds.default_units),
+                                        template=temp,
+                                        origin='specified'))
+        return parameters
 
 class LaserShockExperiment(MeasurementRunFromFileMakerRecord) :
     
-    def get_spec(self,record,specs) :
-        pass
+    performed_by_key='Performed By'
+    performed_date_key='Date'
+    notes_key='Notes & Comments'
+    ignored = ['Check Energy','Check Alignment','Check Beam Path','Check Camera','Check Illumination','Check Main Amp',
+               'Check PDV','Check PreAmp','Check Triggers','Check Launch ID','Check Recover Sample',
+               'Check Previous Sample','Check Protection','Check Protection Again','Check Beam Profiler',
+               'Check Save','Check Safety']
 
-#Tags
-#Grant Funding: MEDE Metals
-#Launch ID: F038-R1C2
-#recordId: 7
-#modId: 16
+    def __init__(self,record,specs,launch_packages) :
+        #find the launch package that was used
+        self.launch_package = search_for_single_name(launch_packages,record.pop('Launch ID'))
+        #init the MeasurementRun
+        super().__init__(record,self.launch_package,specs)
 
-#Notes
-#Notes & Comments: Bad magnification on camera
+    @property
+    def tags_keys(self) :
+        """
+        Add the location of the recovered sample, and some other information
+        """
+        return [*super().tags_keys,
+                'Recovery Box','Recovery Row','Recovery Column',
+                'New Energy Measurement',
+                'Grant Funding'
+            ]
 
-#Source
-#Performed By: Lezcano
-#Date: 10/11/2021
+    @property
+    def file_links_dicts(self) :
+        """
+        Adding any linked filenames with the filename in "filename" and the "url" 
+        explaining what the file is since FileLinks don't have notes : /
+        """
+        return [
+            {'filename':'Camera Filename','url':'Camera'},
+            {'filename':'Scope Filename','url':'Scope'},
+            {'filename':'Beam Profile Filename','url':'Beam Profiler'},
+            ]
 
-#Conditions
-#Laser page
-#Energy: 750 #Laser: Measured Energy (mJ)
-#New Energy Measurement: Yes # radial button, maybe change origin of above energy depending, or parameter in the spec
-#Theoretical Beam Diameter: 1.6666666666666667 #Laser: Theoretical Beam Diameter (mm) (calculated)
-#Fluence: 34.377467707849384 #Laser: Calculated Fluence (J/cm^2)
-#PDV page
-#PreAmp Output Power: 0 #dBm 
-#PDV Spot Size: #um 
-#Camera page
-#Beam Profiler Gain: #dB
-#Beam Profiler Exposure: #ms 
-#Launch Integration page
-#Base Pressure: #mTorr
-#Firing page
-#Return Signal Strength: N/A #dBm
+    @property
+    def measured_property_dict(self):
+        d = {}
+        names = ['Flyer Tilt','Flyer Curvature','Launch Package Orientation','Video Quality','Spall State']
+        for name in names :
+            d[name] = {'valuetype':DiscreteCategorical,'template':ATTR_TEMPL[name]}
+        names = ['Return Signal Strength','Max Velocity','Est Impact Velocity']
+        for name in names :
+            d[name] = {'valuetype':NominalReal,'template':ATTR_TEMPL[name]}
+        return d
 
-#Parameters
-#Experiment Type: Focusing Lens EFL calibration #dropdown menu
-#Laser page
-#Beam Shaper Input Beam Diameter: 25 #(mm) (dropdown menu)
-#Beam Shaper: Silios #dropdown menu
-#Effective Focal Length: 250 #Beam Shaping: Focusing Lens (mm) (dropdown menu)
-#Drive Laser Mode: Q switched #dropdown menu
-#Oscillator Setting: 10 #dropdown menu
-#PDV page
-#Amplifier Setting: 10 #dropdown menu
-#Attenuator Angle: 260 #degrees
-#Booster Amp Setting: 0 #mV  
-#Focusing Lens Arrangement: #radial button 
-#System Configuration: #radial button 
-#Camera page
-#dropdown menus for all of the below
-#Camera Lens: 105 #mm
-#Doubler: 1
-#Camera Aperture: 0
-#Lens Aperture: 11
-#Camera Filter: 648 CWL/20 FWHM
-#Illumination Laser: SiLux
-#Laser Filter: Texwipe/diffuser
-#Speed: 10,000,000 #frames/s
-#Exposure: N/A #ns
-#below is a radial button instead
-#High Speed Camera: Shimadzu
-#Beam Profiler Filter: #dropdown menu
-#Launch Integration page
-#Launch Ratio: ? #calculated
-#PDV spot flyer ratio: #calculated
-#Sample Recovery Method: none #radial button
-#Launch Package Holder: Vacuum Chamber #radial button
+    def ignore_key(self,key) :
+        if key in self.ignored :
+            return True
+        else :
+            return super().ignore_key(key)
 
-#Properties (possibly could be other things that aren't properties actually?)
-#Flyer Tilt: #dropdown
-#Flyer Curvature: #dropdown
-#Max Velocity: 
-#Est Impact Velocity: 
-#Launch Package Orientation: #dropdown
-#Video Quality: #dropdown
-#Recovery Box: #dropdown
-#Recovery Row: #dropdown
-#Recovery Column: #dropdown
-#Spall State: #dropdown
-
-#File Links
-#Camera Filename: 
-#Scope Filename: N/A
-#Beam Profile Filename: N/A
-
-#To skip wholesale (checklist, etc.)
-#Check Energy:  
-#Check Alignment:  
-#Check Beam Path:  
-#Check Camera:  
-#Check Illumination:  
-#Check Main Amp: 
-#Check PDV: 
-#Check PreAmp: 
-#Check Triggers:  
-#Check Launch ID:  
-#Check Recover Sample: 
-#Check Previous Sample: 
-#Check Protection:  
-#Check Protection Again:  
-#Check Beam Profiler: 
-#Check Save: 
-#Check Safety:  
+    def get_spec_kwargs(self,record) :
+        kwargs={}
+        names = [
+            #the experiment type (used for the name of the spec)
+            'Experiment Type',
+            #stuff from the laser tab
+            #conditions
+            'Energy',
+            'Theoretical Beam Diameter',
+            'Fluence', #calculated
+            'Beam Shaper Input Beam Diameter',
+            'Beam Shaper',
+            #parameters
+            'Effective Focal Length',
+            'Drive Laser Mode',
+            'Oscillator Setting',
+            'Amplifier Setting',
+            'Attenuator Angle',
+            #stuff from the PDV tab
+            #conditions
+            'PreAmp Output Power',
+            'PDV Spot Size',
+            #parameters
+            'Booster Amp Setting',
+            'Focusing Lens Arrangement',
+            'System Configuration',
+            'Current Set Point',
+            #stuff from the camera tab
+            #conditions
+            'Camera Lens',
+            'Doubler',
+            'Camera Aperture',
+            'Lens Aperture',
+            'Camera Filter',
+            'Illumination Laser',
+            'Laser Filter',
+            'High Speed Camera',
+            'Beam Profiler Filter',
+            #parameters
+            'Speed',
+            'Exposure',
+            'Beam Profiler Gain',
+            'Beam Profiler Exposure',
+            #stuff from the launch integration tab
+            #conditions
+            'Base Pressure',
+            'PDV spot flyer ratio', #'?' is possible
+            'Sample Recovery Method',
+            'Launch Ratio', #'?' is possible
+            'Launch Package Holder',
+        ]
+        for name in names :
+            kwargs[name] = record.pop(name)
+        return kwargs

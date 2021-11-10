@@ -1,4 +1,5 @@
 #imports
+from gemd.entity.attribute.condition import Condition
 from gemd.entity.bounds import IntegerBounds, RealBounds, CategoricalBounds, CompositionBounds
 from gemd.entity.template import PropertyTemplate, ParameterTemplate, ConditionTemplate
 
@@ -145,6 +146,62 @@ ATTR_TEMPL[name] = PropertyTemplate(
     description='The thickness of an impact sample in a Launch Package',
     bounds=RealBounds(0,1e3,'um')
     )
+
+name = 'Flyer Tilt'
+ATTR_TEMPL[name] = PropertyTemplate(
+    name=name,
+    description='Amount of tilt observed for a flyer',
+    bounds=CategoricalBounds(['None','Minor','Significant'])
+)
+
+name = 'Flyer Curvature'
+ATTR_TEMPL[name] = PropertyTemplate(
+    name=name,
+    description='Amount of curvature observed for a flyer',
+    bounds=CategoricalBounds(['None','Minor','Significant'])
+)
+
+name = 'Launch Package Orientation'
+ATTR_TEMPL[name] = PropertyTemplate(
+    name=name,
+    description='Orientation of the launch package',
+    bounds=CategoricalBounds(['Flat','Slight Rotation','Major Rotation'])
+)
+
+name = 'Video Quality'
+ATTR_TEMPL[name] = PropertyTemplate(
+    name=name,
+    description='The overall quality of a collected high speed camera video',
+    bounds=CategoricalBounds(['Amazing','Great','Good','OK','Eh'])
+)
+
+name = 'Spall State'
+ATTR_TEMPL[name] = PropertyTemplate(
+    name=name,
+    description='Type/amount of spall observed',
+    bounds=CategoricalBounds(['No visible','Partial','Full','Through sample'])
+)
+
+name = 'Return Signal Strength'
+ATTR_TEMPL[name] = PropertyTemplate(
+    name=name,
+    description='Power of the laser return signal',
+    bounds=RealBounds(0.,1.e3,'dBm')
+)
+
+name = 'Max Velocity'
+ATTR_TEMPL[name] = PropertyTemplate(
+    name=name,
+    description='Maximum velocity measured using PDV',
+    bounds=RealBounds(0.,1.e3,'m/s')
+)
+
+name = 'Est Impact Velocity'
+ATTR_TEMPL[name] = PropertyTemplate(
+    name=name,
+    description='Estimated velocity of the flyer at impact',
+    bounds=RealBounds(0.,1.e3,'m/s')
+)
 
 
 # Parameters
@@ -304,6 +361,102 @@ ATTR_TEMPL[name] = ParameterTemplate(
     bounds=CategoricalBounds(['Loctite 460','Kapton Included Adhesive']),
     )
 
+name = 'Effective Focal Length'
+ATTR_TEMPL[name] = ParameterTemplate(
+    name=name,
+    description="""The effective focal length of the focusing lens between the beam shaper and power meter
+                    (units of mm, categorical bc it's a dropdown menu)""",
+    bounds=CategoricalBounds([60,75,85,100,125,150,175,200,250,300,400,500,750,1000])
+)
+
+name = 'Drive Laser Mode'
+ATTR_TEMPL[name] = ParameterTemplate(
+    name=name,
+    description='Mode in which the drive laser is run',
+    bounds=CategoricalBounds(['Long pulse','Q switched'])
+)
+
+name = 'Oscillator Setting'
+ATTR_TEMPL[name] = ParameterTemplate(
+    name=name,
+    description='Drive laser oscillator setting',
+    bounds=CategoricalBounds([0,1,2,3,4,5,6,7,8,9,10])
+)
+
+name = 'Amplifier Setting'
+ATTR_TEMPL[name] = ParameterTemplate(
+    name=name,
+    description='Drive laser amplifier setting',
+    bounds=CategoricalBounds([0,1,2,3,4,5,6,7,8,9,10])
+)
+
+name = 'Focusing Lens Arrangement'
+ATTR_TEMPL[name] = ParameterTemplate(
+    name=name,
+    description='Whether the focusing lens in the PDV system is set according to the "new" or "old" arrangement',
+    bounds=CategoricalBounds(['Old','New'])
+)
+
+name = 'System Configuration'
+ATTR_TEMPL[name] = ParameterTemplate(
+    name=name,
+    description='Whether the PDV system is set up in 1-point or 32-point mode',
+    bounds=CategoricalBounds(['1-Point','32-Point'])
+)
+
+name = 'Speed'
+ATTR_TEMPL[name] = ParameterTemplate(
+    name=name,
+    description="The framerate set in the high speed camera software (frames/s, categorical bc it's a dropdown menu)",
+    bounds=CategoricalBounds(['60','200','500','1,000','10,000','20,000','50,000','100,000','200,000',
+                              '500,000','1,000,000','2,000,000','5,000,000','10,000,000'])
+)
+
+name = 'Exposure'
+ATTR_TEMPL[name] = ParameterTemplate(
+    name=name,
+    description="""The exposure time set in the high speed camera software 
+                   (nanoseconds, categorical bc it's a dropdown menu)""",
+    bounds=CategoricalBounds(['100','200','500','1000','10000','20000','50000','100000','200000',
+                              '500000','1000000','2000000','5000000','10000000'])
+)
+
+name = 'Attenuator Angle'
+ATTR_TEMPL[name] = ParameterTemplate(
+    name=name,
+    description='The angle of the laser attenuator',
+    bounds=RealBounds(0,360,'deg')
+)
+
+name = 'Booster Amp Setting'
+ATTR_TEMPL[name] = ParameterTemplate(
+    name=name,
+    description='Setting on the PDV seed signal laser booster amplifier',
+    bounds=RealBounds(0.,1.e3,'mV')
+)
+
+name = 'Current Set Point'
+ATTR_TEMPL[name] = ParameterTemplate(
+    name=name,
+    description='',
+    bounds=RealBounds(0.,1.,'A_it')
+)
+
+name = 'Beam Profiler Gain'
+ATTR_TEMPL[name] = ParameterTemplate(
+    name=name,
+    description='The gain setting on the beam profiler',
+    bounds=RealBounds(0.,10.,'dB')
+)
+
+name = 'Beam Profiler Exposure'
+ATTR_TEMPL[name] = ParameterTemplate(
+    name=name,
+    description='The exposure time used for the beam profiler',
+    bounds=RealBounds(0.,1.e3,'ms')
+)
+
+
 # Conditions
 
 name = 'Compression Method'
@@ -361,3 +514,150 @@ ATTR_TEMPL[name] = ConditionTemplate(
     description='Method used to attach a sample to a flyer/spacer in a Launch Package',
     bounds=CategoricalBounds(['Manual','Alignment Stage'])
     )
+
+name = 'Fluence'
+ATTR_TEMPL[name] = Condition(
+    name=name,
+    description='The calculated fluence of the laser',
+    bounds=RealBounds(0.,100.,'J/cm^2')
+)
+
+name = 'Beam Shaper Input Beam Diameter'
+ATTR_TEMPL[name] = Condition(
+    name=name,
+    description='The diameter of the laser beam as inputted into the beam shaper',
+    bounds=CategoricalBounds([25,40,60])
+)
+
+name = 'Beam Shaper'
+ATTR_TEMPL[name] = Condition(
+    name=name,
+    description='The beam shaper used',
+    bounds=CategoricalBounds(['Silios','HoloOr'])
+)
+
+name = 'Camera Lens'
+ATTR_TEMPL[name] = Condition(
+    name=name,
+    description="The focal length of the camera used (units are mm, but this is categorical bc it's a dropdown)",
+    bounds=CategoricalBounds([105])
+)
+
+name = 'Doubler'
+ATTR_TEMPL[name] = Condition(
+    name=name,
+    description='',
+    bounds=CategoricalBounds([0,1,2])
+)
+
+name = 'Camera Aperture'
+ATTR_TEMPL[name] = Condition(
+    name=name,
+    description='The aperture setting on the high speed camera',
+    bounds=CategoricalBounds([0,1,2,3,4,5,6,7])
+)
+
+name = 'Lens Aperture'
+ATTR_TEMPL[name] = Condition(
+    name=name,
+    description='The aperture setting on the high speed camera lens',
+    bounds=CategoricalBounds([2.8,4,5.6,8,11,16,22,32])
+)
+
+name = 'Camera Filter'
+ATTR_TEMPL[name] = Condition(
+    name=name,
+    description='The filter used on the high speed camera',
+    bounds=CategoricalBounds(['648 CWL/20 FWHM','647 CWL/10 FWHM'])
+)
+
+name = 'Illumination Laser'
+ATTR_TEMPL[name] = Condition(
+    name=name,
+    description='The laser used to illuminate the high speed camera field of view',
+    bounds=CategoricalBounds(['SiLux','Cavitar'])
+)
+
+name = 'Laser Filter'
+ATTR_TEMPL[name] = Condition(
+    name=name,
+    description='The filter applied to the illumination laser',
+    bounds=CategoricalBounds(['none','Texwipe/diffuser','IR filter'])
+)
+
+name = 'High Speed Camera'
+ATTR_TEMPL[name] = Condition(
+    name=name,
+    description='The high speed camera used',
+    bounds=CategoricalBounds(['Shimadzu','Kirana','Not Used'])
+)
+
+name = 'Beam Profiler Filter'
+ATTR_TEMPL[name] = Condition(
+    name=name,
+    description='The filter applied to the beampath sent to the beam profiler',
+    bounds=CategoricalBounds(['OD 1','OD 2','OD 3','OD 4','OD 5','OD 6','OD 7','OD 8','OD 9','OD 10'])
+)
+
+name = 'Sample Recovery Method'
+ATTR_TEMPL[name] = Condition(
+    name=name,
+    description='How the sample was recovered after impact',
+    bounds=CategoricalBounds(['Glass Petri Dish','PDMS','none'])
+)
+
+name = 'Launch Package Holder'
+ATTR_TEMPL[name] = Condition(
+    name=name,
+    description='The method used to hold the launch package in place',
+    bounds=CategoricalBounds(['Simple Clamp','Vacuum Chamber','Kinematic Optical Mount'])
+)
+
+name = 'Energy'
+ATTR_TEMPL[name] = Condition(
+    name=name,
+    description='The energy of the laser',
+    bounds=RealBounds(0.,5.e3,'mJ')
+)
+
+name = 'Theoretical Beam Diameter'
+ATTR_TEMPL[name] = Condition(
+    name=name,
+    description='The theoretical beam diameter, according to the manufacturer',
+    bounds=RealBounds(0.,5.,'mm')
+)
+
+name = 'PreAmp Output Power'
+ATTR_TEMPL[name] = Condition(
+    name=name,
+    description='The output power of the preamplifier used in the PDV system',
+    bounds=RealBounds(0.,1.e3,'dBm')
+)
+
+name = 'PDV Spot Size'
+ATTR_TEMPL[name] = Condition(
+    name=name,
+    description='The diameter of the PDV laser spot',
+    bounds=RealBounds(0.,1.e3,'um')
+)
+
+name = 'Base Pressure'
+ATTR_TEMPL[name] = Condition(
+    name=name,
+    description='The pressure in the vacuum chamber used to hold the launch package in place',
+    bounds=RealBounds(0.,1.e5,'mTorr')
+)
+
+name = 'PDV spot flyer ratio'
+ATTR_TEMPL[name] = Condition(
+    name=name,
+    description='Ratio of the laser spot diameter to the flyer diameter',
+    bounds=RealBounds(0.,10.,'')
+)
+
+name = 'Launch Ratio'
+ATTR_TEMPL[name] = Condition(
+    name=name,
+    description='Ratio of the PDV spot diameter to the flyer diameter',
+    bounds=RealBounds(0.,10.,'')
+)

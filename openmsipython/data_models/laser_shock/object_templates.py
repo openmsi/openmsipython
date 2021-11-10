@@ -1,5 +1,5 @@
 #imports
-from gemd.entity.template import MaterialTemplate, ProcessTemplate
+from gemd.entity.template import MaterialTemplate, ProcessTemplate, MeasurementTemplate
 #from gemd.entity.template import MeasurementTemplate
 from .attribute_templates import ATTR_TEMPL
 
@@ -65,6 +65,57 @@ OBJ_TEMPL[name] = MaterialTemplate(
     )
 
 # Measurements
+
+name = 'Laser Shock Experiment'
+OBJ_TEMPL[name] = MeasurementTemplate(
+    name=name,
+    description='One of several different categories of measurements performed in the Laser Shock lab',
+    conditions=[ATTR_TEMPL['Fluence'],
+                ATTR_TEMPL['Beam Shaper Input Beam Diameter'],
+                ATTR_TEMPL['Beam Shaper'],
+                ATTR_TEMPL['Camera Lens'],
+                ATTR_TEMPL['Doubler'],
+                ATTR_TEMPL['Camera Aperture'],
+                ATTR_TEMPL['Lens Aperture'],
+                ATTR_TEMPL['Camera Filter'],
+                ATTR_TEMPL['Illumination Laser'],
+                ATTR_TEMPL['Laser Filter'],
+                ATTR_TEMPL['High Speed Camera'],
+                ATTR_TEMPL['Beam Profiler Filter'],
+                ATTR_TEMPL['Sample Recovery Method'],
+                ATTR_TEMPL['Launch Package Holder'],
+                ATTR_TEMPL['Energy'],
+                ATTR_TEMPL['Theoretical Beam Diameter'],
+                ATTR_TEMPL['PreAmp Output Power'],
+                ATTR_TEMPL['PDV Spot Size'],
+                ATTR_TEMPL['Base Pressure'],
+                ATTR_TEMPL['PDV spot flyer ratio'],
+                ATTR_TEMPL['Launch Ratio'],
+        ],
+    parameters=[ATTR_TEMPL['Effective Focal Length'],
+                ATTR_TEMPL['Drive Laser Mode'],
+                ATTR_TEMPL['Oscillator Setting'],
+                ATTR_TEMPL['Amplifier Setting'],
+                ATTR_TEMPL['Focusing Lens Arrangement'],
+                ATTR_TEMPL['System Configuration'],
+                ATTR_TEMPL['Speed'],
+                ATTR_TEMPL['Exposure'],
+                ATTR_TEMPL['Attenuator Angle'],
+                ATTR_TEMPL['Booster Amp Setting'],
+                ATTR_TEMPL['Current Set Point'],
+                ATTR_TEMPL['Beam Profiler Gain'],
+                ATTR_TEMPL['Beam Profiler Exposure'],
+        ],
+    properties=[ATTR_TEMPL['Flyer Tilt'],
+                ATTR_TEMPL['Flyer Curvature'],
+                ATTR_TEMPL['Launch Package Orientation'],
+                ATTR_TEMPL['Video Quality'],
+                ATTR_TEMPL['Spall State'],
+                ATTR_TEMPL['Return Signal Strength'],
+                ATTR_TEMPL['Max Velocity'],
+                ATTR_TEMPL['Est Impact Velocity'],
+        ],
+)
 
 # Processes
 
