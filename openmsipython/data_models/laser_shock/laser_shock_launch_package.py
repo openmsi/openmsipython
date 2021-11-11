@@ -1,6 +1,5 @@
 #imports 
 import copy
-from hashlib import sha512
 from gemd.entity.util import make_instance
 from gemd.entity.source import PerformedSource
 from gemd.entity.value import DiscreteCategorical, NominalInteger, NominalReal
@@ -17,6 +16,8 @@ class LaserShockLaunchPackageSpec(LaserShockSpecForRun) :
     Dynamically-created spec for a Launch Package
     """
 
+    spec_type = MaterialSpec
+
     def __init__(self,*args,**kwargs) :
         self.flyerspec = kwargs.get('flyerspec')
         self.spacerID = kwargs.get('spacerID')
@@ -31,27 +32,6 @@ class LaserShockLaunchPackageSpec(LaserShockSpecForRun) :
         self.samp_attachments_adhesives = kwargs.get('samp_attachments_adhesives')
         self.samp_orientation = kwargs.get('samp_orientation')
         super().__init__(*args,**kwargs)
-
-    def get_arg_hash(self) :
-        arg_hash = sha512()
-        if self.flyerspec is not None :
-            arg_hash.update(self.flyerspec.name.encode())
-        if self.spacerID is not None :
-            arg_hash.update(self.spacerID.name.encode())
-        if self.spacercutting is not None :
-            arg_hash.update(self.spacercutting.name.encode())
-        if self.impactsamplespec is not None :
-            arg_hash.update(self.impactsamplespec.name.encode())
-        arg_hash.update(self.flyerrow.encode())
-        arg_hash.update(self.flyercol.encode())
-        arg_hash.update(self.use_spacer.encode())
-        arg_hash.update(self.spacer_attachment.encode())
-        arg_hash.update(self.spacer_adhesive.encode())
-        arg_hash.update(self.use_sample.encode())
-        for a in self.samp_attachments_adhesives :
-            arg_hash.update(a.encode())
-        arg_hash.update(self.samp_orientation.encode())
-        return arg_hash.hexdigest()
 
     def get_spec_kwargs(self) :
         spec_kwargs = {}
@@ -153,11 +133,13 @@ class LaserShockLaunchPackage(MaterialRunFromFileMakerRecord) :
     A representation of a Launch Package in the Laser Shock Lab, created using a FileMaker record
     """
 
+    spec_type = LaserShockLaunchPackageSpec
+
     name_key = 'Launch ID'
     performed_by_key = 'Performed By'
     performed_date_key = 'Date'
 
-    def __init__(self,record,specs,flyer_stacks,spacer_IDs,spacer_cutting_programs,samples) :
+    def __init__(self,record,flyer_stacks,spacer_IDs,spacer_cutting_programs,samples) :
         # find the flyer stack, spacer ID, spacer cutting program, and sample that were used
         self.flyerstack = search_for_single_tag(flyer_stacks,'FlyerID',record.pop('Flyer ID').replace(' ','_'))
         self.spacerID = search_for_single_name(spacer_IDs,record.pop('Spacer Type'))
@@ -168,7 +150,7 @@ class LaserShockLaunchPackage(MaterialRunFromFileMakerRecord) :
         # create the Impact Sample that was cut from the original sample
         self.impactsample = self.__get_impact_sample(record)
         # create the rest of the Run
-        super().__init__(record,specs)
+        super().__init__(record)
         # link some objects back into the created Run
         for ing in self.run.process.ingredients :
             if ing.name=='Flyer/Spacer' :

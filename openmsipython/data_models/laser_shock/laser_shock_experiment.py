@@ -1,7 +1,7 @@
 #imports
-from hashlib import sha512
 from gemd.entity.value import DiscreteCategorical, NominalReal
 from gemd.entity.attribute import Parameter, Condition
+from gemd.entity.object import MeasurementSpec
 from .utilities import search_for_single_name
 from .attribute_templates import ATTR_TEMPL
 from .object_templates import OBJ_TEMPL
@@ -13,17 +13,11 @@ class LaserShockExperimentSpec(LaserShockSpecForRun) :
     Dynamically-created Spec for a LaserShockExperiment (MeasurementSpec)
     """
 
+    spec_type = MeasurementSpec
+
     def __init__(self,*args,**kwargs) :
         self.kwargs = kwargs
         super().__init__(*args,**kwargs)
-
-    def get_arg_hash(self) :
-        """
-        Placeholder for now; I won't be using this in the very near future
-        """
-        arg_hash = sha512()
-        arg_hash.update(self.kwargs.get('exp_type').encode())
-        return arg_hash.hexdigest()
 
     def get_spec_kwargs(self) :
         spec_kwargs = {}
@@ -137,6 +131,11 @@ class LaserShockExperimentSpec(LaserShockSpecForRun) :
         return parameters
 
 class LaserShockExperiment(MeasurementRunFromFileMakerRecord) :
+    """
+    MeasurementRun representing measurements made using Laser Shock and/or PDV on a particular Launch Package
+    """
+
+    spec_type = LaserShockExperimentSpec
     
     performed_by_key='Performed By'
     performed_date_key='Date'
@@ -146,11 +145,11 @@ class LaserShockExperiment(MeasurementRunFromFileMakerRecord) :
                'Check Previous Sample','Check Protection','Check Protection Again','Check Beam Profiler',
                'Check Save','Check Safety']
 
-    def __init__(self,record,specs,launch_packages) :
+    def __init__(self,record,launch_packages) :
         #find the launch package that was used
         self.launch_package = search_for_single_name(launch_packages,record.pop('Launch ID'))
         #init the MeasurementRun
-        super().__init__(record,self.launch_package,specs)
+        super().__init__(record,material=self.launch_package)
 
     @property
     def tags_keys(self) :

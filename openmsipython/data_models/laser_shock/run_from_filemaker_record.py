@@ -13,12 +13,12 @@ class RunFromFileMakerRecord(FromFileMakerRecordBase) :
     to create and/or link GEMD "Spec" and Run" objects
     """
 
-    def __init__(self,record,specs=None) :
+    def __init__(self,record) :
         """
         Use the information in a given FileMaker record to populate this Run object
         """
         #figure out the Spec for this Run
-        spec = self.get_spec(record,specs)
+        spec = self.get_spec(record)
         #create an initial object from the spec
         self.__run = make_instance(spec)
         #set the name of the Run from the Spec if there is no key defining the name
@@ -45,17 +45,12 @@ class RunFromFileMakerRecord(FromFileMakerRecordBase) :
         """
         pass
 
-    def get_spec(self,record,specs) :
+    def get_spec(self,record) :
         """
         A function to return the Spec for this Run given a FileMaker record
-        and some existing specs that might be reused
         """
         kwargs = self.get_spec_kwargs(record)
-        for spec in specs :
-            if spec.kwargs==kwargs :
-                return spec.spec
         new_spec = self.spec_type(**kwargs)
-        specs.append(new_spec)
         return new_spec.spec
 
     @property

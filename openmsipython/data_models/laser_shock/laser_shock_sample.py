@@ -1,5 +1,4 @@
 #imports
-from hashlib import sha512
 from gemd.entity.value import DiscreteCategorical, NominalReal, NominalComposition
 from gemd.entity.attribute import PropertyAndConditions, Property, Parameter, Condition
 from gemd.entity.object import MaterialSpec, ProcessSpec, IngredientSpec
@@ -24,18 +23,6 @@ class LaserShockSampleSpec(LaserShockSpecForRun) :
         self.proc_temp = kwargs.get('proc_temp')
         self.proc_time = kwargs.get('proc_time')
         super().__init__(*args,**kwargs)
-
-    def get_arg_hash(self) :
-        arg_hash = sha512()
-        arg_hash.update(self.mat_type.encode())
-        arg_hash.update(self.pct_meas.encode())
-        for c in self.constituents :
-            arg_hash.update(c[0].encode())
-            arg_hash.update(str(c[1]).encode())
-        arg_hash.update(self.proc_geom.encode())
-        arg_hash.update(self.proc_route.encode())
-        arg_hash.update(str(self.proc_temp).encode())
-        return arg_hash.hexdigest()
 
     def get_spec_kwargs(self) :
         spec_kwargs = {}

@@ -29,7 +29,6 @@ class LaserShockLab :
         if self.password=='$JHED_PWORD' :
             self.password = getpass.getpass(f'Please enter the JHED password for {self.username}: ')
         #add all the information to the lab object based on entries in the FileMaker DB
-        self.specs_from_runs = []
         #"Inventory" pages (create Specs)
         self.glass_IDs = self.__getGlassIDs()
         self.epoxy_IDs = self.__getEpoxyIDs()
@@ -37,13 +36,13 @@ class LaserShockLab :
         self.spacer_IDs = self.__getSpacerIDs()
         self.flyer_cutting_programs = self.__getFlyerCuttingPrograms()
         self.spacer_cutting_programs = self.__getSpacerCuttingPrograms()
-        #Flyer Stacks
+        #Flyer Stacks (Materials)
         self.flyer_stacks = self.__getFlyerStacks()
-        #Samples
+        #Samples (Materials)
         self.samples = self.__get_samples()
-        #Launch packages
+        #Launch packages (Materials)
         self.launch_packages = self.__getLaunchPackages()
-        #Experiments
+        #Experiments (Measurements)
         self.experiments = self.__get_experiments()
 
     def dump_to_json_files(self) :
@@ -114,8 +113,7 @@ class LaserShockLab :
         flyerstacks = []
         records = self.__get_filemaker_records('Flyer Stack')
         for record in records :
-            flyerstacks.append(LaserShockFlyerStack(record,self.specs_from_runs,
-                                                    self.glass_IDs,self.foil_IDs,self.epoxy_IDs,
+            flyerstacks.append(LaserShockFlyerStack(record,self.glass_IDs,self.foil_IDs,self.epoxy_IDs,
                                                     self.flyer_cutting_programs))
         return flyerstacks
 
@@ -130,8 +128,7 @@ class LaserShockLab :
         launchpackages = []
         records = self.__get_filemaker_records('Launch Package')
         for record in records :
-            launchpackages.append(LaserShockLaunchPackage(record,self.specs_from_runs,
-                                                          self.flyer_stacks,self.spacer_IDs,
+            launchpackages.append(LaserShockLaunchPackage(record,self.flyer_stacks,self.spacer_IDs,
                                                           self.spacer_cutting_programs,self.samples))
         return launchpackages
 
@@ -139,7 +136,7 @@ class LaserShockLab :
         experiments = []
         records = self.__get_filemaker_records('Experiment')
         for record in records :
-            experiments.append(LaserShockExperiment(record,self.specs_from_runs))
+            experiments.append(LaserShockExperiment(record))
         return experiments
 
 #################### MAIN FUNCTION ####################

@@ -1,5 +1,5 @@
 #imports
-import copy, sha512
+import copy
 from gemd.entity.util import make_instance
 from gemd.entity.source import PerformedSource
 from gemd.entity.value import DiscreteCategorical, NominalInteger, NominalReal
@@ -15,6 +15,8 @@ class LaserShockFlyerStackSpec(LaserShockSpecForRun) :
     """
     The Spec for a given Flyer Stack
     """
+
+    spec_type = MaterialSpec
 
     def __init__(self,*args,**kwargs) :
         self.glassID = kwargs.get('glassID')
@@ -32,28 +34,6 @@ class LaserShockFlyerStackSpec(LaserShockSpecForRun) :
         self.d = kwargs.get('d')
         self.n = kwargs.get('n')
         super().__init__(*args,**kwargs)
-
-    def get_arg_hash(self) :
-        arg_hash = sha512()
-        if self.glassID is not None :
-            arg_hash.update(self.glassID.name.encode())
-        if self.foilID is not None :
-            arg_hash.update(self.foilID.name.encode())
-        if self.epoxyID is not None :
-            arg_hash.update(self.epoxyID.name.encode())
-        if self.cutting is not None :
-            arg_hash.update(self.cutting.name.encode())
-        arg_hash.update(self.part_a.encode())
-        arg_hash.update(self.part_b.encode())
-        arg_hash.update(self.mixing_time.encode())
-        arg_hash.update(self.resting_time.encode())
-        arg_hash.update(self.comp_method.encode())
-        arg_hash.update(self.comp_weight.encode())
-        arg_hash.update(self.comp_time.encode())
-        arg_hash.update(self.s.encode())
-        arg_hash.update(self.d.encode())
-        arg_hash.update(self.n.encode())
-        return arg_hash.hexdigest()
 
     def get_spec_kwargs(self) :
         spec_kwargs = {}
@@ -168,11 +148,13 @@ class LaserShockFlyerStack(MaterialRunFromFileMakerRecord) :
     A Flyer Stack created from a piece of glass, a foil, and an epoxy, cut using a Flyer Cutting program
     """
 
+    spec_type = LaserShockFlyerStackSpec
+
     notes_key = 'Flyer Stack Note'
     performed_by_key = 'Performed By'
     performed_date_key = 'Date'
 
-    def __init__(self,record,specs,glass_IDs,foil_IDs,epoxy_IDs,flyer_cutting_programs) :
+    def __init__(self,record,glass_IDs,foil_IDs,epoxy_IDs,flyer_cutting_programs) :
         #find the glass, foil, epoxy, and flyer cutting program that were used for this run
         self.glassID = search_for_single_name(glass_IDs,record.pop('Glass Name Reference'))
         self.foilID = search_for_single_name(foil_IDs,record.pop('Foil Name'))
@@ -183,7 +165,7 @@ class LaserShockFlyerStack(MaterialRunFromFileMakerRecord) :
         self.foil = make_instance(self.foilID) if self.foilID is not None else None
         self.epoxy = make_instance(self.epoxyID) if self.epoxyID is not None else None
         #run the rest of the creating the MaterialRun
-        super().__init__(record,specs)
+        super().__init__(record)
         #add the runs from above to each part of the created Run as necessary
         for ing in self.run.process.ingredients :
             if ing.name=='Glass Epoxy Foil Stack' :
