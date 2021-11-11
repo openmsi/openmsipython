@@ -1,7 +1,7 @@
 #imports
 import copy
 from gemd.entity.util import make_instance
-from gemd.entity.source import PerformedSource
+from gemd.entity.source.performed_source import PerformedSource
 from gemd.entity.value import DiscreteCategorical, NominalInteger, NominalReal
 from gemd.entity.attribute import PropertyAndConditions, Property, Parameter, Condition
 from gemd.entity.object import ProcessSpec, MaterialSpec, MeasurementSpec, MeasurementRun, IngredientSpec
@@ -222,13 +222,13 @@ class LaserShockFlyerStack(MaterialRunFromFileMakerRecord) :
             meas.spec = MeasurementSpec(name=name)
             temp = None
             if key.startswith('Glass Thickness') :
-                temp = ATTR_TEMPL['Glass Thickness mm']
+                temp = ATTR_TEMPL['Glass Thickness']
             elif key=='Glass width' :
-                temp = ATTR_TEMPL['Glass Width mm']
+                temp = ATTR_TEMPL['Glass Width']
             elif key=='Glass length' :
-                temp = ATTR_TEMPL['Glass Length mm']
+                temp = ATTR_TEMPL['Glass Length']
             meas.properties.append(Property(name=name,
-                                            value=NominalReal(float(value),temp.bounds.default_units),
+                                            value=NominalReal(float(value),'mm'),
                                             origin='measured',
                                             template=temp))
             meas.source = PerformedSource(record[self.performed_by_key],record[self.performed_date_key])

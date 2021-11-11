@@ -29,7 +29,7 @@ class FromFileMakerRecordBase(ABC) :
                 self.keys_used.append(key)
             #add the notes
             elif self.notes_key is not None and key==self.notes_key :
-                obj.notes = value
+                obj.notes = value.replace('\r','\n')
                 self.keys_used.append(key)
             #add the file links
             elif key in self.file_links_keys :

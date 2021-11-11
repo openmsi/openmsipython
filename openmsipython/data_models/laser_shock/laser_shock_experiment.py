@@ -1,5 +1,5 @@
 #imports
-from gemd.entity.value import DiscreteCategorical, NominalReal
+from gemd.entity.value import DiscreteCategorical, NominalReal, NominalInteger
 from gemd.entity.attribute import Parameter, Condition
 from gemd.entity.object import MeasurementSpec
 from .utilities import search_for_single_name
@@ -39,13 +39,13 @@ class LaserShockExperimentSpec(LaserShockSpecForRun) :
         Helper function to return the conditions for this measurement spec
         """
         conditions = []
-        conditions.append(Condition(name='Fluence',
-                                    value=NominalReal(self.kwargs.get('fluence'),
-                                                      ATTR_TEMPL['Fluence'].bounds.default_units),
-                                    template=ATTR_TEMPL['Fluence'],
-                                    origin='calculated'))
+        if self.kwargs.get('fluence')!='' :
+            conditions.append(Condition(name='Fluence',
+                                        value=NominalReal(self.kwargs.get('fluence'),
+                                                        ATTR_TEMPL['Fluence'].bounds.default_units),
+                                        template=ATTR_TEMPL['Fluence'],
+                                        origin='calculated'))
         names = [
-            'Beam Shaper Input Beam Diameter',
             'Beam Shaper',
             'Camera Lens',
             'Doubler',
@@ -69,6 +69,7 @@ class LaserShockExperimentSpec(LaserShockSpecForRun) :
                                         template=temp,
                                         origin='specified'))
         names = [
+            'Beam Shaper Input Beam Diameter',
             'Energy',
             'Theoretical Beam Diameter',
             'PreAmp Output Power',
@@ -94,9 +95,19 @@ class LaserShockExperimentSpec(LaserShockSpecForRun) :
         """
         parameters = []
         names = [
-            'Effective Focal Length',
-            'Drive Laser Mode',
             'Oscillator Setting',
+            'Amplifier Setting',
+        ]
+        namesvals = [(name,self.kwargs.get(name)) for name in names]
+        for name,val in namesvals :
+            if val=='' :
+                continue
+            parameters.append(Parameter(name=name.replace(' ',''),
+                                        value=NominalInteger(val),
+                                        template=ATTR_TEMPL[name],
+                                        origin='specified'))
+        names = [
+            'Drive Laser Mode',
             'Amplifier Setting',
             'Focusing Lens Arrangement',
             'System Configuration',
@@ -113,6 +124,7 @@ class LaserShockExperimentSpec(LaserShockSpecForRun) :
                                         template=temp,
                                         origin='specified'))
         names = [
+            'Effective Focal Length',
             'Attenuator Angle',
             'Booster Amp Setting',
             'Current Set Point',

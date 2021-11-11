@@ -15,29 +15,29 @@ OBJ_TEMPL[name] = MaterialTemplate(
                   ATTR_TEMPL['Glass Length'],
                   ATTR_TEMPL['Glass Width'],
         ],
-    )
+)
 
 name = 'Glass Epoxy Foil Stack'
 OBJ_TEMPL[name] = MaterialTemplate(
     name=name,
     description='A foil adhered to a piece of glass using an epoxy',
-    )
+)
 
 name = 'Flyer Stack'
 OBJ_TEMPL[name] = MaterialTemplate(
     name=name,
     description='A set of flyer discs cut out of a glass/epoxy/foil stack',
     properties = [ATTR_TEMPL['Stack Thickness']],
-    )
+)
 
 name = 'Raw Sample Material'
 OBJ_TEMPL[name] = MaterialTemplate(
     name=name,
     description='A raw material that is processed to produced a Laser Shock Sample',
-    properties=[ATTR_TEMPL['Sample Material Processing'],
+    properties=[ATTR_TEMPL['Sample Material Type'],
                 ATTR_TEMPL['Sample Raw Material Composition'],
         ],
-    )
+)
 
 name = 'Sample'
 OBJ_TEMPL[name] = MaterialTemplate(
@@ -47,7 +47,7 @@ OBJ_TEMPL[name] = MaterialTemplate(
                 ATTR_TEMPL['Bulk Wave Speed'],
                 ATTR_TEMPL['Average Grain Size']
         ],
-    )
+)
 
 name = 'Impact Sample'
 OBJ_TEMPL[name] = MaterialTemplate(
@@ -56,13 +56,13 @@ OBJ_TEMPL[name] = MaterialTemplate(
     properties=[ATTR_TEMPL['Sample Diameter'],
                 ATTR_TEMPL['Sample Thickness']
         ],
-    )
+)
 
 name = 'Launch Package'
 OBJ_TEMPL[name] = MaterialTemplate(
     name=name,
     description='A specific flyer in a flyer stack, possibly with a spacer and/or impact sample attached',
-    )
+)
 
 # Measurements
 
@@ -127,7 +127,7 @@ OBJ_TEMPL[name] = ProcessTemplate(
                 ATTR_TEMPL['Glass Part Number'],
         ],
     allowed_names=[],
-    )
+)
 
 name = 'Mixing Epoxy'
 OBJ_TEMPL[name] = ProcessTemplate(
@@ -136,7 +136,7 @@ OBJ_TEMPL[name] = ProcessTemplate(
     parameters=[ATTR_TEMPL['Mixing Time'],
                 ATTR_TEMPL['Resting Time'],
         ],
-    )
+)
 
 name = 'Epoxying a Flyer Stack'
 OBJ_TEMPL[name] = ProcessTemplate(
@@ -146,7 +146,7 @@ OBJ_TEMPL[name] = ProcessTemplate(
     parameters=[ATTR_TEMPL['Compression Weight'],
                 ATTR_TEMPL['Compression Time'],
         ],
-    )
+)
 
 name = 'Cutting a Flyer Stack'
 OBJ_TEMPL[name] = ProcessTemplate(
@@ -157,7 +157,15 @@ OBJ_TEMPL[name] = ProcessTemplate(
                 ATTR_TEMPL['Flyer Diameter'],
                 ATTR_TEMPL['Rows X Columns']
         ]
-    )
+)
+
+name = 'Sample Preprocessing'
+OBJ_TEMPL[name] = ProcessTemplate(
+    name=name,
+    description='Preprocessing a raw material',
+    conditions=[ATTR_TEMPL['Preprocessing']],
+    parameters=[ATTR_TEMPL['Preprocessing Temperature']],
+)
 
 name = 'Sample Processing'
 OBJ_TEMPL[name] = ProcessTemplate(
@@ -165,13 +173,22 @@ OBJ_TEMPL[name] = ProcessTemplate(
     description='''Processing a raw material of some type in some geometry, at some temperature,
                    and through some route to produce a Sample for the Laser Shock Lab''',
     conditions=[ATTR_TEMPL['Processing Geometry'],
+                ATTR_TEMPL['Material Processing'],
                 ATTR_TEMPL['Processing Temperature'],
         ],
     parameters=[
                 ATTR_TEMPL['Processing Route'],
                 ATTR_TEMPL['Processing Time'],
         ],
-    )
+)
+
+name = 'Sample Annealing'
+OBJ_TEMPL[name] = ProcessTemplate(
+    name=name,
+    description='Annealing a processed material',
+    conditions=[ATTR_TEMPL['Annealing Temperature']],
+    parameters=[ATTR_TEMPL['Annealing Time']],
+)
 
 name = 'Impact Sample Cutting and Polishing'
 OBJ_TEMPL[name] = ProcessTemplate(
@@ -186,7 +203,7 @@ OBJ_TEMPL[name] = ProcessTemplate(
                 ATTR_TEMPL['Sample Location'],
                 ATTR_TEMPL['Sample Location Based Order'],
         ],
-    )
+)
 
 name = 'Choosing Flyer'
 OBJ_TEMPL[name] = ProcessTemplate(
@@ -196,13 +213,13 @@ OBJ_TEMPL[name] = ProcessTemplate(
                 ATTR_TEMPL['Flyer Row'],
                 ATTR_TEMPL['Flyer Column'],
         ],
-    )
+)
 
 name = 'Cutting Spacer'
 OBJ_TEMPL[name] = ProcessTemplate(
     name=name,
     description='Cutting a spacer out of a larger piece of spacer material',
-    )
+)
 
 name = 'Attaching Spacer'
 OBJ_TEMPL[name] = ProcessTemplate(
@@ -210,7 +227,7 @@ OBJ_TEMPL[name] = ProcessTemplate(
     description='Attaching a cut out spacer to a specific flyer in a flyer stack',
     conditions=[ATTR_TEMPL['Spacer Attachment Method']],
     parameters=[ATTR_TEMPL['Spacer Adhesive']],
-    )
+)
 
 name = 'Attaching Sample'
 OBJ_TEMPL[name] = ProcessTemplate(
@@ -220,4 +237,4 @@ OBJ_TEMPL[name] = ProcessTemplate(
     parameters=[ATTR_TEMPL['Sample Orientation'],
                 ATTR_TEMPL['Sample Attachment Adhesive'],
         ],
-    )
+)

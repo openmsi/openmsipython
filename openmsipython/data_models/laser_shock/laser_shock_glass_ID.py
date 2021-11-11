@@ -39,7 +39,7 @@ class LaserShockGlassID(MaterialSpecFromFileMakerRecord) :
     @property
     def process_parameter_dict(self) :
         return {'Glass Supplier':{'valuetype':DiscreteCategorical,
-                                  'template':ATTR_TEMPL['Glass Thickness']},
+                                  'template':ATTR_TEMPL['Glass Supplier']},
                 'Glass Part Number':{'valuetype':DiscreteCategorical,
-                                     'template':ATTR_TEMPL['Glass Length']},
+                                     'template':ATTR_TEMPL['Glass Part Number']},
             }

@@ -1,7 +1,7 @@
 #imports 
 import copy
 from gemd.entity.util import make_instance
-from gemd.entity.source import PerformedSource
+from gemd.entity.source.performed_source import PerformedSource
 from gemd.entity.value import DiscreteCategorical, NominalInteger, NominalReal
 from gemd.entity.attribute import Property, Parameter, Condition
 from gemd.entity.object import ProcessSpec, MaterialSpec, MeasurementSpec, MeasurementRun, IngredientSpec
