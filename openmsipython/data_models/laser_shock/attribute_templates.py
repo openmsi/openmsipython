@@ -289,6 +289,34 @@ ATTR_TEMPL[name] = ParameterTemplate(
     bounds=CategoricalBounds([]),
 )
 
+name = 'Laser Cutting Energy'
+ATTR_TEMPL[name] = ParameterTemplate(
+    name=name,
+    description='Energy of the laser used to cut out flyers',
+    bounds=RealBounds(0.,500.,'uJ')
+)
+
+name = 'Number of Passes'
+ATTR_TEMPL[name] = ParameterTemplate(
+    name=name,
+    description='Number of passes performed in cutting out flyers',
+    bounds=IntegerBounds(0,200)
+)
+
+name = 'Aperture Setting'
+ATTR_TEMPL[name] = ParameterTemplate(
+    name=name,
+    description='Whether the aperture used during a laser cutting procedure is narrow or open',
+    bounds=CategoricalBounds(['Narrow','Open'])
+)
+
+name = 'Depth of Cut'
+ATTR_TEMPL[name] = ParameterTemplate(
+    name=name,
+    description='Whether the depth of cut setting is turned on or off during a laser cutting procedure',
+    bounds=CategoricalBounds(['On','Off'])
+)
+
 name = 'Mixing Time'
 ATTR_TEMPL[name] = ParameterTemplate(
     name=name,
@@ -540,6 +568,27 @@ ATTR_TEMPL[name] = ParameterTemplate(
 
 
 # Conditions
+
+name = 'Cutting Method'
+ATTR_TEMPL[name] = ConditionTemplate(
+    name=name,
+    description='Whether something is cut using a laser in pulsed or continuous mode',
+    bounds=CategoricalBounds(['Pulsed','Continuous'])
+)
+
+name = 'Typical Cutting Time'
+ATTR_TEMPL[name] = ConditionTemplate(
+    name=name,
+    description='How long it usually takes to cut out some flyers',
+    bounds=RealBounds(0.,300.,'min')
+)
+
+name = 'Cutting Tool'
+ATTR_TEMPL[name] = ConditionTemplate(
+    name=name,
+    description='The tool used to cut out a set of flyers',
+    bounds=CategoricalBounds(['Femtosecond Laser','Laser Cutter'])
+)
 
 name = 'Compression Method'
 ATTR_TEMPL[name] = ConditionTemplate(

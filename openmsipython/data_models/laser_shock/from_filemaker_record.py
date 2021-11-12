@@ -40,16 +40,19 @@ class FromFileMakerRecordBase(ABC) :
                     if 'filename' in d.keys() :
                         if key==d['filename'] :
                             filename=value
+                            self.keys_used.append(key)
                         elif d['filename'] in record.keys() :
                             filename=record[d['filename']]
                             self.keys_used.append(d['filename'])
                     if 'url' in d.keys() :
                         if key==d['url'] :
                             url=value
+                            self.keys_used.append(key)
                         elif d['url'] in record.keys() :
                             url=record[d['url']]
                             self.keys_used.append(d['url'])
-                    if filename is not None or url is not None :
+                    if ( (filename is not None and filename not in ('','N/A')) or 
+                         (url is not None and url not in ('','N/A')) ) :
                         if obj.file_links is None :
                             obj.file_links = []
                         obj.file_links.append(FileLink(filename,url))
@@ -66,7 +69,7 @@ class FromFileMakerRecordBase(ABC) :
         #make sure all the keys in the record were used in some way
         unused_keys = [k for k in record.keys() if k not in self.keys_used]
         if len(unused_keys)>0 :
-            errmsg = f'ERROR: the following keys were not used in creating a {self.__clas__.__name__} object: '
+            errmsg = f'ERROR: the following keys were not used in creating a {self.__class__.__name__} object: '
             for k in unused_keys :
                 errmsg+=f'{k}, '
             raise ValueError(errmsg[:-2])
@@ -141,8 +144,8 @@ class FromFileMakerRecordBase(ABC) :
     def file_links_keys(self) :
         all_keys = []
         for d in self.file_links_dicts :
-            for k in d.keys() :
-                all_keys.append(k)
+            for v in d.values() :
+                all_keys.append(v)
         return all_keys
 
     @property

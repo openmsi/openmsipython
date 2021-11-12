@@ -1,8 +1,9 @@
 #imports
 from abc import abstractmethod
 from gemd.entity.value import DiscreteCategorical, NominalReal
-from gemd.entity.attribute import PropertyAndConditions, Property, Parameter
-from gemd.entity.object import ProcessSpec,MaterialSpec
+from gemd.entity.attribute import PropertyAndConditions, Property, Parameter, Condition
+from gemd.entity.object import ProcessSpec, MaterialSpec
+from .utilities import name_value_template_from_key_value_dict
 from .from_filemaker_record import FromFileMakerRecordBase
 
 class SpecFromFileMakerRecord(FromFileMakerRecordBase) :
@@ -81,7 +82,7 @@ class MaterialSpecFromFileMakerRecord(HasTemplateFromFileMakerRecord) :
         properties of the material spec. Values for each key are themselves dictionaries, 
         used to add Properties to the Spec. 
 
-        If values in the record for any given keys are "''", the Property is not added
+        If values in the record for any given keys are "''" or "N/A", the Property is not added
         to the spec, but the key is still marked as consumed.
 
         The allowed keys and values for each entry's characteristic dictionary are:
@@ -118,52 +119,85 @@ class MaterialSpecFromFileMakerRecord(HasTemplateFromFileMakerRecord) :
         #add properties (if any of them are given) to this MaterialSpec
         if key in self.property_dict.keys() :
             self.keys_used.append(key)
-            if value in ('','N/A') :
+            name, value, temp = name_value_template_from_key_value_dict(key,value,self.property_dict[key])
+            if name is None or value is None :
                 return
-            name = key.replace(' ','')
-            d = self.property_dict[key]
-            val = value
-            if 'datatype' in d.keys() :
-                val = d['datatype'](val)
-            temp = None
-            if 'template' in d.keys() :
-                temp = d['template']
-            if d['valuetype']==DiscreteCategorical :
-                self.spec.properties.append(PropertyAndConditions(Property(
-                    name=name,
-                    value=d['valuetype']({val:1.0}),
-                    origin='specified',
-                    template=temp)))
-            else :
-                self.spec.properties.append(PropertyAndConditions(Property(
-                    name=name,
-                    value=d['valuetype'](val,temp.bounds.default_units),
-                    origin='specified',
-                    template=temp)))
+            self.spec.properties.append(PropertyAndConditions(
+                Property(name=name,
+                         value=value,
+                         origin='specified',
+                         template=temp)
+                ))
         #add parameters (if any of them are given) to this MaterialSpec's ProcessSpec
         elif key in self.process_parameter_dict.keys() :
             self.keys_used.append(key)
-            if value in ('','N/A') :
+            name, value, temp = name_value_template_from_key_value_dict(key,value,self.process_parameter_dict[key])
+            if name is None or value is None :
                 return
-            name = key.replace(' ','')
-            d = self.process_parameter_dict[key]
-            val = value
-            if 'datatype' in d.keys() :
-                val = d['datatype'](val)
-            temp = None
-            if 'template' in d.keys() :
-                temp = d['template']
-            if 'valuetype' not in d.keys() :
-                raise ValueError(f'ERROR: no valuetype given for process_parameter_dict entry {key}!')
-            elif d['valuetype']==NominalReal :
-                if 'template' not in d.keys() :
-                    raise ValueError(f'ERROR: no template given for process_parameter_dict entry {key}!')
-                value = d['valuetype'](val,temp.bounds.default_units)
-            elif d['valuetype']==DiscreteCategorical :
-                value = d['valuetype']({val:1.0})
             self.spec.process.parameters.append(Parameter(name=name,
                                                           value=value,
                                                           origin='specified',
                                                           template=temp))
+        else :
+            super().add_other_key(key,value,record)
+
+class ProcessSpecFromFileMakerRecord(HasTemplateFromFileMakerRecord) :
+
+    spec_type = ProcessSpec
+
+    @property
+    def condition_dict(self) :
+        """
+        A dictionary whose keys are FileMaker record keys corresponding to single  
+        conditions for the process spec. Values for each key are themselves dictionaries, 
+        used to add Conditions to the Spec. 
+
+        If values in the record for any given keys are "''" or "N/A", the Property is not added
+        to the spec, but the key is still marked as consumed.
+
+        The allowed keys and values for each entry's characteristic dictionary are:
+        valuetype:   the BaseValue object type for the Condition
+        datatype:    datatype to which the value from the FileMaker record should be cast 
+                     when added to the Value of the Condition
+        template:    the AttributeTemplate defining the Condition
+        """
+        return {}
+
+    @property
+    def parameter_dict(self) :
+        """
+        A dictionary in the same format as "condition_dict" above, except entries represent 
+        Parameters of the ProcessSpec instead of Conditions
+        """
+        return {}
+
+    @property
+    def other_keys(self) :
+        return [*super().other_keys,
+                *self.condition_dict.keys(),
+                *self.parameter_dict.keys()
+               ]
+
+    def add_other_key(self,key,value,record) :
+        #add conditions (if any of them are given) to this ProcessSpec
+        if key in self.condition_dict.keys() :
+            self.keys_used.append(key)
+            name, value, temp = name_value_template_from_key_value_dict(key,value,self.condition_dict[key])
+            if name is None or value is None :
+                return
+            self.spec.conditions.append(Condition(name=name,
+                                                  value=value,
+                                                  origin='specified',
+                                                  template=temp))
+        #add parameters (if any of them are given) to this ProcessSpec
+        elif key in self.parameter_dict.keys() :
+            self.keys_used.append(key)
+            name, value, temp = name_value_template_from_key_value_dict(key,value,self.parameter_dict[key])
+            if name is None or value is None :
+                return
+            self.spec.parameters.append(Parameter(name=name,
+                                                  value=value,
+                                                  origin='specified',
+                                                  template=temp))
         else :
             super().add_other_key(key,value,record)

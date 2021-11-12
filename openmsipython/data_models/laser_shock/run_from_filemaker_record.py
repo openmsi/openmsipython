@@ -5,6 +5,7 @@ from gemd.entity.value import DiscreteCategorical
 from gemd.entity.source.performed_source import PerformedSource
 from gemd.entity.attribute import Property
 from gemd.entity.object import MeasurementSpec, MeasurementRun
+from .utilities import name_value_template_from_key_value_dict
 from .from_filemaker_record import FromFileMakerRecordBase
 
 class RunFromFileMakerRecord(FromFileMakerRecordBase) :
@@ -97,8 +98,8 @@ class MaterialRunFromFileMakerRecord(HasSourceFromFileMakerRecord) :
         key are themselves dictionaries, used to add minimal MeasurementRun objects 
         (with accompanying Specs) to this material. 
 
-        If values in the record for any given keys are "''", the MeasurementRun is not added
-        to the material, but the key is still marked as consumed.
+        If values in the record for any given keys are "''" or "N/A", the MeasurementRun 
+        is not added to the material, but the key is still marked as consumed.
 
         The allowed keys and values for each entry's characteristic dictionary are:
         valuetype:   the BaseValue object type for the Property that's measured
@@ -131,20 +132,13 @@ class MaterialRunFromFileMakerRecord(HasSourceFromFileMakerRecord) :
         #add measured properties (if any of them are given) by creating MeasurementRuns linked to this MaterialRun
         elif key in self.measured_property_dict.keys() :
             self.keys_used.append(key)
-            if value=='' :
+            name, value, temp = name_value_template_from_key_value_dict(key,value,self.measured_property_dict[key])
+            if name is None or value is None :
                 return
-            name = key.replace(' ','')
-            d = self.measured_property_dict[key]
             meas = MeasurementRun(name=name,material=self.run)
             meas.spec = MeasurementSpec(name=name)
-            val = value
-            if 'datatype' in d.keys() :
-                val = d['datatype'](val)
-            temp = None
-            if 'template' in d.keys() :
-                temp = d['template']
             meas.properties.append(Property(name=name,
-                                            value=d['valuetype'](val,temp.bounds.default_units),
+                                            value=value,
                                             origin='measured',
                                             template=temp))
         else :
@@ -197,25 +191,12 @@ class MeasurementRunFromFileMakerRecord(HasSourceFromFileMakerRecord) :
         #add measured properties (if any of them are given)
         elif key in self.measured_property_dict.keys() :
             self.keys_used.append(key)
-            if value=='' :
+            name, value, temp = name_value_template_from_key_value_dict(key,value,self.measured_property_dict[key])
+            if name is None or value is None :
                 return
-            name = key.replace(' ','')
-            d = self.measured_property_dict[key]
-            val = value
-            if 'datatype' in d.keys() :
-                val = d['datatype'](val)
-            temp = None
-            if 'template' in d.keys() :
-                temp = d['template']
-            if d['valuetype']==DiscreteCategorical :
-                self.run.properties.append(Property(name=name,
-                                                    value=d['valuetype']({val:1.0}),
-                                                    origin='measured',
-                                                    template=temp))
-            else :
-                self.run.properties.append(Property(name=name,
-                                                    value=d['valuetype'](val,temp.bounds.default_units),
-                                                    origin='measured',
-                                                    template=temp))
+            self.run.properties.append(Property(name=name,
+                                                value=value,
+                                                origin='measured',
+                                                template=temp))
         else :
             super().add_other_key(key,value,record)

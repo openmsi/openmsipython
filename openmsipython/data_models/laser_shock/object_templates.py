@@ -187,6 +187,21 @@ OBJ_TEMPL[name] = ProcessTemplate(
     allowed_names=[],
 )
 
+name = 'Flyer Cutting Program'
+OBJ_TEMPL[name] = ProcessTemplate(
+    name=name,
+    description='A program (process) for cutting flyers out of a layer of foil',
+    conditions=[ATTR_TEMPL['Cutting Method'],
+                ATTR_TEMPL['Typical Cutting Time'],
+                ATTR_TEMPL['Cutting Tool'],
+        ],
+    parameters=[ATTR_TEMPL['Laser Cutting Energy'],
+                ATTR_TEMPL['Number of Passes'],
+                ATTR_TEMPL['Aperture Setting'],
+                ATTR_TEMPL['Depth of Cut'],
+        ],
+)
+
 name = 'Mixing Epoxy'
 OBJ_TEMPL[name] = ProcessTemplate(
     name=name,

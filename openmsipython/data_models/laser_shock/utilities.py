@@ -1,3 +1,7 @@
+#imports
+from gemd.entity.value import NominalInteger, NominalReal, DiscreteCategorical
+from gemd.entity.value.nominal_integer import NominalInteger
+
 def search_for_single_name(obj_list,name) :
     """
     Search a given list of objects for exactly one of them with a name matching the given name
@@ -35,3 +39,30 @@ def search_for_single_tag(ent_list,tagname,tagvalue) :
     elif len(ents)>1 :
         errmsg=f'ERROR: more than one entities were found matching name::value={tagname}::{tagvalue} : {ents}'
         raise RuntimeError(errmsg)
+
+def name_value_template_from_key_value_dict(key,value,d) :
+    """
+    Given a FileMaker record key, its value, and a dictionary specifying 
+    a valuetype, datatype, and template for the entry, return the name, 
+    value, and template that should be added to some corresponding GEMD construct 
+    """
+    if value in ('','N/A') :
+        return None, None, None
+    name = key.replace(' ','')
+    val = value
+    if 'datatype' in d.keys() :
+        val = d['datatype'](val)
+    temp = None
+    if 'template' in d.keys() :
+        temp = d['template']
+    if 'valuetype' not in d.keys() :
+        raise ValueError(f'ERROR: no valuetype given for dict entry {key}!')
+    elif d['valuetype']==NominalInteger :
+        value = d['valuetype'](val)
+    elif d['valuetype']==NominalReal :
+        if 'template' not in d.keys() :
+            raise ValueError(f'ERROR: no template given for NominalReal dict entry {key}!')
+        value = d['valuetype'](val,temp.bounds.default_units)
+    elif d['valuetype']==DiscreteCategorical :
+        value = d['valuetype']({val:1.0})
+    return name, value, temp
