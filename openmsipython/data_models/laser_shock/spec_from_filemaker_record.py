@@ -118,7 +118,7 @@ class MaterialSpecFromFileMakerRecord(HasTemplateFromFileMakerRecord) :
         #add properties (if any of them are given) to this MaterialSpec
         if key in self.property_dict.keys() :
             self.keys_used.append(key)
-            if value=='' :
+            if value in ('','N/A') :
                 return
             name = key.replace(' ','')
             d = self.property_dict[key]
@@ -128,15 +128,22 @@ class MaterialSpecFromFileMakerRecord(HasTemplateFromFileMakerRecord) :
             temp = None
             if 'template' in d.keys() :
                 temp = d['template']
-            self.spec.properties.append(PropertyAndConditions(Property(
-                name=name,
-                value=d['valuetype'](val,temp.bounds.default_units),
-                origin='specified',
-                template=temp)))
+            if d['valuetype']==DiscreteCategorical :
+                self.spec.properties.append(PropertyAndConditions(Property(
+                    name=name,
+                    value=d['valuetype']({val:1.0}),
+                    origin='specified',
+                    template=temp)))
+            else :
+                self.spec.properties.append(PropertyAndConditions(Property(
+                    name=name,
+                    value=d['valuetype'](val,temp.bounds.default_units),
+                    origin='specified',
+                    template=temp)))
         #add parameters (if any of them are given) to this MaterialSpec's ProcessSpec
         elif key in self.process_parameter_dict.keys() :
             self.keys_used.append(key)
-            if value=='' :
+            if value in ('','N/A') :
                 return
             name = key.replace(' ','')
             d = self.process_parameter_dict[key]

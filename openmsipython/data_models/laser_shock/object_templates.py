@@ -17,6 +17,35 @@ OBJ_TEMPL[name] = MaterialTemplate(
         ],
 )
 
+name = 'Epoxy ID'
+OBJ_TEMPL[name] = MaterialTemplate(
+    name=name,
+    description='An epoxy used in the Laser Shock Lab',
+)
+
+name = 'Foil ID'
+OBJ_TEMPL[name] = MaterialTemplate(
+    name=name,
+    description='A foil used in the Laser Shock Lab',
+    properties = [ATTR_TEMPL['Foil Thickness'],
+                  ATTR_TEMPL['Foil Length'],
+                  ATTR_TEMPL['Foil Width'],
+                  ATTR_TEMPL['Foil Hardness'],
+                  ATTR_TEMPL['Foil Material'],
+        ],
+)
+
+name = 'Spacer ID'
+OBJ_TEMPL[name] = MaterialTemplate(
+    name=name,
+    description='A spacer used in the Laser Shock Lab',
+    properties = [ATTR_TEMPL['Spacer Thickness'],
+                  ATTR_TEMPL['Spacer Material'],
+                  ATTR_TEMPL['Spacer Adhesive Sides'],
+                  ATTR_TEMPL['Adhesive Type'],
+        ],
+)
+
 name = 'Glass Epoxy Foil Stack'
 OBJ_TEMPL[name] = MaterialTemplate(
     name=name,
@@ -125,6 +154,35 @@ OBJ_TEMPL[name] = ProcessTemplate(
     description='Purchasing a piece of glass from a manufacturer',
     parameters=[ATTR_TEMPL['Glass Supplier'],
                 ATTR_TEMPL['Glass Part Number'],
+        ],
+    allowed_names=[],
+)
+
+name = 'Purchasing Epoxy'
+OBJ_TEMPL[name] = ProcessTemplate(
+    name=name,
+    description='Purchasing an Epoxy from a manufacturer',
+    parameters=[ATTR_TEMPL['Epoxy Supplier'],
+        ],
+    allowed_names=[],
+)
+
+name = 'Purchasing Foil'
+OBJ_TEMPL[name] = ProcessTemplate(
+    name=name,
+    description='Purchasing a foil from a manufacturer',
+    parameters=[ATTR_TEMPL['Foil Supplier'],
+                ATTR_TEMPL['Foil Part Number'],
+        ],
+    allowed_names=[],
+)
+
+name = 'Purchasing Spacer'
+OBJ_TEMPL[name] = ProcessTemplate(
+    name=name,
+    description='Purchasing a spacer from a manufacturer',
+    parameters=[ATTR_TEMPL['Spacer Supplier'],
+                ATTR_TEMPL['Spacer Part Number'],
         ],
     allowed_names=[],
 )
