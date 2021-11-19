@@ -202,6 +202,20 @@ OBJ_TEMPL[name] = ProcessTemplate(
         ],
 )
 
+name = 'Spacer Cutting Program'
+OBJ_TEMPL[name] = ProcessTemplate(
+    name=name,
+    description='A program (process) for cutting spacers out of a spacer material',
+    conditions=[ATTR_TEMPL['Cutting Method'],
+                ATTR_TEMPL['Typical Cutting Time'],
+        ],
+    parameters=[ATTR_TEMPL['Laser Cutting Energy'],
+                ATTR_TEMPL['Number of Passes'],
+                ATTR_TEMPL['Aperture Setting'],
+                ATTR_TEMPL['Depth of Cut'],
+        ],
+)
+
 name = 'Mixing Epoxy'
 OBJ_TEMPL[name] = ProcessTemplate(
     name=name,

@@ -7,6 +7,7 @@ from .laser_shock_epoxy_ID import LaserShockEpoxyID
 from .laser_shock_foil_ID import LaserShockFoilID
 from .laser_shock_spacer_ID import LaserShockSpacerID
 from .laser_shock_flyer_cutting_program import LaserShockFlyerCuttingProgram
+from .laser_shock_spacer_cutting_program import LaserShockSpacerCuttingProgram
 from .laser_shock_flyer_stack import LaserShockFlyerStack
 from .laser_shock_sample import LaserShockSample
 from .laser_shock_launch_package import LaserShockLaunchPackage
@@ -39,7 +40,7 @@ class LaserShockLab :
         self.foil_IDs = self.__get_foil_IDs()
         self.spacer_IDs = self.__get_spacer_IDs()
         self.flyer_cutting_programs = self.__get_flyer_cutting_programs()
-        #self.spacer_cutting_programs = self.__get_spacer_cutting_programs()
+        self.spacer_cutting_programs = self.__get_spacer_cutting_programs()
         #Flyer Stacks (Materials)
         #self.flyer_stacks = self.__get_flyer_stacks()
         #Samples (Materials)
@@ -77,6 +78,8 @@ class LaserShockLab :
             fp.write(encoder.thin_dumps(self.spacer_IDs[0].spec, indent=2))
         with open('example_laser_shock_flyer_cutting_program.json', 'w') as fp: 
             fp.write(encoder.thin_dumps(self.flyer_cutting_programs[0].spec, indent=2))
+        with open('example_laser_shock_spacer_cutting_program.json', 'w') as fp: 
+            fp.write(encoder.thin_dumps(self.spacer_cutting_programs[0].spec, indent=2))
         #with open('example_laser_shock_experiment_template.json','w') as fp :
         #    fp.write(encoder.thin_dumps(self.experiments[0].template, indent=2))
         #with open('example_laser_shock_experiment_spec.json','w') as fp :
@@ -139,7 +142,11 @@ class LaserShockLab :
         return flyercuttingprograms
 
     def __get_spacer_cutting_programs(self) :
-        return []
+        spacercuttingprograms = []
+        records = self.__get_filemaker_records('Spacer Cutting Program')
+        for record in records :
+            spacercuttingprograms.append(LaserShockSpacerCuttingProgram(record))
+        return spacercuttingprograms
 
     def __get_flyer_stacks(self) :
         flyerstacks = []
