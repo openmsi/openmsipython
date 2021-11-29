@@ -1,5 +1,5 @@
 #imports
-import os, json, requests, getpass, fmrest
+import os, pathlib, json, requests, getpass, fmrest
 from gemd.json import GEMDJson
 from gemd.entity.util import complete_material_history
 from .laser_shock_glass_ID import LaserShockGlassID
@@ -42,7 +42,7 @@ class LaserShockLab :
         self.flyer_cutting_programs = self.__get_flyer_cutting_programs()
         self.spacer_cutting_programs = self.__get_spacer_cutting_programs()
         #Flyer Stacks (Materials)
-        #self.flyer_stacks = self.__get_flyer_stacks()
+        self.flyer_stacks = self.__get_flyer_stacks()
         #Samples (Materials)
         self.samples = self.__get_samples()
         #Launch packages (Materials)
@@ -59,32 +59,42 @@ class LaserShockLab :
         #create the encoder
         encoder = GEMDJson()
         #dump the different parts of the lab data model to json files
-        with open('example_laser_shock_sample_material_history.json', 'w') as fp :
+        ofd = pathlib.Path('./gemd_data_model_dumps')
+        if not ofd.is_dir() :
+            ofd.mkdir(parents=True)
+        with open(ofd/'glass_ID.json', 'w') as fp: 
+            fp.write(encoder.thin_dumps(self.glass_IDs[0].spec, indent=2))
+        with open(ofd/'glass_ID_process.json', 'w') as fp: 
+            fp.write(encoder.thin_dumps(self.glass_IDs[0].spec.process, indent=2))
+        with open(ofd/'epoxy_ID.json', 'w') as fp: 
+            fp.write(encoder.thin_dumps(self.epoxy_IDs[0].spec, indent=2))
+        with open(ofd/'foil_ID.json', 'w') as fp: 
+            fp.write(encoder.thin_dumps(self.foil_IDs[0].spec, indent=2))
+        with open(ofd/'spacer_ID.json', 'w') as fp: 
+            fp.write(encoder.thin_dumps(self.spacer_IDs[0].spec, indent=2))
+        with open(ofd/'flyer_cutting_program.json', 'w') as fp: 
+            fp.write(encoder.thin_dumps(self.flyer_cutting_programs[0].spec, indent=2))
+        with open(ofd/'spacer_cutting_program.json', 'w') as fp: 
+            fp.write(encoder.thin_dumps(self.spacer_cutting_programs[0].spec, indent=2))
+        with open(ofd/'flyer_stack.json', 'w') as fp: 
+            fp.write(encoder.thin_dumps(self.flyer_stacks[39].run, indent=2))
+        with open(ofd/'flyer_stack_spec.json', 'w') as fp: 
+            fp.write(encoder.thin_dumps(self.flyer_stacks[39].run.spec, indent=2))
+        with open(ofd/'flyer_stack_material_history.json', 'w') as fp: 
+            context_list = complete_material_history(self.flyer_stacks[39].run) 
+            fp.write(json.dumps(context_list, indent=2))
+        with open(ofd/'sample_spec.json', 'w') as fp: 
+            fp.write(encoder.thin_dumps(self.samples[0].run.spec, indent=2))
+        with open(ofd/'sample.json', 'w') as fp: 
+            fp.write(encoder.thin_dumps(self.samples[0].run, indent=2))
+        with open(ofd/'sample_material_history.json', 'w') as fp :
             context_list = complete_material_history(self.samples[0].run) 
             fp.write(json.dumps(context_list, indent=2))
-        with open('example_laser_shock_sample_spec.json', 'w') as fp: 
-            fp.write(encoder.thin_dumps(self.samples[0].run.spec, indent=2))
-        with open('example_laser_shock_sample.json', 'w') as fp: 
-            fp.write(encoder.thin_dumps(self.samples[0].run, indent=2))
-        with open('example_laser_shock_glass_ID.json', 'w') as fp: 
-            fp.write(encoder.thin_dumps(self.glass_IDs[0].spec, indent=2))
-        with open('example_laser_shock_glass_ID_process.json', 'w') as fp: 
-            fp.write(encoder.thin_dumps(self.glass_IDs[0].spec.process, indent=2))
-        with open('example_laser_shock_epoxy_ID.json', 'w') as fp: 
-            fp.write(encoder.thin_dumps(self.epoxy_IDs[0].spec, indent=2))
-        with open('example_laser_shock_foil_ID.json', 'w') as fp: 
-            fp.write(encoder.thin_dumps(self.foil_IDs[0].spec, indent=2))
-        with open('example_laser_shock_spacer_ID.json', 'w') as fp: 
-            fp.write(encoder.thin_dumps(self.spacer_IDs[0].spec, indent=2))
-        with open('example_laser_shock_flyer_cutting_program.json', 'w') as fp: 
-            fp.write(encoder.thin_dumps(self.flyer_cutting_programs[0].spec, indent=2))
-        with open('example_laser_shock_spacer_cutting_program.json', 'w') as fp: 
-            fp.write(encoder.thin_dumps(self.spacer_cutting_programs[0].spec, indent=2))
-        #with open('example_laser_shock_experiment_template.json','w') as fp :
+        #with open(ofd/'experiment_template.json','w') as fp :
         #    fp.write(encoder.thin_dumps(self.experiments[0].template, indent=2))
-        #with open('example_laser_shock_experiment_spec.json','w') as fp :
+        #with open(ofd/'experiment_spec.json','w') as fp :
         #    fp.write(encoder.thin_dumps(self.experiments[0].spec, indent=2))
-        #with open('example_laser_shock_experiment.json','w') as fp :
+        #with open(ofd/'experiment.json','w') as fp :
         #    fp.write(encoder.thin_dumps(self.experiments[0], indent=2))
 
     #################### PRIVATE HELPER FUNCTIONS ####################
@@ -179,7 +189,8 @@ class LaserShockLab :
         return experiments
 
     def __replace_specs(self) :
-        print(self.samples[0])
+        #print(self.samples[0])
+        pass
 
 #################### MAIN FUNCTION ####################
 

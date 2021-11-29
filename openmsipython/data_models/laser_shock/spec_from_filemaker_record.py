@@ -3,7 +3,7 @@ from abc import abstractmethod
 from gemd.entity.value import DiscreteCategorical, NominalReal
 from gemd.entity.attribute import PropertyAndConditions, Property, Parameter, Condition
 from gemd.entity.object import ProcessSpec, MaterialSpec
-from .utilities import name_value_template_from_key_value_dict
+from .utilities import name_value_template_origin_from_key_value_dict
 from .from_filemaker_record import FromFileMakerRecordBase
 
 class SpecFromFileMakerRecord(FromFileMakerRecordBase) :
@@ -119,24 +119,26 @@ class MaterialSpecFromFileMakerRecord(HasTemplateFromFileMakerRecord) :
         #add properties (if any of them are given) to this MaterialSpec
         if key in self.property_dict.keys() :
             self.keys_used.append(key)
-            name, value, temp = name_value_template_from_key_value_dict(key,value,self.property_dict[key])
+            name, value, temp, origin = name_value_template_origin_from_key_value_dict(key,value,
+                                                                                       self.property_dict[key])
             if name is None or value is None :
                 return
             self.spec.properties.append(PropertyAndConditions(
                 Property(name=name,
                          value=value,
-                         origin='specified',
+                         origin=origin if origin is not None else 'specified',
                          template=temp)
                 ))
         #add parameters (if any of them are given) to this MaterialSpec's ProcessSpec
         elif key in self.process_parameter_dict.keys() :
             self.keys_used.append(key)
-            name, value, temp = name_value_template_from_key_value_dict(key,value,self.process_parameter_dict[key])
+            name, value, temp, origin = name_value_template_origin_from_key_value_dict(key,value,
+                                                                                       self.process_parameter_dict[key])
             if name is None or value is None :
                 return
             self.spec.process.parameters.append(Parameter(name=name,
                                                           value=value,
-                                                          origin='specified',
+                                                          origin=origin if origin is not None else 'specified',
                                                           template=temp))
         else :
             super().add_other_key(key,value,record)
@@ -182,22 +184,24 @@ class ProcessSpecFromFileMakerRecord(HasTemplateFromFileMakerRecord) :
         #add conditions (if any of them are given) to this ProcessSpec
         if key in self.condition_dict.keys() :
             self.keys_used.append(key)
-            name, value, temp = name_value_template_from_key_value_dict(key,value,self.condition_dict[key])
+            name, value, temp, origin = name_value_template_origin_from_key_value_dict(key,value,
+                                                                                       self.condition_dict[key])
             if name is None or value is None :
                 return
             self.spec.conditions.append(Condition(name=name,
                                                   value=value,
-                                                  origin='specified',
+                                                  origin=origin if origin is not None else 'specified',
                                                   template=temp))
         #add parameters (if any of them are given) to this ProcessSpec
         elif key in self.parameter_dict.keys() :
             self.keys_used.append(key)
-            name, value, temp = name_value_template_from_key_value_dict(key,value,self.parameter_dict[key])
+            name, value, temp, origin = name_value_template_origin_from_key_value_dict(key,value,
+                                                                                       self.parameter_dict[key])
             if name is None or value is None :
                 return
             self.spec.parameters.append(Parameter(name=name,
                                                   value=value,
-                                                  origin='specified',
+                                                  origin=origin if origin is not None else 'specified',
                                                   template=temp))
         else :
             super().add_other_key(key,value,record)

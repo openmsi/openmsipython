@@ -38,7 +38,7 @@ class LaserShockFlyerStackSpec(LaserShockSpecForRun) :
     def get_spec_kwargs(self) :
         spec_kwargs = {}
         #name
-        spec_kwargs['name'] = 'Flyer Stack' if self.cutting is not None else 'Glass Epoxy Foil Stack'
+        spec_kwargs['name'] = 'Flyer Stack'
         #notes
         if self.cutting is not None :
             spec_kwargs['notes'] = 'A spec for creating a set of flyer discs cut out from a glass/epoxy/foil stack'
@@ -55,33 +55,59 @@ class LaserShockFlyerStackSpec(LaserShockSpecForRun) :
         Helper function to return the process spec for this Flyer Stack spec
         """
         #process, materials, and ingredients for mixing epoxy
-        mixing_epoxy = ProcessSpec(
-            name='Mixing Epoxy',
-            parameters=[
+        mixing_epoxy_params = []
+        if self.mixing_time!='' :
+            mixing_epoxy_params.append(
                 Parameter(
                     name='Mixing Time',
                     value=NominalInteger(int(self.mixing_time.split(':')[0])), # assume an int # of mins like 05:00:00
                     template=ATTR_TEMPL['Mixing Time'],
                     origin='specified',
-                    ),
+                    )
+            )
+        if self.resting_time!='' :
+            mixing_epoxy_params.append(
                 Parameter(
                     name='Resting Time',
                     value=NominalInteger(int(self.resting_time.split(':')[0])), # ^ same with resting time
                     template=ATTR_TEMPL['Resting Time'],
                     origin='specified',
-                    ),
-                ],
+                    )
+            )
+        mixing_epoxy = ProcessSpec(
+            name='Mixing Epoxy',
+            parameters=mixing_epoxy_params,
             template=OBJ_TEMPL['Mixing Epoxy']
             )
         epoxy_part_a = MaterialSpec(name='Epoxy Part A',
                                     process=self.epoxyID.process if self.epoxyID is not None else None)
         epoxy_part_b = MaterialSpec(name='Epoxy Part B',
                                     process=self.epoxyID.process if self.epoxyID is not None else None)
-        IngredientSpec(name='Epoxy Part A',material=epoxy_part_a,process=mixing_epoxy,
-                       absolute_quantity=NominalReal(float(self.part_a),'g'))
-        IngredientSpec(name='Epoxy Part B',material=epoxy_part_b,process=mixing_epoxy,
-                       absolute_quantity=NominalReal(float(self.part_b),'g'))
+        aq = NominalReal(float(self.part_a),'g') if self.part_a!='' else None
+        IngredientSpec(name='Epoxy Part A',material=epoxy_part_a,process=mixing_epoxy,absolute_quantity=aq)
+        aq = NominalReal(float(self.part_b),'g') if self.part_b!='' else None
+        IngredientSpec(name='Epoxy Part B',material=epoxy_part_b,process=mixing_epoxy,absolute_quantity=aq)
+        mixed_epoxy = MaterialSpec(name='Mixed Epoxy',process=mixing_epoxy)
         #process and ingredients for making the glass/epoxy/foil stack
+        epoxying_params = []
+        if self.comp_weight!='' :
+            epoxying_params.append(
+                Parameter(
+                    name='Compression Weight',
+                    value=NominalReal(float(self.comp_weight),'lb'),
+                    template=ATTR_TEMPL['Compression Weight'],
+                    origin='specified',
+                    )
+            )
+        if self.comp_time!='' :
+            epoxying_params.append(
+                Parameter(
+                    name='Compression Time',
+                    value=NominalReal(float(self.comp_time),'hr'),
+                    template=ATTR_TEMPL['Compression Time'],
+                    origin='specified',
+                    )
+            )
         epoxying = ProcessSpec(
             name='Epoxying a Flyer Stack',
             conditions=[
@@ -92,55 +118,46 @@ class LaserShockFlyerStackSpec(LaserShockSpecForRun) :
                     origin='specified',
                     )
                 ],
-            parameters=[
-                Parameter(
-                    name='Compression Weight',
-                    value=NominalReal(float(self.comp_weight),'lb'),
-                    template=ATTR_TEMPL['Compression Weight'],
-                    origin='specified',
-                    ),
-                Parameter(
-                    name='Compression Time',
-                    value=NominalReal(float(self.comp_time),'hr'),
-                    template=ATTR_TEMPL['Compression Time'],
-                    origin='specified',
-                    ),
-                ],
+            parameters=epoxying_params,
             template=OBJ_TEMPL['Epoxying a Flyer Stack'],
             )
         IngredientSpec(name='Glass ID',material=self.glassID if self.glassID is not None else None,process=epoxying)
         IngredientSpec(name='Foil ID',material=self.foilID if self.foilID is not None else None,process=epoxying)
-        IngredientSpec(name='Epoxy mixture',material=mixing_epoxy.output_material,process=epoxying)
+        IngredientSpec(name='Mixed Epoxy',material=mixed_epoxy,process=epoxying)
+        glass_epoxy_foil_stack = MaterialSpec(name='Glass Epoxy Foil Stack',process=epoxying)
         #process and ingredients for cutting flyer discs into the glass/epoxy/foil stack
         if self.cutting is not None :
             cutting = copy.copy(self.cutting)
         else :
             cutting = ProcessSpec(name='Cutting Flyer Discs')
-        cutting.parameters.append(
-            Parameter(
-                name='Flyer Spacing',
-                value=NominalReal(float(self.s),'mm'),
-                template=ATTR_TEMPL['Flyer Spacing'],
-                origin='specified',
+        if self.s!='' :
+            cutting.parameters.append(
+                Parameter(
+                    name='Flyer Spacing',
+                    value=NominalReal(float(self.s),'mm'),
+                    template=ATTR_TEMPL['Flyer Spacing'],
+                    origin='specified',
+                    )
                 )
-            )
-        cutting.parameters.append(
-            Parameter(
-                name='Flyer Diameter',
-                value=NominalReal(float(self.d),'mm'),
-                template=ATTR_TEMPL['Flyer Diameter'],
-                origin='specified',
+        if self.d!='' :
+            cutting.parameters.append(
+                Parameter(
+                    name='Flyer Diameter',
+                    value=NominalReal(float(self.d),'mm'),
+                    template=ATTR_TEMPL['Flyer Diameter'],
+                    origin='specified',
+                    )
                 )
-            )
-        cutting.parameters.append(
-            Parameter(
-                name='Rows X Columns',
-                value=NominalInteger(float(self.n)),
-                template=ATTR_TEMPL['Rows X Columns'],
-                origin='specified',
+        if self.n!='' :
+            cutting.parameters.append(
+                Parameter(
+                    name='Rows X Columns',
+                    value=NominalInteger(float(self.n)),
+                    template=ATTR_TEMPL['Rows X Columns'],
+                    origin='specified',
+                    )
                 )
-            )
-        IngredientSpec(name='Glass Epoxy Foil Stack',material=epoxying.output_material,process=cutting)
+        IngredientSpec(name='Glass Epoxy Foil Stack',material=glass_epoxy_foil_stack,process=cutting)
         return cutting
 
 class LaserShockFlyerStack(MaterialRunFromFileMakerRecord) :
@@ -156,10 +173,10 @@ class LaserShockFlyerStack(MaterialRunFromFileMakerRecord) :
 
     def __init__(self,record,glass_IDs,foil_IDs,epoxy_IDs,flyer_cutting_programs) :
         #find the glass, foil, epoxy, and flyer cutting program that were used for this run
-        self.glassID = search_for_single_name(glass_IDs,record.pop('Glass Name Reference'))
-        self.foilID = search_for_single_name(foil_IDs,record.pop('Foil Name'))
-        self.epoxyID = search_for_single_name(epoxy_IDs,record.pop('Epoxy Name'))
-        self.cutting = search_for_single_name(flyer_cutting_programs,record.pop('Cutting Procedure Name'))
+        self.glassID = search_for_single_name([gid.spec for gid in glass_IDs],record.pop('Glass Name Reference'))
+        self.foilID = search_for_single_name([fid.spec for fid in foil_IDs],record.pop('Foil Name'))
+        self.epoxyID = search_for_single_name([eid.spec for eid in epoxy_IDs] ,record.pop('Epoxy Name'))
+        self.cutting = search_for_single_name([fcp.spec for fcp in flyer_cutting_programs],record.pop('Cutting Procedure Name'))
         #create Runs from the Specs found
         self.glass = make_instance(self.glassID) if self.glassID is not None else None
         self.foil = make_instance(self.foilID) if self.foilID is not None else None
@@ -183,20 +200,16 @@ class LaserShockFlyerStack(MaterialRunFromFileMakerRecord) :
         return [*super().tags_keys,'Flyer ID']
 
     @property
-    def ignore_key(self,key) :
-        #I don't have access to the "Flyer Epoxy Thickness" calculated box through the API 
-        #so I'm going to ignore the associated "Row Number" and "Column Number" fields for now 
-        if key in ['Row Number','Column Number'] :
-            return True
-        return super().ignore_key(key)
-
-    @property
     def measured_property_dict(self) :
         rd = {}
         for i in range(1,5) :
             rd[f'Stack Thickness {i}'] = {'valuetype':NominalReal,
                                           'datatype':float,
                                           'template':ATTR_TEMPL['Stack Thickness']}
+            rd[f'Epoxy Thickness {i}'] = {'valuetype':NominalReal,
+                                          'datatype':float,
+                                          'template':ATTR_TEMPL['Stack Thickness'],
+                                          'origin':'computed'}
         return rd
 
     @property
@@ -204,9 +217,15 @@ class LaserShockFlyerStack(MaterialRunFromFileMakerRecord) :
         return [*super().other_keys,
                 *[f'Glass Thickness {i}' for i in range(1,5)],'Glass width','Glass length',
                 *[f'Foil Thickness {i}' for i in range(1,5)],
-                *[f'Epoxy Thickness {i}' for i in range(1,5)],
                 self.performed_date_key,
                ]
+
+    def ignore_key(self,key) :
+        #I don't have access to the "Flyer Epoxy Thickness" calculated box through the API 
+        #so I'm going to ignore the associated "Row Number" and "Column Number" fields for now 
+        if key in ['Row Number','Column Number'] :
+            return True
+        return super().ignore_key(key)
 
     def add_other_key(self,key,value,record) :
         # Measured properties of the Glass run
@@ -249,21 +268,6 @@ class LaserShockFlyerStack(MaterialRunFromFileMakerRecord) :
                                             origin='measured',
                                             template=temp))
             meas.source = PerformedSource(record[self.performed_by_key],record[self.performed_date_key])
-        # Calculated properties of the Flyer Stack
-        elif key.startswith('Epoxy Thickness') :
-            self.keys_used.append(key)
-            if value=='' :
-                return
-            if self.epoxy is None :
-                errmsg = f'ERROR: {key} calculation ({value}) found for a Flyer Stack with no recognized epoxy object!'
-                raise ValueError(errmsg)
-            name=key.replace(' ','')
-            temp = ATTR_TEMPL['Epoxy Thickness']
-            self.epoxy.properties.append(PropertyAndConditions(Property(
-                name=name,
-                value=NominalReal(float(value),temp.bounds.default_units),
-                origin='calculated',
-                template=temp)))
         else :
             super().add_other_key(key,value,record)
 

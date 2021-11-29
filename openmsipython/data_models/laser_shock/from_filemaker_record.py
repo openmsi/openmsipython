@@ -59,7 +59,6 @@ class FromFileMakerRecordBase(ABC) :
             #ignore any specified keys
             elif self.ignore_key(key) :
                 self.keys_used.append(key)
-                continue
             #send any "other" keys to the "add_other_key" function
             elif key in self.other_keys :
                 self.add_other_key(key,value,record)

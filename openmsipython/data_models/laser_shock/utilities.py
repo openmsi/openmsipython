@@ -40,14 +40,14 @@ def search_for_single_tag(ent_list,tagname,tagvalue) :
         errmsg=f'ERROR: more than one entities were found matching name::value={tagname}::{tagvalue} : {ents}'
         raise RuntimeError(errmsg)
 
-def name_value_template_from_key_value_dict(key,value,d) :
+def name_value_template_origin_from_key_value_dict(key,value,d) :
     """
     Given a FileMaker record key, its value, and a dictionary specifying 
-    a valuetype, datatype, and template for the entry, return the name, 
-    value, and template that should be added to some corresponding GEMD construct 
+    a valuetype, datatype, template, and origin for the entry, return the name, 
+    value, template, and origin of the information that should be added to some corresponding GEMD construct 
     """
     if value in ('','N/A') :
-        return None, None, None
+        return None, None, None, None
     name = key.replace(' ','')
     val = value
     if 'datatype' in d.keys() :
@@ -65,4 +65,5 @@ def name_value_template_from_key_value_dict(key,value,d) :
         value = d['valuetype'](val,temp.bounds.default_units)
     elif d['valuetype']==DiscreteCategorical :
         value = d['valuetype']({val:1.0})
-    return name, value, temp
+    origin = d['origin'] if 'origin' in d.keys() else None
+    return name, value, temp, origin
