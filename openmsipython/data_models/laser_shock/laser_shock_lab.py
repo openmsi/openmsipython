@@ -46,7 +46,7 @@ class LaserShockLab :
         #Samples (Materials)
         self.samples = self.__get_samples()
         #Launch packages (Materials)
-        #self.launch_packages = self.__get_launch_packages()
+        self.launch_packages = self.__get_launch_packages()
         #Experiments (Measurements)
         #self.experiments = self.__get_experiments()
         #Make sure that there is only one of each unique spec (dynamically-created specs may be duplicated)
@@ -89,6 +89,13 @@ class LaserShockLab :
             fp.write(encoder.thin_dumps(self.samples[0].run, indent=2))
         with open(ofd/'sample_material_history.json', 'w') as fp :
             context_list = complete_material_history(self.samples[0].run) 
+            fp.write(json.dumps(context_list, indent=2))
+        with open(ofd/'launch_package.json', 'w') as fp: 
+            fp.write(encoder.thin_dumps(self.launch_packages[10].run, indent=2))
+        with open(ofd/'launch_package_spec.json', 'w') as fp: 
+            fp.write(encoder.thin_dumps(self.launch_packages[10].run.spec, indent=2))
+        with open(ofd/'launch_package_material_history.json', 'w') as fp: 
+            context_list = complete_material_history(self.launch_packages[10].run) 
             fp.write(json.dumps(context_list, indent=2))
         #with open(ofd/'experiment_template.json','w') as fp :
         #    fp.write(encoder.thin_dumps(self.experiments[0].template, indent=2))

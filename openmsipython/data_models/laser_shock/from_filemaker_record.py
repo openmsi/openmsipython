@@ -25,8 +25,9 @@ class FromFileMakerRecordBase(ABC) :
                 self.keys_used.append(key)
             #add the tags
             elif key in self.tags_keys :
-                obj.tags.append(f'{key.replace(" ","")}::{value.replace(" ","_")}')
                 self.keys_used.append(key)
+                if value!='' :
+                    obj.tags.append(f'{key.replace(" ","")}::{value.replace(" ","_")}')
             #add the notes
             elif self.notes_key is not None and key==self.notes_key :
                 obj.notes = value.replace('\r','\n')

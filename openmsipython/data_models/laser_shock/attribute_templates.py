@@ -384,7 +384,7 @@ name = 'Processing Route'
 ATTR_TEMPL[name] = ParameterTemplate(
     name=name,
     description='Possible values in the "Processing Route" dropdown menu in the "Sample" layout',
-    bounds=CategoricalBounds(['4Bc','Solutionized','Aged']),
+    bounds=CategoricalBounds(['4Bc','1Bc+3Bc','Solutionized','Aged']),
 )
 
 name = 'Processing Time'

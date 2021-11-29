@@ -2,19 +2,29 @@
 from gemd.entity.value import NominalInteger, NominalReal, DiscreteCategorical
 from gemd.entity.value.nominal_integer import NominalInteger
 
+def search_for_name(obj_list,name) :
+    """
+    Filter a given list of objects for any that have a name matching the given name
+    If none are found in the list, returns None
+    """
+    objs = [o for o in obj_list if o.name==name]
+    if len(objs)==0 :
+        return None
+    return objs
+
 def search_for_single_name(obj_list,name) :
     """
     Search a given list of objects for exactly one of them with a name matching the given name
     If none are found in the list, returns None
     If more than one are found a RuntimeError is thrown 
     """
-    obj = [o for o in obj_list if o.name==name]
-    if len(obj)==0 :
+    objs = search_for_name(obj_list,name)
+    if objs is None or len(objs)==0 :
         return None
-    elif len(obj)==1 :
-        return obj[0]
-    elif len(obj)>1 :
-        raise RuntimeError(f'ERROR: more than one objects were found matching name {name}: {obj}')
+    elif len(objs)==1 :
+        return objs[0]
+    elif len(objs)>1 :
+        raise RuntimeError(f'ERROR: more than one objects were found matching name {name}: {objs}')
 
 def search_for_single_tag(ent_list,tagname,tagvalue) :
     """
