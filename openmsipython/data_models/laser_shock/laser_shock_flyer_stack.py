@@ -82,7 +82,7 @@ class LaserShockFlyerStackSpec(LaserShockSpecForRun) :
         epoxy_part_a = MaterialSpec(name='Epoxy Part A',
                                     process=self.epoxyID.process if self.epoxyID is not None else None)
         epoxy_part_b = MaterialSpec(name='Epoxy Part B',
-                                    process=self.epoxyID.process if self.epoxyID is not None else None)
+                                    process=copy.deepcopy(self.epoxyID.process) if self.epoxyID is not None else None)
         aq = NominalReal(float(self.part_a),'g') if self.part_a!='' else None
         IngredientSpec(name='Epoxy Part A',material=epoxy_part_a,process=mixing_epoxy,absolute_quantity=aq)
         aq = NominalReal(float(self.part_b),'g') if self.part_b!='' else None
@@ -127,7 +127,7 @@ class LaserShockFlyerStackSpec(LaserShockSpecForRun) :
         glass_epoxy_foil_stack = MaterialSpec(name='Glass Epoxy Foil Stack',process=epoxying)
         #process and ingredients for cutting flyer discs into the glass/epoxy/foil stack
         if self.cutting is not None :
-            cutting = copy.copy(self.cutting)
+            cutting = copy.deepcopy(self.cutting)
         else :
             cutting = ProcessSpec(name='Cutting Flyer Discs')
         if self.s!='' :

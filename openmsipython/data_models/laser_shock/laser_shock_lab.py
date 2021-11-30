@@ -1,7 +1,9 @@
 #imports
 import os, pathlib, json, requests, getpass, fmrest
-from gemd.json import GEMDJson
+from gemd.util.impl import recursive_foreach
 from gemd.entity.util import complete_material_history
+from gemd.json import GEMDJson
+from gemd.entity.object import MaterialSpec, ProcessSpec, IngredientSpec, MeasurementSpec
 from ...utilities.logging import LogOwner
 from .laser_shock_glass_ID import LaserShockGlassID
 from .laser_shock_epoxy_ID import LaserShockEpoxyID
@@ -211,9 +213,46 @@ class LaserShockLab(LogOwner) :
             experiments.append(LaserShockExperiment(record,self.launch_packages,logger=self.logger))
         return experiments
 
+    def __find_unique_spec_objs(self,item) :
+        """
+        Return a list containing the single object if the single object is a Spec
+        Otherwise return an empty list
+        Used with recursive_flatmap to obtain ALL created specs
+        """
+        if not isinstance(item, (MaterialSpec, ProcessSpec, IngredientSpec, MeasurementSpec)):
+            return
+        itemname = item.name
+        if itemname not in self.__unique_specs_as_dicts_by_name.keys() :
+            self.__unique_specs_as_dicts_by_name[itemname] = []
+        itemdict = item.as_dict()
+        found = False
+        for uspecdict in self.__unique_specs_as_dicts_by_name[itemname] :
+            if itemdict==uspecdict :
+                found = True
+                break
+        if not found :
+            self.__unique_specs_as_dicts_by_name[itemname].append(itemdict)
+
     def __replace_specs(self) :
-        #print(self.samples[0])
-        pass
+        #get a list of all the unique specs that have been dynamically created
+        all_top_specs = [gid.spec for gid in self.glass_IDs]
+        all_top_specs+= [eid.spec for eid in self.epoxy_IDs]
+        all_top_specs+= [fid.spec for fid in self.foil_IDs]
+        all_top_specs+= [sid.spec for sid in self.spacer_IDs]
+        all_top_specs+= [fcp.spec for fcp in self.flyer_cutting_programs]
+        all_top_specs+= [scp.spec for scp in self.spacer_cutting_programs]
+        all_top_specs+= [fs.run.spec for fs in self.flyer_stacks]
+        all_top_specs+= [s.run.spec for s in self.samples]
+        all_top_specs+= [lp.run.spec for lp in self.launch_packages]
+        all_top_specs+= [e.run.spec for e in self.experiments]
+        self.logger.debug('Finding the set of unique Specs...')
+        self.__unique_specs_as_dicts_by_name = {}
+        recursive_foreach(all_top_specs,self.__find_unique_spec_objs)
+        all_unique_specs = []
+        for t in self.__unique_specs_as_dicts_by_name.keys() :
+            for us in self.__unique_specs_as_dicts_by_name[t] :
+                all_unique_specs.append(us)
+        self.logger.debug(f'Found {len(all_unique_specs)} unique Specs total')
 
 #################### MAIN FUNCTION ####################
 

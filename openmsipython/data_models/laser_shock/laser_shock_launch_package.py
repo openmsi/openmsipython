@@ -76,7 +76,7 @@ class LaserShockLaunchPackageSpec(LaserShockSpecForRun) :
         if not self.use_spacer :
             return choosing_flyer
         if self.spacercutting is not None :
-            cutting_spacer = copy.copy(self.spacercutting)
+            cutting_spacer = copy.deepcopy(self.spacercutting)
         else :
             cutting_spacer = ProcessSpec(
                 name='Cutting Spacer',

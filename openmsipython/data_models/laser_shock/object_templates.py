@@ -1,6 +1,6 @@
 #imports
+import inspect
 from gemd.entity.template import MaterialTemplate, ProcessTemplate, MeasurementTemplate
-#from gemd.entity.template import MeasurementTemplate
 from .attribute_templates import ATTR_TEMPL
 
 OBJ_TEMPL = {}
@@ -258,8 +258,10 @@ OBJ_TEMPL[name] = ProcessTemplate(
 name = 'Sample Processing'
 OBJ_TEMPL[name] = ProcessTemplate(
     name=name,
-    description='''Processing a raw material of some type in some geometry, at some temperature,
-                   and through some route to produce a Sample for the Laser Shock Lab''',
+    description=inspect.cleandoc('''
+        Processing a raw material of some type in some geometry, at some temperature, and through some route to
+        produce a Sample for the Laser Shock Lab
+        ''').replace('\n',''),
     conditions=[ATTR_TEMPL['Processing Geometry'],
                 ATTR_TEMPL['Material Processing'],
                 ATTR_TEMPL['Processing Temperature'],

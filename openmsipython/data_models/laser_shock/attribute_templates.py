@@ -1,4 +1,5 @@
 #imports
+import inspect
 from gemd.entity.bounds import IntegerBounds, RealBounds, CategoricalBounds, CompositionBounds
 from gemd.entity.template import PropertyTemplate, ParameterTemplate, ConditionTemplate, condition_template
 
@@ -532,8 +533,9 @@ ATTR_TEMPL[name] = ParameterTemplate(
 name = 'Exposure'
 ATTR_TEMPL[name] = ParameterTemplate(
     name=name,
-    description="""The exposure time set in the high speed camera software 
-                   (nanoseconds, categorical bc it's a dropdown menu)""",
+    description=inspect.cleandoc("""
+        The exposure time set in the high speed camera software (nanoseconds, categorical bc it's a dropdown menu)
+        """).replace('\n',''),
     bounds=CategoricalBounds(['100','200','500','1000','10000','20000','50000','100000','200000',
                               '500000','1000000','2000000','5000000','10000000'])
 )
@@ -789,8 +791,10 @@ ATTR_TEMPL[name] = ConditionTemplate(
 name = 'PreAmp Output Power'
 ATTR_TEMPL[name] = ConditionTemplate(
     name=name,
-    description="""The output power of the preamplifier used in the PDV system  
-                    (units of decibel-milliwatts, dBm, not recognized by GEMD)""",
+    description=inspect.cleandoc("""
+        The output power of the preamplifier used in the PDV system 
+        (units of decibel-milliwatts, dBm, not recognized by GEMD)
+        """).replace('\n',''),
     bounds=RealBounds(0.,1.e3,'')
 )
 
