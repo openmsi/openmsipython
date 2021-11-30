@@ -1,5 +1,5 @@
 #imports
-from gemd.entity.value import DiscreteCategorical
+from gemd.entity.value import NominalCategorical
 from .attribute_templates import ATTR_TEMPL
 from .object_templates import OBJ_TEMPL
 from .spec_from_filemaker_record import MaterialSpecFromFileMakerRecord
@@ -25,7 +25,7 @@ class LaserShockEpoxyID(MaterialSpecFromFileMakerRecord) :
     
     @property
     def process_parameter_dict(self) :
-        return {'Epoxy Supplier':{'valuetype':DiscreteCategorical,
+        return {'Epoxy Supplier':{'valuetype':NominalCategorical,
                                   'template':ATTR_TEMPL['Epoxy Supplier']},
 
             }

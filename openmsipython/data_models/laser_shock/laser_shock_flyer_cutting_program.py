@@ -1,6 +1,5 @@
 #imports
-from gemd.entity.value import DiscreteCategorical, NominalReal
-from gemd.entity.value.nominal_integer import NominalInteger
+from gemd.entity.value import NominalCategorical, NominalReal, NominalInteger
 from .attribute_templates import ATTR_TEMPL
 from .object_templates import OBJ_TEMPL
 from .spec_from_filemaker_record import ProcessSpecFromFileMakerRecord
@@ -25,12 +24,12 @@ class LaserShockFlyerCuttingProgram(ProcessSpecFromFileMakerRecord) :
     @property
     def condition_dict(self) :
         return {
-            'Cutting Method':{'valuetype':DiscreteCategorical,
+            'Cutting Method':{'valuetype':NominalCategorical,
                               'template':ATTR_TEMPL['Cutting Method']},
             'Typical Cutting Time':{'valuetype':NominalReal,
                                     'datatype':float,
                                     'template':ATTR_TEMPL['Typical Cutting Time']},
-            'Cutting Tool':{'valuetype':DiscreteCategorical,
+            'Cutting Tool':{'valuetype':NominalCategorical,
                             'template':ATTR_TEMPL['Cutting Tool']},
         }
 
@@ -43,9 +42,9 @@ class LaserShockFlyerCuttingProgram(ProcessSpecFromFileMakerRecord) :
             'Number of Passes':{'valuetype':NominalInteger,
                                 'datatype':int,
                                 'template':ATTR_TEMPL['Number of Passes']},
-            'Aperture Setting':{'valuetype':DiscreteCategorical,
+            'Aperture Setting':{'valuetype':NominalCategorical,
                                 'template':ATTR_TEMPL['Aperture Setting']},
-            'Depth of Cut':{'valuetype':DiscreteCategorical,
+            'Depth of Cut':{'valuetype':NominalCategorical,
                             'template':ATTR_TEMPL['Depth of Cut']},
         }
 

@@ -1,5 +1,5 @@
 #imports
-from gemd.entity.value import DiscreteCategorical, NominalReal
+from gemd.entity.value import NominalCategorical, NominalReal
 from .attribute_templates import ATTR_TEMPL
 from .object_templates import OBJ_TEMPL
 from .spec_from_filemaker_record import MaterialSpecFromFileMakerRecord
@@ -28,21 +28,21 @@ class LaserShockSpacerID(MaterialSpecFromFileMakerRecord) :
         return {'Spacer Thickness':{'valuetype':NominalReal,
                                    'datatype':float,
                                    'template':ATTR_TEMPL['Spacer Thickness']},
-                'Spacer Material':{'valuetype':DiscreteCategorical,
+                'Spacer Material':{'valuetype':NominalCategorical,
                                    'datatype':str,
                                    'template':ATTR_TEMPL['Spacer Material']},
-                'Spacer Adhesive':{'valuetype':DiscreteCategorical,
+                'Spacer Adhesive':{'valuetype':NominalCategorical,
                                    'datatype':str,
                                    'template':ATTR_TEMPL['Spacer Adhesive Sides']},
-                'Adhesive Type':{'valuetype':DiscreteCategorical,
+                'Adhesive Type':{'valuetype':NominalCategorical,
                                    'datatype':str,
                                    'template':ATTR_TEMPL['Adhesive Type']},
             }
 
     @property
     def process_parameter_dict(self) :
-        return {'Spacer Supplier':{'valuetype':DiscreteCategorical,
+        return {'Spacer Supplier':{'valuetype':NominalCategorical,
                                   'template':ATTR_TEMPL['Spacer Supplier']},
-                'Spacer Part Number':{'valuetype':DiscreteCategorical,
+                'Spacer Part Number':{'valuetype':NominalCategorical,
                                      'template':ATTR_TEMPL['Spacer Part Number']},
             }

@@ -1,5 +1,5 @@
 #imports
-from gemd.entity.value import DiscreteCategorical, NominalCategorical, NominalReal, NominalInteger
+from gemd.entity.value import NominalCategorical, NominalReal, NominalInteger
 from gemd.entity.attribute import Parameter, Condition
 from gemd.entity.object import MeasurementSpec
 from .utilities import search_for_single_name
@@ -65,7 +65,7 @@ class LaserShockExperimentSpec(LaserShockSpecForRun) :
                 continue
             temp = ATTR_TEMPL[name]
             conditions.append(Condition(name=name.replace(' ',''),
-                                        value=DiscreteCategorical({val:1.0}),
+                                        value=NominalCategorical(str(val)),
                                         template=temp,
                                         origin='specified'))
         names = [
@@ -125,7 +125,7 @@ class LaserShockExperimentSpec(LaserShockSpecForRun) :
                 continue
             temp = ATTR_TEMPL[name]
             parameters.append(Parameter(name=name.replace(' ',''),
-                                        value=DiscreteCategorical({str(val):1.0}),
+                                        value=NominalCategorical(str(val)),
                                         template=temp,
                                         origin='specified'))
         names = [
@@ -199,7 +199,7 @@ class LaserShockExperiment(MeasurementRunFromFileMakerRecord) :
         d = {}
         names = ['Flyer Tilt','Flyer Curvature','Launch Package Orientation','Video Quality','Spall State']
         for name in names :
-            d[name] = {'valuetype':DiscreteCategorical,'template':ATTR_TEMPL[name]}
+            d[name] = {'valuetype':NominalCategorical,'template':ATTR_TEMPL[name]}
         names = ['Return Signal Strength','Max Velocity','Est Impact Velocity']
         for name in names :
             d[name] = {'valuetype':NominalReal,'datatype':float,'template':ATTR_TEMPL[name]}

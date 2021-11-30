@@ -1,5 +1,5 @@
 #imports
-from gemd.entity.value import DiscreteCategorical, NominalReal, NominalComposition
+from gemd.entity.value import NominalCategorical, NominalReal, NominalComposition
 from gemd.entity.attribute import PropertyAndConditions, Property, Parameter, Condition
 from gemd.entity.object import MaterialSpec, ProcessSpec, IngredientSpec
 from .attribute_templates import ATTR_TEMPL
@@ -56,7 +56,7 @@ class LaserShockSampleSpec(LaserShockSpecForRun) :
             name='Raw Material',
             properties=[
                 PropertyAndConditions(Property(name='MaterialType',
-                                               value=DiscreteCategorical({self.mat_type:1.0}),
+                                               value=NominalCategorical(str(self.mat_type)),
                                                template=ATTR_TEMPL['Sample Material Type'],
                                                origin='specified')),
                 PropertyAndConditions(Property(name='MaterialComposition',
@@ -64,7 +64,7 @@ class LaserShockSampleSpec(LaserShockSpecForRun) :
                                                template=ATTR_TEMPL['Sample Raw Material Composition'],
                                                origin='specified'),
                                       Condition(name='CompositionMeasure',
-                                                value=DiscreteCategorical({self.pct_meas:1.0}),
+                                                value=NominalCategorical(str(self.pct_meas)),
                                                 template=ATTR_TEMPL['Composition Measure'],
                                                 origin='specified')),
                 ],
@@ -87,7 +87,7 @@ class LaserShockSampleSpec(LaserShockSpecForRun) :
                 preprocessing.conditions.append(
                     Condition(
                         name='Preprocessing',
-                        value=DiscreteCategorical({self.preproc:1.0}),
+                        value=NominalCategorical(str(self.preproc)),
                         template=ATTR_TEMPL['Preprocessing'],
                         origin='specified'
                     )
@@ -110,13 +110,13 @@ class LaserShockSampleSpec(LaserShockSpecForRun) :
             name='Sample Processing',
             conditions=[
                 Condition(name='ProcessingGeometry',
-                          value=DiscreteCategorical({self.proc_geom:1.0}),
+                          value=NominalCategorical(str(self.proc_geom)),
                           template=ATTR_TEMPL['Processing Geometry'],
                           origin='specified'),
                 ],
             parameters=[
                         Parameter(name='ProcessingRoute',
-                                  value=DiscreteCategorical({self.proc_route:1.0}),
+                                  value=NominalCategorical(str(self.proc_route)),
                                   template=ATTR_TEMPL['Processing Route'],
                                   origin='specified'),
                 ],
@@ -127,7 +127,7 @@ class LaserShockSampleSpec(LaserShockSpecForRun) :
             for mp in self.mat_proc.split('\r')[1:] :
                 sample_processing.conditions.append(
                     Condition(name='MaterialProcessing',
-                          value=DiscreteCategorical({mp:1.0}),
+                          value=NominalCategorical(str(mp)),
                           template=ATTR_TEMPL['Material Processing'],
                           origin='specified'),
                 )

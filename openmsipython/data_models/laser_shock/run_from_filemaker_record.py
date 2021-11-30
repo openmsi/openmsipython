@@ -1,7 +1,6 @@
 #imports
 from abc import abstractmethod
 from gemd.entity.util import make_instance
-from gemd.entity.value import DiscreteCategorical
 from gemd.entity.source.performed_source import PerformedSource
 from gemd.entity.attribute import Property
 from gemd.entity.object import MeasurementSpec, MeasurementRun

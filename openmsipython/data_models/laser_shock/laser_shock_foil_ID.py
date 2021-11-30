@@ -1,5 +1,5 @@
 #imports
-from gemd.entity.value import DiscreteCategorical, NominalReal
+from gemd.entity.value import NominalCategorical, NominalReal
 from .attribute_templates import ATTR_TEMPL
 from .object_templates import OBJ_TEMPL
 from .spec_from_filemaker_record import MaterialSpecFromFileMakerRecord
@@ -34,18 +34,18 @@ class LaserShockFoilID(MaterialSpecFromFileMakerRecord) :
                 'Foil Width':{'valuetype':NominalReal,
                                    'datatype':float,
                                    'template':ATTR_TEMPL['Foil Width']},
-                'Foil Hardness':{'valuetype':DiscreteCategorical,
+                'Foil Hardness':{'valuetype':NominalCategorical,
                                    'datatype':str,
                                    'template':ATTR_TEMPL['Foil Hardness']},
-                'Foil Material':{'valuetype':DiscreteCategorical,
+                'Foil Material':{'valuetype':NominalCategorical,
                                    'datatype':str,
                                    'template':ATTR_TEMPL['Foil Material']},
             }
 
     @property
     def process_parameter_dict(self) :
-        return {'Foil Supplier':{'valuetype':DiscreteCategorical,
+        return {'Foil Supplier':{'valuetype':NominalCategorical,
                                   'template':ATTR_TEMPL['Foil Supplier']},
-                'Foil Part Number':{'valuetype':DiscreteCategorical,
+                'Foil Part Number':{'valuetype':NominalCategorical,
                                      'template':ATTR_TEMPL['Foil Part Number']},
             }

@@ -1,5 +1,5 @@
 #imports
-from gemd.entity.value import DiscreteCategorical, NominalReal
+from gemd.entity.value import NominalCategorical, NominalReal
 from .attribute_templates import ATTR_TEMPL
 from .object_templates import OBJ_TEMPL
 from .spec_from_filemaker_record import MaterialSpecFromFileMakerRecord
@@ -38,8 +38,8 @@ class LaserShockGlassID(MaterialSpecFromFileMakerRecord) :
 
     @property
     def process_parameter_dict(self) :
-        return {'Glass Supplier':{'valuetype':DiscreteCategorical,
+        return {'Glass Supplier':{'valuetype':NominalCategorical,
                                   'template':ATTR_TEMPL['Glass Supplier']},
-                'Glass Part Number':{'valuetype':DiscreteCategorical,
+                'Glass Part Number':{'valuetype':NominalCategorical,
                                      'template':ATTR_TEMPL['Glass Part Number']},
             }

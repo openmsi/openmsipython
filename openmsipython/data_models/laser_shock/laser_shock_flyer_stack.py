@@ -2,7 +2,7 @@
 import copy
 from gemd.entity.util import make_instance
 from gemd.entity.source.performed_source import PerformedSource
-from gemd.entity.value import DiscreteCategorical, NominalInteger, NominalReal
+from gemd.entity.value import NominalCategorical, NominalInteger, NominalReal
 from gemd.entity.attribute import PropertyAndConditions, Property, Parameter, Condition
 from gemd.entity.object import ProcessSpec, MaterialSpec, MeasurementSpec, MeasurementRun, IngredientSpec
 from .utilities import search_for_single_name
@@ -113,7 +113,7 @@ class LaserShockFlyerStackSpec(LaserShockSpecForRun) :
             conditions=[
                 Condition(
                     name='Compression Method',
-                    value=DiscreteCategorical({self.comp_method:1.0}),
+                    value=NominalCategorical(str(self.comp_method)),
                     template=ATTR_TEMPL['Compression Method'],
                     origin='specified',
                     )

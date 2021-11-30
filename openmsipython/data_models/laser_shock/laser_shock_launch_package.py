@@ -2,7 +2,7 @@
 import copy
 from gemd.entity.util import make_instance
 from gemd.entity.source.performed_source import PerformedSource
-from gemd.entity.value import DiscreteCategorical, NominalInteger, NominalReal
+from gemd.entity.value import NominalCategorical, NominalInteger, NominalReal
 from gemd.entity.attribute import Property, Parameter, Condition
 from gemd.entity.object import ProcessSpec, MaterialSpec, MeasurementSpec, MeasurementRun, IngredientSpec, IngredientRun
 from .utilities import search_for_name, search_for_single_name, search_for_single_tag
@@ -89,13 +89,13 @@ class LaserShockLaunchPackageSpec(LaserShockSpecForRun) :
             name='Attaching Spacer',
             conditions=[
                 Condition(name='Spacer Attachment Method',
-                          value=DiscreteCategorical({self.spacer_attachment:1.0}),
+                          value=NominalCategorical(str(self.spacer_attachment)),
                           template=ATTR_TEMPL['Spacer Attachment Method'],
                           origin='specified'),
                 ],
             parameters=[
                 Parameter(name='Spacer Adhesive',
-                          value=DiscreteCategorical({self.spacer_adhesive:1.0}),
+                          value=NominalCategorical(str(self.spacer_adhesive)),
                           template=ATTR_TEMPL['Spacer Adhesive'],
                           origin='specified'),
                 ],
@@ -111,7 +111,7 @@ class LaserShockLaunchPackageSpec(LaserShockSpecForRun) :
             name='Attaching Sample',
             parameters=[
                 Parameter(name='Sample Orientation',
-                          value=DiscreteCategorical({self.samp_orientation:1.0}),
+                          value=NominalCategorical(str(self.samp_orientation)),
                           template=ATTR_TEMPL['Sample Orientation'],
                           origin='specified',
                     )
@@ -122,14 +122,14 @@ class LaserShockLaunchPackageSpec(LaserShockSpecForRun) :
             if ai==0 :
                 attaching_sample.conditions.append(
                     Condition(name='Sample Attachment Method',
-                              value=DiscreteCategorical({a:1.0}),
+                              value=NominalCategorical(str(a)),
                               template=ATTR_TEMPL['Sample Attachment Method'],
                               origin='specified')
                     )
             else :
                 attaching_sample.parameters.append(
                     Parameter(name='Sample Attachment Adhesive',
-                              value=DiscreteCategorical({a:1.0}),
+                              value=NominalCategorical(str(a)),
                               template=ATTR_TEMPL['Sample Attachment Adhesive'],
                               origin='specified')
                     )
@@ -265,7 +265,7 @@ class LaserShockLaunchPackage(MaterialRunFromFileMakerRecord) :
         #initial Spec
         params = [
             Parameter(name='Polishing Pad',
-                      value=DiscreteCategorical({polish_pad:1.0}),
+                      value=NominalCategorical(str(polish_pad)),
                       template=ATTR_TEMPL['Polishing Pad'],
                       origin='specified')
         ]
@@ -289,7 +289,7 @@ class LaserShockLaunchPackage(MaterialRunFromFileMakerRecord) :
                 name='Impact Sample Cutting and Polishing',
                 conditions=[
                     Condition(name='Polishing Process',
-                              value=DiscreteCategorical({polish_proc:1.0}),
+                              value=NominalCategorical(str(polish_proc)),
                               template=ATTR_TEMPL['Polishing Process'],
                               origin='specified')
                     ],
@@ -302,14 +302,14 @@ class LaserShockLaunchPackage(MaterialRunFromFileMakerRecord) :
         n = 'Impact Sample Cutting Procedure'
         for cp in cutting_procs :
             impactsamplespec.process.conditions.append(Condition(name=n,
-                                                                 value=DiscreteCategorical({cp:1.0}),
+                                                                 value=NominalCategorical(str(cp)),
                                                                  template=ATTR_TEMPL[n],
                                                                  origin='specified'))
         #add the polishing grit(s) as parameters of the process
         for n,v in zip(ns,vs) :
             if v!='' and v!='N/A':
                 impactsamplespec.process.parameters.append(Parameter(name=n,
-                                                                     value=DiscreteCategorical({v:1.0}),
+                                                                     value=NominalCategorical(str(v)),
                                                                      template=ATTR_TEMPL[n],
                                                                      origin='specified'))
         #add the sample as an ingredient in the process

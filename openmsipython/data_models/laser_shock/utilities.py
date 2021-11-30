@@ -1,7 +1,5 @@
 #imports
-from gemd.entity.value import NominalInteger, NominalReal, DiscreteCategorical
-from gemd.entity.value.nominal_categorical import NominalCategorical
-from gemd.entity.value.nominal_integer import NominalInteger
+from gemd.entity.value import NominalCategorical, NominalReal, NominalInteger
 
 def search_for_name(obj_list,name) :
     """
@@ -83,7 +81,8 @@ def name_value_template_origin_from_key_value_dict(key,value,d,logger=None,raise
                     logger.error(msg,ValueError)
             else :
                 if logger is not None :
-                    logger.warning(msg+'. Value will be added with "CouldNotCast" in the name.')
+                    msg+='. Value added with no template and "CouldNotCast" appended to the name.'
+                    logger.warning(msg)
                 name+='CouldNotCast'
                 val=str(val)
                 d['valuetype'] = NominalCategorical
@@ -99,8 +98,6 @@ def name_value_template_origin_from_key_value_dict(key,value,d,logger=None,raise
         if 'template' not in d.keys() :
             raise ValueError(f'ERROR: no template given for NominalReal dict entry {key}!')
         value = d['valuetype'](val,temp.bounds.default_units)
-    elif d['valuetype']==DiscreteCategorical :
-        value = d['valuetype']({val:1.0})
     elif d['valuetype']==NominalCategorical :
         value = d['valuetype'](val)
     origin = d['origin'] if 'origin' in d.keys() else None

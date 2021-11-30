@@ -1,6 +1,5 @@
 #imports
 from abc import abstractmethod
-from gemd.entity.value import DiscreteCategorical, NominalReal
 from gemd.entity.attribute import PropertyAndConditions, Property, Parameter, Condition
 from gemd.entity.object import ProcessSpec, MaterialSpec
 from .utilities import name_value_template_origin_from_key_value_dict
