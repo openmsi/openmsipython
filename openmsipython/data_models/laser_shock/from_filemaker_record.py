@@ -2,16 +2,20 @@
 import functools
 from abc import ABC
 from gemd.entity.file_link import FileLink
+from ...utilities.logging import LogOwner
 
-class FromFileMakerRecordBase(ABC) :
+class FromFileMakerRecordBase(LogOwner,ABC) :
     """
     Base class for specs/runs that will be created from FileMaker Records
     """
 
-    def __init__(self,record,obj) :
+    def __init__(self,record,obj,**kwargs) :
         """
         Use information in the given record to populate the given object
+        kwargs get sent to the logger object
         """
+        #init the Logger
+        super().__init__(**kwargs)
         #A list of keys whose values have been recognized and used in reading the record
         self.keys_used = []
         #loop over all the keys/values for the given record and process them one at a time
@@ -27,6 +31,8 @@ class FromFileMakerRecordBase(ABC) :
             elif key in self.tags_keys :
                 self.keys_used.append(key)
                 if value!='' :
+                    if type(value)!=str :
+                        value = repr(value)
                     obj.tags.append(f'{key.replace(" ","")}::{value.replace(" ","_")}')
             #add the notes
             elif self.notes_key is not None and key==self.notes_key :
@@ -65,14 +71,14 @@ class FromFileMakerRecordBase(ABC) :
                 self.add_other_key(key,value,record)
             #if the key hasn't been found anywhere by now, throw an error
             else :
-                raise ValueError(f'ERROR: FileMaker record key {key} is not recognized!')
+                self.logger.error(f'ERROR: FileMaker record key {key} is not recognized!',ValueError)
         #make sure all the keys in the record were used in some way
         unused_keys = [k for k in record.keys() if k not in self.keys_used]
         if len(unused_keys)>0 :
             errmsg = f'ERROR: the following keys were not used in creating a {self.__class__.__name__} object: '
             for k in unused_keys :
                 errmsg+=f'{k}, '
-            raise ValueError(errmsg[:-2])
+            self.logger.error(errmsg[:-2],ValueError)
         #make sure the record contained all the expected keys and they were processed
         all_keys = [self.name_key,*self.tags_keys,self.notes_key,
                     *self.file_links_keys,
@@ -83,7 +89,7 @@ class FromFileMakerRecordBase(ABC) :
             errmsg+= f'used to create a {self.__class__.__name__} object: '
             for k in missing_keys :
                 errmsg+=f'{k}, '
-            raise ValueError(errmsg[:-2])
+            self.logger.error(errmsg[:-2],ValueError)
 
     def ignore_key(self,key) :
         """
@@ -113,7 +119,7 @@ class FromFileMakerRecordBase(ABC) :
         """
         errmsg = f'ERROR: add_other_key called for key {key} on the base class for a '
         errmsg+= f'{self.__class__.__name__} object! This key should be processed somewhere other than the base class'
-        raise NotImplementedError(errmsg)
+        self.logger.error(errmsg,NotImplementedError)
 
     @property
     def name_key(self) :

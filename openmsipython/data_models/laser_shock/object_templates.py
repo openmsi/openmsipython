@@ -125,6 +125,7 @@ OBJ_TEMPL[name] = MeasurementTemplate(
                 ATTR_TEMPL['Drive Laser Mode'],
                 ATTR_TEMPL['Oscillator Setting'],
                 ATTR_TEMPL['Amplifier Setting'],
+                ATTR_TEMPL['Oscilloscope Range'],
                 ATTR_TEMPL['Focusing Lens Arrangement'],
                 ATTR_TEMPL['System Configuration'],
                 ATTR_TEMPL['Speed'],

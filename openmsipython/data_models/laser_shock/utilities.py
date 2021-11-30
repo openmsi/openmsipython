@@ -1,5 +1,6 @@
 #imports
 from gemd.entity.value import NominalInteger, NominalReal, DiscreteCategorical
+from gemd.entity.value.nominal_categorical import NominalCategorical
 from gemd.entity.value.nominal_integer import NominalInteger
 
 def search_for_name(obj_list,name) :
@@ -12,11 +13,12 @@ def search_for_name(obj_list,name) :
         return None
     return objs
 
-def search_for_single_name(obj_list,name) :
+def search_for_single_name(obj_list,name,logger=None,raise_exception=True) :
     """
     Search a given list of objects for exactly one of them with a name matching the given name
     If none are found in the list, returns None
-    If more than one are found a RuntimeError is thrown 
+    If more than one are found, a warning or error are sent to the logger (or just raised) 
+    If only a warning is sent to the logger, then the first object found is returned
     """
     objs = search_for_name(obj_list,name)
     if objs is None or len(objs)==0 :
@@ -24,7 +26,16 @@ def search_for_single_name(obj_list,name) :
     elif len(objs)==1 :
         return objs[0]
     elif len(objs)>1 :
-        raise RuntimeError(f'ERROR: more than one objects were found matching name {name}: {objs}')
+        msg = f'more than one objects were found matching name {name}: {objs}'
+        if logger is None :
+            raise RuntimeError(f'ERROR: {msg}')
+        else :
+            if raise_exception :
+                logger.error(msg,RuntimeError)
+            else :
+                logger.warning(msg)
+                logger.warning('The first object found will be returned.')
+                return objs[0]
 
 def search_for_single_tag(ent_list,tagname,tagvalue) :
     """
@@ -50,7 +61,7 @@ def search_for_single_tag(ent_list,tagname,tagvalue) :
         errmsg=f'ERROR: more than one entities were found matching name::value={tagname}::{tagvalue} : {ents}'
         raise RuntimeError(errmsg)
 
-def name_value_template_origin_from_key_value_dict(key,value,d) :
+def name_value_template_origin_from_key_value_dict(key,value,d,logger=None,raise_exception=True) :
     """
     Given a FileMaker record key, its value, and a dictionary specifying 
     a valuetype, datatype, template, and origin for the entry, return the name, 
@@ -61,7 +72,22 @@ def name_value_template_origin_from_key_value_dict(key,value,d) :
     name = key.replace(' ','')
     val = value
     if 'datatype' in d.keys() :
-        val = d['datatype'](val)
+        try :
+            val = d['datatype'](val)
+        except ValueError as e :
+            msg = f'failed to cast {val} to {d["datatype"]}'
+            if raise_exception :
+                if logger is None :
+                    raise e
+                else :
+                    logger.error(msg,ValueError)
+            else :
+                if logger is not None :
+                    logger.warning(msg+'. Value will be added with "CouldNotCast" in the name.')
+                name+='CouldNotCast'
+                val=str(val)
+                d['valuetype'] = NominalCategorical
+                d['template'] = None
     temp = None
     if 'template' in d.keys() :
         temp = d['template']
@@ -75,5 +101,7 @@ def name_value_template_origin_from_key_value_dict(key,value,d) :
         value = d['valuetype'](val,temp.bounds.default_units)
     elif d['valuetype']==DiscreteCategorical :
         value = d['valuetype']({val:1.0})
+    elif d['valuetype']==NominalCategorical :
+        value = d['valuetype'](val)
     origin = d['origin'] if 'origin' in d.keys() else None
     return name, value, temp, origin

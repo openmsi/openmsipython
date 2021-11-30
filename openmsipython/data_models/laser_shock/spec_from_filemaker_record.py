@@ -11,14 +11,14 @@ class SpecFromFileMakerRecord(FromFileMakerRecordBase) :
     Base class for Spec objects created from FileMaker records
     """
 
-    def __init__(self,record) :
+    def __init__(self,record,**kwargs) :
         """
         Create the Spec using the given FileMaker record
         """
         #create a placeholder Spec
         self.__spec = self.spec_type(**self.init_spec_kwargs)
         #call the base class's __init__ with the Spec as the object to modify
-        super().__init__(record,self.__spec)
+        super().__init__(record,self.__spec,**kwargs)
 
     @property
     def spec(self) :

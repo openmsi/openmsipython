@@ -171,12 +171,16 @@ class LaserShockFlyerStack(MaterialRunFromFileMakerRecord) :
     performed_by_key = 'Performed By'
     performed_date_key = 'Date'
 
-    def __init__(self,record,glass_IDs,foil_IDs,epoxy_IDs,flyer_cutting_programs) :
+    def __init__(self,record,glass_IDs,foil_IDs,epoxy_IDs,flyer_cutting_programs,**kwargs) :
         #find the glass, foil, epoxy, and flyer cutting program that were used for this run
-        self.glassID = search_for_single_name([gid.spec for gid in glass_IDs],record.pop('Glass Name Reference'))
-        self.foilID = search_for_single_name([fid.spec for fid in foil_IDs],record.pop('Foil Name'))
-        self.epoxyID = search_for_single_name([eid.spec for eid in epoxy_IDs] ,record.pop('Epoxy Name'))
-        self.cutting = search_for_single_name([fcp.spec for fcp in flyer_cutting_programs],record.pop('Cutting Procedure Name'))
+        self.glassID = search_for_single_name([gid.spec for gid in glass_IDs],
+                                              record.pop('Glass Name Reference'),logger=kwargs.get('logger'))
+        self.foilID = search_for_single_name([fid.spec for fid in foil_IDs],
+                                             record.pop('Foil Name'),logger=kwargs.get('logger'))
+        self.epoxyID = search_for_single_name([eid.spec for eid in epoxy_IDs],
+                                              record.pop('Epoxy Name'),logger=kwargs.get('logger'))
+        self.cutting = search_for_single_name([fcp.spec for fcp in flyer_cutting_programs],
+                                              record.pop('Cutting Procedure Name'),logger=kwargs.get('logger'))
         #create Runs from the Specs found
         self.glass = make_instance(self.glassID) if self.glassID is not None else None
         self.foil = make_instance(self.foilID) if self.foilID is not None else None

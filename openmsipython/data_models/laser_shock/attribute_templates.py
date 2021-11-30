@@ -514,6 +514,13 @@ ATTR_TEMPL[name] = ParameterTemplate(
     bounds=CategoricalBounds(['1-Point','32-Point'])
 )
 
+name = 'Oscilloscope Range'
+ATTR_TEMPL[name] = ParameterTemplate(
+    name=name,
+    description="The range setting on the oscilloscope (mV/div, categorical bc it's a dropdown menu)",
+    bounds=CategoricalBounds(['50','100','200'])
+)
+
 name = 'Speed'
 ATTR_TEMPL[name] = ParameterTemplate(
     name=name,

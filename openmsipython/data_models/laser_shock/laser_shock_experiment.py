@@ -1,5 +1,5 @@
 #imports
-from gemd.entity.value import DiscreteCategorical, NominalReal, NominalInteger
+from gemd.entity.value import DiscreteCategorical, NominalCategorical, NominalReal, NominalInteger
 from gemd.entity.attribute import Parameter, Condition
 from gemd.entity.object import MeasurementSpec
 from .utilities import search_for_single_name
@@ -22,7 +22,7 @@ class LaserShockExperimentSpec(LaserShockSpecForRun) :
     def get_spec_kwargs(self) :
         spec_kwargs = {}
         #name
-        exp_type = self.kwargs.get('exp_type')
+        exp_type = self.kwargs.get('Experiment Type')
         spec_kwargs['name'] = exp_type if exp_type!='' else 'Laser Shock Experiment'
         #notes
         spec_kwargs['notes'] = 'A spec for performing a Laser Shock Experiment measurement'
@@ -39,12 +39,12 @@ class LaserShockExperimentSpec(LaserShockSpecForRun) :
         Helper function to return the conditions for this measurement spec
         """
         conditions = []
-        if self.kwargs.get('fluence')!='' :
+        if self.kwargs.get('Fluence')!='' :
             conditions.append(Condition(name='Fluence',
-                                        value=NominalReal(self.kwargs.get('fluence'),
+                                        value=NominalReal(self.kwargs.get('Fluence'),
                                                         ATTR_TEMPL['Fluence'].bounds.default_units),
                                         template=ATTR_TEMPL['Fluence'],
-                                        origin='calculated'))
+                                        origin='computed'))
         names = [
             'Beam Shaper',
             'Camera Lens',
@@ -83,10 +83,15 @@ class LaserShockExperimentSpec(LaserShockSpecForRun) :
             if val in ('','N/A','?') :
                 continue
             temp = ATTR_TEMPL[name]
-            conditions.append(Condition(name=name.replace(' ',''),
-                                        value=NominalReal(val,temp.bounds.default_units),
-                                        template=temp,
-                                        origin='specified'))
+            try :
+                conditions.append(Condition(name=name.replace(' ',''),
+                                            value=NominalReal(float(val),temp.bounds.default_units),
+                                            template=temp,
+                                            origin='specified'))
+            except ValueError :
+                conditions.append(Condition(name=name.replace(' ','')+'CouldNotCast',
+                                            value=NominalCategorical(val),
+                                            origin='specified'))
         return conditions
 
     def __get_parameters(self) :
@@ -108,9 +113,9 @@ class LaserShockExperimentSpec(LaserShockSpecForRun) :
                                         origin='specified'))
         names = [
             'Drive Laser Mode',
-            'Amplifier Setting',
             'Focusing Lens Arrangement',
             'System Configuration',
+            'Oscilloscope Range',
             'Speed',
             'Exposure',
         ]
@@ -120,7 +125,7 @@ class LaserShockExperimentSpec(LaserShockSpecForRun) :
                 continue
             temp = ATTR_TEMPL[name]
             parameters.append(Parameter(name=name.replace(' ',''),
-                                        value=DiscreteCategorical({val:1.0}),
+                                        value=DiscreteCategorical({str(val):1.0}),
                                         template=temp,
                                         origin='specified'))
         names = [
@@ -136,10 +141,15 @@ class LaserShockExperimentSpec(LaserShockSpecForRun) :
             if val=='' :
                 continue
             temp = ATTR_TEMPL[name]
-            parameters.append(Parameter(name=name.replace(' ',''),
-                                        value=NominalReal(val,temp.bounds.default_units),
-                                        template=temp,
-                                        origin='specified'))
+            try :
+                parameters.append(Parameter(name=name.replace(' ',''),
+                                            value=NominalReal(float(val),temp.bounds.default_units),
+                                            template=temp,
+                                            origin='specified'))
+            except ValueError :
+                parameters.append(Parameter(name=name.replace(' ','')+'CouldNotCast',
+                                            value=NominalCategorical(val),
+                                            origin='specified'))
         return parameters
 
 class LaserShockExperiment(MeasurementRunFromFileMakerRecord) :
@@ -157,11 +167,13 @@ class LaserShockExperiment(MeasurementRunFromFileMakerRecord) :
                'Check Previous Sample','Check Protection','Check Protection Again','Check Beam Profiler',
                'Check Save','Check Safety']
 
-    def __init__(self,record,launch_packages) :
+    def __init__(self,record,launch_packages,**kwargs) :
         #find the launch package that was used
-        self.launch_package = search_for_single_name(launch_packages,record.pop('Launch ID'))
+        logger = kwargs.get('logger')
+        self.launch_package = search_for_single_name([lp.run for lp in launch_packages],record.pop('Launch ID'),
+                                                     logger=logger,raise_exception=(logger is None))
         #init the MeasurementRun
-        super().__init__(record,material=self.launch_package)
+        super().__init__(record,material=self.launch_package,**kwargs)
 
     @property
     def tags_keys(self) :
@@ -176,14 +188,10 @@ class LaserShockExperiment(MeasurementRunFromFileMakerRecord) :
 
     @property
     def file_links_dicts(self) :
-        """
-        Adding any linked filenames with the filename in "filename" and the "url" 
-        explaining what the file is since FileLinks don't have notes : /
-        """
         return [
-            {'filename':'Camera Filename','url':'Camera'},
-            {'filename':'Scope Filename','url':'Scope'},
-            {'filename':'Beam Profile Filename','url':'Beam Profiler'},
+            {'filename':'Camera Filename'},
+            {'filename':'Scope Filename'},
+            {'filename':'Beam Profile Filename'},
             ]
 
     @property
@@ -194,7 +202,7 @@ class LaserShockExperiment(MeasurementRunFromFileMakerRecord) :
             d[name] = {'valuetype':DiscreteCategorical,'template':ATTR_TEMPL[name]}
         names = ['Return Signal Strength','Max Velocity','Est Impact Velocity']
         for name in names :
-            d[name] = {'valuetype':NominalReal,'template':ATTR_TEMPL[name]}
+            d[name] = {'valuetype':NominalReal,'datatype':float,'template':ATTR_TEMPL[name]}
         return d
 
     def ignore_key(self,key) :
@@ -230,6 +238,7 @@ class LaserShockExperiment(MeasurementRunFromFileMakerRecord) :
             'Focusing Lens Arrangement',
             'System Configuration',
             'Current Set Point',
+            'Oscilloscope Range',
             #stuff from the camera tab
             #conditions
             'Camera Lens',

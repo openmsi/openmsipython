@@ -148,12 +148,15 @@ class LaserShockLaunchPackage(MaterialRunFromFileMakerRecord) :
     performed_by_key = 'Performed By'
     performed_date_key = 'Date'
 
-    def __init__(self,record,flyer_stacks,spacer_IDs,spacer_cutting_programs,samples) :
+    def __init__(self,record,flyer_stacks,spacer_IDs,spacer_cutting_programs,samples,**kwargs) :
         # find the flyer stack, spacer ID, spacer cutting program, and sample that were used
         self.flyerstack = search_for_single_tag([fs.run for fs in flyer_stacks],'FlyerID',record.pop('Flyer ID').replace(' ','_'))
-        self.spacerID = search_for_single_name([sid.spec for sid in spacer_IDs],record.pop('Spacer Type'))
-        self.spacercutting = search_for_single_name([scp.spec for scp in spacer_cutting_programs],record.pop('Spacer Cutting Program'))
-        self.sample = search_for_single_name([s.run for s in samples],record.pop('Sample Name'))
+        self.spacerID = search_for_single_name([sid.spec for sid in spacer_IDs],
+                                               record.pop('Spacer Type'),logger=kwargs.get('logger'))
+        self.spacercutting = search_for_single_name([scp.spec for scp in spacer_cutting_programs],
+                                                    record.pop('Spacer Cutting Program'),logger=kwargs.get('logger'))
+        self.sample = search_for_single_name([s.run for s in samples],
+                                             record.pop('Sample Name'),logger=kwargs.get('logger'))
         # create Runs from Specs that were found
         self.spacer = make_instance(self.spacerID) if self.spacerID is not None else None
         # create the Impact Sample that was cut from the original sample
@@ -194,7 +197,7 @@ class LaserShockLaunchPackage(MaterialRunFromFileMakerRecord) :
                 return
             if self.spacer is None :
                 errmsg = f'ERROR: {key} measurement ({value}) found for a Launch Package with no spacer!'
-                raise ValueError(errmsg)
+                self.logger.error(errmsg,ValueError)
             name=key.replace(' ','')
             meas = MeasurementRun(name=name,material=self.spacer)
             meas.spec = MeasurementSpec(name=name)
@@ -211,7 +214,7 @@ class LaserShockLaunchPackage(MaterialRunFromFileMakerRecord) :
                 return
             if self.impactsample is None :
                 errmsg = f'ERROR: {key} measurement ({value}) found for a Launch Package with no impactsample!'
-                raise ValueError(errmsg)
+                self.logger.error(errmsg,ValueError)
             name=key.replace(' ','')
             meas = MeasurementRun(name=name,material=self.impactsample)
             meas.spec = MeasurementSpec(name=name)

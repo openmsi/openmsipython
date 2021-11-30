@@ -14,7 +14,7 @@ class RunFromFileMakerRecord(FromFileMakerRecordBase) :
     to create and/or link GEMD "Spec" and Run" objects
     """
 
-    def __init__(self,record) :
+    def __init__(self,record,**kwargs) :
         """
         Use the information in a given FileMaker record to populate this Run object
         """
@@ -26,7 +26,7 @@ class RunFromFileMakerRecord(FromFileMakerRecordBase) :
         if self.name_key is None :
             self.__run.name=self.__spec.name
         #call the base class's __init__ with the run as the object to modify
-        super().__init__(record,self.__run)
+        super().__init__(record,self.__run,**kwargs)
 
     @property
     @abstractmethod
@@ -133,7 +133,9 @@ class MaterialRunFromFileMakerRecord(HasSourceFromFileMakerRecord) :
         elif key in self.measured_property_dict.keys() :
             self.keys_used.append(key)
             name, value, temp, origin = name_value_template_origin_from_key_value_dict(key,value,
-                                                                                       self.measured_property_dict[key])
+                                                                                       self.measured_property_dict[key],
+                                                                                       logger=self.logger,
+                                                                                       raise_exception=False)
             if name is None or value is None :
                 return
             meas = MeasurementRun(name=name,material=self.run)
@@ -175,6 +177,12 @@ class MeasurementRunFromFileMakerRecord(HasSourceFromFileMakerRecord) :
         """
         return {}
 
+    @property
+    def other_keys(self) :
+        return [*super().other_keys,
+                *self.measured_property_dict.keys(),
+               ]
+
     def add_other_key(self,key,value,record) :
         #add a PerformedSource for this measurement
         if self.performed_by_key is not None and key==self.performed_by_key :
@@ -193,7 +201,9 @@ class MeasurementRunFromFileMakerRecord(HasSourceFromFileMakerRecord) :
         elif key in self.measured_property_dict.keys() :
             self.keys_used.append(key)
             name, value, temp, origin = name_value_template_origin_from_key_value_dict(key,value,
-                                                                                       self.measured_property_dict[key])
+                                                                                       self.measured_property_dict[key],
+                                                                                       logger=self.logger,
+                                                                                       raise_exception=False)
             if name is None or value is None :
                 return
             self.run.properties.append(Property(name=name,
