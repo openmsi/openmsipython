@@ -79,14 +79,12 @@ class LaserShockFlyerStackSpec(LaserShockSpecForRun) :
             parameters=mixing_epoxy_params,
             template=OBJ_TEMPL['Mixing Epoxy']
             )
-        epoxy_part_a = MaterialSpec(name='Epoxy Part A',
-                                    process=self.epoxyID.process if self.epoxyID is not None else None)
-        epoxy_part_b = MaterialSpec(name='Epoxy Part B',
-                                    process=copy.deepcopy(self.epoxyID.process) if self.epoxyID is not None else None)
         aq = NominalReal(float(self.part_a),'g') if self.part_a!='' else None
-        IngredientSpec(name='Epoxy Part A',material=epoxy_part_a,process=mixing_epoxy,absolute_quantity=aq)
+        IngredientSpec(name='Epoxy Part A',material=self.epoxyID if self.epoxyID is not None else None,
+                       process=mixing_epoxy,absolute_quantity=aq)
         aq = NominalReal(float(self.part_b),'g') if self.part_b!='' else None
-        IngredientSpec(name='Epoxy Part B',material=epoxy_part_b,process=mixing_epoxy,absolute_quantity=aq)
+        IngredientSpec(name='Epoxy Part B',material=self.epoxyID if self.epoxyID is not None else None,
+                       process=mixing_epoxy,absolute_quantity=aq)
         mixed_epoxy = MaterialSpec(name='Mixed Epoxy',process=mixing_epoxy)
         #process and ingredients for making the glass/epoxy/foil stack
         epoxying_params = []
@@ -184,7 +182,6 @@ class LaserShockFlyerStack(MaterialRunFromFileMakerRecord) :
         #create Runs from the Specs found
         self.glass = make_instance(self.glassID) if self.glassID is not None else None
         self.foil = make_instance(self.foilID) if self.foilID is not None else None
-        self.epoxy = make_instance(self.epoxyID) if self.epoxyID is not None else None
         #run the rest of the creating the MaterialRun
         super().__init__(record)
         #add the runs from above to each part of the created Run as necessary
@@ -195,9 +192,6 @@ class LaserShockFlyerStack(MaterialRunFromFileMakerRecord) :
                         ing2.material=self.glass
                     elif ing2.name=='Foil ID' :
                         ing2.material=self.foil
-                    elif ing2.name=='Epoxy mixture' :
-                        self.epoxy.process=ing2.material.process
-                        ing2.material=self.epoxy
 
     @property
     def tags_keys(self) :

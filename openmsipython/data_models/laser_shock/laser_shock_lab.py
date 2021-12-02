@@ -4,6 +4,7 @@ from gemd.util.impl import recursive_foreach
 from gemd.entity.util import complete_material_history
 from gemd.json import GEMDJson
 from gemd.entity.object import MaterialSpec, ProcessSpec, IngredientSpec, MeasurementSpec
+from gemd.entity.object import MaterialRun, ProcessRun, IngredientRun, MeasurementRun
 from ...utilities.logging import LogOwner
 from .laser_shock_glass_ID import LaserShockGlassID
 from .laser_shock_epoxy_ID import LaserShockEpoxyID
@@ -67,7 +68,6 @@ class LaserShockLab(LogOwner) :
         self.logger.debug('Creating Experiments...')
         self.experiments = self.__get_experiments()
         #Make sure that there is only one of each unique spec (dynamically-created specs may be duplicated)
-        self.logger.debug('Replacing duplicated Specs...')
         self.__replace_specs()
         self.logger.info('Done creating GEMD objects')
 
@@ -121,6 +121,42 @@ class LaserShockLab(LogOwner) :
         with open(self.ofd/'experiment.json','w') as fp :
             fp.write(encoder.thin_dumps(self.experiments[0].run, indent=2))
         self.logger.info('Done.')
+
+    #################### PROPERTIES ####################
+
+    @property
+    def all_top_specs(self) :
+        all_top_specs = [gid.spec for gid in self.glass_IDs]
+        all_top_specs+= [eid.spec for eid in self.epoxy_IDs]
+        all_top_specs+= [fid.spec for fid in self.foil_IDs]
+        all_top_specs+= [sid.spec for sid in self.spacer_IDs]
+        all_top_specs+= [fcp.spec for fcp in self.flyer_cutting_programs]
+        all_top_specs+= [scp.spec for scp in self.spacer_cutting_programs]
+        all_top_specs+= [fs.run.spec for fs in self.flyer_stacks]
+        all_top_specs+= [s.run.spec for s in self.samples]
+        all_top_specs+= [lp.run.spec for lp in self.launch_packages]
+        all_top_specs+= [e.run.spec for e in self.experiments]
+        return all_top_specs
+
+    @property
+    def all_top_objs(self) :
+        all_top_objs = [gid.spec for gid in self.glass_IDs]
+        all_top_objs+= [eid.spec for eid in self.epoxy_IDs]
+        all_top_objs+= [fid.spec for fid in self.foil_IDs]
+        all_top_objs+= [sid.spec for sid in self.spacer_IDs]
+        all_top_objs+= [fcp.spec for fcp in self.flyer_cutting_programs]
+        all_top_objs+= [scp.spec for scp in self.spacer_cutting_programs]
+        all_top_objs+= [fs.run for fs in self.flyer_stacks]
+        all_top_objs+= [s.run for s in self.samples]
+        all_top_objs+= [lp.run for lp in self.launch_packages]
+        all_top_objs+= [e.run for e in self.experiments]
+        return all_top_objs
+
+    @property
+    def specs_from_records(self) :
+        specs_from_records = self.glass_IDs+self.epoxy_IDs+self.foil_IDs+self.spacer_IDs
+        specs_from_records+= self.flyer_cutting_programs+self.spacer_cutting_programs
+        return specs_from_records
 
     #################### PRIVATE HELPER FUNCTIONS ####################
 
@@ -213,46 +249,62 @@ class LaserShockLab(LogOwner) :
             experiments.append(LaserShockExperiment(record,self.launch_packages,logger=self.logger))
         return experiments
 
+    def __count_specs(self,item) :
+        if not isinstance(item, (MaterialSpec, ProcessSpec, IngredientSpec, MeasurementSpec)):
+            return
+        self.__n_total_specs+=1
+
     def __find_unique_spec_objs(self,item) :
-        """
-        Return a list containing the single object if the single object is a Spec
-        Otherwise return an empty list
-        Used with recursive_flatmap to obtain ALL created specs
-        """
         if not isinstance(item, (MaterialSpec, ProcessSpec, IngredientSpec, MeasurementSpec)):
             return
         itemname = item.name
-        if itemname not in self.__unique_specs_as_dicts_by_name.keys() :
-            self.__unique_specs_as_dicts_by_name[itemname] = []
+        if itemname not in self.__unique_specs_by_name.keys() :
+            self.__unique_specs_by_name[itemname] = []
         itemdict = item.as_dict()
         found = False
-        for uspecdict in self.__unique_specs_as_dicts_by_name[itemname] :
+        for uspecdict,_ in self.__unique_specs_by_name[itemname] :
             if itemdict==uspecdict :
                 found = True
                 break
         if not found :
-            self.__unique_specs_as_dicts_by_name[itemname].append(itemdict)
+            self.__unique_specs_by_name[itemname].append((itemdict,item))
+
+    def __replace_duplicated_specs_in_runs(self,item) :
+        #replace specs for MaterialRuns, ProcessRuns, IngredientRuns, and MeasurementRuns
+        if isinstance(item,(MaterialRun,ProcessRun,IngredientRun,MeasurementRun)) :
+            if item.spec is not None :
+                thisspecname = item.spec.name
+                thisspecdict = item.spec.as_dict()
+                for specdict,spec in self.__unique_specs_by_name[thisspecname] :
+                    if thisspecdict==specdict :
+                        item.spec = spec
+                        break
+        return
 
     def __replace_specs(self) :
         #get a list of all the unique specs that have been dynamically created
-        all_top_specs = [gid.spec for gid in self.glass_IDs]
-        all_top_specs+= [eid.spec for eid in self.epoxy_IDs]
-        all_top_specs+= [fid.spec for fid in self.foil_IDs]
-        all_top_specs+= [sid.spec for sid in self.spacer_IDs]
-        all_top_specs+= [fcp.spec for fcp in self.flyer_cutting_programs]
-        all_top_specs+= [scp.spec for scp in self.spacer_cutting_programs]
-        all_top_specs+= [fs.run.spec for fs in self.flyer_stacks]
-        all_top_specs+= [s.run.spec for s in self.samples]
-        all_top_specs+= [lp.run.spec for lp in self.launch_packages]
-        all_top_specs+= [e.run.spec for e in self.experiments]
         self.logger.debug('Finding the set of unique Specs...')
-        self.__unique_specs_as_dicts_by_name = {}
-        recursive_foreach(all_top_specs,self.__find_unique_spec_objs)
+        self.__n_total_specs = 0
+        recursive_foreach(self.all_top_objs,self.__count_specs)
+        self.__unique_specs_by_name = {}
+        recursive_foreach(self.all_top_objs,self.__find_unique_spec_objs)
         all_unique_specs = []
-        for t in self.__unique_specs_as_dicts_by_name.keys() :
-            for us in self.__unique_specs_as_dicts_by_name[t] :
+        for t in self.__unique_specs_by_name.keys() :
+            for us in self.__unique_specs_by_name[t] :
                 all_unique_specs.append(us)
-        self.logger.debug(f'Found {len(all_unique_specs)} unique Specs total')
+        self.logger.debug(f'Found {len(all_unique_specs)} unique Specs from a set of {self.__n_total_specs} total')
+        #replace duplicate specs in the SpecFromFileMakerRecord objects
+        self.logger.debug(f'Replacing duplicated top level Specs...')
+        for sfr in self.specs_from_records :
+            thisspecname = sfr.spec.name
+            thisspecdict = sfr.spec.as_dict()
+            for specdict,spec in self.__unique_specs_by_name[thisspecname] :
+                if thisspecdict==specdict :
+                    sfr.spec = spec
+                    break
+        #replace all of the lower-level specs recursively
+        self.logger.debug(f'Recursively replacing all duplicated lower level Specs...')
+        recursive_foreach(self.all_top_objs,self.__replace_duplicated_specs_in_runs)
 
 #################### MAIN FUNCTION ####################
 

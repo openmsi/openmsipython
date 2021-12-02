@@ -70,7 +70,9 @@ class LaserShockLaunchPackageSpec(LaserShockSpecForRun) :
             parameters=choosing_flyer_params,
             template=OBJ_TEMPL['Choosing Flyer'],
             )
-        IngredientSpec(name='Flyer Stack',material=self.flyerspec,process=choosing_flyer)
+        IngredientSpec(name='Flyer Stack',
+                       material=self.flyerspec if self.flyerspec is not None else None,
+                       process=choosing_flyer)
         chosen_flyer = MaterialSpec(name='Chosen Flyer',process=choosing_flyer)
         # Create Spacer from Spacer ID and Spacer Cutting Program
         if not self.use_spacer :
@@ -82,7 +84,9 @@ class LaserShockLaunchPackageSpec(LaserShockSpecForRun) :
                 name='Cutting Spacer',
                 template=OBJ_TEMPL['Cutting Spacer']
                 )
-        IngredientSpec(name='Spacer Material',material=self.spacerID,process=cutting_spacer)
+        IngredientSpec(name='Spacer Material',
+                       material=self.spacerID if self.spacerID is not None else None,
+                       process=cutting_spacer)
         cut_spacer = MaterialSpec(name='Spacer',process=cutting_spacer)
         # Attach Spacer to Flyer
         attaching_spacer = ProcessSpec(
@@ -134,7 +138,9 @@ class LaserShockLaunchPackageSpec(LaserShockSpecForRun) :
                               origin='specified')
                     )
         IngredientSpec(name='Flyer/Spacer',material=flyer_and_spacer,process=attaching_sample)
-        IngredientSpec(name='Impact Sample',material=self.impactsamplespec,process=attaching_sample)
+        IngredientSpec(name='Impact Sample',
+                       material=self.impactsamplespec if self.impactsamplespec is not None else None,
+                       process=attaching_sample)
         return attaching_sample
 
 class LaserShockLaunchPackage(MaterialRunFromFileMakerRecord) :
@@ -230,7 +236,7 @@ class LaserShockLaunchPackage(MaterialRunFromFileMakerRecord) :
     def get_spec_kwargs(self,record) :
         kwargs = {}
         # the flyer stack, spacer ID, spacer cutting program, and sample that were used
-        kwargs['flyerspec'] = self.flyerstack.spec
+        kwargs['flyerspec'] = self.flyerstack.spec if self.flyerstack is not None else None
         kwargs['spacerID'] = self.spacerID
         kwargs['spacercutting'] = self.spacercutting
         kwargs['impactsamplespec'] = self.impactsample.spec if self.impactsample is not None else None

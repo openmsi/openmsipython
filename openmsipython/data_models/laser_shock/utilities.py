@@ -24,15 +24,15 @@ def search_for_single_name(obj_list,name,logger=None,raise_exception=True) :
     elif len(objs)==1 :
         return objs[0]
     elif len(objs)>1 :
-        msg = f'more than one objects were found matching name {name}: {objs}'
+        msg = f'{len(objs)} objects were found matching name {name}'
         if logger is None :
             raise RuntimeError(f'ERROR: {msg}')
         else :
             if raise_exception :
                 logger.error(msg,RuntimeError)
             else :
+                msg+='. The first object found will be returned.'
                 logger.warning(msg)
-                logger.warning('The first object found will be returned.')
                 return objs[0]
 
 def search_for_single_tag(ent_list,tagname,tagvalue) :

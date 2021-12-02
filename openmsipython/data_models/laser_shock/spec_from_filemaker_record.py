@@ -23,6 +23,15 @@ class SpecFromFileMakerRecord(FromFileMakerRecordBase) :
     def spec(self) :
         return self.__spec
 
+    @spec.setter
+    def spec(self,s) :
+        if type(s)==type(self.__spec) :
+            self.__spec = s
+        else :
+            errmsg = f'ERROR: tried to overwrite specs with mistmatched types! Spec is of type {type(self.__spec)} '
+            errmsg+= f'but new spec has type {type(s)}'
+            self.logger.error(errmsg)
+
     @property
     def init_spec_kwargs(self) :
         """
