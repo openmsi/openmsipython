@@ -33,6 +33,9 @@ class LaserShockFlyerStackSpec(LaserShockSpecForRun) :
         self.s = kwargs.get('s')
         self.d = kwargs.get('d')
         self.n = kwargs.get('n')
+        self.cutting_energy = kwargs.get('cutting_energy')
+        self.n_passes = kwargs.get('n_passes')
+        self.logger = kwargs.get('logger')
         super().__init__(*args,**kwargs)
 
     def get_spec_kwargs(self) :
@@ -155,6 +158,49 @@ class LaserShockFlyerStackSpec(LaserShockSpecForRun) :
                     origin='specified',
                     )
                 )
+        if self.cutting_energy!='' :
+            laser_cutting_energy_par = None
+            for p in cutting.parameters :
+                if p.name=='LaserCuttingEnergy' :
+                    laser_cutting_energy_par = p
+                    break
+            if laser_cutting_energy_par is not None :
+                new_value=NominalReal(float(self.cutting_energy))
+                msg =  'WARNING: replacing laser cutting energy in a created Spec based on new information in the '
+                msg+= f'Flyer Stack layout. Old value = {p.value}, new value = {new_value}'
+                self.logger.warning(msg)
+                p.value=new_value
+            else :
+                temp = ATTR_TEMPL['Laser Cutting Energy']
+                cutting.parameters.append(
+                    Parameter(
+                        name='LaserCuttingEnergy',
+                        value=NominalReal(float(self.cutting_energy),temp.bounds.default_units),
+                        template=temp,
+                        origin='specified',
+                        )
+                )
+        if self.n_passes!='' :
+            n_passes_par = None
+            for p in cutting.parameters :
+                if p.name=='NumberofPasses' :
+                    n_passes_par = p
+                    break
+            if n_passes_par is not None :
+                new_value=NominalInteger(int(self.n_passes))
+                msg =  'WARNING: replacing number of passes in a created Spec based on new information in the '
+                msg+= f'Flyer Stack layout. Old value = {p.value}, new value = {new_value}'
+                self.logger.warning(msg)
+                p.value=new_value
+            else :
+                cutting.parameters.append(
+                    Parameter(
+                        name='NumberofPasses',
+                        value=NominalInteger(int(self.n_passes)),
+                        template=ATTR_TEMPL['Number of Passes'],
+                        origin='specified',
+                        )
+                )
         IngredientSpec(name='Glass Epoxy Foil Stack',material=glass_epoxy_foil_stack,process=cutting)
         return cutting
 
@@ -170,6 +216,8 @@ class LaserShockFlyerStack(MaterialRunFromFileMakerRecord) :
     performed_date_key = 'Date'
 
     def __init__(self,record,glass_IDs,foil_IDs,epoxy_IDs,flyer_cutting_programs,**kwargs) :
+        #set the logger until it can be overwritten after everything else is initialized
+        self.logger = kwargs.get('logger')
         #find the glass, foil, epoxy, and flyer cutting program that were used for this run
         self.glassID = search_for_single_name([gid.spec for gid in glass_IDs],
                                               record.pop('Glass Name Reference'),logger=kwargs.get('logger'))
@@ -289,4 +337,8 @@ class LaserShockFlyerStack(MaterialRunFromFileMakerRecord) :
         kwargs['s'] = record.pop('Flyer Spacing')
         kwargs['d'] = record.pop('Flyer Diameter')
         kwargs['n'] = record.pop('Rows X Columns')
+        kwargs['cutting_energy'] = record.pop('Cutting Energy')
+        kwargs['n_passes'] = record.pop('Number of Passes')
+        # The logger (creating the Spec might throw some warnings)
+        kwargs['logger'] = self.logger
         return kwargs

@@ -49,27 +49,48 @@ class LaserShockLab(LogOwner) :
         self.logger.info('Creating GEMD objects from FileMakerDB entries')
         #"Inventory" pages (create Specs)
         self.logger.debug('Creating Inventory objects...')
-        self.glass_IDs = self.__get_glass_IDs()
-        self.epoxy_IDs = self.__get_epoxy_IDs()
-        self.foil_IDs = self.__get_foil_IDs()
-        self.spacer_IDs = self.__get_spacer_IDs()
-        self.flyer_cutting_programs = self.__get_flyer_cutting_programs()
-        self.spacer_cutting_programs = self.__get_spacer_cutting_programs()
+        self.glass_IDs = self.get_objs_from_filemaker(LaserShockGlassID,'Glass ID')
+        self.epoxy_IDs = self.get_objs_from_filemaker(LaserShockEpoxyID,'Epoxy ID')
+        self.foil_IDs = self.get_objs_from_filemaker(LaserShockFoilID,'Foil ID')
+        self.spacer_IDs = self.get_objs_from_filemaker(LaserShockSpacerID,'Spacer ID')
+        self.flyer_cutting_programs = self.get_objs_from_filemaker(LaserShockFlyerCuttingProgram,
+                                                                   'Flyer Cutting Program')
+        self.spacer_cutting_programs = self.get_objs_from_filemaker(LaserShockSpacerCuttingProgram,
+                                                                   'Spacer Cutting Program')
         #Flyer Stacks (Materials)
         self.logger.debug('Creating Flyer Stacks...')
-        self.flyer_stacks = self.__get_flyer_stacks()
+        self.flyer_stacks = self.get_objs_from_filemaker(LaserShockFlyerStack,'Flyer Stack',self.glass_IDs,
+                                                         self.foil_IDs,self.epoxy_IDs,self.flyer_cutting_programs)
         #Samples (Materials)
         self.logger.debug('Creating Samples...')
-        self.samples = self.__get_samples()
+        self.samples = self.get_objs_from_filemaker(LaserShockSample,'Sample')
         #Launch packages (Materials)
         self.logger.debug('Creating Launch Packages...')
-        self.launch_packages = self.__get_launch_packages()
+        self.launch_packages = self.get_objs_from_filemaker(LaserShockLaunchPackage,'Launch Package',self.flyer_stacks,
+                                                            self.spacer_IDs,self.spacer_cutting_programs,self.samples)
         #Experiments (Measurements)
         self.logger.debug('Creating Experiments...')
-        self.experiments = self.__get_experiments()
+        self.experiments = self.get_objs_from_filemaker(LaserShockExperiment,'Experiment',self.launch_packages)
         #Make sure that there is only one of each unique spec (dynamically-created specs may be duplicated)
         self.__replace_specs()
         self.logger.info('Done creating GEMD objects')
+
+    def get_objs_from_filemaker(self,obj_type,layout_name,*args,n_max_records=1000,**kwargs) :
+        """
+        Return a list of LaserShock/GEMD constructs based on FileMaker records 
+
+        obj_type = the type of LaserShock/GEMD object that should be created from this set of records
+        layout_name = the name of the FileMaker Database layout to get records from
+        n_max_records = the maximum number of records to return from FileMaker
+
+        any other args/kwargs get sent to the constructor for obj_type objects
+        """
+        objs = []
+        #get records from the FileMaker server
+        records = self.__get_filemaker_records(layout_name,n_max_records)
+        for record in records :
+            objs.append(obj_type(record,*args,logger=self.logger,**kwargs))
+        return objs
 
     def dump_to_json_files(self) :
         """
@@ -176,79 +197,6 @@ class LaserShockLab(LogOwner) :
         #return records in the foundset
         return fms.get_records(limit=n_max_records)
 
-    def __get_glass_IDs(self) :
-        glassIDs = []
-        #get records from the FileMaker server
-        records = self.__get_filemaker_records('Glass ID')
-        for record in records :
-            glassIDs.append(LaserShockGlassID(record,logger=self.logger))
-        return glassIDs
-
-    def __get_epoxy_IDs(self) :
-        epoxyIDs = []
-        records = self.__get_filemaker_records('Epoxy ID')
-        for record in records :
-            epoxyIDs.append(LaserShockEpoxyID(record,logger=self.logger))
-        return epoxyIDs
-
-    def __get_foil_IDs(self) :
-        foilIDs = []
-        records = self.__get_filemaker_records('Foil ID')
-        for record in records :
-            foilIDs.append(LaserShockFoilID(record,logger=self.logger))
-        return foilIDs
-
-    def __get_spacer_IDs(self) :
-        spacerIDs = []
-        records = self.__get_filemaker_records('Spacer ID')
-        for record in records :
-            spacerIDs.append(LaserShockSpacerID(record,logger=self.logger))
-        return spacerIDs
-
-    def __get_flyer_cutting_programs(self) :
-        flyercuttingprograms = []
-        records = self.__get_filemaker_records('Flyer Cutting Program')
-        for record in records :
-            flyercuttingprograms.append(LaserShockFlyerCuttingProgram(record,logger=self.logger))
-        return flyercuttingprograms
-
-    def __get_spacer_cutting_programs(self) :
-        spacercuttingprograms = []
-        records = self.__get_filemaker_records('Spacer Cutting Program')
-        for record in records :
-            spacercuttingprograms.append(LaserShockSpacerCuttingProgram(record,logger=self.logger))
-        return spacercuttingprograms
-
-    def __get_flyer_stacks(self) :
-        flyerstacks = []
-        records = self.__get_filemaker_records('Flyer Stack')
-        for record in records :
-            flyerstacks.append(LaserShockFlyerStack(record,self.glass_IDs,self.foil_IDs,self.epoxy_IDs,
-                                                    self.flyer_cutting_programs,logger=self.logger))
-        return flyerstacks
-
-    def __get_samples(self) :
-        samples = []
-        records = self.__get_filemaker_records('Sample')
-        for record in records :
-            samples.append(LaserShockSample(record,logger=self.logger))
-        return samples
-
-    def __get_launch_packages(self) :
-        launchpackages = []
-        records = self.__get_filemaker_records('Launch Package')
-        for record in records :
-            launchpackages.append(LaserShockLaunchPackage(record,self.flyer_stacks,self.spacer_IDs,
-                                                          self.spacer_cutting_programs,self.samples,logger=self.logger))
-        return launchpackages
-
-    def __get_experiments(self) :
-        experiments = []
-        records = self.__get_filemaker_records('Experiment')
-        for record in records :
-            experiments.append(LaserShockExperiment(record,self.launch_packages,logger=self.logger))
-        return experiments
-
     def __count_specs(self,item) :
         if not isinstance(item, (MaterialSpec, ProcessSpec, IngredientSpec, MeasurementSpec)):
             return
@@ -279,7 +227,6 @@ class LaserShockLab(LogOwner) :
                     if thisspecdict==specdict :
                         item.spec = spec
                         break
-        return
 
     def __replace_specs(self) :
         #get a list of all the unique specs that have been dynamically created
