@@ -230,6 +230,10 @@ class LaserShockSample(MaterialRunFromFileMakerRecord) :
                         'template':ATTR_TEMPL[name]}
         return rd
 
+    @property
+    def unique_values(self):
+        return {**super().unique_values,self.name_key:self.run.name}
+
     def get_spec_kwargs(self,record) :
         kwargs = {}
         kwargs['mat_type'] = record.pop('Material Type')

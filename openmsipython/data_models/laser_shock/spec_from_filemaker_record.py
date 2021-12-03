@@ -188,6 +188,10 @@ class ProcessSpecFromFileMakerRecord(HasTemplateFromFileMakerRecord) :
                 *self.parameter_dict.keys()
                ]
 
+    @property
+    def unique_values(self):
+        return {**super().unique_values,f'{self.spec_type} name':self.spec.name}
+
     def add_other_key(self,key,value,record) :
         #add conditions (if any of them are given) to this ProcessSpec
         if key in self.condition_dict.keys() :

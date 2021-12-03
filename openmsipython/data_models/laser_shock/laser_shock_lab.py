@@ -90,6 +90,32 @@ class LaserShockLab(LogOwner) :
         records = self.__get_filemaker_records(layout_name,n_max_records)
         for record in records :
             objs.append(obj_type(record,*args,logger=self.logger,**kwargs))
+        if len(objs)<=0 :
+            return objs
+        #log warnings if any of the created objects duplicate values that are assumed to be unique
+        unique_vals = {}
+        for io,obj in enumerate(objs) :
+            for iuv,(uvn,uv) in enumerate(obj.unique_values.items()) :
+                if uvn not in unique_vals.keys() :
+                    if io==0 :
+                        unique_vals[uvn] = []
+                    else :
+                        errmsg = f'ERROR: discovered a {obj_type.__name__} object with unrecognized unique value name '
+                        errmsg+= f'{uvn}! Recognized names are {unique_vals.keys()}'
+                        self.logger.error(errmsg,RuntimeError)
+                unique_vals[uvn].append(uv)
+        for uvn,uvl in unique_vals.items() :
+            done = set()
+            for uv in uvl :
+                if uv in done :
+                    continue
+                n_objs_with_val=uvl.count(uv)
+                if n_objs_with_val!=1 :
+                    msg = f'WARNING: {n_objs_with_val} {obj_type.__name__} objects found with {uvn} = {uv} but {uvn} '
+                    msg+= 'is assumed to be unique! This will cause warnings/errors if these objects are '
+                    msg+= 'referenced later.'
+                    self.logger.warning(msg)
+                done.add(uv)
         return objs
 
     def dump_to_json_files(self) :

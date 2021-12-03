@@ -266,6 +266,14 @@ class LaserShockFlyerStack(MaterialRunFromFileMakerRecord) :
                 self.performed_date_key,
                ]
 
+    @property
+    def unique_values(self):
+        flyer_ID_tags = [t for t in self.run.tags if t.startswith('FlyerID')]
+        if len(flyer_ID_tags)!=1 :
+            errmsg = f'ERROR: found {len(flyer_ID_tags)} tags specifying a Flyer ID when there should be exactly one'
+            self.logger.error(errmsg,RuntimeError)
+        return {**super().unique_values,'Flyer ID':flyer_ID_tags[0]}
+
     def ignore_key(self,key) :
         #I don't have access to the "Flyer Epoxy Thickness" calculated box through the API 
         #so I'm going to ignore the associated "Row Number" and "Column Number" fields for now 

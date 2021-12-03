@@ -170,3 +170,13 @@ class FromFileMakerRecordBase(LogOwner,ABC) :
         along with the entire FileMaker record
         """
         return []
+
+    @property
+    def unique_values(self) :
+        """
+        A dictionary of values that should be unique to each FileMaker record of this type 
+        because they're used as unique references in other layouts
+
+        keys are strings describing what the values are, values are the actual values for that object
+        """
+        return {}

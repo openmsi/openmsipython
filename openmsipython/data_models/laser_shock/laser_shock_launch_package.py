@@ -195,6 +195,10 @@ class LaserShockLaunchPackage(MaterialRunFromFileMakerRecord) :
                 'Sample Diameter','Sample Thickness',
             ]
 
+    @property
+    def unique_values(self):
+        return {**super().unique_values,self.name_key:self.run.name}
+
     def add_other_key(self,key,value,record) :
         # Measured properties of spacer
         if key in ['Spacer Inner Diameter','Spacer Outer Diameter'] :
