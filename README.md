@@ -19,7 +19,7 @@ Developed for Open MSI (NSF DMREF award #1921959)
 
 ## Installation
 
-Programs use the Python implementation of the Apache Kafka API, and are designed to run on Windows machines connected to laboratory instruments. The only base requirements are Python >=3.7, `git`, and `pip`. 
+Programs use the Python implementation of the Apache Kafka API, and are designed to run on Windows machines connected to laboratory instruments. The only base requirements are Python >=3.7, <3.10, `git`, and `pip`. 
 
 ### Quick start with miniconda3
 
@@ -28,9 +28,21 @@ The quickest way to get started is to use Miniconda3. Miniconda3 installers can 
 With Miniconda installed, next create and switch to a new environment for Open MSI. In a terminal window (or Anaconda Prompt in admin mode on Windows) type:
 
 ```
-conda create -n openmsi python=3
+conda create -n openmsi python=3.9
 conda activate openmsi
 ```
+
+(Python 3.9 is the most recent minor release of Python supported by confluent-kafka on Windows 10.)
+
+You'll need to use that second "activate" command every time you open a Terminal window or Anaconda Prompt to switch to the `openmsi` environment. 
+
+Miniconda installs `pip`, and if you need to install Git you can do so with
+
+`conda install -c anaconda git`
+
+(or use the instructions on [the website here](https://github.com/git-guides/install-git).)
+
+#### Extra setup on Windows
 
 This environment needs a special variable set to allow the Kafka Python code to find its dependencies on Windows (see [here](https://github.com/ContinuumIO/anaconda-issues/issues/12475) for more details), so after you've done the above, type the following commands to set the variable and then refresh the environment:
 
@@ -40,13 +52,14 @@ conda deactivate #this command will give a warning, that's normal
 conda activate openmsi
 ```
 
-You'll need to use that second "activate" command every time you open a Terminal window or Anaconda Prompt to switch to the `openmsi` environment. 
+#### Extra setup on Mac OS
 
-Miniconda installs `pip`, and if you need to install Git you can do so with
+Mac OS is not officially supported for `openmsipython`, but if you would like to work with it you will need to install `librdkafka` using homebrew to do so. This may also require installing Xcode command line tools. You can install both of these using the commands below:
 
-`conda install -c anaconda git`
-
-(or use the instructions on [the website here](https://github.com/git-guides/install-git).)
+```
+xcode-select --install
+brew install librdkafka
+```
 
 ### Cloning this repo and installing the openmsipython package
 
@@ -70,6 +83,12 @@ python
 ```
 
 and if that line runs without any problems then the package was installed correctly.
+
+### Environment variables
+
+Interacting with the Kafka Cluster, including running code tests as described [here](./test), requires that some environment variables are set on your system. If you're installing any software to run as a Windows Service (as described [here](./openmsipython/services)]) then you'll be prompted to enter these variables' values, but you may find it more convenient to set them once. The environment variables are called `KAFKA_TEST_CLUSTER_USERNAME`, `KAFKA_TEST_CLUSTER_PASSWORD`, `KAFKA_PROD_CLUSTER_USERNAME`, and `KAFKA_PROD_CLUSTER_PASSWORD`. The "`TEST`" variables are used to connect to the test cluster, and must be set to successfully run the automatic code tests. The "`PROD`" variables are used to connect to the full production cluster and are only needed for fully deployed code.
+
+You can set these environment variables in a shell `.rc` or `.profile` file if running on Linux or Mac OS. On Windows you can set them as machine environment variables using commands like `[Environment]::SetEnvironmentVariable("NAME","VALUE",[EnvironmentVariableTarget]::Machine)`. You can also set them as "User" environment variables on Windows if you don't have the necessary permissions to set them for the "Machine". 
 
 ### Other documentation
 

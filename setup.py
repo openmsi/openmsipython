@@ -18,7 +18,7 @@ setupkwargs = dict(
                              'PDVPlotMaker=openmsipython.pdv.pdv_plot_maker:main',
                             ],
     },
-    python_requires='>=3.7',
+    python_requires='>=3.7,<3.10',
     install_requires=['confluent-kafka>=1.6.0',
                       'python-fmrest>=1.4.0',
                       'gemd>=1.2.0',
