@@ -104,7 +104,7 @@ class TestPDVPlots(unittest.TestCase) :
             LOGGER.info(msg)
             LOGGER.set_stream_level(logging.ERROR)
             while ( (TEST_CONST.TEST_LECROY_DATA_FILE_PATH not in pdvpm.processed_filepaths) and 
-                    current_messages_read<pdvpm.n_msgs_read and time_waited<TIMEOUT_SECS ) :
+                    time_waited<TIMEOUT_SECS ) :
                 current_messages_read = pdvpm.n_msgs_read
                 LOGGER.set_stream_level(logging.INFO)
                 LOGGER.info(f'\t{current_messages_read} messages read after waiting {time_waited} seconds....')
