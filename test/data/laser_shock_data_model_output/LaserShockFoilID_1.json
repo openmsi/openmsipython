@@ -3,7 +3,7 @@
   "name": "50.4um (0.002\") Hard Al (AluFoil)",
   "notes": "",
   "process": {
-    "id": "eb044608-06ba-4fc9-8d35-db32d240fe81",
+    "id": "38bb1331-51c0-471f-a73c-c99bef7670c7",
     "scope": "auto",
     "type": "link_by_uid"
   },
@@ -16,7 +16,7 @@
         "notes": null,
         "origin": "specified",
         "template": {
-          "id": "b44b1236-a3f1-419b-9308-a3f6c77aa38e",
+          "id": "c56a777a-4020-46b0-9cc9-9083b91be60b",
           "scope": "auto",
           "type": "link_by_uid"
         },
@@ -37,7 +37,7 @@
         "notes": null,
         "origin": "specified",
         "template": {
-          "id": "4b0f3e5a-c6d1-4bdf-b15f-f14f6e4f1184",
+          "id": "53148cfa-7930-411a-ba37-c8c89dfca37a",
           "scope": "auto",
           "type": "link_by_uid"
         },
@@ -58,7 +58,7 @@
         "notes": null,
         "origin": "specified",
         "template": {
-          "id": "c2761f68-0bce-4e38-9669-adf992d96320",
+          "id": "3d76a400-332b-49dd-9505-f1b2cdec5404",
           "scope": "auto",
           "type": "link_by_uid"
         },
@@ -79,7 +79,7 @@
         "notes": null,
         "origin": "specified",
         "template": {
-          "id": "4f6c445c-6509-45d7-9b17-f837c0de3374",
+          "id": "753bbe95-e666-46fb-a7a5-7c9fc74a01c5",
           "scope": "auto",
           "type": "link_by_uid"
         },
@@ -99,7 +99,7 @@
         "notes": null,
         "origin": "specified",
         "template": {
-          "id": "5134ed03-e788-4b63-84c3-d60560977a59",
+          "id": "232d4bc4-4c77-4f7d-98ef-a61363acdfd8",
           "scope": "auto",
           "type": "link_by_uid"
         },
@@ -118,12 +118,12 @@
     "modId::4"
   ],
   "template": {
-    "id": "1ae142b9-f1d7-47bf-88de-083dfc99d7a7",
+    "id": "608768ae-4d69-45ad-8d4f-4921cc11d4cc",
     "scope": "auto",
     "type": "link_by_uid"
   },
   "type": "material_spec",
   "uids": {
-    "auto": "72742a12-f69d-4ecd-b516-dad9396b1a00"
+    "auto": "dbe86ba5-a092-4eed-85d4-4944b55a3918"
   }
 }

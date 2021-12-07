@@ -3,13 +3,13 @@
   "name": "23-17 Mg-9Al 1Bc+3Bc ECAE Plate",
   "notes": "",
   "process": {
-    "id": "a99597eb-e392-4513-b37e-ec2e84d3781e",
+    "id": "a563c308-63bb-4099-819c-34dc770396ce",
     "scope": "auto",
     "type": "link_by_uid"
   },
   "sample_type": "unknown",
   "spec": {
-    "id": "fdf2e3be-6724-4ce5-a1f1-d4155afce17d",
+    "id": "bfd969b7-40aa-490b-ab71-d1f3181b7218",
     "scope": "auto",
     "type": "link_by_uid"
   },
@@ -23,6 +23,6 @@
   ],
   "type": "material_run",
   "uids": {
-    "auto": "f3d8c174-5424-4d44-b731-16809d118e98"
+    "auto": "cde38bdf-4797-4b44-95f0-bb8e1e97aeb7"
   }
 }

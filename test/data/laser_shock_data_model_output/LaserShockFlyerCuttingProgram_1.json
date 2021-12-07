@@ -6,7 +6,7 @@
       "notes": null,
       "origin": "specified",
       "template": {
-        "id": "e0e34f4b-76df-48bc-9123-6ae367af4d6c",
+        "id": "e07598b2-1c09-4e05-a384-047bca1082cf",
         "scope": "auto",
         "type": "link_by_uid"
       },
@@ -22,7 +22,7 @@
       "notes": null,
       "origin": "specified",
       "template": {
-        "id": "d86a454d-9b5a-4c26-b5d8-30aea57b9d62",
+        "id": "f5c91fee-9a9a-4da2-ab8a-7b988d8ab5c4",
         "scope": "auto",
         "type": "link_by_uid"
       },
@@ -39,7 +39,7 @@
       "notes": null,
       "origin": "specified",
       "template": {
-        "id": "b653b00f-24e4-4da7-8a86-13c5e378c146",
+        "id": "2d0a4759-833f-4235-9436-72292c18c8b6",
         "scope": "auto",
         "type": "link_by_uid"
       },
@@ -66,7 +66,7 @@
       "notes": null,
       "origin": "specified",
       "template": {
-        "id": "08005ca6-3eac-4263-b1d6-356e7154ef61",
+        "id": "e69c9c25-0510-4a81-afa4-f91a0434f97b",
         "scope": "auto",
         "type": "link_by_uid"
       },
@@ -83,7 +83,7 @@
       "notes": null,
       "origin": "specified",
       "template": {
-        "id": "a2d833a5-dee2-4eb8-a9cc-99b99a43595b",
+        "id": "e93da1d8-c388-4fb7-9679-adee5459ec76",
         "scope": "auto",
         "type": "link_by_uid"
       },
@@ -99,7 +99,7 @@
       "notes": null,
       "origin": "specified",
       "template": {
-        "id": "32efa544-3dfc-4476-8404-b24359c5bdac",
+        "id": "3d227dba-adbe-4f46-81ef-cae1eaa05d56",
         "scope": "auto",
         "type": "link_by_uid"
       },
@@ -115,7 +115,7 @@
       "notes": null,
       "origin": "specified",
       "template": {
-        "id": "93a28135-522c-482a-9aaf-713709102152",
+        "id": "a9b9b225-d9ad-4886-aa0a-032f901496fd",
         "scope": "auto",
         "type": "link_by_uid"
       },
@@ -133,12 +133,12 @@
     "modId::5"
   ],
   "template": {
-    "id": "c578e507-34ed-4576-812d-31f79407921f",
+    "id": "1a30572e-2a21-4202-902b-f99ad2080c17",
     "scope": "auto",
     "type": "link_by_uid"
   },
   "type": "process_spec",
   "uids": {
-    "auto": "e37e226a-e3fb-41f1-bba9-e48cf81607d0"
+    "auto": "f13cfb52-304b-4577-93eb-06ac26ea451c"
   }
 }
