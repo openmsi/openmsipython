@@ -11,6 +11,8 @@ class DownloadDataFile(DataFile,ABC) :
     Class to represent a data file that will be read as messages from a topic
     """
 
+    #################### PROPERTIES AND STATIC METHODS ####################
+
     @staticmethod
     def get_full_filepath(dfc) :
         """
@@ -31,6 +33,8 @@ class DownloadDataFile(DataFile,ABC) :
     @abstractmethod
     def check_file_hash(self) :
         pass #the hash of the data in the file after it was read; not implemented in the base class
+
+    #################### PUBLIC FUNCTIONS ####################
 
     def __init__(self,*args,**kwargs) :
         super().__init__(*args,**kwargs)
@@ -85,6 +89,8 @@ class DownloadDataFile(DataFile,ABC) :
         else :
             return DATA_FILE_HANDLING_CONST.FILE_IN_PROGRESS
 
+    #################### PRIVATE HELPER FUNCTIONS ####################
+
     @abstractmethod
     def _on_add_chunk(dfc,*args,**kwargs) :
         """
@@ -100,6 +106,8 @@ class DownloadDataFileToDisk(DownloadDataFile) :
     Class to represent a data file that will be reconstructed on disk using messages read from a topic
     """
 
+    #################### PROPERTIES ####################
+
     @property
     def check_file_hash(self) :
         check_file_hash = sha512()
@@ -107,6 +115,8 @@ class DownloadDataFileToDisk(DownloadDataFile) :
             data = fp.read()
         check_file_hash.update(data)
         return check_file_hash.digest()
+
+    #################### PUBLIC FUNCTIONS ####################
 
     def __init__(self,*args,**kwargs) :
         super().__init__(*args,**kwargs)
@@ -131,16 +141,21 @@ class DownloadDataFileToMemory(DownloadDataFile) :
     Class to represent a data file that will be held in memory and populated by the contents of messages from a topic
     """
 
+    #################### PROPERTIES ####################
+
     @property
     def bytestring(self) :
         if self.__bytestring is None :
             self.__create_bytestring()
         return self.__bytestring
+
     @property
     def check_file_hash(self) :
         check_file_hash = sha512()
         check_file_hash.update(self.bytestring)
         return check_file_hash.digest()
+
+    #################### PUBLIC FUNCTIONS ####################
 
     def __init__(self,*args,**kwargs) :
         super().__init__(*args,**kwargs)
@@ -148,6 +163,8 @@ class DownloadDataFileToMemory(DownloadDataFile) :
         self.__chunk_data_by_offset = {}
         #placeholder for the eventual full data bytestring
         self.__bytestring = None
+
+    #################### PRIVATE HELPER FUNCTIONS ####################
 
     def _on_add_chunk(self,dfc) :
         """

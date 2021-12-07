@@ -51,7 +51,7 @@ def test_python_code() :
         return
     SERVICE_CONST.LOGGER.debug('All unittest checks complete : )')
 
-def write_executable_file(service_name,argslist) :
+def write_executable_file(service_name,argslist,filepath=None) :
     """
     write out the executable python file that the service will actually be running
     """
@@ -67,7 +67,10 @@ def write_executable_file(service_name,argslist) :
             {service_dict['func_name']}({argslist})
 
     '''
-    exec_fp = pathlib.Path(__file__).parent/'working_dir'/f'{service_name}{SERVICE_CONST.SERVICE_EXECUTABLE_NAME_STEM}'
+    if filepath is not None :
+        exec_fp = filepath
+    else :
+        exec_fp = pathlib.Path(__file__).parent/'working_dir'/f'{service_name}{SERVICE_CONST.SERVICE_EXECUTABLE_NAME_STEM}'
     with open(exec_fp,'w') as fp :
         fp.write(textwrap.dedent(code))
     return exec_fp

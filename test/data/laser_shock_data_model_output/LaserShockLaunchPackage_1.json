@@ -1,0 +1,24 @@
+{
+  "file_links": [],
+  "name": "F054-R3C2-Spacer",
+  "notes": null,
+  "process": {
+    "id": "7d47b92a-179e-41d0-9cd8-6bd98650304e",
+    "scope": "auto",
+    "type": "link_by_uid"
+  },
+  "sample_type": "unknown",
+  "spec": {
+    "id": "af96eb8d-636a-49ff-b9d6-435ef3afc903",
+    "scope": "auto",
+    "type": "link_by_uid"
+  },
+  "tags": [
+    "recordId::599",
+    "modId::3"
+  ],
+  "type": "material_run",
+  "uids": {
+    "auto": "55ba3aa5-1f5e-42d8-b4af-2b5857a47ff0"
+  }
+}

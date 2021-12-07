@@ -1,0 +1,112 @@
+{
+  "conditions": [
+    {
+      "file_links": [],
+      "name": "CuttingMethod",
+      "notes": null,
+      "origin": "specified",
+      "template": {
+        "id": "e8a533b5-2dbb-4fe1-8312-92e6257bd4ed",
+        "scope": "auto",
+        "type": "link_by_uid"
+      },
+      "type": "condition",
+      "value": {
+        "category": "Continuous",
+        "type": "nominal_categorical"
+      }
+    },
+    {
+      "file_links": [],
+      "name": "TypicalCuttingTime",
+      "notes": null,
+      "origin": "specified",
+      "template": {
+        "id": "29e5e01b-44e8-4f67-92c5-00bfe1c55cf7",
+        "scope": "auto",
+        "type": "link_by_uid"
+      },
+      "type": "condition",
+      "value": {
+        "nominal": 40.0,
+        "type": "nominal_real",
+        "units": "minute"
+      }
+    }
+  ],
+  "file_links": [
+    {
+      "filename": "2021-10-22",
+      "type": "file_link",
+      "url": null
+    }
+  ],
+  "name": "240um Kapton Original v2 (2021-10-22)",
+  "notes": "Femtosecond system fixed by Mike\nPower increased to 320\nBetter alignment",
+  "parameters": [
+    {
+      "file_links": [],
+      "name": "LaserCuttingEnergy",
+      "notes": null,
+      "origin": "specified",
+      "template": {
+        "id": "6e248efa-bd80-482d-ab61-17ded3c201f6",
+        "scope": "auto",
+        "type": "link_by_uid"
+      },
+      "type": "parameter",
+      "value": {
+        "nominal": 320.0,
+        "type": "nominal_real",
+        "units": "microjoule"
+      }
+    },
+    {
+      "file_links": [],
+      "name": "NumberofPasses",
+      "notes": null,
+      "origin": "specified",
+      "template": {
+        "id": "0e4a5c0d-a392-4644-b32a-22a03ac14172",
+        "scope": "auto",
+        "type": "link_by_uid"
+      },
+      "type": "parameter",
+      "value": {
+        "nominal": 6,
+        "type": "nominal_integer"
+      }
+    },
+    {
+      "file_links": [],
+      "name": "ApertureSetting",
+      "notes": null,
+      "origin": "specified",
+      "template": {
+        "id": "3da322d8-e5dc-41a6-9af9-71c057c5228f",
+        "scope": "auto",
+        "type": "link_by_uid"
+      },
+      "type": "parameter",
+      "value": {
+        "category": "Open",
+        "type": "nominal_categorical"
+      }
+    }
+  ],
+  "tags": [
+    "SpacerCuttingID::SP03",
+    "VersionDate::10/22/2021",
+    "recordId::4",
+    "modId::4"
+  ],
+  "template": {
+    "id": "7bf3f70a-2a3d-4f52-8172-22976e66a8a2",
+    "scope": "auto",
+    "type": "link_by_uid"
+  },
+  "type": "process_spec",
+  "uids": {
+    "auto": "0808204a-6d8d-4ceb-acbc-e662431d19f1"
+  }
+}

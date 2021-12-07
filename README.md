@@ -1,15 +1,17 @@
 # <div align="center"> Open MSI Python Code </div>
-#### <div align="center">***v0.5.0***</div>
+#### <div align="center">***v0.6.0***</div>
 
-#### <div align="center">Maggie Eminizer<sup>2</sup>, Sam Tabrisky<sup>3</sup>, David Elbert<sup>1</sup></div>
+#### <div align="center">Maggie Eminizer<sup>2</sup>, Sam Tabrisky<sup>3</sup>, Alakarthika Ulaganathan<sup>4</sup>, David Elbert<sup>1</sup></div>
 
  <div align="center"><sup>1</sup>Hopkins Extreme Materials Institute (HEMI), PARADIM Materials Innovation Platform, and Dept. of Earth and Planetary Sciences, The Johns Hopkins University, Baltimore, MD, USA</div>
   <div align="center"><sup>2</sup>Institute for Data Intensive Engineering and Science (IDIES), Dept. of Physics and Astronomy, The Johns Hopkins University, Baltimore, MD, USA</div>
  <div align="center"><sup>3</sup>Depts. of Biology and Computer Science, Dartmouth College, Hanover, NH, and HEMI, The Johns Hopkins University, Baltimore, MD, USA</div> 
+ <div align="center"><sup>4</sup>Dept. of Applied Mathematics and Statistics, The Johns Hopkins University, Baltimore, MD, USA</div> 
  <br>
 
 ## Introduction
-User-friendly implementation and extension of common data streaming applications using Apache Kakfa, written in Python
+
+Applications for laboratory, analysis, and computational materials data streaming using [Apache Kafka](https://kafka.apache.org/) and comprehensive data modeling using [Citrine Informatics' GEMD](https://citrineinformatics.github.io/gemd-docs/)
 
 Available on GitHub at https://github.com/openmsi/openmsipython
 
@@ -17,7 +19,7 @@ Developed for Open MSI (NSF DMREF award #1921959)
 
 ## Installation
 
-Programs use the Python implementation of the Apache Kafka API, and are designed to run on Windows machines connected to laboratory instruments. The only base requirements are Python >=3.7, `git`, and `pip`. 
+Programs use the Python implementation of the Apache Kafka API, and are designed to run on Windows machines connected to laboratory instruments. The only base requirements are Python >=3.7, <3.10, `git`, and `pip`. 
 
 ### Quick start with miniconda3
 
@@ -26,9 +28,21 @@ The quickest way to get started is to use Miniconda3. Miniconda3 installers can 
 With Miniconda installed, next create and switch to a new environment for Open MSI. In a terminal window (or Anaconda Prompt in admin mode on Windows) type:
 
 ```
-conda create -n openmsi python=3
+conda create -n openmsi python=3.9
 conda activate openmsi
 ```
+
+(Python 3.9 is the most recent minor release of Python supported by confluent-kafka on Windows 10.)
+
+You'll need to use that second "activate" command every time you open a Terminal window or Anaconda Prompt to switch to the `openmsi` environment. 
+
+Miniconda installs `pip`, and if you need to install Git you can do so with
+
+`conda install -c anaconda git`
+
+(or use the instructions on [the website here](https://github.com/git-guides/install-git).)
+
+#### Extra setup on Windows
 
 This environment needs a special variable set to allow the Kafka Python code to find its dependencies on Windows (see [here](https://github.com/ContinuumIO/anaconda-issues/issues/12475) for more details), so after you've done the above, type the following commands to set the variable and then refresh the environment:
 
@@ -38,13 +52,14 @@ conda deactivate #this command will give a warning, that's normal
 conda activate openmsi
 ```
 
-You'll need to use that second "activate" command every time you open a Terminal window or Anaconda Prompt to switch to the `openmsi` environment. 
+#### Extra setup on Mac OS
 
-Miniconda installs `pip`, and if you need to install Git you can do so with
+Mac OS is not officially supported for `openmsipython`, but if you would like to work with it you will need to install `librdkafka` using homebrew to do so. This may also require installing Xcode command line tools. You can install both of these using the commands below:
 
-`conda install -c anaconda git`
-
-(or use the instructions on [the website here](https://github.com/git-guides/install-git).)
+```
+xcode-select --install
+brew install librdkafka
+```
 
 ### Cloning this repo and installing the openmsipython package
 
@@ -57,9 +72,9 @@ pip install .
 cd ..
 ```
 
-This will give you access to all of the console commands discussed below, as well as any of the other modules in the `openmsipython` package. If you'd like to be able to make changes to the `openmsipython` code without reinstalling, you can include the `--editable` flag in the `pip install` command.
+This will give you access to several new console commands to run openmsipython applications, as well as any of the other modules in the `openmsipython` package. If you'd like to be able to make changes to the `openmsipython` code without reinstalling, you can include the `--editable` flag in the `pip install` command.
 
-If you like, you can check everything with:
+If you like, you can check your installation with:
 
 ```
 python
@@ -67,7 +82,13 @@ python
 >>> import openmsipython
 ```
 
-And if that line runs without any problems then the package was installed correctly.
+and if that line runs without any problems then the package was installed correctly.
+
+### Environment variables
+
+Interacting with the Kafka Cluster, including running code tests as described [here](./test), requires that some environment variables are set on your system. If you're installing any software to run as a Windows Service (as described [here](./openmsipython/services)]) then you'll be prompted to enter these variables' values, but you may find it more convenient to set them once. The environment variables are called `KAFKA_TEST_CLUSTER_USERNAME`, `KAFKA_TEST_CLUSTER_PASSWORD`, `KAFKA_PROD_CLUSTER_USERNAME`, and `KAFKA_PROD_CLUSTER_PASSWORD`. The "`TEST`" variables are used to connect to the test cluster, and must be set to successfully run the automatic code tests. The "`PROD`" variables are used to connect to the full production cluster and are only needed for fully deployed code.
+
+You can set these environment variables in a shell `.rc` or `.profile` file if running on Linux or Mac OS. On Windows you can set them as machine environment variables using commands like `[Environment]::SetEnvironmentVariable("NAME","VALUE",[EnvironmentVariableTarget]::Machine)`. You can also set them as "User" environment variables on Windows if you don't have the necessary permissions to set them for the "Machine". 
 
 ### Other documentation
 
@@ -81,20 +102,23 @@ Installing the code provides access to several programs that share a basic schem
 
 The documentation for specific programs can be found in a few locations within the repo. 
 
-The readme file [here](./openmsipython/data_file_io/) explains programs used to upload entire arbitrary files by breaking them into chunks/producing those chunks as messages to a Kafka topic or download entire files by reading messages from the topic and writing data to disk.
+The [readme file here](./openmsipython/data_file_io/) explains programs used to upload entire arbitrary files by breaking them into chunks/producing those chunks as messages to a Kafka topic or download entire files by reading messages from the topic and writing data to disk.
 
-The readme file [here](./openmsipython/pdv) explains programs used to upload specific portions of data in Lecroy Oscilloscope files and produce sheets of plots for PDV spall or velocity analyses.
+The [readme file here](./openmsipython/pdv) explains programs used to upload specific portions of data in Lecroy Oscilloscope files and produce sheets of plots for PDV spall or velocity analyses.
 
-The readme file [here](./openmsipython/my_kafka) gives more details about options for configuration files used to define which kafka cluster(s) the programs interact with and how data are produced to/consumed from topics within them.
+The [readme file here](./openmsipython/my_kafka) gives more details about options for configuration files used to define which kafka cluster(s) the programs interact with and how data are produced to/consumed from topics within them.
 
-The readme file [here](./openmsipython/services) details procedures for installing any available command-line program as a Windows Service and working with it.
+The [readme file here](./openmsipython/services) details procedures for installing any available command-line program as a Windows Service and working with it.
 
-The readme file [here](./test) describes the automatic testing and CI/CD setup for the project, including how to run tests interactively and add additional tests.
+The [readme file here](./openmsipython/data_models) describes how GEMD data structures are used to model data across the different projects in the Open MSI / DMREF project.
+
+The [readme file here](./test) describes the automatic testing and CI/CD setup for the project, including how to run tests interactively and add additional tests.
 
 ## To-do list
 
 The following items are currently planned to be implemented ASAP:
 
+1. New applications for asynchronous and repeatable stream filtering and processing (i.e. to facilitate decentralized/asynchronous lab data analysis)
 1. Adding a safer and more graceful shutdown when stopping Services so that no external lag time needs to be considered
 1. Allowing watching directories where large files are in the process of being created/saved instead of just directories where fully-created files are being added
 1. Implementing other data types and serialization schemas, likely using Avro
@@ -104,8 +128,6 @@ The following items are currently planned to be implemented ASAP:
 ## Questions that will arise later (inFAQs?)
 
 1. What are best practices for topic creation and naming?  Should we have a new topic for each student, for each instrument, for each “kind” of data, ...?
-1. Would it be possible to have an environment and dependency definition? YAML??
 1. How do I know (and trust!) my data made it and is safe?
 1. What if I forget and write my data to some “wrong” place?  What if I write my data to the directory twice?  
 1. Should I clear my data out of the streaming directory once it’s been produced to Kafka?
-

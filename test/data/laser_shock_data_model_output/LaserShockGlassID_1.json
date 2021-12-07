@@ -1,0 +1,89 @@
+{
+  "file_links": [],
+  "name": "Borosilicate, T=0.25\"",
+  "notes": "",
+  "process": {
+    "id": "713aeb39-f076-4976-882e-16c9f752880c",
+    "scope": "auto",
+    "type": "link_by_uid"
+  },
+  "properties": [
+    {
+      "conditions": [],
+      "property": {
+        "file_links": [],
+        "name": "GlassThickness",
+        "notes": null,
+        "origin": "specified",
+        "template": {
+          "id": "3dbbc822-aea4-4925-afbb-12ad89c02bbc",
+          "scope": "auto",
+          "type": "link_by_uid"
+        },
+        "type": "property",
+        "value": {
+          "nominal": 0.25,
+          "type": "nominal_real",
+          "units": "inch"
+        }
+      },
+      "type": "property_and_conditions"
+    },
+    {
+      "conditions": [],
+      "property": {
+        "file_links": [],
+        "name": "GlassLength",
+        "notes": null,
+        "origin": "specified",
+        "template": {
+          "id": "bcc3cdf4-8f58-4117-bf68-191c4da1feb0",
+          "scope": "auto",
+          "type": "link_by_uid"
+        },
+        "type": "property",
+        "value": {
+          "nominal": 2.0,
+          "type": "nominal_real",
+          "units": "inch"
+        }
+      },
+      "type": "property_and_conditions"
+    },
+    {
+      "conditions": [],
+      "property": {
+        "file_links": [],
+        "name": "GlassWidth",
+        "notes": null,
+        "origin": "specified",
+        "template": {
+          "id": "a09af309-eef9-46e7-a2b9-d9371b88f51d",
+          "scope": "auto",
+          "type": "link_by_uid"
+        },
+        "type": "property",
+        "value": {
+          "nominal": 2.0,
+          "type": "nominal_real",
+          "units": "inch"
+        }
+      },
+      "type": "property_and_conditions"
+    }
+  ],
+  "tags": [
+    "GlassID::G001",
+    "recordId::2",
+    "modId::13"
+  ],
+  "template": {
+    "id": "840d6e9e-b6f6-46d7-a7cb-b21fdae6953f",
+    "scope": "auto",
+    "type": "link_by_uid"
+  },
+  "type": "material_spec",
+  "uids": {
+    "auto": "9d07e9ee-49eb-4663-b74e-945356c20259"
+  }
+}

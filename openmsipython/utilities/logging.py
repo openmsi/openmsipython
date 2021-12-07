@@ -100,6 +100,14 @@ class LogOwner :
     def logger(self) :
         return self.__logger
 
+    @logger.setter
+    def logger(self,logger) :
+        if hasattr(self,'_LogOwner__logger') and self.__logger is not None and type(self.__logger)!=type(logger) :
+            errmsg = f'ERROR: tried to reset a logger of type {type(self.__logger)} to a new logger of type {logger}!'
+            self.__logger.error(errmsg,ValueError)
+        else :
+            self.__logger = logger
+
     def __init__(self,*args,
                  logger=None,logger_name=None,streamlevel=logging.DEBUG,logger_file=None,filelevel=logging.INFO,
                  **other_kwargs) :

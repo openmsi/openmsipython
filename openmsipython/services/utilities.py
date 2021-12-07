@@ -38,7 +38,6 @@ def set_env_var_from_user_input(var_name,var_desc) :
     var_val = input(f'Please enter the {var_desc}: ')
     set_machine_env_var(var_name,var_val)
 
-
 #if NSSM doesn't exist in the current directory, install it from the web
 def find_install_NSSM() :
     if SERVICE_CONST.NSSM_EXECUTABLE_PATH.is_file() :

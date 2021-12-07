@@ -68,7 +68,7 @@ class TestDataFileStreamProcessor(unittest.TestCase) :
             LOGGER.info(msg)
             LOGGER.set_stream_level(logging.ERROR)
             while ( (TEST_CONST.TEST_DATA_FILE_2_NAME not in dfsp.completed_bytestrings_by_filename.keys()) and 
-                    current_messages_read<dfsp.n_msgs_read and time_waited<TIMEOUT_SECS ) :
+                    time_waited<TIMEOUT_SECS ) :
                 current_messages_read = dfsp.n_msgs_read
                 LOGGER.set_stream_level(logging.INFO)
                 LOGGER.info(f'\t{current_messages_read} messages read after waiting {time_waited} seconds....')

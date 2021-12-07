@@ -1,0 +1,86 @@
+{
+  "file_links": [],
+  "name": "240um Kapton (double adhesive)",
+  "notes": "",
+  "process": {
+    "id": "2c0dbcf9-d4ed-422a-b452-8c11a231b508",
+    "scope": "auto",
+    "type": "link_by_uid"
+  },
+  "properties": [
+    {
+      "conditions": [],
+      "property": {
+        "file_links": [],
+        "name": "SpacerMaterial",
+        "notes": null,
+        "origin": "specified",
+        "template": {
+          "id": "254fd354-5a5e-4d5b-b2be-be80cb2f8031",
+          "scope": "auto",
+          "type": "link_by_uid"
+        },
+        "type": "property",
+        "value": {
+          "category": "Kapton",
+          "type": "nominal_categorical"
+        }
+      },
+      "type": "property_and_conditions"
+    },
+    {
+      "conditions": [],
+      "property": {
+        "file_links": [],
+        "name": "SpacerAdhesive",
+        "notes": null,
+        "origin": "specified",
+        "template": {
+          "id": "8820f4a4-c589-442d-93d6-5ebcf67afb9f",
+          "scope": "auto",
+          "type": "link_by_uid"
+        },
+        "type": "property",
+        "value": {
+          "category": "Double",
+          "type": "nominal_categorical"
+        }
+      },
+      "type": "property_and_conditions"
+    },
+    {
+      "conditions": [],
+      "property": {
+        "file_links": [],
+        "name": "AdhesiveType",
+        "notes": null,
+        "origin": "specified",
+        "template": {
+          "id": "c2d6d660-b003-4730-88b3-4d74d11cb59b",
+          "scope": "auto",
+          "type": "link_by_uid"
+        },
+        "type": "property",
+        "value": {
+          "category": "Silicone",
+          "type": "nominal_categorical"
+        }
+      },
+      "type": "property_and_conditions"
+    }
+  ],
+  "tags": [
+    "SpacerID::S001",
+    "recordId::2",
+    "modId::0"
+  ],
+  "template": {
+    "id": "66a9e0e5-7ad6-4aea-aed4-035a2c27c65e",
+    "scope": "auto",
+    "type": "link_by_uid"
+  },
+  "type": "material_spec",
+  "uids": {
+    "auto": "611c9d97-dcc4-4b83-933a-d1f58f0b7283"
+  }
+}
