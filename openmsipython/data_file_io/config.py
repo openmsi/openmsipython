@@ -46,7 +46,7 @@ class RunOptionConstants :
         return 10      # default number of threads to use when uploading a file
     @property
     def N_DEFAULT_DOWNLOAD_THREADS(self) :
-        return 4      # default number of threads to use when downloading chunks of a file
+        return 3      # default number of threads to use when downloading chunks of a file
     @property
     def DEFAULT_CHUNK_SIZE(self) :
         return 16384  # default size in bytes of each file upload chunk
