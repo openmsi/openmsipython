@@ -1,6 +1,6 @@
 ## Data Modeling
 
-The Open MSI / DMREF projects link and track materials, the processes that created them, and measurements performed on them using a data model built on [the Python binding](https://github.com/CitrineInformatics/gemd-python) for [Citrine Informatics' Graphical Expression of Materials Data (GEMD)](https://citrineinformatics.github.io/gemd-docs/) implemented as part of `openmsipython`.
+The Open MSI / DMREF projects link and track materials, the processes that created them, and measurements performed on them using a data model built on [the Python binding](https://github.com/CitrineInformatics/gemd-python) for Citrine Informatics' [Graphical Expression of Materials Data (GEMD)](https://citrineinformatics.github.io/gemd-docs/), implemented as part of `openmsipython`.
 
 ### Laser Shock
 
