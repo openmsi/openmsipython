@@ -31,10 +31,11 @@ class TestServiceUtilities(unittest.TestCase) :
         Make sure an executable file is written to the expected location with the expected format
         """
         #the test below does create a file but that file should be ignored in the repo
-        write_executable_file(TEST_SERVICE_NAME,TEST_SERVICE_EXECUTABLE_ARGSLIST)
+        LOGGER.set_stream_level(logging.INFO)
+        LOGGER.info('testing')
+        write_executable_file(TEST_SERVICE_NAME,TEST_SERVICE_EXECUTABLE_ARGSLIST,LOGGER)
         test_exec_fp = pathlib.Path(__file__).parent.parent.parent/'openmsipython'/'services'
         test_exec_fp = test_exec_fp/'working_dir'/f'{TEST_SERVICE_NAME}{SERVICE_CONST.SERVICE_EXECUTABLE_NAME_STEM}'
-        LOGGER.set_stream_level(logging.INFO)
         LOGGER.info(f'Will search directory at {test_exec_fp.parent}')
         for fp in test_exec_fp.parent.glob('*') :
             LOGGER.info(f'Found file {fp}')
