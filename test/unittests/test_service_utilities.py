@@ -34,6 +34,8 @@ class TestServiceUtilities(unittest.TestCase) :
         write_executable_file(TEST_SERVICE_NAME,TEST_SERVICE_EXECUTABLE_ARGSLIST)
         test_exec_fp = pathlib.Path(__file__).parent.parent.parent/'openmsipython'/'services'
         test_exec_fp = test_exec_fp/'working_dir'/f'{TEST_SERVICE_NAME}{SERVICE_CONST.SERVICE_EXECUTABLE_NAME_STEM}'
+        LOGGER.set_stream_level(logging.INFO)
+        LOGGER.info(f'Will search directory at {test_exec_fp.parent}')
         for fp in test_exec_fp.parent.glob('*') :
             LOGGER.info(f'Found file {fp}')
         self.assertTrue(test_exec_fp.is_file())
