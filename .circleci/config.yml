@@ -3,7 +3,7 @@ version: 2.1
 ################# ORB #################
 orbs:
   # See the orb documentation here: https://circleci.com/developer/orbs/orb/circleci/python
-  python: circleci/python@1.4.0
+  python: circleci/python@1.5.0
 
 ################# WORKFLOWS #################
 workflows:
@@ -23,7 +23,7 @@ jobs:
   # Build the repo and check the code using pyflakes 
   build-and-code-check:
     docker:
-      - image: cimg/python:3.7
+      - image: cimg/python:3.9
     steps:
       - checkout
       - python/install-packages:
@@ -41,7 +41,8 @@ jobs:
   # Run unittests 
   run-tests:
     docker:
-      - image: cimg/python:3.7
+      - image: cimg/python:3.9
+    parallelism: 10
     steps:
       - attach_workspace:
           at: .
@@ -49,7 +50,10 @@ jobs:
           pkg-manager: pip
       - run:
           name: run tests
-          command: python -m unittest discover -s test/unittests -v -p test*.py
+          command: |
+            cd test/unittests
+            TESTCLASSES=$(circleci tests glob "test*.py" | sed -e 's/.py//' | circleci tests split)
+            python -m unittest $TESTCLASSES -v
       - persist_to_workspace:
           root: .
           paths:
@@ -57,7 +61,7 @@ jobs:
   # Make sure that the repository is clean after all tests have been run
   check-repo:
     docker:
-      - image: cimg/python:3.7
+      - image: cimg/python:3.9
     steps:
       - attach_workspace:
           at: .
