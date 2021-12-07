@@ -18,11 +18,6 @@ class LaserShockSpacerID(MaterialSpecFromFileMakerRecord) :
     def tags_keys(self) :
         return [*super().tags_keys,'Spacer ID']
 
-    def ignore_key(self,key) :
-        if key in ['Spacer Picture'] :
-            return True
-        return super().ignore_key(key)
-
     @property
     def property_dict(self) :
         return {'Spacer Thickness':{'valuetype':NominalReal,
@@ -50,3 +45,8 @@ class LaserShockSpacerID(MaterialSpecFromFileMakerRecord) :
     @property
     def unique_values(self):
         return {**super().unique_values,'Spacer ID':self.get_tag_value('SpacerID')}
+
+    def ignore_key(self,key) :
+        if key in ['Spacer Picture'] :
+            return True
+        return super().ignore_key(key)

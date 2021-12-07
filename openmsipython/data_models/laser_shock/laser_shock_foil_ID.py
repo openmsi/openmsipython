@@ -18,11 +18,6 @@ class LaserShockFoilID(MaterialSpecFromFileMakerRecord) :
     def tags_keys(self) :
         return [*super().tags_keys,'Foil ID']
 
-    def ignore_key(self,key) :
-        if key in ['Foil Picture'] :
-            return True
-        return super().ignore_key(key)
-
     @property
     def property_dict(self) :
         return {'Foil Thickness':{'valuetype':NominalReal,
@@ -53,3 +48,8 @@ class LaserShockFoilID(MaterialSpecFromFileMakerRecord) :
     @property
     def unique_values(self):
         return {**super().unique_values,'Foil ID':self.get_tag_value('FoilID')}
+
+    def ignore_key(self,key) :
+        if key in ['Foil Picture'] :
+            return True
+        return super().ignore_key(key)

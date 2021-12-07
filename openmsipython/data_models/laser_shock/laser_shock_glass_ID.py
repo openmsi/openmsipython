@@ -18,11 +18,6 @@ class LaserShockGlassID(MaterialSpecFromFileMakerRecord) :
     def tags_keys(self) :
         return [*super().tags_keys,'Glass ID']
 
-    def ignore_key(self,key) :
-        if key in ['Glass Picture'] :
-            return True
-        return super().ignore_key(key)
-
     @property
     def property_dict(self) :
         return {'Glass Thickness':{'valuetype':NominalReal,
@@ -47,3 +42,8 @@ class LaserShockGlassID(MaterialSpecFromFileMakerRecord) :
     @property
     def unique_values(self):
         return {**super().unique_values,'Glass ID':self.get_tag_value('GlassID')}
+
+    def ignore_key(self,key) :
+        if key in ['Glass Picture'] :
+            return True
+        return super().ignore_key(key)

@@ -25,6 +25,46 @@ class LaserShockLab(LogOwner) :
     Representation of all the information in the Laser Shock Lab's FileMaker database in GEMD language
     """
 
+    #################### PROPERTIES ####################
+
+    @property
+    def username(self) :
+        if self.__username is None :
+            self.__username = os.path.expandvars('$JHED_UNAME')
+            if self.__username=='$JHED_UNAME' :
+                self.__username = (input('Please enter your JHED username: ')).rstrip()
+        return self.__username
+
+    @property
+    def password(self) :
+        if self.__password is None :
+            self.__password = os.path.expandvars('$JHED_PWORD')
+            if self.__password=='$JHED_PWORD' :
+                self.__password = getpass.getpass(f'Please enter the JHED password for {self.username}: ')
+        return self.__password
+
+    @property
+    def all_object_lists(self) :
+        return [self.glass_IDs,self.epoxy_IDs,self.foil_IDs,self.spacer_IDs,self.flyer_cutting_programs,
+                self.spacer_cutting_programs,self.flyer_stacks,self.samples,self.launch_packages,self.experiments]
+    
+    @property
+    def all_top_objs(self) :
+        all_top_objs = []
+        for obj_list in self.all_object_lists :
+            for obj in obj_list :
+                all_top_objs.append(obj.gemd_object)
+        return all_top_objs
+
+    @property
+    def specs_from_records(self) :
+        specs_from_records = []
+        for obj_list in self.all_object_lists :
+            for obj in obj_list :
+                if isinstance(obj,SpecFromFileMakerRecord) :
+                    specs_from_records.append(obj)
+        return specs_from_records
+
     #################### PUBLIC METHODS ####################
 
     def __init__(self,*args,working_dir=pathlib.Path('./gemd_data_model_dumps'),**kwargs) :
@@ -152,46 +192,6 @@ class LaserShockLab(LogOwner) :
                         with open(self.ofd/fn.replace('.json','_material_history.json'),'w') as fp :
                             fp.write(json.dumps(context_list,indent=2))
         self.logger.info('Done.')
-
-    #################### PROPERTIES ####################
-
-    @property
-    def username(self) :
-        if self.__username is None :
-            self.__username = os.path.expandvars('$JHED_UNAME')
-            if self.__username=='$JHED_UNAME' :
-                self.__username = (input('Please enter your JHED username: ')).rstrip()
-        return self.__username
-
-    @property
-    def password(self) :
-        if self.__password is None :
-            self.__password = os.path.expandvars('$JHED_PWORD')
-            if self.__password=='$JHED_PWORD' :
-                self.__password = getpass.getpass(f'Please enter the JHED password for {self.username}: ')
-        return self.__password
-
-    @property
-    def all_object_lists(self) :
-        return [self.glass_IDs,self.epoxy_IDs,self.foil_IDs,self.spacer_IDs,self.flyer_cutting_programs,
-                self.spacer_cutting_programs,self.flyer_stacks,self.samples,self.launch_packages,self.experiments]
-    
-    @property
-    def all_top_objs(self) :
-        all_top_objs = []
-        for obj_list in self.all_object_lists :
-            for obj in obj_list :
-                all_top_objs.append(obj.gemd_object)
-        return all_top_objs
-
-    @property
-    def specs_from_records(self) :
-        specs_from_records = []
-        for obj_list in self.all_object_lists :
-            for obj in obj_list :
-                if isinstance(obj,SpecFromFileMakerRecord) :
-                    specs_from_records.append(obj)
-        return specs_from_records
 
     #################### PRIVATE HELPER FUNCTIONS ####################
     

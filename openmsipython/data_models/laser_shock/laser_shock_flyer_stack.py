@@ -215,31 +215,7 @@ class LaserShockFlyerStack(MaterialRunFromFileMakerRecord) :
     performed_by_key = 'Performed By'
     performed_date_key = 'Date'
 
-    def __init__(self,record,glass_IDs,foil_IDs,epoxy_IDs,flyer_cutting_programs,**kwargs) :
-        #set the logger until it can be overwritten after everything else is initialized
-        self.logger = kwargs.get('logger')
-        #find the glass, foil, epoxy, and flyer cutting program that were used for this run
-        self.glassID = search_for_single_name([gid.spec for gid in glass_IDs],
-                                              record.pop('Glass Name Reference'),logger=kwargs.get('logger'))
-        self.foilID = search_for_single_name([fid.spec for fid in foil_IDs],
-                                             record.pop('Foil Name'),logger=kwargs.get('logger'))
-        self.epoxyID = search_for_single_name([eid.spec for eid in epoxy_IDs],
-                                              record.pop('Epoxy Name'),logger=kwargs.get('logger'))
-        self.cutting = search_for_single_name([fcp.spec for fcp in flyer_cutting_programs],
-                                              record.pop('Cutting Procedure Name'),logger=kwargs.get('logger'))
-        #create Runs from the Specs found
-        self.glass = make_instance(self.glassID) if self.glassID is not None else None
-        self.foil = make_instance(self.foilID) if self.foilID is not None else None
-        #run the rest of the creating the MaterialRun
-        super().__init__(record)
-        #add the runs from above to each part of the created Run as necessary
-        for ing in self.run.process.ingredients :
-            if ing.name=='Glass Epoxy Foil Stack' :
-                for ing2 in ing.material.process.ingredients :
-                    if ing2.name=='Glass ID' :
-                        ing2.material=self.glass
-                    elif ing2.name=='Foil ID' :
-                        ing2.material=self.foil
+    #################### PROPERTIES ####################
 
     @property
     def tags_keys(self) :
@@ -273,6 +249,34 @@ class LaserShockFlyerStack(MaterialRunFromFileMakerRecord) :
             errmsg = f'ERROR: found {len(flyer_ID_tags)} tags specifying a Flyer ID when there should be exactly one'
             self.logger.error(errmsg,RuntimeError)
         return {**super().unique_values,'Flyer ID':flyer_ID_tags[0]}
+
+    #################### PUBLIC FUNCTIONS ####################
+
+    def __init__(self,record,glass_IDs,foil_IDs,epoxy_IDs,flyer_cutting_programs,**kwargs) :
+        #set the logger until it can be overwritten after everything else is initialized
+        self.logger = kwargs.get('logger')
+        #find the glass, foil, epoxy, and flyer cutting program that were used for this run
+        self.glassID = search_for_single_name([gid.spec for gid in glass_IDs],
+                                              record.pop('Glass Name Reference'),logger=kwargs.get('logger'))
+        self.foilID = search_for_single_name([fid.spec for fid in foil_IDs],
+                                             record.pop('Foil Name'),logger=kwargs.get('logger'))
+        self.epoxyID = search_for_single_name([eid.spec for eid in epoxy_IDs],
+                                              record.pop('Epoxy Name'),logger=kwargs.get('logger'))
+        self.cutting = search_for_single_name([fcp.spec for fcp in flyer_cutting_programs],
+                                              record.pop('Cutting Procedure Name'),logger=kwargs.get('logger'))
+        #create Runs from the Specs found
+        self.glass = make_instance(self.glassID) if self.glassID is not None else None
+        self.foil = make_instance(self.foilID) if self.foilID is not None else None
+        #run the rest of the creating the MaterialRun
+        super().__init__(record)
+        #add the runs from above to each part of the created Run as necessary
+        for ing in self.run.process.ingredients :
+            if ing.name=='Glass Epoxy Foil Stack' :
+                for ing2 in ing.material.process.ingredients :
+                    if ing2.name=='Glass ID' :
+                        ing2.material=self.glass
+                    elif ing2.name=='Foil ID' :
+                        ing2.material=self.foil
 
     def ignore_key(self,key) :
         #I don't have access to the "Flyer Epoxy Thickness" calculated box through the API 

@@ -5,7 +5,7 @@ from gemd.entity.template import PropertyTemplate, ParameterTemplate, ConditionT
 
 ATTR_TEMPL = {}
 
-# Properties
+#################### PROPERTIES ####################
 
 name = 'Glass Thickness'
 ATTR_TEMPL[name] = PropertyTemplate(
@@ -238,8 +238,7 @@ ATTR_TEMPL[name] = PropertyTemplate(
     bounds=RealBounds(0.,1.e3,'m/s')
 )
 
-
-# Parameters
+#################### PARAMETERS ####################
 
 name = 'Glass Supplier'
 ATTR_TEMPL[name] = ParameterTemplate(
@@ -575,8 +574,7 @@ ATTR_TEMPL[name] = ParameterTemplate(
     bounds=RealBounds(0.,1.e3,'ms')
 )
 
-
-# Conditions
+#################### CONDITIONS ####################
 
 name = 'Cutting Method'
 ATTR_TEMPL[name] = ConditionTemplate(

@@ -9,6 +9,79 @@ class FromFileMakerRecordBase(LogOwner,ABC) :
     Base class for specs/runs that will be created from FileMaker Records
     """
 
+    #################### PROPERTIES ####################
+
+    @property
+    @abstractmethod
+    def gemd_object(self) :
+        """
+        A property for the GEMD object within this construct
+        (must be a property of child classes)
+        """
+        pass
+    
+    @property
+    def name_key(self) :
+        """
+        The FileMaker record key whose value should be used as the name of the object
+        (must be implemented in child classes)
+        """
+        return None
+
+    @property
+    def tags_keys(self) :
+        """
+        A list of keys whose values should be added to the object as tags
+        tags will be formatted as 'name::value' where the name is the key with spaces removed
+        and value is the value in the record
+        """
+        return ['recordId','modId']
+
+    @property
+    def notes_key(self) :
+        """
+        The FileMaker record key whose value should be added as "notes" for the run object
+        """
+        return None
+
+    @property
+    @functools.lru_cache(maxsize=10)
+    def file_links_keys(self) :
+        all_keys = []
+        for d in self.file_links_dicts :
+            for v in d.values() :
+                all_keys.append(v)
+        return all_keys
+
+    @property
+    def file_links_dicts(self) :
+        """
+        The FileMaker record keys whose values should be used to define file_links for the run object
+        Each entry in the list should be a dictionary with keys "filename" and "url"
+        """
+        return []
+
+    @property
+    def other_keys(self) :
+        """
+        A list of keys that need to be processed uniquely by the child class
+        when keys in this list are found they are sent back to the "add_other_key" function 
+        along with the entire FileMaker record
+        """
+        return []
+
+    @property
+    def unique_values(self) :
+        """
+        A dictionary of values that should be unique to each FileMaker record of this type 
+        because they're used as unique references in other layouts
+
+        keys are strings describing what the values are, values are the actual values for that object
+        """
+        return {}
+
+    #################### PUBLIC FUNCTIONS ####################
+
     def __init__(self,record,obj,**kwargs) :
         """
         Use information in the given record to populate the given object
@@ -136,72 +209,3 @@ class FromFileMakerRecordBase(LogOwner,ABC) :
         if tag_value is None :
             self.logger.error(f'ERROR: failed to find a tag with name {tag_name}!',ValueError)
         return tag_value
-
-    @property
-    @abstractmethod
-    def gemd_object(self) :
-        """
-        A property for the GEMD object within this construct
-        (must be a property of child classes)
-        """
-        pass
-    
-    @property
-    def name_key(self) :
-        """
-        The FileMaker record key whose value should be used as the name of the object
-        (must be implemented in child classes)
-        """
-        return None
-
-    @property
-    def tags_keys(self) :
-        """
-        A list of keys whose values should be added to the object as tags
-        tags will be formatted as 'name::value' where the name is the key with spaces removed
-        and value is the value in the record
-        """
-        return ['recordId','modId']
-
-    @property
-    def notes_key(self) :
-        """
-        The FileMaker record key whose value should be added as "notes" for the run object
-        """
-        return None
-
-    @property
-    @functools.lru_cache(maxsize=10)
-    def file_links_keys(self) :
-        all_keys = []
-        for d in self.file_links_dicts :
-            for v in d.values() :
-                all_keys.append(v)
-        return all_keys
-
-    @property
-    def file_links_dicts(self) :
-        """
-        The FileMaker record keys whose values should be used to define file_links for the run object
-        Each entry in the list should be a dictionary with keys "filename" and "url"
-        """
-        return []
-
-    @property
-    def other_keys(self) :
-        """
-        A list of keys that need to be processed uniquely by the child class
-        when keys in this list are found they are sent back to the "add_other_key" function 
-        along with the entire FileMaker record
-        """
-        return []
-
-    @property
-    def unique_values(self) :
-        """
-        A dictionary of values that should be unique to each FileMaker record of this type 
-        because they're used as unique references in other layouts
-
-        keys are strings describing what the values are, values are the actual values for that object
-        """
-        return {}

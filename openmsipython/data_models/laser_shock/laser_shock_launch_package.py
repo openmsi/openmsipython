@@ -154,6 +154,25 @@ class LaserShockLaunchPackage(MaterialRunFromFileMakerRecord) :
     performed_by_key = 'Performed By'
     performed_date_key = 'Date'
 
+    #################### PROPERTIES ####################
+
+    @property
+    def tags_keys(self):
+        return [*super().tags_keys,'Secondary Sample ID']
+    
+    @property
+    def other_keys(self) :
+        return [*super().other_keys,
+                'Spacer Inner Diameter','Spacer Outer Diameter',
+                'Sample Diameter','Sample Thickness',
+            ]
+
+    @property
+    def unique_values(self):
+        return {**super().unique_values,self.name_key:self.run.name}
+
+    #################### PUBLIC FUNCTIONS ####################
+
     def __init__(self,record,flyer_stacks,spacer_IDs,spacer_cutting_programs,samples,**kwargs) :
         # find the flyer stack, spacer ID, spacer cutting program, and sample that were used
         self.flyerstack = search_for_single_tag([fs.run for fs in flyer_stacks],'FlyerID',record.pop('Flyer ID').replace(' ','_'))
@@ -183,21 +202,6 @@ class LaserShockLaunchPackage(MaterialRunFromFileMakerRecord) :
                                 ing3.material=self.spacer
             elif ing.name=='Impact Sample' :
                 ing.material=self.impactsample
-
-    @property
-    def tags_keys(self):
-        return [*super().tags_keys,'Secondary Sample ID']
-    
-    @property
-    def other_keys(self) :
-        return [*super().other_keys,
-                'Spacer Inner Diameter','Spacer Outer Diameter',
-                'Sample Diameter','Sample Thickness',
-            ]
-
-    @property
-    def unique_values(self):
-        return {**super().unique_values,self.name_key:self.run.name}
 
     def add_other_key(self,key,value,record) :
         # Measured properties of spacer
@@ -256,6 +260,8 @@ class LaserShockLaunchPackage(MaterialRunFromFileMakerRecord) :
         kwargs['samp_attachments_adhesives']=record.pop('Sample Attachment Method').split('\r')
         kwargs['samp_orientation']=record.pop('Sample Impact Orientation')
         return kwargs
+
+    #################### PRIVATE HELPER FUNCTIONS ####################
 
     def __get_impact_sample(self,record) :
         """

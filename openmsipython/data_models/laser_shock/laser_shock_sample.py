@@ -201,15 +201,14 @@ class LaserShockSampleSpec(LaserShockSpecForRun) :
             )
         return final_output_proc
 
-
 class LaserShockSample(MaterialRunFromFileMakerRecord) :
     """
     A MaterialSpec/MaterialRun pair representing a Sample in the Laser Shock Lab 
     created from a record in the "Sample" layout of the FileMaker database
     """
 
-    #Some constants for MaterialRunFromFileMakerRecord
     spec_type = LaserShockSampleSpec
+    
     name_key = 'Sample Name'
     notes_key = 'General Notes'
     performed_by_key = 'Supplier Name'

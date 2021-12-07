@@ -18,11 +18,6 @@ class LaserShockEpoxyID(MaterialSpecFromFileMakerRecord) :
     def tags_keys(self) :
         return [*super().tags_keys,'Epoxy ID']
 
-    def ignore_key(self,key) :
-        if key in ['Epoxy Picture'] :
-            return True
-        return super().ignore_key(key)
-    
     @property
     def process_parameter_dict(self) :
         return {'Epoxy Supplier':{'valuetype':NominalCategorical,
@@ -32,3 +27,8 @@ class LaserShockEpoxyID(MaterialSpecFromFileMakerRecord) :
     @property
     def unique_values(self):
         return {**super().unique_values,'Epoxy ID':self.get_tag_value('EpoxyID')}
+
+    def ignore_key(self,key) :
+        if key in ['Epoxy Picture'] :
+            return True
+        return super().ignore_key(key)

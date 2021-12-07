@@ -13,6 +13,27 @@ class RunFromFileMakerRecord(FromFileMakerRecordBase) :
     to create and/or link GEMD "Spec" and Run" objects
     """
 
+    #################### PROPERTIES ####################
+
+    @property
+    @abstractmethod
+    def spec_type(self) :
+        """
+        A property for the type of spec corresponding to this Run object
+        (must be a property of child classes)
+        """
+        pass
+
+    @property
+    def run(self) :
+        return self.__run
+
+    @property
+    def gemd_object(self):
+        return self.run
+
+    #################### PUBLIC FUNCTIONS ####################
+
     def __init__(self,record,**kwargs) :
         """
         Use the information in a given FileMaker record to populate this Run object
@@ -26,15 +47,6 @@ class RunFromFileMakerRecord(FromFileMakerRecordBase) :
             self.__run.name=self.__spec.name
         #call the base class's __init__ with the run as the object to modify
         super().__init__(record,self.__run,**kwargs)
-
-    @property
-    @abstractmethod
-    def spec_type(self) :
-        """
-        A property for the type of spec corresponding to this Run object
-        (must be a property of child classes)
-        """
-        pass
 
     @abstractmethod
     def get_spec_kwargs(self,record) :
@@ -52,14 +64,6 @@ class RunFromFileMakerRecord(FromFileMakerRecordBase) :
         kwargs = self.get_spec_kwargs(record)
         new_spec = self.spec_type(**kwargs)
         return new_spec.spec
-
-    @property
-    def run(self) :
-        return self.__run
-
-    @property
-    def gemd_object(self):
-        return self.run
 
 class HasSourceFromFileMakerRecord(RunFromFileMakerRecord) :
     """
@@ -155,13 +159,6 @@ class MeasurementRunFromFileMakerRecord(HasSourceFromFileMakerRecord) :
     Class to use for creating Measurement(Spec/Run)s based on FileMaker records
     """
 
-    def __init__(self,*args,material=None,**kwargs) :
-        """
-        material = the MaterialRun whose properties this measurement determined
-        """
-        super().__init__(*args,**kwargs)
-        self.run.material=material
-
     @property
     def measured_property_dict(self) :
         """
@@ -185,6 +182,13 @@ class MeasurementRunFromFileMakerRecord(HasSourceFromFileMakerRecord) :
         return [*super().other_keys,
                 *self.measured_property_dict.keys(),
                ]
+
+    def __init__(self,*args,material=None,**kwargs) :
+        """
+        material = the MaterialRun whose properties this measurement determined
+        """
+        super().__init__(*args,**kwargs)
+        self.run.material=material
 
     def add_other_key(self,key,value,record) :
         #add a PerformedSource for this measurement

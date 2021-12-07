@@ -5,7 +5,7 @@ from .attribute_templates import ATTR_TEMPL
 
 OBJ_TEMPL = {}
 
-# Materials
+#################### MATERIALS ####################
 
 name = 'Glass ID'
 OBJ_TEMPL[name] = MaterialTemplate(
@@ -93,7 +93,7 @@ OBJ_TEMPL[name] = MaterialTemplate(
     description='A specific flyer in a flyer stack, possibly with a spacer and/or impact sample attached',
 )
 
-# Measurements
+#################### MEASUREMENTS ####################
 
 name = 'Laser Shock Experiment'
 OBJ_TEMPL[name] = MeasurementTemplate(
@@ -147,7 +147,7 @@ OBJ_TEMPL[name] = MeasurementTemplate(
         ],
 )
 
-# Processes
+#################### PROCESSES ####################
 
 name = 'Purchasing Glass'
 OBJ_TEMPL[name] = ProcessTemplate(
