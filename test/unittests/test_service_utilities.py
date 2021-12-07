@@ -1,5 +1,6 @@
 #imports
-import unittest, pathlib, importlib, filecmp, os
+import unittest, pathlib, importlib, filecmp, os, logging
+from openmsipython.utilities.logging import Logger
 from openmsipython.services.config import SERVICE_CONST
 from openmsipython.services.utilities import find_install_NSSM
 from openmsipython.services.install_service import write_executable_file
@@ -8,6 +9,7 @@ from config import TEST_CONST
 #constants
 TEST_SERVICE_NAME = 'DataFileUploadDirectoryService'
 TEST_SERVICE_EXECUTABLE_ARGSLIST = ['test_upload']
+LOGGER = Logger(pathlib.Path(__file__).name.split('.')[0],logging.INFO)
 
 class TestServiceUtilities(unittest.TestCase) :
     """
@@ -32,6 +34,8 @@ class TestServiceUtilities(unittest.TestCase) :
         write_executable_file(TEST_SERVICE_NAME,TEST_SERVICE_EXECUTABLE_ARGSLIST)
         test_exec_fp = pathlib.Path(__file__).parent.parent.parent/'openmsipython'/'services'
         test_exec_fp = test_exec_fp/'working_dir'/f'{TEST_SERVICE_NAME}{SERVICE_CONST.SERVICE_EXECUTABLE_NAME_STEM}'
+        for fp in test_exec_fp.parent.glob('*') :
+            LOGGER.info(f'Found file {fp}')
         self.assertTrue(test_exec_fp.is_file())
         ref_exec_fp = TEST_CONST.TEST_DATA_DIR_PATH/test_exec_fp.name
         self.assertTrue(ref_exec_fp.is_file())

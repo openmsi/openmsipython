@@ -42,7 +42,7 @@ jobs:
   run-tests:
     docker:
       - image: cimg/python:3.9
-    parallelism: 12
+    parallelism: 11
     steps:
       - attach_workspace:
           at: .
