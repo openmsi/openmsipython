@@ -1,6 +1,6 @@
 #imports
 import functools
-from abc import ABC
+from abc import ABC, abstractmethod
 from gemd.entity.file_link import FileLink
 from ...utilities.logging import LogOwner
 
@@ -121,6 +121,31 @@ class FromFileMakerRecordBase(LogOwner,ABC) :
         errmsg+= f'{self.__class__.__name__} object! This key should be processed somewhere other than the base class'
         self.logger.error(errmsg,NotImplementedError)
 
+    def get_tag_value(self,tag_name) :
+        """
+        Search through the tags for this Run and return the value of the tag with the specified name
+        """
+        tag_value = None
+        for t in self.gemd_object.tags :
+            tsplit = t.split('::')
+            if len(tsplit)!=2 :
+                continue
+            if tsplit[0]==tag_name :
+                tag_value=tsplit[1]
+                break
+        if tag_value is None :
+            self.logger.error(f'ERROR: failed to find a tag with name {tag_name}!',ValueError)
+        return tag_value
+
+    @property
+    @abstractmethod
+    def gemd_object(self) :
+        """
+        A property for the GEMD object within this construct
+        (must be a property of child classes)
+        """
+        pass
+    
     @property
     def name_key(self) :
         """

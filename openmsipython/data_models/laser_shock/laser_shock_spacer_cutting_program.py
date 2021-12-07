@@ -47,3 +47,7 @@ class LaserShockSpacerCuttingProgram(ProcessSpecFromFileMakerRecord) :
                             'template':ATTR_TEMPL['Depth of Cut']},
         }
 
+    @property
+    def unique_values(self):
+        return {**super().unique_values,'Spacer Cutting ID':self.get_tag_value('SpacerCuttingID')}
+

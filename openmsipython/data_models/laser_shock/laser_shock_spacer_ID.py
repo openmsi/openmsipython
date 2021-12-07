@@ -46,3 +46,7 @@ class LaserShockSpacerID(MaterialSpecFromFileMakerRecord) :
                 'Spacer Part Number':{'valuetype':NominalCategorical,
                                      'template':ATTR_TEMPL['Spacer Part Number']},
             }
+
+    @property
+    def unique_values(self):
+        return {**super().unique_values,'Spacer ID':self.get_tag_value('SpacerID')}

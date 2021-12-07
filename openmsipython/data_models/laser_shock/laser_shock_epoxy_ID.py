@@ -27,5 +27,8 @@ class LaserShockEpoxyID(MaterialSpecFromFileMakerRecord) :
     def process_parameter_dict(self) :
         return {'Epoxy Supplier':{'valuetype':NominalCategorical,
                                   'template':ATTR_TEMPL['Epoxy Supplier']},
-
             }
+
+    @property
+    def unique_values(self):
+        return {**super().unique_values,'Epoxy ID':self.get_tag_value('EpoxyID')}

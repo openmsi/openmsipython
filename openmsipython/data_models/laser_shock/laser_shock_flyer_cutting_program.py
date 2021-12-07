@@ -48,3 +48,7 @@ class LaserShockFlyerCuttingProgram(ProcessSpecFromFileMakerRecord) :
                             'template':ATTR_TEMPL['Depth of Cut']},
         }
 
+    @property
+    def unique_values(self):
+        return {**super().unique_values,'Flyer Cutting ID':self.get_tag_value('FlyerCuttingID')}
+

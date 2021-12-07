@@ -181,10 +181,7 @@ class LaserShockLab(LogOwner) :
         all_top_objs = []
         for obj_list in self.all_object_lists :
             for obj in obj_list :
-                if isinstance(obj,RunFromFileMakerRecord) :
-                    all_top_objs.append(obj.run)
-                elif isinstance(obj,SpecFromFileMakerRecord) :
-                    all_top_objs.append(obj.spec)
+                all_top_objs.append(obj.gemd_object)
         return all_top_objs
 
     @property
@@ -235,8 +232,7 @@ class LaserShockLab(LogOwner) :
                 n_objs_with_val=uvl.count(uv)
                 if n_objs_with_val!=1 :
                     msg = f'WARNING: {n_objs_with_val} {obj.__class__.__name__} objects found with {uvn} = {uv} but '
-                    msg+= f'{uvn} is assumed to be unique! This will cause warnings/errors if these objects are '
-                    msg+= 'referenced later.'
+                    msg+= f'{uvn} should be unique!'
                     self.logger.warning(msg)
                 done.add(uv)
 

@@ -57,6 +57,10 @@ class RunFromFileMakerRecord(FromFileMakerRecordBase) :
     def run(self) :
         return self.__run
 
+    @property
+    def gemd_object(self):
+        return self.run
+
 class HasSourceFromFileMakerRecord(RunFromFileMakerRecord) :
     """
     Adds to the base class to process keys for sources 

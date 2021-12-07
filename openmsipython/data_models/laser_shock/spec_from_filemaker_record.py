@@ -33,6 +33,10 @@ class SpecFromFileMakerRecord(FromFileMakerRecordBase) :
             self.logger.error(errmsg)
 
     @property
+    def gemd_object(self):
+        return self.spec
+
+    @property
     def init_spec_kwargs(self) :
         """
         keyword arguments that should be used to define the initial spec

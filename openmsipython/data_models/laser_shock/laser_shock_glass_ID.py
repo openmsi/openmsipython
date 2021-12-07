@@ -43,3 +43,7 @@ class LaserShockGlassID(MaterialSpecFromFileMakerRecord) :
                 'Glass Part Number':{'valuetype':NominalCategorical,
                                      'template':ATTR_TEMPL['Glass Part Number']},
             }
+
+    @property
+    def unique_values(self):
+        return {**super().unique_values,'Glass ID':self.get_tag_value('GlassID')}

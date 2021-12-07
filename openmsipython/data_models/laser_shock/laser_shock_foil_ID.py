@@ -49,3 +49,7 @@ class LaserShockFoilID(MaterialSpecFromFileMakerRecord) :
                 'Foil Part Number':{'valuetype':NominalCategorical,
                                      'template':ATTR_TEMPL['Foil Part Number']},
             }
+
+    @property
+    def unique_values(self):
+        return {**super().unique_values,'Foil ID':self.get_tag_value('FoilID')}
