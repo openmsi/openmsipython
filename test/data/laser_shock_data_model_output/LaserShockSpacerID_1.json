@@ -3,7 +3,7 @@
   "name": "240um Kapton (double adhesive)",
   "notes": "",
   "process": {
-    "id": "0889aaa7-69b1-4c59-9b59-4e56a3ea4b4c",
+    "id": "2c0dbcf9-d4ed-422a-b452-8c11a231b508",
     "scope": "auto",
     "type": "link_by_uid"
   },
@@ -16,7 +16,7 @@
         "notes": null,
         "origin": "specified",
         "template": {
-          "id": "f4837cf0-cf9e-4fde-8dce-a28473c7f603",
+          "id": "254fd354-5a5e-4d5b-b2be-be80cb2f8031",
           "scope": "auto",
           "type": "link_by_uid"
         },
@@ -36,7 +36,7 @@
         "notes": null,
         "origin": "specified",
         "template": {
-          "id": "65f694de-a485-44ba-b621-a29d912f4a94",
+          "id": "8820f4a4-c589-442d-93d6-5ebcf67afb9f",
           "scope": "auto",
           "type": "link_by_uid"
         },
@@ -56,7 +56,7 @@
         "notes": null,
         "origin": "specified",
         "template": {
-          "id": "f7e7d153-ef36-417b-ba9f-3cbde81e951d",
+          "id": "c2d6d660-b003-4730-88b3-4d74d11cb59b",
           "scope": "auto",
           "type": "link_by_uid"
         },
@@ -75,12 +75,12 @@
     "modId::0"
   ],
   "template": {
-    "id": "0e126f5b-66a5-4298-94b2-1e2890c65cca",
+    "id": "66a9e0e5-7ad6-4aea-aed4-035a2c27c65e",
     "scope": "auto",
     "type": "link_by_uid"
   },
   "type": "material_spec",
   "uids": {
-    "auto": "2bf90f39-dafa-4fe4-99ab-9966578287f9"
+    "auto": "611c9d97-dcc4-4b83-933a-d1f58f0b7283"
   }
 }

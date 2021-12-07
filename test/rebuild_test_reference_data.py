@@ -7,7 +7,7 @@ from openmsipython.my_kafka.serialization import DataFileChunkSerializer
 from openmsipython.data_file_io.upload_data_file import UploadDataFile
 from openmsipython.services.install_service import write_executable_file
 from openmsipython.data_models.laser_shock.laser_shock_lab import LaserShockLab
-from .unittests.config import TEST_CONST
+from unittests.config import TEST_CONST
 
 #constants
 EXISTING_TEST_DATA_DIR = (pathlib.Path(__file__).parent / 'data').resolve()

@@ -6,7 +6,7 @@
       "notes": null,
       "origin": "specified",
       "template": {
-        "id": "868d0835-035f-46c5-b254-abd6c2d532d6",
+        "id": "e8a533b5-2dbb-4fe1-8312-92e6257bd4ed",
         "scope": "auto",
         "type": "link_by_uid"
       },
@@ -22,7 +22,7 @@
       "notes": null,
       "origin": "specified",
       "template": {
-        "id": "0ca7fc3f-d244-4dab-85a0-6e34cbdc1f54",
+        "id": "29e5e01b-44e8-4f67-92c5-00bfe1c55cf7",
         "scope": "auto",
         "type": "link_by_uid"
       },
@@ -50,7 +50,7 @@
       "notes": null,
       "origin": "specified",
       "template": {
-        "id": "1488952f-4f0a-41ba-b781-bea87b2e4458",
+        "id": "6e248efa-bd80-482d-ab61-17ded3c201f6",
         "scope": "auto",
         "type": "link_by_uid"
       },
@@ -67,7 +67,7 @@
       "notes": null,
       "origin": "specified",
       "template": {
-        "id": "86a88daf-76c2-40f3-9dba-a6fbc7599cc2",
+        "id": "0e4a5c0d-a392-4644-b32a-22a03ac14172",
         "scope": "auto",
         "type": "link_by_uid"
       },
@@ -83,7 +83,7 @@
       "notes": null,
       "origin": "specified",
       "template": {
-        "id": "b3339cf6-5cd3-4774-8efe-5cb104f414b5",
+        "id": "3da322d8-e5dc-41a6-9af9-71c057c5228f",
         "scope": "auto",
         "type": "link_by_uid"
       },
@@ -101,12 +101,12 @@
     "modId::4"
   ],
   "template": {
-    "id": "aa9dbc91-3bb2-4d61-9ae7-ed599f8d6c9f",
+    "id": "7bf3f70a-2a3d-4f52-8172-22976e66a8a2",
     "scope": "auto",
     "type": "link_by_uid"
   },
   "type": "process_spec",
   "uids": {
-    "auto": "1be5aa1b-bd01-4515-87a1-c7fa2473cfa5"
+    "auto": "0808204a-6d8d-4ceb-acbc-e662431d19f1"
   }
 }
