@@ -1,0 +1,135 @@
+{
+  "conditions": [],
+  "file_links": [
+    {
+      "filename": "BP--20211122--00025",
+      "type": "file_link",
+      "url": null
+    },
+    {
+      "filename": "F2--20211122--00025",
+      "type": "file_link",
+      "url": null
+    },
+    {
+      "filename": "15_55_40",
+      "type": "file_link",
+      "url": null
+    }
+  ],
+  "material": {
+    "id": "7ac49f68-fbf4-41e6-a48b-47c053835e17",
+    "scope": "auto",
+    "type": "link_by_uid"
+  },
+  "name": "Spall",
+  "notes": "good peaks",
+  "parameters": [],
+  "properties": [
+    {
+      "file_links": [],
+      "name": "MaxVelocity",
+      "notes": null,
+      "origin": "measured",
+      "template": {
+        "id": "bd53142c-51b7-4698-8af8-f10be7334d57",
+        "scope": "auto",
+        "type": "link_by_uid"
+      },
+      "type": "property",
+      "value": {
+        "nominal": 746.0,
+        "type": "nominal_real",
+        "units": "meter / second"
+      }
+    },
+    {
+      "file_links": [],
+      "name": "EstImpactVelocity",
+      "notes": null,
+      "origin": "measured",
+      "template": {
+        "id": "952b30bf-9508-4986-bcda-875a4d4e0c83",
+        "scope": "auto",
+        "type": "link_by_uid"
+      },
+      "type": "property",
+      "value": {
+        "nominal": 785.0,
+        "type": "nominal_real",
+        "units": "meter / second"
+      }
+    },
+    {
+      "file_links": [],
+      "name": "SpallState",
+      "notes": null,
+      "origin": "measured",
+      "template": {
+        "id": "837a93bf-5a53-4db2-a057-eaac5cc8e476",
+        "scope": "auto",
+        "type": "link_by_uid"
+      },
+      "type": "property",
+      "value": {
+        "category": "Through sample",
+        "type": "nominal_categorical"
+      }
+    },
+    {
+      "file_links": [],
+      "name": "LaunchPackageOrientation",
+      "notes": null,
+      "origin": "measured",
+      "template": {
+        "id": "066e5c82-8f50-4a28-9322-010c5c7695df",
+        "scope": "auto",
+        "type": "link_by_uid"
+      },
+      "type": "property",
+      "value": {
+        "category": "Flat",
+        "type": "nominal_categorical"
+      }
+    },
+    {
+      "file_links": [],
+      "name": "VideoQuality",
+      "notes": null,
+      "origin": "measured",
+      "template": {
+        "id": "90a0e699-8abd-4090-9da2-92acae407246",
+        "scope": "auto",
+        "type": "link_by_uid"
+      },
+      "type": "property",
+      "value": {
+        "category": "Great",
+        "type": "nominal_categorical"
+      }
+    }
+  ],
+  "source": {
+    "performed_by": "Lezcano",
+    "performed_date": "11/22/2021",
+    "type": "performed_source"
+  },
+  "spec": {
+    "id": "7d0b30cb-7b5e-4c14-b5f4-9a2a7d765e05",
+    "scope": "auto",
+    "type": "link_by_uid"
+  },
+  "tags": [
+    "GrantFunding::MEDE_Metals",
+    "NewEnergyMeasurement::No",
+    "RecoveryBox::5",
+    "RecoveryRow::3",
+    "RecoveryColumn::4",
+    "recordId::689",
+    "modId::6"
+  ],
+  "type": "measurement_run",
+  "uids": {
+    "auto": "08e3bec9-23ad-457b-8c03-3d0fcb4d2d08"
+  }
+}

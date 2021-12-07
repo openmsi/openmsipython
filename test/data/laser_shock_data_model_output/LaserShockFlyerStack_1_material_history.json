@@ -1,0 +1,3121 @@
+[
+  {
+    "file_links": [],
+    "name": "Flyer Stack",
+    "notes": "",
+    "process": {
+      "id": "58ab75a9-f349-4cc8-afca-621a6f7ac42e",
+      "scope": "auto",
+      "type": "link_by_uid"
+    },
+    "sample_type": "unknown",
+    "spec": {
+      "id": "a61e3694-f55f-4fe0-b700-45bb6bcb2dfe",
+      "scope": "auto",
+      "type": "link_by_uid"
+    },
+    "tags": [
+      "FlyerID::F054",
+      "recordId::74",
+      "modId::11"
+    ],
+    "type": "material_run",
+    "uids": {
+      "auto": "624af5ac-0632-44e0-aa0b-724686434bb2"
+    }
+  },
+  {
+    "file_links": [],
+    "name": "Flyer Stack",
+    "notes": "A spec for creating a set of flyer discs cut out from a glass/epoxy/foil stack",
+    "process": {
+      "id": "de9107a2-e2b7-4348-b60d-c1c02831dd49",
+      "scope": "auto",
+      "type": "link_by_uid"
+    },
+    "properties": [],
+    "tags": [],
+    "template": {
+      "id": "aa6e7efe-c4e2-462a-8150-c64774737575",
+      "scope": "auto",
+      "type": "link_by_uid"
+    },
+    "type": "material_spec",
+    "uids": {
+      "auto": "a61e3694-f55f-4fe0-b700-45bb6bcb2dfe"
+    }
+  },
+  {
+    "description": "A set of flyer discs cut out of a glass/epoxy/foil stack",
+    "name": "Flyer Stack",
+    "properties": [
+      [
+        {
+          "id": "51a759a2-fac7-4101-8e1b-016d4507d312",
+          "scope": "auto",
+          "type": "link_by_uid"
+        },
+        null
+      ]
+    ],
+    "tags": [],
+    "type": "material_template",
+    "uids": {
+      "auto": "aa6e7efe-c4e2-462a-8150-c64774737575"
+    }
+  },
+  {
+    "bounds": {
+      "default_units": "millimeter",
+      "lower_bound": 0,
+      "type": "real_bounds",
+      "upper_bound": 100
+    },
+    "description": "The thickness of a glass/epoxy/foil stack at some point",
+    "name": "Stack Thickness",
+    "tags": [],
+    "type": "property_template",
+    "uids": {
+      "auto": "51a759a2-fac7-4101-8e1b-016d4507d312"
+    }
+  },
+  {
+    "conditions": [
+      {
+        "file_links": [],
+        "name": "CuttingMethod",
+        "notes": null,
+        "origin": "specified",
+        "template": {
+          "id": "a7980b68-5ab8-403f-b840-5a8618be5c34",
+          "scope": "auto",
+          "type": "link_by_uid"
+        },
+        "type": "condition",
+        "value": {
+          "category": "Continuous",
+          "type": "nominal_categorical"
+        }
+      },
+      {
+        "file_links": [],
+        "name": "TypicalCuttingTime",
+        "notes": null,
+        "origin": "specified",
+        "template": {
+          "id": "e45540d3-bb09-40b4-af70-9e0c2333f657",
+          "scope": "auto",
+          "type": "link_by_uid"
+        },
+        "type": "condition",
+        "value": {
+          "nominal": 9.0,
+          "type": "nominal_real",
+          "units": "minute"
+        }
+      },
+      {
+        "file_links": [],
+        "name": "CuttingTool",
+        "notes": null,
+        "origin": "specified",
+        "template": {
+          "id": "10e5863a-28aa-4a15-bbd0-a24ae3f7a4b1",
+          "scope": "auto",
+          "type": "link_by_uid"
+        },
+        "type": "condition",
+        "value": {
+          "category": "Femtosecond Laser",
+          "type": "nominal_categorical"
+        }
+      }
+    ],
+    "file_links": [
+      {
+        "filename": "2021-10-22",
+        "type": "file_link",
+        "url": null
+      }
+    ],
+    "name": "50um Al Optimized v2 (2021-10-22)",
+    "notes": "Femtosecond system fixed by Mike\nPower increased to 320\nBetter alignment",
+    "parameters": [
+      {
+        "file_links": [],
+        "name": "LaserCuttingEnergy",
+        "notes": null,
+        "origin": "specified",
+        "template": {
+          "id": "73344d22-fdd4-4269-8de1-570dcbf397ad",
+          "scope": "auto",
+          "type": "link_by_uid"
+        },
+        "type": "parameter",
+        "value": {
+          "nominal": 320.0,
+          "type": "nominal_real",
+          "units": "microjoule"
+        }
+      },
+      {
+        "file_links": [],
+        "name": "NumberofPasses",
+        "notes": null,
+        "origin": "specified",
+        "template": {
+          "id": "11d70d9d-d72f-403f-944c-4145cf614e18",
+          "scope": "auto",
+          "type": "link_by_uid"
+        },
+        "type": "parameter",
+        "value": {
+          "nominal": 4,
+          "type": "nominal_integer"
+        }
+      },
+      {
+        "file_links": [],
+        "name": "ApertureSetting",
+        "notes": null,
+        "origin": "specified",
+        "template": {
+          "id": "3b188425-ccb6-4314-a98b-78237fa1cde1",
+          "scope": "auto",
+          "type": "link_by_uid"
+        },
+        "type": "parameter",
+        "value": {
+          "category": "Open",
+          "type": "nominal_categorical"
+        }
+      },
+      {
+        "file_links": [],
+        "name": "DepthofCut",
+        "notes": null,
+        "origin": "specified",
+        "template": {
+          "id": "675dcf03-6a73-4151-b29f-1d13faf9bbcf",
+          "scope": "auto",
+          "type": "link_by_uid"
+        },
+        "type": "parameter",
+        "value": {
+          "category": "On",
+          "type": "nominal_categorical"
+        }
+      },
+      {
+        "file_links": [],
+        "name": "Flyer Spacing",
+        "notes": null,
+        "origin": "specified",
+        "template": {
+          "id": "41387ce6-dc0d-4b80-a2cf-6d593549f907",
+          "scope": "auto",
+          "type": "link_by_uid"
+        },
+        "type": "parameter",
+        "value": {
+          "nominal": 6.0,
+          "type": "nominal_real",
+          "units": "millimeter"
+        }
+      },
+      {
+        "file_links": [],
+        "name": "Flyer Diameter",
+        "notes": null,
+        "origin": "specified",
+        "template": {
+          "id": "157a9f0c-9d71-4fc7-8bd9-7d2e5ce0cea9",
+          "scope": "auto",
+          "type": "link_by_uid"
+        },
+        "type": "parameter",
+        "value": {
+          "nominal": 1.5,
+          "type": "nominal_real",
+          "units": "millimeter"
+        }
+      },
+      {
+        "file_links": [],
+        "name": "Rows X Columns",
+        "notes": null,
+        "origin": "specified",
+        "template": {
+          "id": "57d0feee-7c07-4ad5-8979-2f1ea46ac2e2",
+          "scope": "auto",
+          "type": "link_by_uid"
+        },
+        "type": "parameter",
+        "value": {
+          "nominal": 7,
+          "type": "nominal_integer"
+        }
+      }
+    ],
+    "tags": [
+      "FlyerCuttingID::FP03",
+      "VersionDate::10/22/2021",
+      "recordId::3",
+      "modId::5"
+    ],
+    "template": {
+      "id": "8e893716-2f78-458e-943d-2a9d2b6c7b84",
+      "scope": "auto",
+      "type": "link_by_uid"
+    },
+    "type": "process_spec",
+    "uids": {
+      "auto": "de9107a2-e2b7-4348-b60d-c1c02831dd49"
+    }
+  },
+  {
+    "absolute_quantity": null,
+    "file_links": [],
+    "labels": [],
+    "mass_fraction": null,
+    "material": {
+      "id": "37cac8e7-2481-4a8f-84a6-3e666e24c050",
+      "scope": "auto",
+      "type": "link_by_uid"
+    },
+    "name": "Glass Epoxy Foil Stack",
+    "notes": null,
+    "number_fraction": null,
+    "process": {
+      "id": "de9107a2-e2b7-4348-b60d-c1c02831dd49",
+      "scope": "auto",
+      "type": "link_by_uid"
+    },
+    "tags": [],
+    "type": "ingredient_spec",
+    "uids": {
+      "auto": "3e8acf61-426c-4c24-960e-c9408f0b27a7"
+    },
+    "volume_fraction": null
+  },
+  {
+    "file_links": [],
+    "name": "Glass Epoxy Foil Stack",
+    "notes": null,
+    "process": {
+      "id": "40851c27-a4df-4e3d-91a0-0f29b7be4992",
+      "scope": "auto",
+      "type": "link_by_uid"
+    },
+    "properties": [],
+    "tags": [],
+    "template": null,
+    "type": "material_spec",
+    "uids": {
+      "auto": "37cac8e7-2481-4a8f-84a6-3e666e24c050"
+    }
+  },
+  {
+    "conditions": [
+      {
+        "file_links": [],
+        "name": "Compression Method",
+        "notes": null,
+        "origin": "specified",
+        "template": {
+          "id": "053c9ac9-56dc-4acd-9db6-70e6d48d6df1",
+          "scope": "auto",
+          "type": "link_by_uid"
+        },
+        "type": "condition",
+        "value": {
+          "category": "Apparatus",
+          "type": "nominal_categorical"
+        }
+      }
+    ],
+    "file_links": [],
+    "name": "Epoxying a Flyer Stack",
+    "notes": null,
+    "parameters": [
+      {
+        "file_links": [],
+        "name": "Compression Weight",
+        "notes": null,
+        "origin": "specified",
+        "template": {
+          "id": "d5cffb04-332f-4c0b-b691-a83b2c7333f0",
+          "scope": "auto",
+          "type": "link_by_uid"
+        },
+        "type": "parameter",
+        "value": {
+          "nominal": 35.0,
+          "type": "nominal_real",
+          "units": "pound"
+        }
+      },
+      {
+        "file_links": [],
+        "name": "Compression Time",
+        "notes": null,
+        "origin": "specified",
+        "template": {
+          "id": "f8a0db0d-ad35-4329-a135-f86406fed2d1",
+          "scope": "auto",
+          "type": "link_by_uid"
+        },
+        "type": "parameter",
+        "value": {
+          "nominal": 48.0,
+          "type": "nominal_real",
+          "units": "hour"
+        }
+      }
+    ],
+    "tags": [],
+    "template": {
+      "id": "ad2aad35-9c4d-403c-82b7-d9dad7012cc4",
+      "scope": "auto",
+      "type": "link_by_uid"
+    },
+    "type": "process_spec",
+    "uids": {
+      "auto": "40851c27-a4df-4e3d-91a0-0f29b7be4992"
+    }
+  },
+  {
+    "absolute_quantity": null,
+    "file_links": [],
+    "labels": [],
+    "mass_fraction": null,
+    "material": {
+      "id": "9d19db57-6b70-4724-9d69-53975ac09c6d",
+      "scope": "auto",
+      "type": "link_by_uid"
+    },
+    "name": "Mixed Epoxy",
+    "notes": null,
+    "number_fraction": null,
+    "process": {
+      "id": "40851c27-a4df-4e3d-91a0-0f29b7be4992",
+      "scope": "auto",
+      "type": "link_by_uid"
+    },
+    "tags": [],
+    "type": "ingredient_spec",
+    "uids": {
+      "auto": "15cfae8c-993f-40c7-a36e-9aaef49442a2"
+    },
+    "volume_fraction": null
+  },
+  {
+    "file_links": [],
+    "name": "Mixed Epoxy",
+    "notes": null,
+    "process": {
+      "id": "45cc98cd-0b0b-47c6-9951-c39b70dd6b69",
+      "scope": "auto",
+      "type": "link_by_uid"
+    },
+    "properties": [],
+    "tags": [],
+    "template": null,
+    "type": "material_spec",
+    "uids": {
+      "auto": "9d19db57-6b70-4724-9d69-53975ac09c6d"
+    }
+  },
+  {
+    "conditions": [],
+    "file_links": [],
+    "name": "Mixing Epoxy",
+    "notes": null,
+    "parameters": [
+      {
+        "file_links": [],
+        "name": "Mixing Time",
+        "notes": null,
+        "origin": "specified",
+        "template": {
+          "id": "41b830a4-b9e2-494e-b119-f5bc131e1844",
+          "scope": "auto",
+          "type": "link_by_uid"
+        },
+        "type": "parameter",
+        "value": {
+          "nominal": 5,
+          "type": "nominal_integer"
+        }
+      },
+      {
+        "file_links": [],
+        "name": "Resting Time",
+        "notes": null,
+        "origin": "specified",
+        "template": {
+          "id": "10acccf8-9749-411a-99fa-be8e6bd07076",
+          "scope": "auto",
+          "type": "link_by_uid"
+        },
+        "type": "parameter",
+        "value": {
+          "nominal": 5,
+          "type": "nominal_integer"
+        }
+      }
+    ],
+    "tags": [],
+    "template": {
+      "id": "3641bc87-38cc-46a6-9069-c08e37a7cc14",
+      "scope": "auto",
+      "type": "link_by_uid"
+    },
+    "type": "process_spec",
+    "uids": {
+      "auto": "45cc98cd-0b0b-47c6-9951-c39b70dd6b69"
+    }
+  },
+  {
+    "absolute_quantity": {
+      "nominal": 2.818,
+      "type": "nominal_real",
+      "units": "gram"
+    },
+    "file_links": [],
+    "labels": [],
+    "mass_fraction": null,
+    "material": {
+      "id": "ca5d9e94-30f1-471a-b421-fc4078946cc4",
+      "scope": "auto",
+      "type": "link_by_uid"
+    },
+    "name": "Epoxy Part B",
+    "notes": null,
+    "number_fraction": null,
+    "process": {
+      "id": "45cc98cd-0b0b-47c6-9951-c39b70dd6b69",
+      "scope": "auto",
+      "type": "link_by_uid"
+    },
+    "tags": [],
+    "type": "ingredient_spec",
+    "uids": {
+      "auto": "5cb3b3fe-dbf0-48f1-8e9e-061cad6507b0"
+    },
+    "volume_fraction": null
+  },
+  {
+    "file_links": [],
+    "name": "Loctite Ablestik 24",
+    "notes": "100:28 Weight Ratio (A:B)\n\n5g to 1.42g - Good for 4 flyers\n10g to 2.84g - Good for 10 flyers",
+    "process": {
+      "id": "a465406a-45ee-475b-99d9-8c26f01a3571",
+      "scope": "auto",
+      "type": "link_by_uid"
+    },
+    "properties": [],
+    "tags": [
+      "EpoxyID::E001",
+      "recordId::1",
+      "modId::2"
+    ],
+    "template": {
+      "id": "123ccca7-fe18-4fe5-afe9-511ea3c9512b",
+      "scope": "auto",
+      "type": "link_by_uid"
+    },
+    "type": "material_spec",
+    "uids": {
+      "auto": "ca5d9e94-30f1-471a-b421-fc4078946cc4"
+    }
+  },
+  {
+    "description": "An epoxy used in the Laser Shock Lab",
+    "name": "Epoxy ID",
+    "properties": [],
+    "tags": [],
+    "type": "material_template",
+    "uids": {
+      "auto": "123ccca7-fe18-4fe5-afe9-511ea3c9512b"
+    }
+  },
+  {
+    "conditions": [],
+    "file_links": [],
+    "name": "Purchasing Epoxy",
+    "notes": null,
+    "parameters": [
+      {
+        "file_links": [],
+        "name": "EpoxySupplier",
+        "notes": null,
+        "origin": "specified",
+        "template": {
+          "id": "c3e1822c-21b7-429f-9d3d-394a706973b3",
+          "scope": "auto",
+          "type": "link_by_uid"
+        },
+        "type": "parameter",
+        "value": {
+          "category": "Loctite",
+          "type": "nominal_categorical"
+        }
+      }
+    ],
+    "tags": [],
+    "template": {
+      "id": "65510077-8516-429f-b286-2c0ec8447ec3",
+      "scope": "auto",
+      "type": "link_by_uid"
+    },
+    "type": "process_spec",
+    "uids": {
+      "auto": "a465406a-45ee-475b-99d9-8c26f01a3571"
+    }
+  },
+  {
+    "allowed_labels": null,
+    "allowed_names": [],
+    "conditions": [],
+    "description": "Purchasing an Epoxy from a manufacturer",
+    "name": "Purchasing Epoxy",
+    "parameters": [
+      [
+        {
+          "id": "c3e1822c-21b7-429f-9d3d-394a706973b3",
+          "scope": "auto",
+          "type": "link_by_uid"
+        },
+        null
+      ]
+    ],
+    "tags": [],
+    "type": "process_template",
+    "uids": {
+      "auto": "65510077-8516-429f-b286-2c0ec8447ec3"
+    }
+  },
+  {
+    "bounds": {
+      "categories": [
+        "Loctite"
+      ],
+      "type": "categorical_bounds"
+    },
+    "description": "The name of a supplier from which an Epoxy was procured",
+    "name": "Epoxy Supplier",
+    "tags": [],
+    "type": "parameter_template",
+    "uids": {
+      "auto": "c3e1822c-21b7-429f-9d3d-394a706973b3"
+    }
+  },
+  {
+    "absolute_quantity": {
+      "nominal": 10.013,
+      "type": "nominal_real",
+      "units": "gram"
+    },
+    "file_links": [],
+    "labels": [],
+    "mass_fraction": null,
+    "material": {
+      "id": "ca5d9e94-30f1-471a-b421-fc4078946cc4",
+      "scope": "auto",
+      "type": "link_by_uid"
+    },
+    "name": "Epoxy Part A",
+    "notes": null,
+    "number_fraction": null,
+    "process": {
+      "id": "45cc98cd-0b0b-47c6-9951-c39b70dd6b69",
+      "scope": "auto",
+      "type": "link_by_uid"
+    },
+    "tags": [],
+    "type": "ingredient_spec",
+    "uids": {
+      "auto": "5d646e8b-a8bf-43c7-b72b-7b4a9d9544d3"
+    },
+    "volume_fraction": null
+  },
+  {
+    "allowed_labels": null,
+    "allowed_names": null,
+    "conditions": [],
+    "description": "Mixing a two-part epoxy",
+    "name": "Mixing Epoxy",
+    "parameters": [
+      [
+        {
+          "id": "41b830a4-b9e2-494e-b119-f5bc131e1844",
+          "scope": "auto",
+          "type": "link_by_uid"
+        },
+        null
+      ],
+      [
+        {
+          "id": "10acccf8-9749-411a-99fa-be8e6bd07076",
+          "scope": "auto",
+          "type": "link_by_uid"
+        },
+        null
+      ]
+    ],
+    "tags": [],
+    "type": "process_template",
+    "uids": {
+      "auto": "3641bc87-38cc-46a6-9069-c08e37a7cc14"
+    }
+  },
+  {
+    "bounds": {
+      "lower_bound": 0,
+      "type": "integer_bounds",
+      "upper_bound": 30
+    },
+    "description": "How long a two-part epoxy is rested for after mixing (integer number of minutes)",
+    "name": "Resting Time",
+    "tags": [],
+    "type": "parameter_template",
+    "uids": {
+      "auto": "10acccf8-9749-411a-99fa-be8e6bd07076"
+    }
+  },
+  {
+    "bounds": {
+      "lower_bound": 0,
+      "type": "integer_bounds",
+      "upper_bound": 30
+    },
+    "description": "How long a two-part epoxy is mixed for (integer number of minutes)",
+    "name": "Mixing Time",
+    "tags": [],
+    "type": "parameter_template",
+    "uids": {
+      "auto": "41b830a4-b9e2-494e-b119-f5bc131e1844"
+    }
+  },
+  {
+    "absolute_quantity": null,
+    "file_links": [],
+    "labels": [],
+    "mass_fraction": null,
+    "material": {
+      "id": "72742a12-f69d-4ecd-b516-dad9396b1a00",
+      "scope": "auto",
+      "type": "link_by_uid"
+    },
+    "name": "Foil ID",
+    "notes": null,
+    "number_fraction": null,
+    "process": {
+      "id": "40851c27-a4df-4e3d-91a0-0f29b7be4992",
+      "scope": "auto",
+      "type": "link_by_uid"
+    },
+    "tags": [],
+    "type": "ingredient_spec",
+    "uids": {
+      "auto": "d09d04c3-ad68-47b2-afa9-f06b5010a0a9"
+    },
+    "volume_fraction": null
+  },
+  {
+    "file_links": [],
+    "name": "50.4um (0.002\") Hard Al (AluFoil)",
+    "notes": "",
+    "process": {
+      "id": "eb044608-06ba-4fc9-8d35-db32d240fe81",
+      "scope": "auto",
+      "type": "link_by_uid"
+    },
+    "properties": [
+      {
+        "conditions": [],
+        "property": {
+          "file_links": [],
+          "name": "FoilThickness",
+          "notes": null,
+          "origin": "specified",
+          "template": {
+            "id": "b44b1236-a3f1-419b-9308-a3f6c77aa38e",
+            "scope": "auto",
+            "type": "link_by_uid"
+          },
+          "type": "property",
+          "value": {
+            "nominal": 0.002,
+            "type": "nominal_real",
+            "units": "micrometer"
+          }
+        },
+        "type": "property_and_conditions"
+      },
+      {
+        "conditions": [],
+        "property": {
+          "file_links": [],
+          "name": "FoilLength",
+          "notes": null,
+          "origin": "specified",
+          "template": {
+            "id": "4b0f3e5a-c6d1-4bdf-b15f-f14f6e4f1184",
+            "scope": "auto",
+            "type": "link_by_uid"
+          },
+          "type": "property",
+          "value": {
+            "nominal": 4.0,
+            "type": "nominal_real",
+            "units": "inch"
+          }
+        },
+        "type": "property_and_conditions"
+      },
+      {
+        "conditions": [],
+        "property": {
+          "file_links": [],
+          "name": "FoilWidth",
+          "notes": null,
+          "origin": "specified",
+          "template": {
+            "id": "c2761f68-0bce-4e38-9669-adf992d96320",
+            "scope": "auto",
+            "type": "link_by_uid"
+          },
+          "type": "property",
+          "value": {
+            "nominal": 4.0,
+            "type": "nominal_real",
+            "units": "inch"
+          }
+        },
+        "type": "property_and_conditions"
+      },
+      {
+        "conditions": [],
+        "property": {
+          "file_links": [],
+          "name": "FoilHardness",
+          "notes": null,
+          "origin": "specified",
+          "template": {
+            "id": "4f6c445c-6509-45d7-9b17-f837c0de3374",
+            "scope": "auto",
+            "type": "link_by_uid"
+          },
+          "type": "property",
+          "value": {
+            "category": "Hard",
+            "type": "nominal_categorical"
+          }
+        },
+        "type": "property_and_conditions"
+      },
+      {
+        "conditions": [],
+        "property": {
+          "file_links": [],
+          "name": "FoilMaterial",
+          "notes": null,
+          "origin": "specified",
+          "template": {
+            "id": "5134ed03-e788-4b63-84c3-d60560977a59",
+            "scope": "auto",
+            "type": "link_by_uid"
+          },
+          "type": "property",
+          "value": {
+            "category": "Aluminum",
+            "type": "nominal_categorical"
+          }
+        },
+        "type": "property_and_conditions"
+      }
+    ],
+    "tags": [
+      "FoilID::M004",
+      "recordId::11",
+      "modId::4"
+    ],
+    "template": {
+      "id": "1ae142b9-f1d7-47bf-88de-083dfc99d7a7",
+      "scope": "auto",
+      "type": "link_by_uid"
+    },
+    "type": "material_spec",
+    "uids": {
+      "auto": "72742a12-f69d-4ecd-b516-dad9396b1a00"
+    }
+  },
+  {
+    "description": "A foil used in the Laser Shock Lab",
+    "name": "Foil ID",
+    "properties": [
+      [
+        {
+          "id": "b44b1236-a3f1-419b-9308-a3f6c77aa38e",
+          "scope": "auto",
+          "type": "link_by_uid"
+        },
+        null
+      ],
+      [
+        {
+          "id": "4b0f3e5a-c6d1-4bdf-b15f-f14f6e4f1184",
+          "scope": "auto",
+          "type": "link_by_uid"
+        },
+        null
+      ],
+      [
+        {
+          "id": "c2761f68-0bce-4e38-9669-adf992d96320",
+          "scope": "auto",
+          "type": "link_by_uid"
+        },
+        null
+      ],
+      [
+        {
+          "id": "4f6c445c-6509-45d7-9b17-f837c0de3374",
+          "scope": "auto",
+          "type": "link_by_uid"
+        },
+        null
+      ],
+      [
+        {
+          "id": "5134ed03-e788-4b63-84c3-d60560977a59",
+          "scope": "auto",
+          "type": "link_by_uid"
+        },
+        null
+      ]
+    ],
+    "tags": [],
+    "type": "material_template",
+    "uids": {
+      "auto": "1ae142b9-f1d7-47bf-88de-083dfc99d7a7"
+    }
+  },
+  {
+    "bounds": {
+      "categories": [
+        "Aluminum"
+      ],
+      "type": "categorical_bounds"
+    },
+    "description": "The type of Material of the Foil",
+    "name": "Foil Material",
+    "tags": [],
+    "type": "property_template",
+    "uids": {
+      "auto": "5134ed03-e788-4b63-84c3-d60560977a59"
+    }
+  },
+  {
+    "bounds": {
+      "categories": [
+        "Hard",
+        "Soft",
+        "Unknown"
+      ],
+      "type": "categorical_bounds"
+    },
+    "description": "The type of Hardness of the Foil",
+    "name": "Foil Hardness",
+    "tags": [],
+    "type": "property_template",
+    "uids": {
+      "auto": "4f6c445c-6509-45d7-9b17-f837c0de3374"
+    }
+  },
+  {
+    "bounds": {
+      "default_units": "inch",
+      "lower_bound": 0,
+      "type": "real_bounds",
+      "upper_bound": 50
+    },
+    "description": "The width of the Foil",
+    "name": "Foil Width",
+    "tags": [],
+    "type": "property_template",
+    "uids": {
+      "auto": "c2761f68-0bce-4e38-9669-adf992d96320"
+    }
+  },
+  {
+    "bounds": {
+      "default_units": "inch",
+      "lower_bound": 0,
+      "type": "real_bounds",
+      "upper_bound": 50
+    },
+    "description": "The length of the Foil",
+    "name": "Foil Length",
+    "tags": [],
+    "type": "property_template",
+    "uids": {
+      "auto": "4b0f3e5a-c6d1-4bdf-b15f-f14f6e4f1184"
+    }
+  },
+  {
+    "bounds": {
+      "default_units": "micrometer",
+      "lower_bound": 0,
+      "type": "real_bounds",
+      "upper_bound": 500
+    },
+    "description": "The thickness of a piece of foil",
+    "name": "Foil Thickness",
+    "tags": [],
+    "type": "property_template",
+    "uids": {
+      "auto": "b44b1236-a3f1-419b-9308-a3f6c77aa38e"
+    }
+  },
+  {
+    "conditions": [],
+    "file_links": [],
+    "name": "Purchasing Foil",
+    "notes": null,
+    "parameters": [
+      {
+        "file_links": [],
+        "name": "FoilSupplier",
+        "notes": null,
+        "origin": "specified",
+        "template": {
+          "id": "fefa5611-b72c-4cc7-bad2-1a5ae268411f",
+          "scope": "auto",
+          "type": "link_by_uid"
+        },
+        "type": "parameter",
+        "value": {
+          "category": "AluFoil",
+          "type": "nominal_categorical"
+        }
+      }
+    ],
+    "tags": [],
+    "template": {
+      "id": "278b3079-5cb0-42c6-ba71-b1054777cdb2",
+      "scope": "auto",
+      "type": "link_by_uid"
+    },
+    "type": "process_spec",
+    "uids": {
+      "auto": "eb044608-06ba-4fc9-8d35-db32d240fe81"
+    }
+  },
+  {
+    "allowed_labels": null,
+    "allowed_names": [],
+    "conditions": [],
+    "description": "Purchasing a foil from a manufacturer",
+    "name": "Purchasing Foil",
+    "parameters": [
+      [
+        {
+          "id": "fefa5611-b72c-4cc7-bad2-1a5ae268411f",
+          "scope": "auto",
+          "type": "link_by_uid"
+        },
+        null
+      ],
+      [
+        {
+          "id": "29ab4b93-f222-4031-8add-9d3cdf0d3495",
+          "scope": "auto",
+          "type": "link_by_uid"
+        },
+        null
+      ]
+    ],
+    "tags": [],
+    "type": "process_template",
+    "uids": {
+      "auto": "278b3079-5cb0-42c6-ba71-b1054777cdb2"
+    }
+  },
+  {
+    "bounds": {
+      "categories": [],
+      "type": "categorical_bounds"
+    },
+    "description": "The manufacturer's part number for a foil that was purchased",
+    "name": "Foil Part Number",
+    "tags": [],
+    "type": "parameter_template",
+    "uids": {
+      "auto": "29ab4b93-f222-4031-8add-9d3cdf0d3495"
+    }
+  },
+  {
+    "bounds": {
+      "categories": [
+        "AluFoil"
+      ],
+      "type": "categorical_bounds"
+    },
+    "description": "The name of a supplier from which a foil was procured",
+    "name": "Foil Supplier",
+    "tags": [],
+    "type": "parameter_template",
+    "uids": {
+      "auto": "fefa5611-b72c-4cc7-bad2-1a5ae268411f"
+    }
+  },
+  {
+    "absolute_quantity": null,
+    "file_links": [],
+    "labels": [],
+    "mass_fraction": null,
+    "material": {
+      "id": "eeeabaf9-34f7-4a04-8045-28774c2253c2",
+      "scope": "auto",
+      "type": "link_by_uid"
+    },
+    "name": "Glass ID",
+    "notes": null,
+    "number_fraction": null,
+    "process": {
+      "id": "40851c27-a4df-4e3d-91a0-0f29b7be4992",
+      "scope": "auto",
+      "type": "link_by_uid"
+    },
+    "tags": [],
+    "type": "ingredient_spec",
+    "uids": {
+      "auto": "8b1a05d3-6a0f-4370-8671-8c7be6a2f3f5"
+    },
+    "volume_fraction": null
+  },
+  {
+    "file_links": [],
+    "name": "Borosilicate, T=0.25\"",
+    "notes": "",
+    "process": {
+      "id": "141774bd-1982-4dc8-b773-8e40fcc557eb",
+      "scope": "auto",
+      "type": "link_by_uid"
+    },
+    "properties": [
+      {
+        "conditions": [],
+        "property": {
+          "file_links": [],
+          "name": "GlassThickness",
+          "notes": null,
+          "origin": "specified",
+          "template": {
+            "id": "200bf85d-e546-4a89-9da4-905c6b2ecd80",
+            "scope": "auto",
+            "type": "link_by_uid"
+          },
+          "type": "property",
+          "value": {
+            "nominal": 0.25,
+            "type": "nominal_real",
+            "units": "inch"
+          }
+        },
+        "type": "property_and_conditions"
+      },
+      {
+        "conditions": [],
+        "property": {
+          "file_links": [],
+          "name": "GlassLength",
+          "notes": null,
+          "origin": "specified",
+          "template": {
+            "id": "99a8531b-d076-4c4f-9d93-856d57f20f87",
+            "scope": "auto",
+            "type": "link_by_uid"
+          },
+          "type": "property",
+          "value": {
+            "nominal": 2.0,
+            "type": "nominal_real",
+            "units": "inch"
+          }
+        },
+        "type": "property_and_conditions"
+      },
+      {
+        "conditions": [],
+        "property": {
+          "file_links": [],
+          "name": "GlassWidth",
+          "notes": null,
+          "origin": "specified",
+          "template": {
+            "id": "8496b363-fc27-4184-a7d3-5e453f8ccc54",
+            "scope": "auto",
+            "type": "link_by_uid"
+          },
+          "type": "property",
+          "value": {
+            "nominal": 2.0,
+            "type": "nominal_real",
+            "units": "inch"
+          }
+        },
+        "type": "property_and_conditions"
+      }
+    ],
+    "tags": [
+      "GlassID::G001",
+      "recordId::2",
+      "modId::13"
+    ],
+    "template": {
+      "id": "0e507b59-e408-4c23-8dad-8e280e464f54",
+      "scope": "auto",
+      "type": "link_by_uid"
+    },
+    "type": "material_spec",
+    "uids": {
+      "auto": "eeeabaf9-34f7-4a04-8045-28774c2253c2"
+    }
+  },
+  {
+    "description": "A piece of glass used in the Laser Shock Lab (used in creating Flyer Stacks)",
+    "name": "Glass ID",
+    "properties": [
+      [
+        {
+          "id": "200bf85d-e546-4a89-9da4-905c6b2ecd80",
+          "scope": "auto",
+          "type": "link_by_uid"
+        },
+        null
+      ],
+      [
+        {
+          "id": "99a8531b-d076-4c4f-9d93-856d57f20f87",
+          "scope": "auto",
+          "type": "link_by_uid"
+        },
+        null
+      ],
+      [
+        {
+          "id": "8496b363-fc27-4184-a7d3-5e453f8ccc54",
+          "scope": "auto",
+          "type": "link_by_uid"
+        },
+        null
+      ]
+    ],
+    "tags": [],
+    "type": "material_template",
+    "uids": {
+      "auto": "0e507b59-e408-4c23-8dad-8e280e464f54"
+    }
+  },
+  {
+    "bounds": {
+      "default_units": "inch",
+      "lower_bound": 0,
+      "type": "real_bounds",
+      "upper_bound": 12
+    },
+    "description": "The width of a piece of glass",
+    "name": "Glass Width",
+    "tags": [],
+    "type": "property_template",
+    "uids": {
+      "auto": "8496b363-fc27-4184-a7d3-5e453f8ccc54"
+    }
+  },
+  {
+    "bounds": {
+      "default_units": "inch",
+      "lower_bound": 0,
+      "type": "real_bounds",
+      "upper_bound": 12
+    },
+    "description": "The length of a piece of glass",
+    "name": "Glass Length",
+    "tags": [],
+    "type": "property_template",
+    "uids": {
+      "auto": "99a8531b-d076-4c4f-9d93-856d57f20f87"
+    }
+  },
+  {
+    "bounds": {
+      "default_units": "inch",
+      "lower_bound": 0,
+      "type": "real_bounds",
+      "upper_bound": 2
+    },
+    "description": "The thickness of a piece of glass",
+    "name": "Glass Thickness",
+    "tags": [],
+    "type": "property_template",
+    "uids": {
+      "auto": "200bf85d-e546-4a89-9da4-905c6b2ecd80"
+    }
+  },
+  {
+    "conditions": [],
+    "file_links": [],
+    "name": "Purchasing Glass",
+    "notes": null,
+    "parameters": [
+      {
+        "file_links": [],
+        "name": "GlassSupplier",
+        "notes": null,
+        "origin": "specified",
+        "template": {
+          "id": "2d682295-e231-4bd8-aafd-667cbccc3198",
+          "scope": "auto",
+          "type": "link_by_uid"
+        },
+        "type": "parameter",
+        "value": {
+          "category": "McMaster Carr",
+          "type": "nominal_categorical"
+        }
+      },
+      {
+        "file_links": [],
+        "name": "GlassPartNumber",
+        "notes": null,
+        "origin": "specified",
+        "template": {
+          "id": "c043d9cc-ef39-4b89-9c63-82ceb63a6eaa",
+          "scope": "auto",
+          "type": "link_by_uid"
+        },
+        "type": "parameter",
+        "value": {
+          "category": "B8476012",
+          "type": "nominal_categorical"
+        }
+      }
+    ],
+    "tags": [],
+    "template": {
+      "id": "4e3500d8-34ff-4621-980f-ebcbce89fdc8",
+      "scope": "auto",
+      "type": "link_by_uid"
+    },
+    "type": "process_spec",
+    "uids": {
+      "auto": "141774bd-1982-4dc8-b773-8e40fcc557eb"
+    }
+  },
+  {
+    "allowed_labels": null,
+    "allowed_names": [],
+    "conditions": [],
+    "description": "Purchasing a piece of glass from a manufacturer",
+    "name": "Purchasing Glass",
+    "parameters": [
+      [
+        {
+          "id": "2d682295-e231-4bd8-aafd-667cbccc3198",
+          "scope": "auto",
+          "type": "link_by_uid"
+        },
+        null
+      ],
+      [
+        {
+          "id": "c043d9cc-ef39-4b89-9c63-82ceb63a6eaa",
+          "scope": "auto",
+          "type": "link_by_uid"
+        },
+        null
+      ]
+    ],
+    "tags": [],
+    "type": "process_template",
+    "uids": {
+      "auto": "4e3500d8-34ff-4621-980f-ebcbce89fdc8"
+    }
+  },
+  {
+    "bounds": {
+      "categories": [
+        "B8476012"
+      ],
+      "type": "categorical_bounds"
+    },
+    "description": "The manufacturer's part number for a piece of glass that was purchased",
+    "name": "Glass Part Number",
+    "tags": [],
+    "type": "parameter_template",
+    "uids": {
+      "auto": "c043d9cc-ef39-4b89-9c63-82ceb63a6eaa"
+    }
+  },
+  {
+    "bounds": {
+      "categories": [
+        "McMaster Carr"
+      ],
+      "type": "categorical_bounds"
+    },
+    "description": "The name of a supplier from which a piece of glass was procured",
+    "name": "Glass Supplier",
+    "tags": [],
+    "type": "parameter_template",
+    "uids": {
+      "auto": "2d682295-e231-4bd8-aafd-667cbccc3198"
+    }
+  },
+  {
+    "allowed_labels": null,
+    "allowed_names": null,
+    "conditions": [
+      [
+        {
+          "id": "053c9ac9-56dc-4acd-9db6-70e6d48d6df1",
+          "scope": "auto",
+          "type": "link_by_uid"
+        },
+        null
+      ]
+    ],
+    "description": "Adhering a foil to a piece of glass using an epoxy",
+    "name": "Epoxying a Flyer Stack",
+    "parameters": [
+      [
+        {
+          "id": "d5cffb04-332f-4c0b-b691-a83b2c7333f0",
+          "scope": "auto",
+          "type": "link_by_uid"
+        },
+        null
+      ],
+      [
+        {
+          "id": "f8a0db0d-ad35-4329-a135-f86406fed2d1",
+          "scope": "auto",
+          "type": "link_by_uid"
+        },
+        null
+      ]
+    ],
+    "tags": [],
+    "type": "process_template",
+    "uids": {
+      "auto": "ad2aad35-9c4d-403c-82b7-d9dad7012cc4"
+    }
+  },
+  {
+    "bounds": {
+      "default_units": "hour",
+      "lower_bound": 0,
+      "type": "real_bounds",
+      "upper_bound": 168
+    },
+    "description": "How long a glass/epoxy/foil stack should be compressed while the epoxy cures",
+    "name": "Compression Time",
+    "tags": [],
+    "type": "parameter_template",
+    "uids": {
+      "auto": "f8a0db0d-ad35-4329-a135-f86406fed2d1"
+    }
+  },
+  {
+    "bounds": {
+      "default_units": "pound",
+      "lower_bound": 0,
+      "type": "real_bounds",
+      "upper_bound": 100
+    },
+    "description": "How many pounds of force should be used to compress a glass/epoxy/foil stack while the epoxy cures",
+    "name": "Compression Weight",
+    "tags": [],
+    "type": "parameter_template",
+    "uids": {
+      "auto": "d5cffb04-332f-4c0b-b691-a83b2c7333f0"
+    }
+  },
+  {
+    "bounds": {
+      "categories": [
+        "Apparatus",
+        "Handclamp"
+      ],
+      "type": "categorical_bounds"
+    },
+    "description": "Method used to compress a glass/epoxy/flyer stack",
+    "name": "Compression Method",
+    "tags": [],
+    "type": "condition_template",
+    "uids": {
+      "auto": "053c9ac9-56dc-4acd-9db6-70e6d48d6df1"
+    }
+  },
+  {
+    "allowed_labels": null,
+    "allowed_names": null,
+    "conditions": [
+      [
+        {
+          "id": "a7980b68-5ab8-403f-b840-5a8618be5c34",
+          "scope": "auto",
+          "type": "link_by_uid"
+        },
+        null
+      ],
+      [
+        {
+          "id": "e45540d3-bb09-40b4-af70-9e0c2333f657",
+          "scope": "auto",
+          "type": "link_by_uid"
+        },
+        null
+      ],
+      [
+        {
+          "id": "10e5863a-28aa-4a15-bbd0-a24ae3f7a4b1",
+          "scope": "auto",
+          "type": "link_by_uid"
+        },
+        null
+      ]
+    ],
+    "description": "A program (process) for cutting flyers out of a layer of foil",
+    "name": "Flyer Cutting Program",
+    "parameters": [
+      [
+        {
+          "id": "73344d22-fdd4-4269-8de1-570dcbf397ad",
+          "scope": "auto",
+          "type": "link_by_uid"
+        },
+        null
+      ],
+      [
+        {
+          "id": "11d70d9d-d72f-403f-944c-4145cf614e18",
+          "scope": "auto",
+          "type": "link_by_uid"
+        },
+        null
+      ],
+      [
+        {
+          "id": "3b188425-ccb6-4314-a98b-78237fa1cde1",
+          "scope": "auto",
+          "type": "link_by_uid"
+        },
+        null
+      ],
+      [
+        {
+          "id": "675dcf03-6a73-4151-b29f-1d13faf9bbcf",
+          "scope": "auto",
+          "type": "link_by_uid"
+        },
+        null
+      ]
+    ],
+    "tags": [],
+    "type": "process_template",
+    "uids": {
+      "auto": "8e893716-2f78-458e-943d-2a9d2b6c7b84"
+    }
+  },
+  {
+    "bounds": {
+      "categories": [
+        "Off",
+        "On"
+      ],
+      "type": "categorical_bounds"
+    },
+    "description": "Whether the depth of cut setting is turned on or off during a laser cutting procedure",
+    "name": "Depth of Cut",
+    "tags": [],
+    "type": "parameter_template",
+    "uids": {
+      "auto": "675dcf03-6a73-4151-b29f-1d13faf9bbcf"
+    }
+  },
+  {
+    "bounds": {
+      "categories": [
+        "Narrow",
+        "Open"
+      ],
+      "type": "categorical_bounds"
+    },
+    "description": "Whether the aperture used during a laser cutting procedure is narrow or open",
+    "name": "Aperture Setting",
+    "tags": [],
+    "type": "parameter_template",
+    "uids": {
+      "auto": "3b188425-ccb6-4314-a98b-78237fa1cde1"
+    }
+  },
+  {
+    "bounds": {
+      "lower_bound": 0,
+      "type": "integer_bounds",
+      "upper_bound": 200
+    },
+    "description": "Number of passes performed in cutting out flyers",
+    "name": "Number of Passes",
+    "tags": [],
+    "type": "parameter_template",
+    "uids": {
+      "auto": "11d70d9d-d72f-403f-944c-4145cf614e18"
+    }
+  },
+  {
+    "bounds": {
+      "default_units": "microjoule",
+      "lower_bound": 0.0,
+      "type": "real_bounds",
+      "upper_bound": 500.0
+    },
+    "description": "Energy of the laser used to cut out flyers",
+    "name": "Laser Cutting Energy",
+    "tags": [],
+    "type": "parameter_template",
+    "uids": {
+      "auto": "73344d22-fdd4-4269-8de1-570dcbf397ad"
+    }
+  },
+  {
+    "bounds": {
+      "categories": [
+        "Femtosecond Laser",
+        "Laser Cutter"
+      ],
+      "type": "categorical_bounds"
+    },
+    "description": "The tool used to cut out a set of flyers",
+    "name": "Cutting Tool",
+    "tags": [],
+    "type": "condition_template",
+    "uids": {
+      "auto": "10e5863a-28aa-4a15-bbd0-a24ae3f7a4b1"
+    }
+  },
+  {
+    "bounds": {
+      "default_units": "minute",
+      "lower_bound": 0.0,
+      "type": "real_bounds",
+      "upper_bound": 300.0
+    },
+    "description": "How long it usually takes to cut out some flyers",
+    "name": "Typical Cutting Time",
+    "tags": [],
+    "type": "condition_template",
+    "uids": {
+      "auto": "e45540d3-bb09-40b4-af70-9e0c2333f657"
+    }
+  },
+  {
+    "bounds": {
+      "categories": [
+        "Continuous",
+        "Pulsed"
+      ],
+      "type": "categorical_bounds"
+    },
+    "description": "Whether something is cut using a laser in pulsed or continuous mode",
+    "name": "Cutting Method",
+    "tags": [],
+    "type": "condition_template",
+    "uids": {
+      "auto": "a7980b68-5ab8-403f-b840-5a8618be5c34"
+    }
+  },
+  {
+    "bounds": {
+      "lower_bound": 0,
+      "type": "integer_bounds",
+      "upper_bound": 20
+    },
+    "description": "The number of rows and columns of flyer discs that is cut out of a glass/epoxy/foil stack",
+    "name": "Rows X Columns",
+    "tags": [],
+    "type": "parameter_template",
+    "uids": {
+      "auto": "57d0feee-7c07-4ad5-8979-2f1ea46ac2e2"
+    }
+  },
+  {
+    "bounds": {
+      "default_units": "millimeter",
+      "lower_bound": 0,
+      "type": "real_bounds",
+      "upper_bound": 100
+    },
+    "description": "The diameter of each flyer in a Flyer Stack",
+    "name": "Flyer Diameter",
+    "tags": [],
+    "type": "parameter_template",
+    "uids": {
+      "auto": "157a9f0c-9d71-4fc7-8bd9-7d2e5ce0cea9"
+    }
+  },
+  {
+    "bounds": {
+      "default_units": "millimeter",
+      "lower_bound": 0,
+      "type": "real_bounds",
+      "upper_bound": 100
+    },
+    "description": "The distance between adjacent flyer discs in a Flyer Stack",
+    "name": "Flyer Spacing",
+    "tags": [],
+    "type": "parameter_template",
+    "uids": {
+      "auto": "41387ce6-dc0d-4b80-a2cf-6d593549f907"
+    }
+  },
+  {
+    "conditions": [],
+    "file_links": [],
+    "material": {
+      "id": "624af5ac-0632-44e0-aa0b-724686434bb2",
+      "scope": "auto",
+      "type": "link_by_uid"
+    },
+    "name": "EpoxyThickness2",
+    "notes": null,
+    "parameters": [],
+    "properties": [
+      {
+        "file_links": [],
+        "name": "EpoxyThickness2",
+        "notes": null,
+        "origin": "computed",
+        "template": {
+          "id": "51a759a2-fac7-4101-8e1b-016d4507d312",
+          "scope": "auto",
+          "type": "link_by_uid"
+        },
+        "type": "property",
+        "value": {
+          "nominal": 2.0,
+          "type": "nominal_real",
+          "units": "millimeter"
+        }
+      }
+    ],
+    "source": null,
+    "spec": {
+      "id": "ad8e8ac5-aa2c-4849-badf-558be6f635f8",
+      "scope": "auto",
+      "type": "link_by_uid"
+    },
+    "tags": [],
+    "type": "measurement_run",
+    "uids": {
+      "auto": "50a38e31-30a7-489e-91de-c4ef3bb10230"
+    }
+  },
+  {
+    "conditions": [],
+    "file_links": [],
+    "name": "EpoxyThickness2",
+    "notes": null,
+    "parameters": [],
+    "tags": [],
+    "template": null,
+    "type": "measurement_spec",
+    "uids": {
+      "auto": "ad8e8ac5-aa2c-4849-badf-558be6f635f8"
+    }
+  },
+  {
+    "conditions": [],
+    "file_links": [],
+    "material": {
+      "id": "624af5ac-0632-44e0-aa0b-724686434bb2",
+      "scope": "auto",
+      "type": "link_by_uid"
+    },
+    "name": "EpoxyThickness3",
+    "notes": null,
+    "parameters": [],
+    "properties": [
+      {
+        "file_links": [],
+        "name": "EpoxyThickness3",
+        "notes": null,
+        "origin": "computed",
+        "template": {
+          "id": "51a759a2-fac7-4101-8e1b-016d4507d312",
+          "scope": "auto",
+          "type": "link_by_uid"
+        },
+        "type": "property",
+        "value": {
+          "nominal": 6.0,
+          "type": "nominal_real",
+          "units": "millimeter"
+        }
+      }
+    ],
+    "source": null,
+    "spec": {
+      "id": "164722da-be7c-4a77-81f6-8a94d9ce0307",
+      "scope": "auto",
+      "type": "link_by_uid"
+    },
+    "tags": [],
+    "type": "measurement_run",
+    "uids": {
+      "auto": "297d14a5-7841-4efd-9154-8210e7b86c9c"
+    }
+  },
+  {
+    "conditions": [],
+    "file_links": [],
+    "name": "EpoxyThickness3",
+    "notes": null,
+    "parameters": [],
+    "tags": [],
+    "template": null,
+    "type": "measurement_spec",
+    "uids": {
+      "auto": "164722da-be7c-4a77-81f6-8a94d9ce0307"
+    }
+  },
+  {
+    "conditions": [],
+    "file_links": [],
+    "material": {
+      "id": "624af5ac-0632-44e0-aa0b-724686434bb2",
+      "scope": "auto",
+      "type": "link_by_uid"
+    },
+    "name": "EpoxyThickness4",
+    "notes": null,
+    "parameters": [],
+    "properties": [
+      {
+        "file_links": [],
+        "name": "EpoxyThickness4",
+        "notes": null,
+        "origin": "computed",
+        "template": {
+          "id": "51a759a2-fac7-4101-8e1b-016d4507d312",
+          "scope": "auto",
+          "type": "link_by_uid"
+        },
+        "type": "property",
+        "value": {
+          "nominal": 7.0,
+          "type": "nominal_real",
+          "units": "millimeter"
+        }
+      }
+    ],
+    "source": null,
+    "spec": {
+      "id": "d6f5650f-417d-4fb8-9d6b-a1aeadfaab0e",
+      "scope": "auto",
+      "type": "link_by_uid"
+    },
+    "tags": [],
+    "type": "measurement_run",
+    "uids": {
+      "auto": "b89f04c4-cdaa-4f5a-ad69-136c70163a6b"
+    }
+  },
+  {
+    "conditions": [],
+    "file_links": [],
+    "name": "EpoxyThickness4",
+    "notes": null,
+    "parameters": [],
+    "tags": [],
+    "template": null,
+    "type": "measurement_spec",
+    "uids": {
+      "auto": "d6f5650f-417d-4fb8-9d6b-a1aeadfaab0e"
+    }
+  },
+  {
+    "conditions": [],
+    "file_links": [],
+    "material": {
+      "id": "624af5ac-0632-44e0-aa0b-724686434bb2",
+      "scope": "auto",
+      "type": "link_by_uid"
+    },
+    "name": "EpoxyThickness1",
+    "notes": null,
+    "parameters": [],
+    "properties": [
+      {
+        "file_links": [],
+        "name": "EpoxyThickness1",
+        "notes": null,
+        "origin": "computed",
+        "template": {
+          "id": "51a759a2-fac7-4101-8e1b-016d4507d312",
+          "scope": "auto",
+          "type": "link_by_uid"
+        },
+        "type": "property",
+        "value": {
+          "nominal": 2.0,
+          "type": "nominal_real",
+          "units": "millimeter"
+        }
+      }
+    ],
+    "source": null,
+    "spec": {
+      "id": "2ea7163f-0f2f-4ca1-838f-3820bac26821",
+      "scope": "auto",
+      "type": "link_by_uid"
+    },
+    "tags": [],
+    "type": "measurement_run",
+    "uids": {
+      "auto": "48d4a59f-a58e-4f20-b9af-ddeb5ecfb4e6"
+    }
+  },
+  {
+    "conditions": [],
+    "file_links": [],
+    "name": "EpoxyThickness1",
+    "notes": null,
+    "parameters": [],
+    "tags": [],
+    "template": null,
+    "type": "measurement_spec",
+    "uids": {
+      "auto": "2ea7163f-0f2f-4ca1-838f-3820bac26821"
+    }
+  },
+  {
+    "conditions": [],
+    "file_links": [],
+    "material": {
+      "id": "624af5ac-0632-44e0-aa0b-724686434bb2",
+      "scope": "auto",
+      "type": "link_by_uid"
+    },
+    "name": "StackThickness4",
+    "notes": null,
+    "parameters": [],
+    "properties": [
+      {
+        "file_links": [],
+        "name": "StackThickness4",
+        "notes": null,
+        "origin": "measured",
+        "template": {
+          "id": "51a759a2-fac7-4101-8e1b-016d4507d312",
+          "scope": "auto",
+          "type": "link_by_uid"
+        },
+        "type": "property",
+        "value": {
+          "nominal": 6.502,
+          "type": "nominal_real",
+          "units": "millimeter"
+        }
+      }
+    ],
+    "source": null,
+    "spec": {
+      "id": "7556960a-1b02-441e-9de6-cd7cee7af430",
+      "scope": "auto",
+      "type": "link_by_uid"
+    },
+    "tags": [],
+    "type": "measurement_run",
+    "uids": {
+      "auto": "ec9f29d8-0c0b-458a-9abc-130113e6f23e"
+    }
+  },
+  {
+    "conditions": [],
+    "file_links": [],
+    "name": "StackThickness4",
+    "notes": null,
+    "parameters": [],
+    "tags": [],
+    "template": null,
+    "type": "measurement_spec",
+    "uids": {
+      "auto": "7556960a-1b02-441e-9de6-cd7cee7af430"
+    }
+  },
+  {
+    "conditions": [],
+    "file_links": [],
+    "material": {
+      "id": "624af5ac-0632-44e0-aa0b-724686434bb2",
+      "scope": "auto",
+      "type": "link_by_uid"
+    },
+    "name": "StackThickness3",
+    "notes": null,
+    "parameters": [],
+    "properties": [
+      {
+        "file_links": [],
+        "name": "StackThickness3",
+        "notes": null,
+        "origin": "measured",
+        "template": {
+          "id": "51a759a2-fac7-4101-8e1b-016d4507d312",
+          "scope": "auto",
+          "type": "link_by_uid"
+        },
+        "type": "property",
+        "value": {
+          "nominal": 6.501,
+          "type": "nominal_real",
+          "units": "millimeter"
+        }
+      }
+    ],
+    "source": null,
+    "spec": {
+      "id": "9ad4b319-addf-410b-b882-5156474b464f",
+      "scope": "auto",
+      "type": "link_by_uid"
+    },
+    "tags": [],
+    "type": "measurement_run",
+    "uids": {
+      "auto": "a7b9ca40-632d-4a7e-b056-3f677360ec68"
+    }
+  },
+  {
+    "conditions": [],
+    "file_links": [],
+    "name": "StackThickness3",
+    "notes": null,
+    "parameters": [],
+    "tags": [],
+    "template": null,
+    "type": "measurement_spec",
+    "uids": {
+      "auto": "9ad4b319-addf-410b-b882-5156474b464f"
+    }
+  },
+  {
+    "conditions": [],
+    "file_links": [],
+    "material": {
+      "id": "624af5ac-0632-44e0-aa0b-724686434bb2",
+      "scope": "auto",
+      "type": "link_by_uid"
+    },
+    "name": "StackThickness2",
+    "notes": null,
+    "parameters": [],
+    "properties": [
+      {
+        "file_links": [],
+        "name": "StackThickness2",
+        "notes": null,
+        "origin": "measured",
+        "template": {
+          "id": "51a759a2-fac7-4101-8e1b-016d4507d312",
+          "scope": "auto",
+          "type": "link_by_uid"
+        },
+        "type": "property",
+        "value": {
+          "nominal": 6.501,
+          "type": "nominal_real",
+          "units": "millimeter"
+        }
+      }
+    ],
+    "source": null,
+    "spec": {
+      "id": "c171b43d-993a-4a38-9b70-776c3e91c764",
+      "scope": "auto",
+      "type": "link_by_uid"
+    },
+    "tags": [],
+    "type": "measurement_run",
+    "uids": {
+      "auto": "1edb640e-441b-44e0-8c2b-bf5f6af41b69"
+    }
+  },
+  {
+    "conditions": [],
+    "file_links": [],
+    "name": "StackThickness2",
+    "notes": null,
+    "parameters": [],
+    "tags": [],
+    "template": null,
+    "type": "measurement_spec",
+    "uids": {
+      "auto": "c171b43d-993a-4a38-9b70-776c3e91c764"
+    }
+  },
+  {
+    "conditions": [],
+    "file_links": [],
+    "material": {
+      "id": "624af5ac-0632-44e0-aa0b-724686434bb2",
+      "scope": "auto",
+      "type": "link_by_uid"
+    },
+    "name": "StackThickness1",
+    "notes": null,
+    "parameters": [],
+    "properties": [
+      {
+        "file_links": [],
+        "name": "StackThickness1",
+        "notes": null,
+        "origin": "measured",
+        "template": {
+          "id": "51a759a2-fac7-4101-8e1b-016d4507d312",
+          "scope": "auto",
+          "type": "link_by_uid"
+        },
+        "type": "property",
+        "value": {
+          "nominal": 6.506,
+          "type": "nominal_real",
+          "units": "millimeter"
+        }
+      }
+    ],
+    "source": null,
+    "spec": {
+      "id": "e2151fb1-ed18-434f-992b-7e4ea74e0705",
+      "scope": "auto",
+      "type": "link_by_uid"
+    },
+    "tags": [],
+    "type": "measurement_run",
+    "uids": {
+      "auto": "99d4445a-6fa1-4449-b3d3-f0ca3dfc4f09"
+    }
+  },
+  {
+    "conditions": [],
+    "file_links": [],
+    "name": "StackThickness1",
+    "notes": null,
+    "parameters": [],
+    "tags": [],
+    "template": null,
+    "type": "measurement_spec",
+    "uids": {
+      "auto": "e2151fb1-ed18-434f-992b-7e4ea74e0705"
+    }
+  },
+  {
+    "conditions": [],
+    "file_links": [],
+    "name": "50um Al Optimized v2 (2021-10-22)",
+    "notes": null,
+    "parameters": [],
+    "source": {
+      "performed_by": "DiMarco",
+      "performed_date": "09/27/2021",
+      "type": "performed_source"
+    },
+    "spec": {
+      "id": "de9107a2-e2b7-4348-b60d-c1c02831dd49",
+      "scope": "auto",
+      "type": "link_by_uid"
+    },
+    "tags": [],
+    "type": "process_run",
+    "uids": {
+      "auto": "58ab75a9-f349-4cc8-afca-621a6f7ac42e"
+    }
+  },
+  {
+    "absolute_quantity": null,
+    "file_links": [],
+    "labels": [],
+    "mass_fraction": null,
+    "material": {
+      "id": "39ef322d-8e38-4255-8e2d-ca0e4ffe5ed5",
+      "scope": "auto",
+      "type": "link_by_uid"
+    },
+    "name": "Glass Epoxy Foil Stack",
+    "notes": null,
+    "number_fraction": null,
+    "process": {
+      "id": "58ab75a9-f349-4cc8-afca-621a6f7ac42e",
+      "scope": "auto",
+      "type": "link_by_uid"
+    },
+    "spec": {
+      "id": "3e8acf61-426c-4c24-960e-c9408f0b27a7",
+      "scope": "auto",
+      "type": "link_by_uid"
+    },
+    "tags": [],
+    "type": "ingredient_run",
+    "uids": {
+      "auto": "29544e4c-6d42-45ea-9617-8ab024171f8f"
+    },
+    "volume_fraction": null
+  },
+  {
+    "file_links": [],
+    "name": "Glass Epoxy Foil Stack",
+    "notes": null,
+    "process": {
+      "id": "49c218ce-913b-42b4-b974-5de61a7bf3ac",
+      "scope": "auto",
+      "type": "link_by_uid"
+    },
+    "sample_type": "unknown",
+    "spec": {
+      "id": "37cac8e7-2481-4a8f-84a6-3e666e24c050",
+      "scope": "auto",
+      "type": "link_by_uid"
+    },
+    "tags": [],
+    "type": "material_run",
+    "uids": {
+      "auto": "39ef322d-8e38-4255-8e2d-ca0e4ffe5ed5"
+    }
+  },
+  {
+    "conditions": [],
+    "file_links": [],
+    "name": "Epoxying a Flyer Stack",
+    "notes": null,
+    "parameters": [],
+    "source": null,
+    "spec": {
+      "id": "40851c27-a4df-4e3d-91a0-0f29b7be4992",
+      "scope": "auto",
+      "type": "link_by_uid"
+    },
+    "tags": [],
+    "type": "process_run",
+    "uids": {
+      "auto": "49c218ce-913b-42b4-b974-5de61a7bf3ac"
+    }
+  },
+  {
+    "absolute_quantity": null,
+    "file_links": [],
+    "labels": [],
+    "mass_fraction": null,
+    "material": {
+      "id": "45fd9be4-bcb3-404f-90e6-514831b2dc41",
+      "scope": "auto",
+      "type": "link_by_uid"
+    },
+    "name": "Mixed Epoxy",
+    "notes": null,
+    "number_fraction": null,
+    "process": {
+      "id": "49c218ce-913b-42b4-b974-5de61a7bf3ac",
+      "scope": "auto",
+      "type": "link_by_uid"
+    },
+    "spec": {
+      "id": "15cfae8c-993f-40c7-a36e-9aaef49442a2",
+      "scope": "auto",
+      "type": "link_by_uid"
+    },
+    "tags": [],
+    "type": "ingredient_run",
+    "uids": {
+      "auto": "bd71b98a-d49f-4b69-bd88-19896e78bf72"
+    },
+    "volume_fraction": null
+  },
+  {
+    "file_links": [],
+    "name": "Mixed Epoxy",
+    "notes": null,
+    "process": {
+      "id": "9403eb9a-a484-4851-ab8c-ce75413ed79a",
+      "scope": "auto",
+      "type": "link_by_uid"
+    },
+    "sample_type": "unknown",
+    "spec": {
+      "id": "9d19db57-6b70-4724-9d69-53975ac09c6d",
+      "scope": "auto",
+      "type": "link_by_uid"
+    },
+    "tags": [],
+    "type": "material_run",
+    "uids": {
+      "auto": "45fd9be4-bcb3-404f-90e6-514831b2dc41"
+    }
+  },
+  {
+    "conditions": [],
+    "file_links": [],
+    "name": "Mixing Epoxy",
+    "notes": null,
+    "parameters": [],
+    "source": null,
+    "spec": {
+      "id": "f80110d7-ee0a-41d9-935c-677a8b99cfd2",
+      "scope": "auto",
+      "type": "link_by_uid"
+    },
+    "tags": [],
+    "type": "process_run",
+    "uids": {
+      "auto": "9403eb9a-a484-4851-ab8c-ce75413ed79a"
+    }
+  },
+  {
+    "absolute_quantity": null,
+    "file_links": [],
+    "labels": [],
+    "mass_fraction": null,
+    "material": {
+      "id": "ee18f442-151f-4fdd-85f7-3c0d02f4a8b8",
+      "scope": "auto",
+      "type": "link_by_uid"
+    },
+    "name": "Epoxy Part B",
+    "notes": null,
+    "number_fraction": null,
+    "process": {
+      "id": "9403eb9a-a484-4851-ab8c-ce75413ed79a",
+      "scope": "auto",
+      "type": "link_by_uid"
+    },
+    "spec": {
+      "id": "5cb3b3fe-dbf0-48f1-8e9e-061cad6507b0",
+      "scope": "auto",
+      "type": "link_by_uid"
+    },
+    "tags": [],
+    "type": "ingredient_run",
+    "uids": {
+      "auto": "b29899fa-b3a4-4aa6-aa58-b5373c755cd7"
+    },
+    "volume_fraction": null
+  },
+  {
+    "file_links": [],
+    "name": "Loctite Ablestik 24",
+    "notes": null,
+    "process": {
+      "id": "c4ed357d-3a5a-4b50-aa91-95d0d18f5a70",
+      "scope": "auto",
+      "type": "link_by_uid"
+    },
+    "sample_type": "unknown",
+    "spec": {
+      "id": "ca5d9e94-30f1-471a-b421-fc4078946cc4",
+      "scope": "auto",
+      "type": "link_by_uid"
+    },
+    "tags": [],
+    "type": "material_run",
+    "uids": {
+      "auto": "ee18f442-151f-4fdd-85f7-3c0d02f4a8b8"
+    }
+  },
+  {
+    "conditions": [],
+    "file_links": [],
+    "name": "Purchasing Epoxy",
+    "notes": null,
+    "parameters": [],
+    "source": null,
+    "spec": {
+      "id": "a465406a-45ee-475b-99d9-8c26f01a3571",
+      "scope": "auto",
+      "type": "link_by_uid"
+    },
+    "tags": [],
+    "type": "process_run",
+    "uids": {
+      "auto": "c4ed357d-3a5a-4b50-aa91-95d0d18f5a70"
+    }
+  },
+  {
+    "absolute_quantity": null,
+    "file_links": [],
+    "labels": [],
+    "mass_fraction": null,
+    "material": {
+      "id": "ee18f442-151f-4fdd-85f7-3c0d02f4a8b8",
+      "scope": "auto",
+      "type": "link_by_uid"
+    },
+    "name": "Epoxy Part A",
+    "notes": null,
+    "number_fraction": null,
+    "process": {
+      "id": "9403eb9a-a484-4851-ab8c-ce75413ed79a",
+      "scope": "auto",
+      "type": "link_by_uid"
+    },
+    "spec": {
+      "id": "5d646e8b-a8bf-43c7-b72b-7b4a9d9544d3",
+      "scope": "auto",
+      "type": "link_by_uid"
+    },
+    "tags": [],
+    "type": "ingredient_run",
+    "uids": {
+      "auto": "49e62cd8-7aa1-4af0-be01-5733164a0d67"
+    },
+    "volume_fraction": null
+  },
+  {
+    "conditions": [],
+    "file_links": [],
+    "name": "Mixing Epoxy",
+    "notes": null,
+    "parameters": [
+      {
+        "file_links": [],
+        "name": "Mixing Time",
+        "notes": null,
+        "origin": "specified",
+        "template": {
+          "id": "41b830a4-b9e2-494e-b119-f5bc131e1844",
+          "scope": "auto",
+          "type": "link_by_uid"
+        },
+        "type": "parameter",
+        "value": {
+          "nominal": 5,
+          "type": "nominal_integer"
+        }
+      },
+      {
+        "file_links": [],
+        "name": "Resting Time",
+        "notes": null,
+        "origin": "specified",
+        "template": {
+          "id": "10acccf8-9749-411a-99fa-be8e6bd07076",
+          "scope": "auto",
+          "type": "link_by_uid"
+        },
+        "type": "parameter",
+        "value": {
+          "nominal": 5,
+          "type": "nominal_integer"
+        }
+      }
+    ],
+    "tags": [],
+    "template": {
+      "id": "3641bc87-38cc-46a6-9069-c08e37a7cc14",
+      "scope": "auto",
+      "type": "link_by_uid"
+    },
+    "type": "process_spec",
+    "uids": {
+      "auto": "f80110d7-ee0a-41d9-935c-677a8b99cfd2"
+    }
+  },
+  {
+    "absolute_quantity": {
+      "nominal": 4.298,
+      "type": "nominal_real",
+      "units": "gram"
+    },
+    "file_links": [],
+    "labels": [],
+    "mass_fraction": null,
+    "material": {
+      "id": "ca5d9e94-30f1-471a-b421-fc4078946cc4",
+      "scope": "auto",
+      "type": "link_by_uid"
+    },
+    "name": "Epoxy Part B",
+    "notes": null,
+    "number_fraction": null,
+    "process": {
+      "id": "f80110d7-ee0a-41d9-935c-677a8b99cfd2",
+      "scope": "auto",
+      "type": "link_by_uid"
+    },
+    "tags": [],
+    "type": "ingredient_spec",
+    "uids": {
+      "auto": "c6ecaf78-f538-45db-ba18-3d61d2a49436"
+    },
+    "volume_fraction": null
+  },
+  {
+    "absolute_quantity": {
+      "nominal": 15.287,
+      "type": "nominal_real",
+      "units": "gram"
+    },
+    "file_links": [],
+    "labels": [],
+    "mass_fraction": null,
+    "material": {
+      "id": "ca5d9e94-30f1-471a-b421-fc4078946cc4",
+      "scope": "auto",
+      "type": "link_by_uid"
+    },
+    "name": "Epoxy Part A",
+    "notes": null,
+    "number_fraction": null,
+    "process": {
+      "id": "f80110d7-ee0a-41d9-935c-677a8b99cfd2",
+      "scope": "auto",
+      "type": "link_by_uid"
+    },
+    "tags": [],
+    "type": "ingredient_spec",
+    "uids": {
+      "auto": "14a8a908-d7c7-4450-812f-03c44b4c8c16"
+    },
+    "volume_fraction": null
+  },
+  {
+    "file_links": [],
+    "name": "Mixed Epoxy",
+    "notes": null,
+    "process": {
+      "id": "f80110d7-ee0a-41d9-935c-677a8b99cfd2",
+      "scope": "auto",
+      "type": "link_by_uid"
+    },
+    "properties": [],
+    "tags": [],
+    "template": null,
+    "type": "material_spec",
+    "uids": {
+      "auto": "46bed787-b7ef-4330-b329-6076dc81ad3d"
+    }
+  },
+  {
+    "absolute_quantity": null,
+    "file_links": [],
+    "labels": [],
+    "mass_fraction": null,
+    "material": {
+      "id": "42c11261-cf83-4690-8727-83bf42f0e6fc",
+      "scope": "auto",
+      "type": "link_by_uid"
+    },
+    "name": "Foil ID",
+    "notes": null,
+    "number_fraction": null,
+    "process": {
+      "id": "49c218ce-913b-42b4-b974-5de61a7bf3ac",
+      "scope": "auto",
+      "type": "link_by_uid"
+    },
+    "spec": {
+      "id": "d09d04c3-ad68-47b2-afa9-f06b5010a0a9",
+      "scope": "auto",
+      "type": "link_by_uid"
+    },
+    "tags": [],
+    "type": "ingredient_run",
+    "uids": {
+      "auto": "164b273d-edc0-4762-8e43-34b018c2636f"
+    },
+    "volume_fraction": null
+  },
+  {
+    "file_links": [],
+    "name": "50.4um (0.002\") Hard Al (AluFoil)",
+    "notes": null,
+    "process": {
+      "id": "127fe195-ecf6-488e-a27e-61598079e60a",
+      "scope": "auto",
+      "type": "link_by_uid"
+    },
+    "sample_type": "unknown",
+    "spec": {
+      "id": "72742a12-f69d-4ecd-b516-dad9396b1a00",
+      "scope": "auto",
+      "type": "link_by_uid"
+    },
+    "tags": [],
+    "type": "material_run",
+    "uids": {
+      "auto": "42c11261-cf83-4690-8727-83bf42f0e6fc"
+    }
+  },
+  {
+    "conditions": [],
+    "file_links": [],
+    "material": {
+      "id": "42c11261-cf83-4690-8727-83bf42f0e6fc",
+      "scope": "auto",
+      "type": "link_by_uid"
+    },
+    "name": "FoilThickness4",
+    "notes": null,
+    "parameters": [],
+    "properties": [
+      {
+        "file_links": [],
+        "name": "FoilThickness4",
+        "notes": null,
+        "origin": "measured",
+        "template": {
+          "id": "b44b1236-a3f1-419b-9308-a3f6c77aa38e",
+          "scope": "auto",
+          "type": "link_by_uid"
+        },
+        "type": "property",
+        "value": {
+          "nominal": 50.0,
+          "type": "nominal_real",
+          "units": "micrometer"
+        }
+      }
+    ],
+    "source": {
+      "performed_by": "DiMarco",
+      "performed_date": "09/27/2021",
+      "type": "performed_source"
+    },
+    "spec": {
+      "id": "1f8235a2-3005-4d4e-8b80-74198f3f273c",
+      "scope": "auto",
+      "type": "link_by_uid"
+    },
+    "tags": [],
+    "type": "measurement_run",
+    "uids": {
+      "auto": "f8f615b3-f140-4b3a-848c-aadb51b2af9c"
+    }
+  },
+  {
+    "conditions": [],
+    "file_links": [],
+    "name": "FoilThickness4",
+    "notes": null,
+    "parameters": [],
+    "tags": [],
+    "template": null,
+    "type": "measurement_spec",
+    "uids": {
+      "auto": "1f8235a2-3005-4d4e-8b80-74198f3f273c"
+    }
+  },
+  {
+    "conditions": [],
+    "file_links": [],
+    "material": {
+      "id": "42c11261-cf83-4690-8727-83bf42f0e6fc",
+      "scope": "auto",
+      "type": "link_by_uid"
+    },
+    "name": "FoilThickness3",
+    "notes": null,
+    "parameters": [],
+    "properties": [
+      {
+        "file_links": [],
+        "name": "FoilThickness3",
+        "notes": null,
+        "origin": "measured",
+        "template": {
+          "id": "b44b1236-a3f1-419b-9308-a3f6c77aa38e",
+          "scope": "auto",
+          "type": "link_by_uid"
+        },
+        "type": "property",
+        "value": {
+          "nominal": 50.0,
+          "type": "nominal_real",
+          "units": "micrometer"
+        }
+      }
+    ],
+    "source": {
+      "performed_by": "DiMarco",
+      "performed_date": "09/27/2021",
+      "type": "performed_source"
+    },
+    "spec": {
+      "id": "8ef858d6-67f2-4991-a2a3-0997b2d1e5d9",
+      "scope": "auto",
+      "type": "link_by_uid"
+    },
+    "tags": [],
+    "type": "measurement_run",
+    "uids": {
+      "auto": "abf64adb-d558-4388-b7ac-9dae09d9f70d"
+    }
+  },
+  {
+    "conditions": [],
+    "file_links": [],
+    "name": "FoilThickness3",
+    "notes": null,
+    "parameters": [],
+    "tags": [],
+    "template": null,
+    "type": "measurement_spec",
+    "uids": {
+      "auto": "8ef858d6-67f2-4991-a2a3-0997b2d1e5d9"
+    }
+  },
+  {
+    "conditions": [],
+    "file_links": [],
+    "material": {
+      "id": "42c11261-cf83-4690-8727-83bf42f0e6fc",
+      "scope": "auto",
+      "type": "link_by_uid"
+    },
+    "name": "FoilThickness2",
+    "notes": null,
+    "parameters": [],
+    "properties": [
+      {
+        "file_links": [],
+        "name": "FoilThickness2",
+        "notes": null,
+        "origin": "measured",
+        "template": {
+          "id": "b44b1236-a3f1-419b-9308-a3f6c77aa38e",
+          "scope": "auto",
+          "type": "link_by_uid"
+        },
+        "type": "property",
+        "value": {
+          "nominal": 52.0,
+          "type": "nominal_real",
+          "units": "micrometer"
+        }
+      }
+    ],
+    "source": {
+      "performed_by": "DiMarco",
+      "performed_date": "09/27/2021",
+      "type": "performed_source"
+    },
+    "spec": {
+      "id": "5121b299-195c-4020-b176-49beb2a8f4d5",
+      "scope": "auto",
+      "type": "link_by_uid"
+    },
+    "tags": [],
+    "type": "measurement_run",
+    "uids": {
+      "auto": "7d583a81-ad5c-4e75-be4b-ac4310c304e8"
+    }
+  },
+  {
+    "conditions": [],
+    "file_links": [],
+    "name": "FoilThickness2",
+    "notes": null,
+    "parameters": [],
+    "tags": [],
+    "template": null,
+    "type": "measurement_spec",
+    "uids": {
+      "auto": "5121b299-195c-4020-b176-49beb2a8f4d5"
+    }
+  },
+  {
+    "conditions": [],
+    "file_links": [],
+    "material": {
+      "id": "42c11261-cf83-4690-8727-83bf42f0e6fc",
+      "scope": "auto",
+      "type": "link_by_uid"
+    },
+    "name": "FoilThickness1",
+    "notes": null,
+    "parameters": [],
+    "properties": [
+      {
+        "file_links": [],
+        "name": "FoilThickness1",
+        "notes": null,
+        "origin": "measured",
+        "template": {
+          "id": "b44b1236-a3f1-419b-9308-a3f6c77aa38e",
+          "scope": "auto",
+          "type": "link_by_uid"
+        },
+        "type": "property",
+        "value": {
+          "nominal": 52.0,
+          "type": "nominal_real",
+          "units": "micrometer"
+        }
+      }
+    ],
+    "source": {
+      "performed_by": "DiMarco",
+      "performed_date": "09/27/2021",
+      "type": "performed_source"
+    },
+    "spec": {
+      "id": "54232681-3103-4655-8c78-d11808784160",
+      "scope": "auto",
+      "type": "link_by_uid"
+    },
+    "tags": [],
+    "type": "measurement_run",
+    "uids": {
+      "auto": "31d6b267-a5af-401a-a0b0-1f410f399a6b"
+    }
+  },
+  {
+    "conditions": [],
+    "file_links": [],
+    "name": "FoilThickness1",
+    "notes": null,
+    "parameters": [],
+    "tags": [],
+    "template": null,
+    "type": "measurement_spec",
+    "uids": {
+      "auto": "54232681-3103-4655-8c78-d11808784160"
+    }
+  },
+  {
+    "conditions": [],
+    "file_links": [],
+    "name": "Purchasing Foil",
+    "notes": null,
+    "parameters": [],
+    "source": null,
+    "spec": {
+      "id": "eb044608-06ba-4fc9-8d35-db32d240fe81",
+      "scope": "auto",
+      "type": "link_by_uid"
+    },
+    "tags": [],
+    "type": "process_run",
+    "uids": {
+      "auto": "127fe195-ecf6-488e-a27e-61598079e60a"
+    }
+  },
+  {
+    "absolute_quantity": null,
+    "file_links": [],
+    "labels": [],
+    "mass_fraction": null,
+    "material": {
+      "id": "d24ff73b-957f-467d-ab5f-e0b5b1490f5a",
+      "scope": "auto",
+      "type": "link_by_uid"
+    },
+    "name": "Glass ID",
+    "notes": null,
+    "number_fraction": null,
+    "process": {
+      "id": "49c218ce-913b-42b4-b974-5de61a7bf3ac",
+      "scope": "auto",
+      "type": "link_by_uid"
+    },
+    "spec": {
+      "id": "8b1a05d3-6a0f-4370-8671-8c7be6a2f3f5",
+      "scope": "auto",
+      "type": "link_by_uid"
+    },
+    "tags": [],
+    "type": "ingredient_run",
+    "uids": {
+      "auto": "4e2f17f2-a3fc-499e-8627-5e6f62445f14"
+    },
+    "volume_fraction": null
+  },
+  {
+    "file_links": [],
+    "name": "Borosilicate, T=0.25\"",
+    "notes": null,
+    "process": {
+      "id": "8983e24c-f311-425f-a7c9-ea0930792dae",
+      "scope": "auto",
+      "type": "link_by_uid"
+    },
+    "sample_type": "unknown",
+    "spec": {
+      "id": "eeeabaf9-34f7-4a04-8045-28774c2253c2",
+      "scope": "auto",
+      "type": "link_by_uid"
+    },
+    "tags": [],
+    "type": "material_run",
+    "uids": {
+      "auto": "d24ff73b-957f-467d-ab5f-e0b5b1490f5a"
+    }
+  },
+  {
+    "conditions": [],
+    "file_links": [],
+    "material": {
+      "id": "d24ff73b-957f-467d-ab5f-e0b5b1490f5a",
+      "scope": "auto",
+      "type": "link_by_uid"
+    },
+    "name": "GlassThickness4",
+    "notes": null,
+    "parameters": [],
+    "properties": [
+      {
+        "file_links": [],
+        "name": "GlassThickness4",
+        "notes": null,
+        "origin": "measured",
+        "template": {
+          "id": "200bf85d-e546-4a89-9da4-905c6b2ecd80",
+          "scope": "auto",
+          "type": "link_by_uid"
+        },
+        "type": "property",
+        "value": {
+          "nominal": 6.445,
+          "type": "nominal_real",
+          "units": "millimeter"
+        }
+      }
+    ],
+    "source": {
+      "performed_by": "DiMarco",
+      "performed_date": "09/27/2021",
+      "type": "performed_source"
+    },
+    "spec": {
+      "id": "70ac6aac-ebc7-4250-bbea-abdb321b75ed",
+      "scope": "auto",
+      "type": "link_by_uid"
+    },
+    "tags": [],
+    "type": "measurement_run",
+    "uids": {
+      "auto": "6e074d3b-3d31-4593-962f-cddd04febe09"
+    }
+  },
+  {
+    "conditions": [],
+    "file_links": [],
+    "name": "GlassThickness4",
+    "notes": null,
+    "parameters": [],
+    "tags": [],
+    "template": null,
+    "type": "measurement_spec",
+    "uids": {
+      "auto": "70ac6aac-ebc7-4250-bbea-abdb321b75ed"
+    }
+  },
+  {
+    "conditions": [],
+    "file_links": [],
+    "material": {
+      "id": "d24ff73b-957f-467d-ab5f-e0b5b1490f5a",
+      "scope": "auto",
+      "type": "link_by_uid"
+    },
+    "name": "GlassThickness3",
+    "notes": null,
+    "parameters": [],
+    "properties": [
+      {
+        "file_links": [],
+        "name": "GlassThickness3",
+        "notes": null,
+        "origin": "measured",
+        "template": {
+          "id": "200bf85d-e546-4a89-9da4-905c6b2ecd80",
+          "scope": "auto",
+          "type": "link_by_uid"
+        },
+        "type": "property",
+        "value": {
+          "nominal": 6.445,
+          "type": "nominal_real",
+          "units": "millimeter"
+        }
+      }
+    ],
+    "source": {
+      "performed_by": "DiMarco",
+      "performed_date": "09/27/2021",
+      "type": "performed_source"
+    },
+    "spec": {
+      "id": "8e2a3f83-8ee0-4ca5-ac50-3a4da0dcb675",
+      "scope": "auto",
+      "type": "link_by_uid"
+    },
+    "tags": [],
+    "type": "measurement_run",
+    "uids": {
+      "auto": "5cfbd1f7-9e20-4d87-be9c-e0f09c67ce95"
+    }
+  },
+  {
+    "conditions": [],
+    "file_links": [],
+    "name": "GlassThickness3",
+    "notes": null,
+    "parameters": [],
+    "tags": [],
+    "template": null,
+    "type": "measurement_spec",
+    "uids": {
+      "auto": "8e2a3f83-8ee0-4ca5-ac50-3a4da0dcb675"
+    }
+  },
+  {
+    "conditions": [],
+    "file_links": [],
+    "material": {
+      "id": "d24ff73b-957f-467d-ab5f-e0b5b1490f5a",
+      "scope": "auto",
+      "type": "link_by_uid"
+    },
+    "name": "GlassThickness1",
+    "notes": null,
+    "parameters": [],
+    "properties": [
+      {
+        "file_links": [],
+        "name": "GlassThickness1",
+        "notes": null,
+        "origin": "measured",
+        "template": {
+          "id": "200bf85d-e546-4a89-9da4-905c6b2ecd80",
+          "scope": "auto",
+          "type": "link_by_uid"
+        },
+        "type": "property",
+        "value": {
+          "nominal": 6.452,
+          "type": "nominal_real",
+          "units": "millimeter"
+        }
+      }
+    ],
+    "source": {
+      "performed_by": "DiMarco",
+      "performed_date": "09/27/2021",
+      "type": "performed_source"
+    },
+    "spec": {
+      "id": "4530ba04-0065-48fc-89e6-2a5b43d7690c",
+      "scope": "auto",
+      "type": "link_by_uid"
+    },
+    "tags": [],
+    "type": "measurement_run",
+    "uids": {
+      "auto": "7b676456-bafa-4fad-b314-e7a98b53eb56"
+    }
+  },
+  {
+    "conditions": [],
+    "file_links": [],
+    "name": "GlassThickness1",
+    "notes": null,
+    "parameters": [],
+    "tags": [],
+    "template": null,
+    "type": "measurement_spec",
+    "uids": {
+      "auto": "4530ba04-0065-48fc-89e6-2a5b43d7690c"
+    }
+  },
+  {
+    "conditions": [],
+    "file_links": [],
+    "material": {
+      "id": "d24ff73b-957f-467d-ab5f-e0b5b1490f5a",
+      "scope": "auto",
+      "type": "link_by_uid"
+    },
+    "name": "GlassThickness2",
+    "notes": null,
+    "parameters": [],
+    "properties": [
+      {
+        "file_links": [],
+        "name": "GlassThickness2",
+        "notes": null,
+        "origin": "measured",
+        "template": {
+          "id": "200bf85d-e546-4a89-9da4-905c6b2ecd80",
+          "scope": "auto",
+          "type": "link_by_uid"
+        },
+        "type": "property",
+        "value": {
+          "nominal": 6.447,
+          "type": "nominal_real",
+          "units": "millimeter"
+        }
+      }
+    ],
+    "source": {
+      "performed_by": "DiMarco",
+      "performed_date": "09/27/2021",
+      "type": "performed_source"
+    },
+    "spec": {
+      "id": "04f43c66-7182-4736-a29c-135f16de4b02",
+      "scope": "auto",
+      "type": "link_by_uid"
+    },
+    "tags": [],
+    "type": "measurement_run",
+    "uids": {
+      "auto": "2661d9b6-ed3f-41dd-8c1b-e4906cc4ee76"
+    }
+  },
+  {
+    "conditions": [],
+    "file_links": [],
+    "name": "GlassThickness2",
+    "notes": null,
+    "parameters": [],
+    "tags": [],
+    "template": null,
+    "type": "measurement_spec",
+    "uids": {
+      "auto": "04f43c66-7182-4736-a29c-135f16de4b02"
+    }
+  },
+  {
+    "conditions": [],
+    "file_links": [],
+    "name": "Purchasing Glass",
+    "notes": null,
+    "parameters": [],
+    "source": null,
+    "spec": {
+      "id": "141774bd-1982-4dc8-b773-8e40fcc557eb",
+      "scope": "auto",
+      "type": "link_by_uid"
+    },
+    "tags": [],
+    "type": "process_run",
+    "uids": {
+      "auto": "8983e24c-f311-425f-a7c9-ea0930792dae"
+    }
+  }
+]

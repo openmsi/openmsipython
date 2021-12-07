@@ -170,7 +170,8 @@ class LaserShockExperiment(MeasurementRunFromFileMakerRecord) :
     def __init__(self,record,launch_packages,**kwargs) :
         #find the launch package that was used
         logger = kwargs.get('logger')
-        self.launch_package = search_for_single_name([lp.run for lp in launch_packages],record.pop('Launch ID'),
+        self.launch_ID = record.pop('Launch ID')
+        self.launch_package = search_for_single_name([lp.run for lp in launch_packages],self.launch_ID,
                                                      logger=logger,raise_exception=(logger is None))
         #init the MeasurementRun
         super().__init__(record,material=self.launch_package,**kwargs)
@@ -204,6 +205,10 @@ class LaserShockExperiment(MeasurementRunFromFileMakerRecord) :
         for name in names :
             d[name] = {'valuetype':NominalReal,'datatype':float,'template':ATTR_TEMPL[name]}
         return d
+
+    @property
+    def unique_values(self):
+        return {**super().unique_values,'Launch ID':self.launch_ID}
 
     def ignore_key(self,key) :
         if key in self.ignored :

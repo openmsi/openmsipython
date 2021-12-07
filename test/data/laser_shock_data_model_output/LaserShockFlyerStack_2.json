@@ -1,0 +1,25 @@
+{
+  "file_links": [],
+  "name": "Flyer Stack",
+  "notes": "",
+  "process": {
+    "id": "7ea5ad47-dd6f-4503-8475-56dc7273d54f",
+    "scope": "auto",
+    "type": "link_by_uid"
+  },
+  "sample_type": "unknown",
+  "spec": {
+    "id": "939837ca-6d09-4cd2-a61d-1b6b7dda3611",
+    "scope": "auto",
+    "type": "link_by_uid"
+  },
+  "tags": [
+    "FlyerID::F071",
+    "recordId::91",
+    "modId::12"
+  ],
+  "type": "material_run",
+  "uids": {
+    "auto": "4ccbf1dc-2bcd-4182-a1d8-6d3e30a17afa"
+  }
+}

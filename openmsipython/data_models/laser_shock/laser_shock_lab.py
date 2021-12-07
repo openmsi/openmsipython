@@ -6,6 +6,9 @@ from gemd.json import GEMDJson
 from gemd.entity.object import MaterialSpec, ProcessSpec, IngredientSpec, MeasurementSpec
 from gemd.entity.object import MaterialRun, ProcessRun, IngredientRun, MeasurementRun
 from ...utilities.logging import LogOwner
+from .run_from_filemaker_record import MaterialRunFromFileMakerRecord, RunFromFileMakerRecord
+from .spec_from_filemaker_record import SpecFromFileMakerRecord
+from .config import LASER_SHOCK_CONST
 from .laser_shock_glass_ID import LaserShockGlassID
 from .laser_shock_epoxy_ID import LaserShockEpoxyID
 from .laser_shock_foil_ID import LaserShockFoilID
@@ -22,86 +25,206 @@ class LaserShockLab(LogOwner) :
     Representation of all the information in the Laser Shock Lab's FileMaker database in GEMD language
     """
 
-    #################### CONSTANTS AND PROPERTIES ####################
-
-    FILEMAKER_SERVER_IP_ADDRESS = 'https://10.173.38.223'
-    DATABASE_NAME = 'Laser Shock'
-
     #################### PUBLIC METHODS ####################
 
-    def __init__(self,*args,**kwargs) :
+    def __init__(self,*args,working_dir=pathlib.Path('./gemd_data_model_dumps'),**kwargs) :
+        """
+        working_dir = path to the directory that should hold the log file and any other output (like the JSON dumps)
+        """
         #define the output location
-        self.ofd = pathlib.Path('./gemd_data_model_dumps')
+        self.ofd = working_dir
         if not self.ofd.is_dir() :
             self.ofd.mkdir(parents=True)
         #start up the logger
         if kwargs.get('logger_file') is None :
             kwargs['logger_file'] = self.ofd
         super().__init__(*args,**kwargs)
-        #get login credentials from the user
-        self.username = os.path.expandvars('$JHED_UNAME')
-        if self.username=='$JHED_UNAME' :
-            self.username = (input('Please enter your JHED username: ')).rstrip()
-        self.password = os.path.expandvars('$JHED_PWORD')
-        if self.password=='$JHED_PWORD' :
-            self.password = getpass.getpass(f'Please enter the JHED password for {self.username}: ')
+        #initialize empty username/password
+        self.__username = None; self.__password = None
+
+    def create_gemd_objects(self,records_dict=None) :
+        """
+        Create GEMD objects, either from the FileMaker database or from a dictionary of records keyed by layout name
+        """
+        #set up using either the dictionary of records or the FileMaker DB
+        msg = 'Creating GEMD objects from '
+        if records_dict is not None :
+            msg+='records dictionary'
+            extra_kwargs = {'records_dict':records_dict}
+        else :
+            msg+='FileMakerDB entries'
+            extra_kwargs = {}
         #add all the information to the lab object based on entries in the FileMaker DB
-        self.logger.info('Creating GEMD objects from FileMakerDB entries')
+        self.logger.info(msg)
         #"Inventory" pages (create Specs)
         self.logger.debug('Creating Inventory objects...')
-        self.glass_IDs = self.get_objs_from_filemaker(LaserShockGlassID,'Glass ID')
-        self.epoxy_IDs = self.get_objs_from_filemaker(LaserShockEpoxyID,'Epoxy ID')
-        self.foil_IDs = self.get_objs_from_filemaker(LaserShockFoilID,'Foil ID')
-        self.spacer_IDs = self.get_objs_from_filemaker(LaserShockSpacerID,'Spacer ID')
-        self.flyer_cutting_programs = self.get_objs_from_filemaker(LaserShockFlyerCuttingProgram,
-                                                                   'Flyer Cutting Program')
-        self.spacer_cutting_programs = self.get_objs_from_filemaker(LaserShockSpacerCuttingProgram,
-                                                                   'Spacer Cutting Program')
+        self.glass_IDs = self.get_objects(LaserShockGlassID,'Glass ID',**extra_kwargs)
+        self.logger.debug(f'Created {len(self.glass_IDs)} Glass ID objects...')
+        self.epoxy_IDs = self.get_objects(LaserShockEpoxyID,'Epoxy ID',**extra_kwargs)
+        self.logger.debug(f'Created {len(self.epoxy_IDs)} Epoxy ID objects...')
+        self.foil_IDs = self.get_objects(LaserShockFoilID,'Foil ID',**extra_kwargs)
+        self.logger.debug(f'Created {len(self.foil_IDs)} Foil ID objects...')
+        self.spacer_IDs = self.get_objects(LaserShockSpacerID,'Spacer ID',**extra_kwargs)
+        self.logger.debug(f'Created {len(self.spacer_IDs)} Spacer ID objects...')
+        self.flyer_cutting_programs = self.get_objects(LaserShockFlyerCuttingProgram,'Flyer Cutting Program',
+                                                       **extra_kwargs)
+        self.logger.debug(f'Created {len(self.flyer_cutting_programs)} Flyer Cutting Program objects...')
+        self.spacer_cutting_programs = self.get_objects(LaserShockSpacerCuttingProgram,'Spacer Cutting Program',
+                                                        **extra_kwargs)
+        self.logger.debug(f'Created {len(self.spacer_cutting_programs)} Spacer Cutting Program objects...')
         #Flyer Stacks (Materials)
         self.logger.debug('Creating Flyer Stacks...')
-        self.flyer_stacks = self.get_objs_from_filemaker(LaserShockFlyerStack,'Flyer Stack',self.glass_IDs,
-                                                         self.foil_IDs,self.epoxy_IDs,self.flyer_cutting_programs)
+        self.flyer_stacks = self.get_objects(LaserShockFlyerStack,'Flyer Stack',self.glass_IDs,self.foil_IDs,
+                                             self.epoxy_IDs,self.flyer_cutting_programs,**extra_kwargs)
+        self.logger.debug(f'Created {len(self.flyer_stacks)} Flyer Stack objects...')
         #Samples (Materials)
         self.logger.debug('Creating Samples...')
-        self.samples = self.get_objs_from_filemaker(LaserShockSample,'Sample')
+        self.samples = self.get_objects(LaserShockSample,'Sample',**extra_kwargs)
+        self.logger.debug(f'Created {len(self.samples)} Sample objects...')
         #Launch packages (Materials)
         self.logger.debug('Creating Launch Packages...')
-        self.launch_packages = self.get_objs_from_filemaker(LaserShockLaunchPackage,'Launch Package',self.flyer_stacks,
-                                                            self.spacer_IDs,self.spacer_cutting_programs,self.samples)
+        self.launch_packages = self.get_objects(LaserShockLaunchPackage,'Launch Package',self.flyer_stacks,
+                                                self.spacer_IDs,self.spacer_cutting_programs,self.samples,
+                                                **extra_kwargs)
+        self.logger.debug(f'Created {len(self.launch_packages)} Launch Package objects...')
         #Experiments (Measurements)
         self.logger.debug('Creating Experiments...')
-        self.experiments = self.get_objs_from_filemaker(LaserShockExperiment,'Experiment',self.launch_packages)
+        self.experiments = self.get_objects(LaserShockExperiment,'Experiment',self.launch_packages,**extra_kwargs)
+        self.logger.debug(f'Created {len(self.experiments)} Experiment objects...')
         #Make sure that there is only one of each unique spec (dynamically-created specs may be duplicated)
         self.__replace_specs()
         self.logger.info('Done creating GEMD objects')
-
-    def get_objs_from_filemaker(self,obj_type,layout_name,*args,n_max_records=1000,**kwargs) :
+    
+    def get_objects(self,obj_type,layout_name,*args,n_max_records=1000,records_dict=None,**kwargs) :
         """
         Return a list of LaserShock/GEMD constructs based on FileMaker records 
+        or records in a dictionary (useful for testing)
 
         obj_type = the type of LaserShock/GEMD object that should be created from this set of records
         layout_name = the name of the FileMaker Database layout to get records from
         n_max_records = the maximum number of records to return from FileMaker
+        records_dict = an optional dictionary whose keys are layout names and whose values are records 
+                       stored as dictionaries; used instead of FileMaker DB information if given 
+                       (useful for testing purposes)
 
         any other args/kwargs get sent to the constructor for obj_type objects
         """
         objs = []
-        #get records from the FileMaker server
-        records = self.__get_filemaker_records(layout_name,n_max_records)
+        if records_dict is not None :
+            #get records from the dictionary
+            records = records_dict[layout_name]
+        else :
+            #get records from the FileMaker server
+            records = self.__get_filemaker_records(layout_name,n_max_records)
         for record in records :
             objs.append(obj_type(record,*args,logger=self.logger,**kwargs))
         if len(objs)<=0 :
             return objs
+        self.__check_unique_values(objs)
+        return objs
+
+    def dump_to_json_files(self,n_max_objs=-1,complete_histories=False) :
+        """
+        Write out different parts of the lab as json files
+        
+        n_max_objs = the maximum number of objects of each type to dump to json files
+                     (default = -1 writes out all objects)
+        complete_histories = if True, complete material histories are written out for any
+                             MaterialRunFromFileMakerRecord objects (default = False)
+        """
+        self.logger.info('Dumping GEMD objects to JSON files...')
+        #create the encoder
+        encoder = GEMDJson()
+        #dump the different parts of the lab data model to json files
+        for obj_list in self.all_object_lists :
+            objs_to_dump = obj_list[:min(n_max_objs,len(obj_list))] if n_max_objs>0 else obj_list
+            for iobj,obj in enumerate(objs_to_dump,start=1) :
+                if isinstance(obj,RunFromFileMakerRecord) :
+                    obj_to_write = obj.run
+                elif isinstance(obj,SpecFromFileMakerRecord) :
+                    obj_to_write = obj.spec
+                fn = f'{obj.__class__.__name__}_{iobj}.json'
+                with open(self.ofd/fn,'w') as fp :
+                    fp.write(encoder.thin_dumps(obj_to_write,indent=2))
+                if complete_histories :
+                    if isinstance(obj,MaterialRunFromFileMakerRecord) :
+                        context_list = complete_material_history(obj_to_write)
+                        with open(self.ofd/fn.replace('.json','_material_history.json'),'w') as fp :
+                            fp.write(json.dumps(context_list,indent=2))
+        self.logger.info('Done.')
+
+    #################### PROPERTIES ####################
+
+    @property
+    def username(self) :
+        if self.__username is None :
+            self.__username = os.path.expandvars('$JHED_UNAME')
+            if self.__username=='$JHED_UNAME' :
+                self.__username = (input('Please enter your JHED username: ')).rstrip()
+        return self.__username
+
+    @property
+    def password(self) :
+        if self.__password is None :
+            self.__password = os.path.expandvars('$JHED_PWORD')
+            if self.__password=='$JHED_PWORD' :
+                self.__password = getpass.getpass(f'Please enter the JHED password for {self.username}: ')
+        return self.__password
+
+    @property
+    def all_object_lists(self) :
+        return [self.glass_IDs,self.epoxy_IDs,self.foil_IDs,self.spacer_IDs,self.flyer_cutting_programs,
+                self.spacer_cutting_programs,self.flyer_stacks,self.samples,self.launch_packages,self.experiments]
+    
+    @property
+    def all_top_objs(self) :
+        all_top_objs = []
+        for obj_list in self.all_object_lists :
+            for obj in obj_list :
+                if isinstance(obj,RunFromFileMakerRecord) :
+                    all_top_objs.append(obj.run)
+                elif isinstance(obj,SpecFromFileMakerRecord) :
+                    all_top_objs.append(obj.spec)
+        return all_top_objs
+
+    @property
+    def specs_from_records(self) :
+        specs_from_records = []
+        for obj_list in self.all_object_lists :
+            for obj in obj_list :
+                if isinstance(obj,SpecFromFileMakerRecord) :
+                    specs_from_records.append(obj)
+        return specs_from_records
+
+    #################### PRIVATE HELPER FUNCTIONS ####################
+    
+    def __get_filemaker_records(self,layout_name,n_max_records=1000) :
+        #disable warnings
+        requests.packages.urllib3.disable_warnings()
+        #create the server
+        fms = fmrest.Server(LASER_SHOCK_CONST.FILEMAKER_SERVER_IP_ADDRESS,
+                            user=self.username,
+                            password=self.password,
+                            database=LASER_SHOCK_CONST.DATABASE_NAME,
+                            layout=layout_name,
+                            verify_ssl=False,
+                           )
+        #login
+        fms.login()
+        #return records in the foundset
+        return fms.get_records(limit=n_max_records)
+
+    def __check_unique_values(self,objects) :
         #log warnings if any of the created objects duplicate values that are assumed to be unique
         unique_vals = {}
-        for io,obj in enumerate(objs) :
-            for iuv,(uvn,uv) in enumerate(obj.unique_values.items()) :
+        for io,obj in enumerate(objects) :
+            for uvn,uv in obj.unique_values.items() :
                 if uvn not in unique_vals.keys() :
                     if io==0 :
                         unique_vals[uvn] = []
                     else :
-                        errmsg = f'ERROR: discovered a {obj_type.__name__} object with unrecognized unique value name '
-                        errmsg+= f'{uvn}! Recognized names are {unique_vals.keys()}'
+                        errmsg = f'ERROR: discovered a {obj.__class__.__name__} object with unrecognized unique value '
+                        errmsg+= f'name {uvn}! Recognized names are {unique_vals.keys()}'
                         self.logger.error(errmsg,RuntimeError)
                 unique_vals[uvn].append(uv)
         for uvn,uvl in unique_vals.items() :
@@ -111,117 +234,11 @@ class LaserShockLab(LogOwner) :
                     continue
                 n_objs_with_val=uvl.count(uv)
                 if n_objs_with_val!=1 :
-                    msg = f'WARNING: {n_objs_with_val} {obj_type.__name__} objects found with {uvn} = {uv} but {uvn} '
-                    msg+= 'is assumed to be unique! This will cause warnings/errors if these objects are '
+                    msg = f'WARNING: {n_objs_with_val} {obj.__class__.__name__} objects found with {uvn} = {uv} but '
+                    msg+= f'{uvn} is assumed to be unique! This will cause warnings/errors if these objects are '
                     msg+= 'referenced later.'
                     self.logger.warning(msg)
                 done.add(uv)
-        return objs
-
-    def dump_to_json_files(self) :
-        """
-        Write out different parts of the lab as json files
-        """
-        self.logger.info('Dumping GEMD objects to JSON files...')
-        #create the encoder
-        encoder = GEMDJson()
-        #dump the different parts of the lab data model to json files
-        with open(self.ofd/'glass_ID.json', 'w') as fp: 
-            fp.write(encoder.thin_dumps(self.glass_IDs[0].spec, indent=2))
-        with open(self.ofd/'glass_ID_process.json', 'w') as fp: 
-            fp.write(encoder.thin_dumps(self.glass_IDs[0].spec.process, indent=2))
-        with open(self.ofd/'epoxy_ID.json', 'w') as fp: 
-            fp.write(encoder.thin_dumps(self.epoxy_IDs[0].spec, indent=2))
-        with open(self.ofd/'foil_ID.json', 'w') as fp: 
-            fp.write(encoder.thin_dumps(self.foil_IDs[0].spec, indent=2))
-        with open(self.ofd/'spacer_ID.json', 'w') as fp: 
-            fp.write(encoder.thin_dumps(self.spacer_IDs[0].spec, indent=2))
-        with open(self.ofd/'flyer_cutting_program.json', 'w') as fp: 
-            fp.write(encoder.thin_dumps(self.flyer_cutting_programs[0].spec, indent=2))
-        with open(self.ofd/'spacer_cutting_program.json', 'w') as fp: 
-            fp.write(encoder.thin_dumps(self.spacer_cutting_programs[0].spec, indent=2))
-        with open(self.ofd/'flyer_stack.json', 'w') as fp: 
-            fp.write(encoder.thin_dumps(self.flyer_stacks[39].run, indent=2))
-        with open(self.ofd/'flyer_stack_spec.json', 'w') as fp: 
-            fp.write(encoder.thin_dumps(self.flyer_stacks[39].run.spec, indent=2))
-        with open(self.ofd/'flyer_stack_material_history.json', 'w') as fp: 
-            context_list = complete_material_history(self.flyer_stacks[39].run) 
-            fp.write(json.dumps(context_list, indent=2))
-        with open(self.ofd/'sample_spec.json', 'w') as fp: 
-            fp.write(encoder.thin_dumps(self.samples[0].run.spec, indent=2))
-        with open(self.ofd/'sample.json', 'w') as fp: 
-            fp.write(encoder.thin_dumps(self.samples[0].run, indent=2))
-        with open(self.ofd/'sample_material_history.json', 'w') as fp :
-            context_list = complete_material_history(self.samples[0].run) 
-            fp.write(json.dumps(context_list, indent=2))
-        with open(self.ofd/'launch_package.json', 'w') as fp: 
-            fp.write(encoder.thin_dumps(self.launch_packages[10].run, indent=2))
-        with open(self.ofd/'launch_package_spec.json', 'w') as fp: 
-            fp.write(encoder.thin_dumps(self.launch_packages[10].run.spec, indent=2))
-        with open(self.ofd/'launch_package_material_history.json', 'w') as fp: 
-            context_list = complete_material_history(self.launch_packages[10].run) 
-            fp.write(json.dumps(context_list, indent=2))
-        with open(self.ofd/'experiment_template.json','w') as fp :
-            fp.write(encoder.thin_dumps(self.experiments[0].run.template, indent=2))
-        with open(self.ofd/'experiment_spec.json','w') as fp :
-            fp.write(encoder.thin_dumps(self.experiments[0].run.spec, indent=2))
-        with open(self.ofd/'experiment.json','w') as fp :
-            fp.write(encoder.thin_dumps(self.experiments[0].run, indent=2))
-        self.logger.info('Done.')
-
-    #################### PROPERTIES ####################
-
-    @property
-    def all_top_specs(self) :
-        all_top_specs = [gid.spec for gid in self.glass_IDs]
-        all_top_specs+= [eid.spec for eid in self.epoxy_IDs]
-        all_top_specs+= [fid.spec for fid in self.foil_IDs]
-        all_top_specs+= [sid.spec for sid in self.spacer_IDs]
-        all_top_specs+= [fcp.spec for fcp in self.flyer_cutting_programs]
-        all_top_specs+= [scp.spec for scp in self.spacer_cutting_programs]
-        all_top_specs+= [fs.run.spec for fs in self.flyer_stacks]
-        all_top_specs+= [s.run.spec for s in self.samples]
-        all_top_specs+= [lp.run.spec for lp in self.launch_packages]
-        all_top_specs+= [e.run.spec for e in self.experiments]
-        return all_top_specs
-
-    @property
-    def all_top_objs(self) :
-        all_top_objs = [gid.spec for gid in self.glass_IDs]
-        all_top_objs+= [eid.spec for eid in self.epoxy_IDs]
-        all_top_objs+= [fid.spec for fid in self.foil_IDs]
-        all_top_objs+= [sid.spec for sid in self.spacer_IDs]
-        all_top_objs+= [fcp.spec for fcp in self.flyer_cutting_programs]
-        all_top_objs+= [scp.spec for scp in self.spacer_cutting_programs]
-        all_top_objs+= [fs.run for fs in self.flyer_stacks]
-        all_top_objs+= [s.run for s in self.samples]
-        all_top_objs+= [lp.run for lp in self.launch_packages]
-        all_top_objs+= [e.run for e in self.experiments]
-        return all_top_objs
-
-    @property
-    def specs_from_records(self) :
-        specs_from_records = self.glass_IDs+self.epoxy_IDs+self.foil_IDs+self.spacer_IDs
-        specs_from_records+= self.flyer_cutting_programs+self.spacer_cutting_programs
-        return specs_from_records
-
-    #################### PRIVATE HELPER FUNCTIONS ####################
-
-    def __get_filemaker_records(self,layout_name,n_max_records=1000) :
-        #disable warnings
-        requests.packages.urllib3.disable_warnings()
-        #create the server
-        fms = fmrest.Server(self.FILEMAKER_SERVER_IP_ADDRESS,
-                            user=self.username,
-                            password=self.password,
-                            database=self.DATABASE_NAME,
-                            layout=layout_name,
-                            verify_ssl=False,
-                           )
-        #login
-        fms.login()
-        #return records in the foundset
-        return fms.get_records(limit=n_max_records)
 
     def __count_specs(self,item) :
         if not isinstance(item, (MaterialSpec, ProcessSpec, IngredientSpec, MeasurementSpec)):
@@ -267,7 +284,7 @@ class LaserShockLab(LogOwner) :
                 all_unique_specs.append(us)
         self.logger.debug(f'Found {len(all_unique_specs)} unique Specs from a set of {self.__n_total_specs} total')
         #replace duplicate specs in the SpecFromFileMakerRecord objects
-        self.logger.debug(f'Replacing duplicated top level Specs...')
+        self.logger.debug('Replacing duplicated top level Specs...')
         for sfr in self.specs_from_records :
             thisspecname = sfr.spec.name
             thisspecdict = sfr.spec.as_dict()
@@ -276,7 +293,7 @@ class LaserShockLab(LogOwner) :
                     sfr.spec = spec
                     break
         #replace all of the lower-level specs recursively
-        self.logger.debug(f'Recursively replacing all duplicated lower level Specs...')
+        self.logger.debug('Recursively replacing all duplicated lower level Specs...')
         recursive_foreach(self.all_top_objs,self.__replace_duplicated_specs_in_runs)
 
 #################### MAIN FUNCTION ####################
@@ -284,8 +301,9 @@ class LaserShockLab(LogOwner) :
 def main() :
     #build the model of the lab
     model = LaserShockLab()
+    model.create_gemd_objects()
     #dump its pieces to json files
-    model.dump_to_json_files()
+    model.dump_to_json_files(1,True)
 
 if __name__=='__main__' :
     main()

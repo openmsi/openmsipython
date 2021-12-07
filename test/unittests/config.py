@@ -56,5 +56,11 @@ class TestRoutineConstants :
     @property
     def TEST_RECO_DIR_PATH(self) : # Path to the test data file
         return pathlib.Path(__file__).parent.parent / 'test_reco'
+    @property
+    def FILEMAKER_RECORD_PICKLE_FILENAME(self) :
+        return 'filemaker_records_for_testing.pickle'
+    @property
+    def LASER_SHOCK_DATA_MODEL_OUTPUT_DIRNAME(self) :
+        return 'laser_shock_data_model_output'
     
 TEST_CONST=TestRoutineConstants()

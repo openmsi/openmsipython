@@ -1,7 +1,7 @@
 #imports
 import inspect
 from gemd.entity.bounds import IntegerBounds, RealBounds, CategoricalBounds, CompositionBounds
-from gemd.entity.template import PropertyTemplate, ParameterTemplate, ConditionTemplate, condition_template
+from gemd.entity.template import PropertyTemplate, ParameterTemplate, ConditionTemplate
 
 ATTR_TEMPL = {}
 
