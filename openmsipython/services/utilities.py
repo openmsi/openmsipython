@@ -38,7 +38,6 @@ def set_env_var_from_user_input(var_name,var_desc) :
     var_val = input(f'Please enter the {var_desc}: ')
     set_machine_env_var(var_name,var_val)
 
-
 #if NSSM doesn't exist in the current directory, install it from the web
 def find_install_NSSM() :
     if SERVICE_CONST.NSSM_EXECUTABLE_PATH.is_file() :
@@ -46,7 +45,7 @@ def find_install_NSSM() :
     else :
         SERVICE_CONST.LOGGER.info(f'Installing NSSM from {SERVICE_CONST.NSSM_DOWNLOAD_URL}...')
         nssm_zip_file_name = SERVICE_CONST.NSSM_DOWNLOAD_URL.split('/')[-1]
-        #run_cmd_in_subprocess(['powershell.exe','[Net.ServicePointManager]::SecurityProtocol = "tls12, tls11, tls"'])
+        run_cmd_in_subprocess(['powershell.exe','[Net.ServicePointManager]::SecurityProtocol = "tls12, tls11, tls"'])
         cmd_tuples = [
             (f'curl {SERVICE_CONST.NSSM_DOWNLOAD_URL} -O',
              f'Invoke-WebRequest -Uri {SERVICE_CONST.NSSM_DOWNLOAD_URL} -OutFile {nssm_zip_file_name}'),
