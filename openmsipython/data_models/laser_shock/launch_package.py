@@ -5,13 +5,13 @@ from gemd.entity.source.performed_source import PerformedSource
 from gemd.entity.value import NominalCategorical, NominalInteger, NominalReal
 from gemd.entity.attribute import Property, Parameter, Condition
 from gemd.entity.object import ProcessSpec, MaterialSpec, MeasurementSpec, MeasurementRun, IngredientSpec, IngredientRun
-from .utilities import search_for_single_name, search_for_single_tag
+from ..utilities import search_for_single_name, search_for_single_tag
+from ..spec_for_run import SpecForRun
+from ..run_from_filemaker_record import MaterialRunFromFileMakerRecord
 from .attribute_templates import ATTR_TEMPL
 from .object_templates import OBJ_TEMPL
-from .laser_shock_spec_for_run import LaserShockSpecForRun
-from .run_from_filemaker_record import MaterialRunFromFileMakerRecord
 
-class LaserShockLaunchPackageSpec(LaserShockSpecForRun) :
+class LaserShockLaunchPackageSpec(SpecForRun) :
     """
     Dynamically-created spec for a Launch Package
     """

@@ -6,19 +6,19 @@ from gemd.json import GEMDJson
 from gemd.entity.object import MaterialSpec, ProcessSpec, IngredientSpec, MeasurementSpec
 from gemd.entity.object import MaterialRun, ProcessRun, IngredientRun, MeasurementRun
 from ...utilities.logging import LogOwner
-from .run_from_filemaker_record import MaterialRunFromFileMakerRecord, RunFromFileMakerRecord
-from .spec_from_filemaker_record import SpecFromFileMakerRecord
+from ..run_from_filemaker_record import MaterialRunFromFileMakerRecord, RunFromFileMakerRecord
+from ..spec_from_filemaker_record import SpecFromFileMakerRecord
 from .config import LASER_SHOCK_CONST
-from .laser_shock_glass_ID import LaserShockGlassID
-from .laser_shock_epoxy_ID import LaserShockEpoxyID
-from .laser_shock_foil_ID import LaserShockFoilID
-from .laser_shock_spacer_ID import LaserShockSpacerID
-from .laser_shock_flyer_cutting_program import LaserShockFlyerCuttingProgram
-from .laser_shock_spacer_cutting_program import LaserShockSpacerCuttingProgram
-from .laser_shock_flyer_stack import LaserShockFlyerStack
-from .laser_shock_sample import LaserShockSample
-from .laser_shock_launch_package import LaserShockLaunchPackage
-from .laser_shock_experiment import LaserShockExperiment
+from .glass_ID import LaserShockGlassID
+from .epoxy_ID import LaserShockEpoxyID
+from .foil_ID import LaserShockFoilID
+from .spacer_ID import LaserShockSpacerID
+from .flyer_cutting_program import LaserShockFlyerCuttingProgram
+from .spacer_cutting_program import LaserShockSpacerCuttingProgram
+from .flyer_stack import LaserShockFlyerStack
+from .sample import LaserShockSample
+from .launch_package import LaserShockLaunchPackage
+from .experiment import LaserShockExperiment
 
 class LaserShockLab(LogOwner) :
     """

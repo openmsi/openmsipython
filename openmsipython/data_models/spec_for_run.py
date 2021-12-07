@@ -1,16 +1,16 @@
 #imports
 from abc import ABC,abstractmethod
 
-class LaserShockSpecForRun(ABC) :
+class SpecForRun(ABC) :
     """
-    A small base class to handle keeping dynamically-created Specs unique throughout the entire Laser Shock Lab
+    A small base class for dynamically-created Specs
     """
 
     @property
     @abstractmethod
     def spec_type(self) :
         """
-        A property defining the type of GEMD Spec that this LaserShockSpec creates
+        A property defining the type of GEMD Spec that this SpecForRun creates
         """
         pass
 

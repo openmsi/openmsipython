@@ -1,8 +1,8 @@
 #imports
 from gemd.entity.value import NominalCategorical, NominalReal
+from ..spec_from_filemaker_record import MaterialSpecFromFileMakerRecord
 from .attribute_templates import ATTR_TEMPL
 from .object_templates import OBJ_TEMPL
-from .spec_from_filemaker_record import MaterialSpecFromFileMakerRecord
 
 class LaserShockGlassID(MaterialSpecFromFileMakerRecord) :
     """

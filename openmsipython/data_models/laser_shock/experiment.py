@@ -2,13 +2,13 @@
 from gemd.entity.value import NominalCategorical, NominalReal, NominalInteger
 from gemd.entity.attribute import Parameter, Condition
 from gemd.entity.object import MeasurementSpec
-from .utilities import search_for_single_name
+from ..utilities import search_for_single_name
+from ..spec_for_run import SpecForRun
+from ..run_from_filemaker_record import MeasurementRunFromFileMakerRecord
 from .attribute_templates import ATTR_TEMPL
 from .object_templates import OBJ_TEMPL
-from .laser_shock_spec_for_run import LaserShockSpecForRun
-from .run_from_filemaker_record import MeasurementRunFromFileMakerRecord
 
-class LaserShockExperimentSpec(LaserShockSpecForRun) :
+class LaserShockExperimentSpec(SpecForRun) :
     """
     Dynamically-created Spec for a LaserShockExperiment (MeasurementSpec)
     """

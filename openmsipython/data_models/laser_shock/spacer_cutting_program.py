@@ -1,9 +1,9 @@
 #imports
 from gemd.entity.value import NominalCategorical, NominalReal
 from gemd.entity.value.nominal_integer import NominalInteger
+from ..spec_from_filemaker_record import ProcessSpecFromFileMakerRecord
 from .attribute_templates import ATTR_TEMPL
 from .object_templates import OBJ_TEMPL
-from .spec_from_filemaker_record import ProcessSpecFromFileMakerRecord
 
 class LaserShockSpacerCuttingProgram(ProcessSpecFromFileMakerRecord) :
     """

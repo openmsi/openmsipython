@@ -2,12 +2,12 @@
 from gemd.entity.value import NominalCategorical, NominalReal, NominalComposition
 from gemd.entity.attribute import PropertyAndConditions, Property, Parameter, Condition
 from gemd.entity.object import MaterialSpec, ProcessSpec, IngredientSpec
+from ..spec_for_run import SpecForRun
+from ..run_from_filemaker_record import MaterialRunFromFileMakerRecord
 from .attribute_templates import ATTR_TEMPL
 from .object_templates import OBJ_TEMPL
-from .laser_shock_spec_for_run import LaserShockSpecForRun
-from .run_from_filemaker_record import MaterialRunFromFileMakerRecord
 
-class LaserShockSampleSpec(LaserShockSpecForRun) :
+class LaserShockSampleSpec(SpecForRun) :
     """
     General constructor for all LaserShockSample Material Specs
     """
