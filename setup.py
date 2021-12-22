@@ -16,6 +16,7 @@ setupkwargs = dict(
                              'ManageService=openmsipython.services.manage_service:main',
                              'LecroyFileUploadDirectory=openmsipython.pdv.lecroy_file_upload_directory:main',
                              'PDVPlotMaker=openmsipython.pdv.pdv_plot_maker:main',
+                             'ProvisionNode=openmsipython.utilities.simple_provision_wrapper:main',
                             ],
     },
     python_requires='>=3.7,<3.10',

@@ -30,7 +30,7 @@ class ConfigFileParser(LogOwner) :
         """
         Return a config dictionary populated with configurations from groups with the given names
 
-        group_names = the list of group names to add to the dictionary
+        group_names = the list of group names to add to the dictionary (or a single string)
         """
         if isinstance(group_names,str) :
             group_names = [group_names]

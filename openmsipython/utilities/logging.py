@@ -81,7 +81,7 @@ class Logger :
     def warning(self,msg,*args,**kwargs) :
         if not msg.startswith('WARNING:') :
             msg = f'WARNING: {msg}'
-        self._logger_obj.warning(msg)
+        self._logger_obj.warning(msg,*args,**kwargs)
 
     #log an error message and optionally raise an exception with the same message
     def error(self,msg,exception_type=None,*args,**kwargs) :

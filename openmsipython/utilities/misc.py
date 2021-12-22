@@ -1,5 +1,5 @@
 #imports
-import sys, inspect, time
+import os, sys, inspect, time, contextlib
 
 #listen for and add user input to a queue
 def add_user_input(input_queue) :
@@ -88,3 +88,15 @@ def populated_kwargs(given_kwargs,defaults,logger=None) :
             else :
                 given_kwargs[key] = defaults[key]
     return given_kwargs
+
+@contextlib.contextmanager
+def cd(dir):
+  """
+  Change the current working directory to a different directory,
+  and go back when leaving the context manager.
+  """
+  cdminus = os.getcwd()
+  try:
+    yield os.chdir(dir)
+  finally:
+    os.chdir(cdminus)
