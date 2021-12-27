@@ -29,22 +29,22 @@ jobs:
       - image: cimg/python:3.9
     steps:
       - run:
-      name: libsodium Download.
-      command: >-
-        wget --quiet
-        https://download.libsodium.org/libsodium/releases/libsodium-$LIBSODIUM_VERSION.tar.gz
+          name: libsodium Download.
+          command: >-
+            wget --quiet
+            https://download.libsodium.org/libsodium/releases/libsodium-$LIBSODIUM_VERSION.tar.gz
       - run:
-        name: libsodium Uncompress tar file.
-        command: tar xvzf libsodium-$LIBSODIUM_VERSION.tar.gz
+          name: libsodium Uncompress tar file.
+          command: tar xvzf libsodium-$LIBSODIUM_VERSION.tar.gz
       - run:
-        name: libsodium Run Configure.
-        command: cd libsodium-$LIBSODIUM_VERSION/ && ./configure
+          name: libsodium Run Configure.
+          command: cd libsodium-$LIBSODIUM_VERSION/ && ./configure
       - run:
-        name: libsodium Run Make Check.
-        command: cd libsodium-$LIBSODIUM_VERSION/ && make && make check
+          name: libsodium Run Make Check.
+          command: cd libsodium-$LIBSODIUM_VERSION/ && make && make check
       - run:
-        name: libsodium Run Make Install.
-        command: cd libsodium-$LIBSODIUM_VERSION/ && sudo make install
+          name: libsodium Run Make Install.
+          command: cd libsodium-$LIBSODIUM_VERSION/ && sudo make install
       - persist_to_workspace:
           root: .
           paths:
