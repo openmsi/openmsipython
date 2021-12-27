@@ -38,13 +38,13 @@ jobs:
           command: tar xvzf libsodium-$LIBSODIUM_VERSION.tar.gz
       - run:
           name: libsodium Run Configure.
-          command: cd libsodium-$LIBSODIUM_VERSION/ && ./configure
+          command: cd libsodium-stable/ && ./configure
       - run:
           name: libsodium Run Make Check.
-          command: cd libsodium-$LIBSODIUM_VERSION/ && make && make check
+          command: cd libsodium-stable/ && make && make check
       - run:
           name: libsodium Run Make Install.
-          command: cd libsodium-$LIBSODIUM_VERSION/ && sudo make install
+          command: cd libsodium-stable/ && sudo make install
       - persist_to_workspace:
           root: .
           paths:
