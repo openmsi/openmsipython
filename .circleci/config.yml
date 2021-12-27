@@ -10,7 +10,10 @@ workflows:
   build_and_test:
     # For more details on extending your workflow, see the configuration docs: https://circleci.com/docs/2.0/configuration-reference/#workflows 
     jobs:
-      - build-and-code-check
+      - install-dependencies
+      - build-and-code-check:
+          requires:
+            -install-dependencies
       - run-tests:
           requires:
             - build-and-code-check
@@ -20,6 +23,32 @@ workflows:
 
 ################# JOBS #################
 jobs:
+  # Install libsodium and any other required dependencies not available on pip
+  install-dependencies:
+    docker:
+      - image: cimg/python:3.9
+    steps:
+      - run:
+      name: libsodium Download.
+      command: >-
+        wget --quiet
+        https://download.libsodium.org/libsodium/releases/libsodium-$LIBSODIUM_VERSION.tar.gz
+      - run:
+        name: libsodium Uncompress tar file.
+        command: tar xvzf libsodium-$LIBSODIUM_VERSION.tar.gz
+      - run:
+        name: libsodium Run Configure.
+        command: cd libsodium-$LIBSODIUM_VERSION/ && ./configure
+      - run:
+        name: libsodium Run Make Check.
+        command: cd libsodium-$LIBSODIUM_VERSION/ && make && make check
+      - run:
+        name: libsodium Run Make Install.
+        command: cd libsodium-$LIBSODIUM_VERSION/ && sudo make install
+      - persist_to_workspace:
+          root: .
+          paths:
+            - .
   # Build the repo and check the code using pyflakes 
   build-and-code-check:
     docker:
