@@ -1,8 +1,8 @@
 #imports
-from .utilities import get_replaced_configs, get_next_message
-from ..utilities.config_file_parser import ConfigFileParser
-from confluent_kafka import Consumer, DeserializingConsumer
 import uuid
+from confluent_kafka import Consumer, DeserializingConsumer
+from .utilities import get_replaced_configs, get_next_message
+from ..shared.config_file_parser import ConfigFileParser
 
 class MyConsumer(Consumer) :
     """

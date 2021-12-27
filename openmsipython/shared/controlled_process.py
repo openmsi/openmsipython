@@ -3,8 +3,8 @@ import time
 from queue import Queue
 from threading import Thread
 from abc import ABC, abstractmethod
+from ..utilities.misc import add_user_input
 from .config import UTIL_CONST
-from .misc import add_user_input
 from .logging import LogOwner
 
 class ControlledProcess(LogOwner,ABC) :

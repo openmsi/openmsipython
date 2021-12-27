@@ -1,7 +1,7 @@
 #imports
 import unittest, time
 from threading import Lock
-from openmsipython.utilities.controlled_process import ControlledProcessSingleThread, ControlledProcessMultiThreaded
+from openmsipython.shared.controlled_process import ControlledProcessSingleThread, ControlledProcessMultiThreaded
 from utilities import MyThread
 
 #some constants

@@ -5,7 +5,7 @@ from gemd.entity.util import complete_material_history
 from gemd.json import GEMDJson
 from gemd.entity.object import MaterialSpec, ProcessSpec, IngredientSpec, MeasurementSpec
 from gemd.entity.object import MaterialRun, ProcessRun, IngredientRun, MeasurementRun
-from ...utilities.logging import LogOwner
+from ...shared.logging import LogOwner
 from ..run_from_filemaker_record import MaterialRunFromFileMakerRecord, RunFromFileMakerRecord
 from ..spec_from_filemaker_record import SpecFromFileMakerRecord
 from .config import LASER_SHOCK_CONST

@@ -1,8 +1,8 @@
 #imports
 import unittest, pathlib, logging, filecmp, shutil
 from hashlib import sha512
+from openmsipython.shared.logging import Logger
 from openmsipython.data_file_io.config import RUN_OPT_CONST, DATA_FILE_HANDLING_CONST
-from openmsipython.utilities.logging import Logger
 from openmsipython.data_file_io.data_file_chunk import DataFileChunk
 from openmsipython.data_file_io.upload_data_file import UploadDataFile
 from openmsipython.data_file_io.download_data_file import DownloadDataFileToDisk, DownloadDataFileToMemory

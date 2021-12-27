@@ -1,7 +1,7 @@
 #imports
-from openmsipython.utilities.config import UTIL_CONST
-from openmsipython.data_file_io.config import RUN_OPT_CONST
 import pathlib
+from openmsipython.shared.config import UTIL_CONST
+from openmsipython.data_file_io.config import RUN_OPT_CONST
 
 class TestRoutineConstants :
     """

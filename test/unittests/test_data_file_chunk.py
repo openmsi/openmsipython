@@ -1,11 +1,11 @@
 #imports
-from config import TEST_CONST
+import unittest, pathlib, logging
+from openmsipython.shared.logging import Logger
+from openmsipython.data_file_io.config import RUN_OPT_CONST
 from openmsipython.data_file_io.upload_data_file import UploadDataFile
 from openmsipython.data_file_io.data_file_chunk import DataFileChunk
 from openmsipython.my_kafka.my_producers import MySerializingProducer
-from openmsipython.data_file_io.config import RUN_OPT_CONST
-from openmsipython.utilities.logging import Logger
-import unittest, pathlib, logging
+from config import TEST_CONST
 
 #constants
 LOGGER = Logger(pathlib.Path(__file__).name.split('.')[0],logging.ERROR)

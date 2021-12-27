@@ -1,10 +1,12 @@
 #imports
-from .utilities import producer_callback, PRODUCER_CALLBACK_LOGGER
-from .config import INTERNAL_PRODUCTION_CONST
-from ..utilities.logging import Logger
-from ..utilities.misc import populated_kwargs
-from hashlib import sha512
 import time, pathlib
+from hashlib import sha512
+from ..utilities.misc import populated_kwargs
+from ..shared.logging import Logger
+from .config import INTERNAL_PRODUCTION_CONST
+from .utilities import producer_callback, PRODUCER_CALLBACK_LOGGER
+
+
 
 # DataFileChunk Class 
 class DataFileChunk :

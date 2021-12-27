@@ -1,9 +1,9 @@
 #imports
-from openmsipython.my_kafka.serialization import DataFileChunkSerializer, DataFileChunkDeserializer
+import unittest
 from confluent_kafka.serialization import DoubleSerializer, IntegerSerializer, StringSerializer
 from confluent_kafka.serialization import DoubleDeserializer, IntegerDeserializer, StringDeserializer
 from openmsipython.my_kafka.utilities import get_transformed_configs, get_replaced_configs
-import unittest
+from openmsipython.my_kafka.serialization import DataFileChunkSerializer, DataFileChunkDeserializer
 
 class ReplacementDummyClass :
     """

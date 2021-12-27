@@ -2,12 +2,12 @@
 import pathlib, datetime, time
 from threading import Thread
 from queue import Queue
-from ..utilities.runnable import Runnable
-from ..utilities.controlled_process import ControlledProcessSingleThread
 from ..utilities.misc import populated_kwargs
+from ..shared.runnable import Runnable
+from ..shared.controlled_process import ControlledProcessSingleThread
 from ..my_kafka.my_producers import MySerializingProducer
-from .utilities import produce_from_queue_of_file_chunks
 from .config import RUN_OPT_CONST
+from .utilities import produce_from_queue_of_file_chunks
 from .data_file_directory import DataFileDirectory
 from .upload_data_file import UploadDataFile
 

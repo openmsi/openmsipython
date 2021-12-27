@@ -1,7 +1,7 @@
 #imports
 import unittest, pathlib, time, logging, shutil, filecmp
+from openmsipython.shared.logging import Logger
 from openmsipython.data_file_io.config import RUN_OPT_CONST
-from openmsipython.utilities.logging import Logger
 from openmsipython.data_file_io.data_file_upload_directory import DataFileUploadDirectory
 from openmsipython.data_file_io.data_file_download_directory import DataFileDownloadDirectory
 from config import TEST_CONST

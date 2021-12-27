@@ -1,6 +1,6 @@
 #imports
 import uuid
-from ..utilities.config import UTIL_CONST
+from ..shared.config import UTIL_CONST
 from .my_consumers import MyDeserializingConsumer
 
 class ConsumerGroup :

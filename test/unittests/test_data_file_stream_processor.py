@@ -1,10 +1,9 @@
 #imports
 import unittest, time, pathlib, logging
-from openmsipython.utilities.logging import Logger
+from openmsipython.shared.logging import Logger
 from openmsipython.data_file_io.config import RUN_OPT_CONST
 from openmsipython.data_file_io.upload_data_file import UploadDataFile
 from openmsipython.data_file_io.data_file_stream_processor import DataFileStreamProcessor
-
 from config import TEST_CONST
 from utilities import MyThread
 

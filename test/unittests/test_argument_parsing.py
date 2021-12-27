@@ -1,10 +1,10 @@
 #imports
-from openmsipython.utilities.config import UTIL_CONST
-from openmsipython.utilities.argument_parsing import MyArgumentParser, existing_file, existing_dir, create_dir
-from openmsipython.utilities.argument_parsing import config_path, int_power_of_two, positive_int
+import unittest, pathlib, shutil, os
+from openmsipython.shared.config import UTIL_CONST
+from openmsipython.shared.argument_parsing import MyArgumentParser, existing_file, existing_dir, create_dir
+from openmsipython.shared.argument_parsing import config_path, int_power_of_two, positive_int
 from openmsipython.data_file_io.config import RUN_OPT_CONST
 from config import TEST_CONST
-import unittest, pathlib, shutil, os
 
 class TestArgumentParsing(unittest.TestCase) :
     """

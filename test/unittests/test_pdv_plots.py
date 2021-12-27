@@ -1,7 +1,7 @@
 #imports
 import unittest, pathlib, logging, time, shutil
+from openmsipython.shared.logging import Logger
 from openmsipython.data_file_io.config import RUN_OPT_CONST
-from openmsipython.utilities.logging import Logger
 from openmsipython.pdv.lecroy_file_upload_directory import LecroyFileUploadDirectory
 from openmsipython.pdv.pdv_plot_maker import PDVPlotMaker
 from config import TEST_CONST

@@ -5,8 +5,8 @@ matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import pandas as pd
 from io import BytesIO
+from ..shared.runnable import Runnable
 from ..data_file_io.config import RUN_OPT_CONST
-from ..utilities.runnable import Runnable
 from ..data_file_io.data_file_stream_processor import DataFileStreamProcessor
 from .pdv_analysis import PDVSpallAnalysis, PDVVelocityAnalysis
 from .lecroy_data_file import DownloadLecroyDataFile

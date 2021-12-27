@@ -3,8 +3,8 @@ import pathlib, traceback
 from threading import Lock
 from abc import ABC, abstractmethod
 from ..utilities.misc import populated_kwargs
-from ..utilities.logging import LogOwner
-from ..utilities.controlled_process import ControlledProcessMultiThreaded
+from ..shared.logging import LogOwner
+from ..shared.controlled_process import ControlledProcessMultiThreaded
 from ..my_kafka.consumer_group import ConsumerGroup
 from .config import DATA_FILE_HANDLING_CONST
 from .download_data_file import DownloadDataFileToMemory

@@ -1,9 +1,9 @@
 #imports
-from config import TEST_CONST
-from openmsipython.utilities.config_file_parser import ConfigFileParser
-from openmsipython.utilities.logging import Logger
-from random import choices
 import os, unittest, logging, configparser, string, pathlib
+from random import choices
+from openmsipython.shared.logging import Logger
+from openmsipython.shared.config_file_parser import ConfigFileParser
+from config import TEST_CONST
 
 #constants
 LOGGER = Logger(pathlib.Path(__file__).name.split('.')[0],logging.ERROR)

@@ -1,7 +1,7 @@
 #imports
-from .utilities import get_replaced_configs
-from ..utilities.config_file_parser import ConfigFileParser
 from confluent_kafka import Producer, SerializingProducer
+from ..shared.config_file_parser import ConfigFileParser
+from .utilities import get_replaced_configs
 
 class MyProducer(Producer) :
     """

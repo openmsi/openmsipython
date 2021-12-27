@@ -3,13 +3,13 @@ import traceback
 from threading import Thread
 from queue import Queue
 from hashlib import sha512
-from .data_file import DataFile
-from ..utilities.runnable import Runnable
 from ..utilities.misc import populated_kwargs
+from ..shared.runnable import Runnable
 from ..my_kafka.my_producers import MySerializingProducer
 from .config import RUN_OPT_CONST
 from .utilities import produce_from_queue_of_file_chunks
 from .data_file_chunk import DataFileChunk
+from .data_file import DataFile
 
 class UploadDataFile(DataFile,Runnable) :
     """

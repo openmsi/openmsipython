@@ -2,7 +2,7 @@
 import functools
 from abc import ABC, abstractmethod
 from gemd.entity.file_link import FileLink
-from ..utilities.logging import LogOwner
+from ..shared.logging import LogOwner
 
 class FromFileMakerRecordBase(LogOwner,ABC) :
     """

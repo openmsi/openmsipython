@@ -1,6 +1,6 @@
 #imports
 import os, configparser
-from ..utilities.logging import LogOwner
+from .logging import LogOwner
 
 class ConfigFileParser(LogOwner) :
     """

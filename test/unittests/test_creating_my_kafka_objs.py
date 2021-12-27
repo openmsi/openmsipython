@@ -1,7 +1,7 @@
 #imports
 import unittest, pathlib, logging
+from openmsipython.shared.logging import Logger
 from openmsipython.data_file_io.config import RUN_OPT_CONST
-from openmsipython.utilities.logging import Logger
 from openmsipython.my_kafka.my_producers import MyProducer, MySerializingProducer
 from openmsipython.my_kafka.my_consumers import MyConsumer, MyDeserializingConsumer
 from openmsipython.my_kafka.consumer_group import ConsumerGroup

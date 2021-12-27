@@ -1,9 +1,9 @@
 #imports
 import datetime, time
 from threading import Lock
-from ..utilities.controlled_process import ControlledProcessMultiThreaded
-from ..utilities.runnable import Runnable
 from ..utilities.misc import populated_kwargs
+from ..shared.runnable import Runnable
+from ..shared.controlled_process import ControlledProcessMultiThreaded
 from ..my_kafka.consumer_group import ConsumerGroup
 from .config import DATA_FILE_HANDLING_CONST, RUN_OPT_CONST
 from .download_data_file import DownloadDataFileToDisk
