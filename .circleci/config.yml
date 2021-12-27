@@ -13,7 +13,7 @@ workflows:
       - install-dependencies
       - build-and-code-check:
           requires:
-            -install-dependencies
+            - install-dependencies
       - run-tests:
           requires:
             - build-and-code-check
