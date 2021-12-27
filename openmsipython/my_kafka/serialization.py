@@ -5,6 +5,31 @@ from confluent_kafka.error import SerializationError
 from hashlib import sha512
 import msgpack, pathlib
 
+####################### COMPOUND (DE)SERIALIZER FOR STACKING MULTIPLE STEPS #######################
+
+class CompoundSerDes(Serializer, Deserializer):
+    """
+    A Serializer/Deserizlier that stacks multiple Serialization/Deserialization steps
+    """
+
+    def __init__(self, *args):
+        """
+        args = an list of (De)Serializer (or otherwise callable) objects to apply IN GIVEN ORDER to some data 
+        """
+        self.__steps = list(args)
+
+    def __call__(self,data,ctx=None) :
+        if data is None :
+            return None
+        for istep,serdes in enumerate(self.__steps,start=1) :
+            try :
+                data = serdes(data)
+            except Exception as e :
+                errmsg = f'ERROR: failed to (de)serialize at step {istep} in CompoundSerDes! Callable = {serdes}, '
+                errmsg+= f'exception = {e}'
+                raise SerializationError(errmsg)
+        return data
+
 ####################### SERIALIZING/DESERIALIZING FILE CHUNKS #######################
 
 class DataFileChunkSerializer(Serializer) :
