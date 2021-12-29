@@ -89,7 +89,7 @@ class DataFileStreamProcessor(ControlledProcessMultiThreaded,LogOwner,ConsumerGr
         #start the loop for while the controlled process is alive
         while self.alive :
             #consume a message from the topic
-            dfc = consumer.get_next_message(self.logger,0)
+            dfc = consumer.get_next_message_value(0)
             if dfc is None :
                 continue
             #set the chunk's rootdir to the current directory

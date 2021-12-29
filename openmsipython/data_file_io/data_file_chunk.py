@@ -1,7 +1,6 @@
 #imports
 import time, pathlib
 from hashlib import sha512
-from kafkacrypto import KafkaProducer
 from ..utilities.misc import populated_kwargs
 from ..shared.logging import Logger
 from .config import INTERNAL_PRODUCTION_CONST
@@ -137,11 +136,7 @@ class DataFileChunk :
         success=False; total_wait_secs=0 
         if (not success) and total_wait_secs<kwargs['timeout'] :
             try :
-                key = self.message_key; value = self
-                if isinstance(producer,KafkaProducer) :
-                    key = producer.ks(topic_name,key)
-                    value = producer.vs(topic_name,value)
-                producer.produce(topic=topic_name,key=key,value=value,on_delivery=producer_callback)
+                producer.produce(topic=topic_name,key=self.message_key,value=self,on_delivery=producer_callback)
                 success=True
             except BufferError :
                 time.sleep(kwargs['retry_sleep'])

@@ -5,7 +5,7 @@ from queue import Queue
 from hashlib import sha512
 from ..utilities.misc import populated_kwargs
 from ..shared.runnable import Runnable
-from ..my_kafka.my_producers import MySerializingProducer
+from ..my_kafka.my_producer import MyProducer
 from .config import RUN_OPT_CONST
 from .utilities import produce_from_queue_of_file_chunks
 from .data_file_chunk import DataFileChunk
@@ -146,7 +146,7 @@ class UploadDataFile(DataFile,Runnable) :
                                    'chunk_size': RUN_OPT_CONST.DEFAULT_CHUNK_SIZE,
                                   },self.logger)
         #start the producer
-        producer = MySerializingProducer.from_file(config_path,logger=self.logger)
+        producer = MyProducer.from_file(config_path,logger=self.logger)
         startup_msg = f"Uploading entire file {self.filepath} to {topic_name} in {kwargs['chunk_size']} byte chunks "
         startup_msg+=f"using {kwargs['n_threads']} threads...."
         self.logger.info(startup_msg)

@@ -1,6 +1,7 @@
 #imports
-import msgpack, pathlib, inspect
+import msgpack, pathlib, inspect, time
 from hashlib import sha512
+from kafkacrypto.message import KafkaCryptoMessage, KafkaCryptoMessageError
 from confluent_kafka.error import SerializationError
 from confluent_kafka.serialization import Serializer, Deserializer
 from ..data_file_io.data_file_chunk import DataFileChunk
@@ -58,6 +59,8 @@ class CompoundDeserializer(Deserializer):
     For use with KafkaCrypto since topic names must be passed
     """
 
+    MAX_WAIT_PER_MESSAGE = 600 #in seconds
+
     def __init__(self, *args):
         self.__steps = list(args)
 
@@ -66,6 +69,15 @@ class CompoundDeserializer(Deserializer):
             try :
                 if hasattr(des,'deserialize') and inspect.isroutine(des.deserialize) :
                     data = des.deserialize(topic,data)
+                    if isinstance(data,KafkaCryptoMessage) :
+                        success = False; elapsed = 0
+                        while (not success) and elapsed<CompoundDeserializer.MAX_WAIT_PER_MESSAGE :
+                            try :
+                                data = data.getMessage()
+                                success = True
+                            except KafkaCryptoMessageError :
+                                time.sleep(1)
+                                elapsed+=1
                 else :
                     data = des(data,ctx=None)
             except Exception as e :

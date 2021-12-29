@@ -4,7 +4,7 @@ from openmsipython.shared.logging import Logger
 from openmsipython.data_file_io.config import RUN_OPT_CONST
 from openmsipython.data_file_io.upload_data_file import UploadDataFile
 from openmsipython.data_file_io.data_file_chunk import DataFileChunk
-from openmsipython.my_kafka.my_producers import MySerializingProducer
+from openmsipython.my_kafka.my_producer import MyProducer
 from config import TEST_CONST
 
 #constants
@@ -26,7 +26,7 @@ class TestDataFileChunk(unittest.TestCase) :
         self.test_chunk_2._populate_with_file_data(logger=LOGGER)
 
     def test_produce_to_topic_kafka(self) :
-        producer = MySerializingProducer.from_file(TEST_CONST.TEST_CONFIG_FILE_PATH,logger=LOGGER)
+        producer = MyProducer.from_file(TEST_CONST.TEST_CONFIG_FILE_PATH,logger=LOGGER)
         self.test_chunk_1.produce_to_topic(producer,RUN_OPT_CONST.DEFAULT_TOPIC_NAME,logger=LOGGER)
         producer.flush()
         self.test_chunk_2.produce_to_topic(producer,RUN_OPT_CONST.DEFAULT_TOPIC_NAME,logger=LOGGER)
@@ -45,7 +45,7 @@ class TestDataFileChunk(unittest.TestCase) :
         LOGGER.set_stream_level(logging.ERROR)
         with self.assertRaises(FileNotFoundError) :
             chunk_to_fail._populate_with_file_data(logger=LOGGER)
-        producer = MySerializingProducer.from_file(TEST_CONST.TEST_CONFIG_FILE_PATH,logger=LOGGER)
+        producer = MyProducer.from_file(TEST_CONST.TEST_CONFIG_FILE_PATH,logger=LOGGER)
         with self.assertRaises(FileNotFoundError) :
             chunk_to_fail.produce_to_topic(producer,RUN_OPT_CONST.DEFAULT_TOPIC_NAME,logger=LOGGER)
 

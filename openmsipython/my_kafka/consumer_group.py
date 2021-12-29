@@ -1,13 +1,12 @@
 #imports
 import uuid
 from ..shared.config import UTIL_CONST
-from .my_consumers import MyDeserializingConsumer
+from .my_consumer import MyConsumer
 
 class ConsumerGroup :
     """
     Class for working with a group of consumers
     """
-    _consumer_type = MyDeserializingConsumer
 
     @property
     def consumers(self) :
@@ -16,7 +15,7 @@ class ConsumerGroup :
     def topic_name(self) :
         return self.__topic_name
 
-    def __init__(self,config_path,topic_name,*args,
+    def __init__(self,config_path,topic_name,*,
                  consumer_group_ID=str(uuid.uuid1()),n_consumers=UTIL_CONST.DEFAULT_N_THREADS,**other_kwargs) :
         """
         arguments:
@@ -29,10 +28,10 @@ class ConsumerGroup :
         """
         self.__topic_name = topic_name
         #create a Consumer for each thread and subscribe it to the topic
-        config_dict = self._consumer_type.get_config_dict(config_path,group_id=consumer_group_ID,**other_kwargs)
+        c_args, c_kwargs = MyConsumer.get_consumer_args_kwargs(config_path,group_id=consumer_group_ID,**other_kwargs)
         self.__consumers = []
         for i in range(n_consumers) :
-            consumer = self._consumer_type(config_dict)
+            consumer = MyConsumer(*c_args,**c_kwargs)
             self.__consumers.append(consumer)
         for consumer in self.__consumers :
             consumer.subscribe([self.__topic_name])        

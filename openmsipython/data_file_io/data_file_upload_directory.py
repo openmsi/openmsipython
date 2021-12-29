@@ -5,7 +5,7 @@ from queue import Queue
 from ..utilities.misc import populated_kwargs
 from ..shared.runnable import Runnable
 from ..shared.controlled_process import ControlledProcessSingleThread
-from ..my_kafka.my_producers import MySerializingProducer
+from ..my_kafka.my_producer import MyProducer
 from .config import RUN_OPT_CONST
 from .utilities import produce_from_queue_of_file_chunks
 from .data_file_directory import DataFileDirectory
@@ -77,7 +77,7 @@ class DataFileUploadDirectory(DataFileDirectory,ControlledProcessSingleThread,Ru
                                   },self.logger)
         self.__chunk_size = kwargs.get('chunk_size')
         #start the producer 
-        self.__producer = MySerializingProducer.from_file(config_path,logger=self.logger)
+        self.__producer = MyProducer.from_file(config_path,logger=self.logger)
         #if we're only going to upload new files, exclude what's already in the directory
         if kwargs['new_files_only'] :
             self.__find_new_files(to_upload=False)

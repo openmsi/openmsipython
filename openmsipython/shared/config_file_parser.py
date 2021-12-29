@@ -6,7 +6,7 @@ class ConfigFileParser(LogOwner) :
     """
     A class to parse configurations from files
     """
-
+    
     #################### PROPERTIES ####################
 
     @property
@@ -59,4 +59,3 @@ class ConfigFileParser(LogOwner) :
                         value = exp_value
                 config_dict[key] = value
         return config_dict
-
