@@ -1,20 +1,20 @@
 #imports
-from ..data_file_io.data_file_chunk import DataFileChunk
-from confluent_kafka.serialization import Serializer, Deserializer
-from confluent_kafka.error import SerializationError
+import msgpack, pathlib, inspect
 from hashlib import sha512
-import msgpack, pathlib
+from confluent_kafka.error import SerializationError
+from confluent_kafka.serialization import Serializer, Deserializer
+from ..data_file_io.data_file_chunk import DataFileChunk
 
-####################### COMPOUND (DE)SERIALIZER FOR STACKING MULTIPLE STEPS #######################
+####################### COMPOUND (DE)SERIALIZERS FOR STACKING MULTIPLE STEPS #######################
 
 class CompoundSerDes(Serializer, Deserializer):
     """
-    A Serializer/Deserizlier that stacks multiple Serialization/Deserialization steps
+    A Serializer/Deserializer that stacks multiple Serialization/Deserialization steps
     """
 
     def __init__(self, *args):
         """
-        args = an list of (De)Serializer (or otherwise callable) objects to apply IN GIVEN ORDER to some data 
+        args = a list of (De)Serializer (or otherwise callable) objects to apply IN GIVEN ORDER to some data 
         """
         self.__steps = list(args)
 
@@ -25,8 +25,52 @@ class CompoundSerDes(Serializer, Deserializer):
             try :
                 data = serdes(data)
             except Exception as e :
-                errmsg = f'ERROR: failed to (de)serialize at step {istep} in CompoundSerDes! Callable = {serdes}, '
-                errmsg+= f'exception = {e}'
+                errmsg = f'ERROR: failed to (de)serialize at step {istep} (of {len(self.__steps)}) in CompoundSerDes! '
+                errmsg+= f'Callable = {serdes}, exception = {e}'
+                raise SerializationError(errmsg)
+        return data
+
+class CompoundSerializer(Serializer):
+    """
+    A Serializer that stacks multiple steps
+    For use with KafkaCrypto since topic names must be passed
+    """
+
+    def __init__(self, *args):
+        self.__steps = list(args)
+
+    def serialize(self,topic,data) :
+        for istep,ser in enumerate(self.__steps,start=1) :
+            try :
+                if hasattr(ser,'serialize') and inspect.isroutine(ser.serialize) :
+                    data = ser.serialize(topic,data)
+                else :
+                    data = ser(data,ctx=None)
+            except Exception as e :
+                errmsg = f'ERROR: failed to serialize at step {istep} (of {len(self.__steps)}) in CompoundSerializer! '
+                errmsg+= f'Callable = {ser}, exception = {e}'
+                raise SerializationError(errmsg)
+        return data
+
+class CompoundDeserializer(Deserializer):
+    """
+    A Deserializer that stacks multiple steps
+    For use with KafkaCrypto since topic names must be passed
+    """
+
+    def __init__(self, *args):
+        self.__steps = list(args)
+
+    def deserialize(self,topic,data) :
+        for istep,des in enumerate(self.__steps,start=1) :
+            try :
+                if hasattr(des,'deserialize') and inspect.isroutine(des.deserialize) :
+                    data = des.deserialize(topic,data)
+                else :
+                    data = des(data,ctx=None)
+            except Exception as e :
+                errmsg = f'ERROR: failed to deserialize at step {istep} (of {len(self.__steps)}) in CompoundDeserializer! '
+                errmsg+= f'Callable = {des}, exception = {e}'
                 raise SerializationError(errmsg)
         return data
 

@@ -1,7 +1,9 @@
 #imports
-from .serialization import DataFileChunkSerializer, DataFileChunkDeserializer
+import pathlib
 from confluent_kafka.serialization import DoubleSerializer, IntegerSerializer, StringSerializer
 from confluent_kafka.serialization import DoubleDeserializer, IntegerDeserializer, StringDeserializer
+from ..shared.config import UTIL_CONST
+from .serialization import DataFileChunkSerializer, DataFileChunkDeserializer
 
 def get_transformed_configs(configs,names_to_classes) :
     """
@@ -40,6 +42,52 @@ def get_replaced_configs(configs,replacement_type) :
     else :
         raise ValueError(f'ERROR: unrecognized replacement_type "{replacement_type}" in get_replaced_configs!')
     return get_transformed_configs(configs,names_classes)
+
+def find_kc_config_file_from_parser(parser,logger=None) :
+    """
+    Returns the path to the config file that KafkaCrypto needs given a parser for a general config file.
+    Return value is a string as expected by KafkaCrypto.
+    If no config file is found according to the conventions listed below, this function returns None 
+    and it will be assumed that no configuration for KafkaCrypto exists
+
+    Options are:
+    1) The regular config file also has the KafkaCrypto configs in it, as indicated by the presence of 
+       the "node_id" in the DEFAULT section
+    2) The regular config file has a "kafkacrypto" section with a "config_file" parameter that is the 
+       path to the KafkaCrypo config file
+    3) The regular config file has a "kafkacrypto" section with a "node_id" parameter corresponding to 
+       a named subdirectory in openmsipython/my_kafka/config_files that was created when the node was provisioned
+    """
+    #option 1 above
+    if parser.has_default and 'node_id' in (parser.get_config_dict_for_groups('DEFAULT')).keys() :
+        return str(parser.filepath)
+    elif 'kafkacrypto' in parser.available_group_names :
+        kc_configs = parser.get_config_dict_for_groups('kafkacrypto')
+        #option 2 above
+        if 'config_file' in kc_configs.keys() :
+            path_as_str = (kc_configs['config_file']).lstrip('file#')
+            if not pathlib.Path(path_as_str.is_file()) :
+                errmsg = f'ERROR: KafkaCrypto config file {path_as_str} (from config file {parser.filepath}) not found!'
+                if logger is not None :
+                    logger.error(errmsg,FileNotFoundError)
+                else :
+                    raise FileNotFoundError(errmsg)
+            return path_as_str
+        #option 3 above
+        elif 'node_id' in kc_configs.keys() :
+            node_id = kc_configs['node_id']
+            dirpath = UTIL_CONST.CONFIG_FILE_DIR / node_id
+            filepath = dirpath / f'{node_id}.config'
+            if (not dirpath.is_dir()) or (not filepath.is_file()) :
+                errmsg = f'ERROR: no KafkaCrypto config file found in the default location ({filepath}) '
+                errmsg+= f'for node ID = {node_id}'
+                if logger is not None :
+                    logger.error(errmsg,FileNotFoundError)
+                else :
+                    raise FileNotFoundError(errmsg)
+            return str(filepath)
+    #no config file found
+    return None
 
 def get_next_message(consumer,logger,*poll_args,**poll_kwargs) :
     """

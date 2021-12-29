@@ -1,5 +1,7 @@
 #imports
+import pathlib, uuid
 from kafkacrypto import KafkaProducer, KafkaConsumer, KafkaCrypto
+from ..utilities.misc import cd
 
 class MyKafkaCrypto :
     """
@@ -25,8 +27,14 @@ class MyKafkaCrypto :
         server_configs = the producer/consumer-agnostic configurations for connecting to the server in question
         config_file    = the path to the config file that should be used to instantiate KafkaCrypto 
         """
-        #start up the producer and consumer
-        self._kcp = KafkaProducer(server_configs)
-        self._kcc = KafkaConsumer(server_configs)
-        #initialize the KafkaCrypto object 
-        self._kc = KafkaCrypto(None,self._kcp,self._kcc,config_file)
+        producer_configs = server_configs.copy()
+        consumer_configs = server_configs.copy()
+        #figure out a consumer group ID to use
+        if 'group.id' not in consumer_configs.keys() :
+            consumer_configs['group.id'] = str(uuid.uuid1())
+        with cd(pathlib.Path(config_file).parent) :
+            #start up the producer and consumer
+            self._kcp = KafkaProducer(**producer_configs)
+            self._kcc = KafkaConsumer(**consumer_configs)
+            #initialize the KafkaCrypto object 
+            self._kc = KafkaCrypto(None,self._kcp,self._kcc,config_file)

@@ -32,7 +32,7 @@ class ConsumerGroup :
         config_dict = self._consumer_type.get_config_dict(config_path,group_id=consumer_group_ID,**other_kwargs)
         self.__consumers = []
         for i in range(n_consumers) :
-            consumer = MyDeserializingConsumer(config_dict)
+            consumer = self._consumer_type(config_dict)
             self.__consumers.append(consumer)
         for consumer in self.__consumers :
             consumer.subscribe([self.__topic_name])        

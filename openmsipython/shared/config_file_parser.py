@@ -10,8 +10,14 @@ class ConfigFileParser(LogOwner) :
     #################### PROPERTIES ####################
 
     @property
-    def available_group_names(self):
+    def has_default(self) :
+        return 'DEFAULT' in self._config
+    @property
+    def available_group_names(self) :
         return self._config.sections()
+    @property
+    def filepath(self) :
+        return self._filepath
 
     #################### PUBLIC FUNCTIONS ####################
 
@@ -39,6 +45,9 @@ class ConfigFileParser(LogOwner) :
             if group_name not in self._config :
                 self.logger.error(f'ERROR: {group_name} is not a recognized section in {self._filepath}!',ValueError)
             for key, value in self._config[group_name].items() :
+                #don't add the 'node_id' to groups for clusters, producers, or consumers
+                if key=='node_id' and group_name in ['cluster','producer','consumer'] :
+                    continue
                 #if the value is an environment variable, expand it on the current system
                 if value.startswith('$') :
                     exp_value = os.path.expandvars(value)
