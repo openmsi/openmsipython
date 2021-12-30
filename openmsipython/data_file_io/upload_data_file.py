@@ -169,7 +169,7 @@ class UploadDataFile(DataFile,Runnable) :
         for ut in upload_threads :
             ut.join()
         self.logger.info('Waiting for all enqueued messages to be delivered (this may take a moment)....')
-        producer.flush() #don't leave the function until all messages have been sent/received
+        producer.flush(timeout=None) #don't leave the function until all messages have been sent/received
         self.logger.info('Done!')
 
     #################### PRIVATE HELPER FUNCTIONS ####################
