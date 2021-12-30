@@ -73,22 +73,21 @@ class MyConsumer(LogOwner) :
 
     def get_next_message_value(self,*poll_args,**poll_kwargs) :
         """
-        Call "poll" for this consumer and return any successfully consumed message
+        Call "poll" for this consumer and return any successfully consumed message's value
         otherwise log a warning if there's an error
         """
         consumed_msg = None
         try :
             consumed_msg = self.__consumer.poll(*poll_args,**poll_kwargs)
         except Exception as e :
-            warnmsg = 'WARNING: encountered an error in a call to consumer.poll() and will skip the offending message. '
-            warnmsg+= f'Error: {e}'
+            warnmsg = 'WARNING: encountered an error in a call to consumer.poll() and this message will be skipped. '
+            warnmsg+= f'Exception: {e}'
             self.logger.warning(warnmsg)
             raise e
             return
         if consumed_msg is not None and consumed_msg!={} :
             #wait for the message to be decrypted if necessary
             if isinstance(self.__consumer,KafkaConsumer) :
-                print(f'consumed_msg = {consumed_msg}')
                 elapsed = 0
                 while (not consumed_msg.value.isCleartext()) and elapsed<MyConsumer.MAX_WAIT_TIME_PER_KC_MESSAGE :
                     time.sleep(1)
