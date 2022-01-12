@@ -23,10 +23,10 @@ jobs:
   # Build the repo and check the code using pyflakes 
   build-and-code-check:
     docker:
-      - image: $DOCKERHUB_USERNAME/openmsipython:0.0.1
+      - image: containers.repo.sciserver.org/openmsipython:0.0.1
         auth:
-          username: $DOCKERHUB_USERNAME
-          password: $DOCKERHUB_PASSWORD
+          username: $IDIESDOCKER_USERNAME
+          password: $IDIESDOCKER_PASSWORD
     steps:
       - checkout
       - python/install-packages:
@@ -44,10 +44,10 @@ jobs:
   # Run unittests 
   run-tests:
     docker:
-      - image: $DOCKERHUB_USERNAME/openmsipython:0.0.1
+      - image: containers.repo.sciserver.org/openmsipython:0.0.1
         auth:
-          username: $DOCKERHUB_USERNAME
-          password: $DOCKERHUB_PASSWORD
+          username: $IDIESDOCKER_USERNAME
+          password: $IDIESDOCKER_PASSWORD
     parallelism: 11
     steps:
       - attach_workspace:
@@ -67,10 +67,10 @@ jobs:
   # Make sure that the repository is clean after all tests have been run
   check-repo:
     docker:
-      - image: $DOCKERHUB_USERNAME/openmsipython:0.0.1
+      - image: containers.repo.sciserver.org/openmsipython:0.0.1
         auth:
-          username: $DOCKERHUB_USERNAME
-          password: $DOCKERHUB_PASSWORD
+          username: $IDIESDOCKER_USERNAME
+          password: $IDIESDOCKER_PASSWORD
     steps:
       - attach_workspace:
           at: .

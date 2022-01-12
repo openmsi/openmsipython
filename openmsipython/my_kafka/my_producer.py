@@ -20,7 +20,7 @@ class MyProducer(LogOwner) :
         super().__init__(**kwargs)
         if producer_type==KafkaProducer :
             if kafkacrypto is None :
-                self.logger.error(f'ERROR: creating a KafkaProducer requires holding onto its KafkaCrypto objects!')
+                self.logger.error('ERROR: creating a KafkaProducer requires holding onto its KafkaCrypto objects!')
             self.__kafkacrypto = kafkacrypto
             self.__producer = producer_type(**configs)
         elif producer_type==SerializingProducer :

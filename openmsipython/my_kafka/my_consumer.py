@@ -23,7 +23,7 @@ class MyConsumer(LogOwner) :
         super().__init__(**kwargs)
         if consumer_type==KafkaConsumer :
             if kafkacrypto is None :
-                self.logger.error(f'ERROR: creating a KafkaConsumer requires holding onto its KafkaCrypto objects!')
+                self.logger.error('ERROR: creating a KafkaConsumer requires holding onto its KafkaCrypto objects!')
             self.__kafkacrypto = kafkacrypto
             self.__consumer = consumer_type(**configs)
         elif consumer_type==DeserializingConsumer :
