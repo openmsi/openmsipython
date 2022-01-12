@@ -78,7 +78,7 @@ class DataFileDownloadDirectory(DataFileDirectory,ControlledProcessMultiThreaded
         #start the loop for while the controlled process is alive
         while self.alive :
             #consume a DataFileChunk message from the topic
-            dfc = consumer.get_next_message_value(0)
+            dfc = consumer.get_next_message_value(100)
             if dfc is None :
                 time.sleep(0.25) #wait just a bit to not over-tax things
                 continue

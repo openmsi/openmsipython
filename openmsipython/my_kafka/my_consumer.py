@@ -15,13 +15,16 @@ class MyConsumer(LogOwner) :
 
     MAX_WAIT_TIME_PER_KC_MESSAGE = 10 #in seconds
 
-    def __init__(self,consumer_type,configs,**kwargs) :
+    def __init__(self,consumer_type,configs,kafkacrypto=None,**kwargs) :
         """
         consumer_type = the type of Consumer underlying this object
         configs = a dictionary of configurations to pass to the consumer to create it
         """
         super().__init__(**kwargs)
         if consumer_type==KafkaConsumer :
+            if kafkacrypto is None :
+                self.logger.error(f'ERROR: creating a KafkaConsumer requires holding onto its KafkaCrypto objects!')
+            self.__kafkacrypto = kafkacrypto
             self.__consumer = consumer_type(**configs)
         elif consumer_type==DeserializingConsumer :
             self.__consumer = consumer_type(configs)
@@ -40,6 +43,7 @@ class MyConsumer(LogOwner) :
         Used to quickly instantiate more than one identical MyConsumer for a ConsumerGroup
         """
         parser = MyKafkaConfigFileParser(config_file_path,logger=logger)
+        ret_kwargs = {}
         #get the cluster and consumer configurations
         all_configs = {**parser.cluster_configs,**parser.consumer_configs}
         all_configs = add_kwargs_to_configs(all_configs,**kwargs)
@@ -60,10 +64,11 @@ class MyConsumer(LogOwner) :
             all_configs['value_deserializer']=valdes
             #all_configs['debug']='broker,topic,msg'
             ret_args = [KafkaConsumer,all_configs]
+            ret_kwargs['kafkacrypto']=kc
         #otherwise use a DeserializingConsumer
         else :
             ret_args = [DeserializingConsumer,all_configs]
-        ret_kwargs = {'logger':logger}
+        ret_kwargs['logger'] = logger
         return ret_args, ret_kwargs
 
     @classmethod
@@ -78,12 +83,17 @@ class MyConsumer(LogOwner) :
         """
         consumed_msg = None
         try :
+            #import logging
+            #logging.basicConfig(level=logging.DEBUG)
+            #logging.getLogger('kafkaCrypto').setLevel(level=logging.DEBUG)
+            #print(f'Calling poll on consumer {self.__consumer}')
             consumed_msg = self.__consumer.poll(*poll_args,**poll_kwargs)
+            #print(f'Returned from poll for consumer {self.__consumer}')
         except Exception as e :
             warnmsg = 'WARNING: encountered an error in a call to consumer.poll() and this message will be skipped. '
             warnmsg+= f'Exception: {e}'
             self.logger.warning(warnmsg)
-            raise e
+            #raise e
             return
         if consumed_msg is not None and consumed_msg!={} :
             #wait for the message to be decrypted if necessary

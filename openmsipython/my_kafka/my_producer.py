@@ -12,13 +12,16 @@ class MyProducer(LogOwner) :
     Convenience class for working with a Producer of some type
     """
 
-    def __init__(self,producer_type,configs,**kwargs) :
+    def __init__(self,producer_type,configs,kafkacrypto=None,**kwargs) :
         """
         producer_type = the type of Producer underlying this object
         configs = a dictionary of configurations to pass to the producer to create it
         """
         super().__init__(**kwargs)
         if producer_type==KafkaProducer :
+            if kafkacrypto is None :
+                self.logger.error(f'ERROR: creating a KafkaProducer requires holding onto its KafkaCrypto objects!')
+            self.__kafkacrypto = kafkacrypto
             self.__producer = producer_type(**configs)
         elif producer_type==SerializingProducer :
             self.__producer = producer_type(configs)
@@ -52,7 +55,7 @@ class MyProducer(LogOwner) :
             all_configs['key_serializer']=keyser
             all_configs['value_serializer']=valser
             #all_configs['debug']='broker,topic,msg'
-            return cls(KafkaProducer,all_configs,logger=logger)
+            return cls(KafkaProducer,all_configs,kafkacrypto=kc,logger=logger)
         #otherwise use a SerializingProducer
         else :
             return cls(SerializingProducer,all_configs,logger=logger)
