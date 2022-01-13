@@ -10,6 +10,7 @@ from utilities import MyThread
 #constants
 LOGGER = Logger(pathlib.Path(__file__).name.split('.')[0],logging.ERROR)
 TIMEOUT_SECS = 90
+JOIN_TIMEOUT_SECS = 30
 TOPIC_NAME = 'test_data_file_stream_processor'
 
 class DataFileStreamProcessorForTesting(DataFileStreamProcessor) :
@@ -76,13 +77,14 @@ class TestDataFileStreamProcessor(unittest.TestCase) :
                 time_waited+=5
             LOGGER.set_stream_level(logging.INFO)
             msg = 'Quitting download thread in test_data_file_stream_processor after processing '
-            msg+= f'{dfsp.n_msgs_read} messages; will timeout after 5 seconds....'
+            msg+= f'{dfsp.n_msgs_read} messages; will timeout after {JOIN_TIMEOUT_SECS} seconds....'
             LOGGER.info(msg)
             LOGGER.set_stream_level(logging.ERROR)
             dfsp.control_command_queue.put('q')
-            stream_thread.join(timeout=5)
+            stream_thread.join(timeout=JOIN_TIMEOUT_SECS)
             if stream_thread.is_alive() :
-                errmsg = 'ERROR: download thread in test_data_file_stream_processor timed out after 5 seconds!'
+                errmsg = 'ERROR: download thread in test_data_file_stream_processor timed out after '
+                errmsg+= f'{JOIN_TIMEOUT_SECS} seconds!'
                 raise TimeoutError(errmsg)
             #make sure the contents of the file in memory are the same as the original
             self.assertTrue(TEST_CONST.TEST_DATA_FILE_2_NAME in dfsp.completed_bytestrings_by_filename.keys())
@@ -96,9 +98,10 @@ class TestDataFileStreamProcessor(unittest.TestCase) :
             if stream_thread.is_alive() :
                 try :
                     dfsp.control_command_queue.put('q')
-                    stream_thread.join(timeout=5)
+                    stream_thread.join(timeout=JOIN_TIMEOUT_SECS)
                     if stream_thread.is_alive() :
-                        errmsg = 'ERROR: download thread in test_data_file_stream_processor timed out after 5 seconds!'
+                        errmsg = 'ERROR: download thread in test_data_file_stream_processor timed out after '
+                        errmsg+= f'{JOIN_TIMEOUT_SECS} seconds!'
                         raise TimeoutError(errmsg)
                 except Exception as e :
                     raise e

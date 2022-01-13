@@ -43,10 +43,10 @@ class RunOptionConstants :
         return 'prod' # name of the config file used in "real" production
     @property
     def N_DEFAULT_UPLOAD_THREADS(self) :
-        return 10      # default number of threads to use when uploading a file
+        return 2      # default number of threads to use when uploading a file
     @property
     def N_DEFAULT_DOWNLOAD_THREADS(self) :
-        return 3      # default number of threads to use when downloading chunks of a file
+        return 2      # default number of threads to use when downloading chunks of a file
     @property
     def DEFAULT_CHUNK_SIZE(self) :
         return 16384  # default size in bytes of each file upload chunk

@@ -8,7 +8,6 @@ from openmsipython.data_file_io.upload_data_file import UploadDataFile
 from openmsipython.data_file_io.download_data_file import DownloadDataFileToDisk, DownloadDataFileToMemory
 from config import TEST_CONST
 
-
 #constants
 LOGGER = Logger(pathlib.Path(__file__).name.split('.')[0],logging.ERROR)
 

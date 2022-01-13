@@ -11,6 +11,7 @@ from utilities import MyThread
 LOGGER = Logger(pathlib.Path(__file__).name.split('.')[0],logging.ERROR)
 UPDATE_SECS = 5
 TIMEOUT_SECS = 90
+JOIN_TIMEOUT_SECS = 30
 TOPIC_NAME = 'test_data_file_directories'
 
 class TestDataFileDirectories(unittest.TestCase) :
@@ -61,9 +62,10 @@ class TestDataFileDirectories(unittest.TestCase) :
             if upload_thread.is_alive() :
                 try :
                     dfud.shutdown()
-                    upload_thread.join(timeout=5)
+                    upload_thread.join(timeout=JOIN_TIMEOUT_SECS)
                     if upload_thread.is_alive() :
-                        errmsg = 'ERROR: upload thread in run_data_file_upload_directory timed out after 5 seconds!'
+                        errmsg = 'ERROR: upload thread in run_data_file_upload_directory timed out after '
+                        errmsg+= f'{JOIN_TIMEOUT_SECS} seconds!'
                         raise TimeoutError(errmsg)
                 except Exception as e :
                     raise e
@@ -113,14 +115,15 @@ class TestDataFileDirectories(unittest.TestCase) :
             #put the "quit" command into the input queue, which SHOULD stop the method running
             LOGGER.set_stream_level(logging.INFO)
             msg = f'Quitting download thread in run_data_file_download_directory after reading {dfdd.n_msgs_read} '
-            msg+= 'messages; will timeout after 5 seconds....'
+            msg+= f'messages; will timeout after {JOIN_TIMEOUT_SECS} seconds....'
             LOGGER.info(msg)
             LOGGER.set_stream_level(logging.ERROR)
             dfdd.control_command_queue.put('q')
             #wait for the download thread to finish
-            download_thread.join(timeout=5)
+            download_thread.join(timeout=JOIN_TIMEOUT_SECS)
             if download_thread.is_alive() :
-                errmsg = 'ERROR: download thread in run_data_file_download_directory timed out after 5 seconds!'
+                errmsg = 'ERROR: download thread in run_data_file_download_directory timed out after '
+                errmsg+= f'{JOIN_TIMEOUT_SECS} seconds!'
                 raise TimeoutError(errmsg)
             #make sure the reconstructed file exists with the same name and content as the original
             fp = TEST_CONST.TEST_RECO_DIR_PATH/TEST_CONST.TEST_DATA_FILE_SUB_DIR_NAME/TEST_CONST.TEST_DATA_FILE_NAME
@@ -135,9 +138,10 @@ class TestDataFileDirectories(unittest.TestCase) :
             if download_thread.is_alive() :
                 try :
                     dfdd.control_command_queue.put('q')
-                    download_thread.join(timeout=5)
+                    download_thread.join(timeout=JOIN_TIMEOUT_SECS)
                     if download_thread.is_alive() :
-                        errmsg = 'ERROR: download thread in run_data_file_download_directory timed out after 5 seconds!'
+                        errmsg = 'ERROR: download thread in run_data_file_download_directory timed out after '
+                        errmsg+= f'{JOIN_TIMEOUT_SECS} seconds!'
                         raise TimeoutError(errmsg)
                 except Exception as e :
                     raise e
