@@ -55,7 +55,7 @@ class LaserShockSampleSpec(SpecForRun) :
         raw_mat_properties = []
         if comp_dict!={} :
             condition = None
-            if self.pct_meas!='' :
+            if self.pct_meas not in ('','N/A') :
                 condition = Condition(name='CompositionMeasure',
                                       value=NominalCategorical(str(self.pct_meas)),
                                       template=ATTR_TEMPL['Composition Measure'],
