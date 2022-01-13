@@ -11,7 +11,7 @@ from utilities import MyThread
 LOGGER = Logger(pathlib.Path(__file__).name.split('.')[0],logging.ERROR)
 UPDATE_SECS = 5
 TIMEOUT_SECS = 90
-JOIN_TIMEOUT_SECS = 30
+JOIN_TIMEOUT_SECS = 60
 TOPIC_NAME = 'test_data_file_directories'
 
 class TestDataFileDirectories(unittest.TestCase) :
