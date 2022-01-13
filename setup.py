@@ -20,7 +20,7 @@ setupkwargs = dict(
                             ],
     },
     python_requires='>=3.7,<3.10',
-    install_requires=['confluent-kafka>=1.6.0',
+    install_requires=['confluent-kafka>=1.8.2',
                       'matplotlib>=3.4.0',
                       'msgpack>=1.0.0',
                       'pandas>=1.3.0',
