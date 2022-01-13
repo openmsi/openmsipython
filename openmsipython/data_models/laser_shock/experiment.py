@@ -58,6 +58,7 @@ class LaserShockExperimentSpec(SpecForRun) :
             'Beam Profiler Filter',
             'Sample Recovery Method',
             'Launch Package Holder',
+            'Check Vacuum',
         ]
         namesvals = [(name,self.kwargs.get(name)) for name in names]
         for name,val in namesvals :
@@ -121,7 +122,7 @@ class LaserShockExperimentSpec(SpecForRun) :
         ]
         namesvals = [(name,self.kwargs.get(name)) for name in names]
         for name,val in namesvals :
-            if val=='' :
+            if val in ('','N/A') :
                 continue
             temp = ATTR_TEMPL[name]
             parameters.append(Parameter(name=name.replace(' ',''),
@@ -177,7 +178,8 @@ class LaserShockExperiment(MeasurementRunFromFileMakerRecord) :
         return [*super().tags_keys,
                 'Recovery Box','Recovery Row','Recovery Column',
                 'New Energy Measurement',
-                'Grant Funding'
+                'Grant Funding',
+                'Experiment Day Counter'
             ]
 
     @property
@@ -191,7 +193,8 @@ class LaserShockExperiment(MeasurementRunFromFileMakerRecord) :
     @property
     def measured_property_dict(self):
         d = {}
-        names = ['Flyer Tilt','Flyer Curvature','Launch Package Orientation','Video Quality','Spall State']
+        names = ['Flyer Tilt','Flyer Curvature','Launch Package Orientation',
+                 'Video Quality','Spall State','Check Plateau']
         for name in names :
             d[name] = {'valuetype':NominalCategorical,'template':ATTR_TEMPL[name]}
         names = ['Return Signal Strength','Max Velocity','Est Impact Velocity']
@@ -267,6 +270,7 @@ class LaserShockExperiment(MeasurementRunFromFileMakerRecord) :
             #stuff from the launch integration tab
             #conditions
             'Base Pressure',
+            'Check Vacuum', # 'On' or 'Off'
             'PDV spot flyer ratio', #'?' is possible
             'Sample Recovery Method',
             'Launch Ratio', #'?' is possible

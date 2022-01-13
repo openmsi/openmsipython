@@ -95,7 +95,7 @@ name = 'Epoxy Thickness'
 ATTR_TEMPL[name] = PropertyTemplate(
     name=name,
     description='The thickness of a layer of epoxy',
-    bounds=RealBounds(-10,100,'um')
+    bounds=RealBounds(-100,100,'um')
 )
 
 name = 'Stack Thickness'
@@ -108,7 +108,7 @@ ATTR_TEMPL[name] = PropertyTemplate(
 name = 'Sample Material Type'
 ATTR_TEMPL[name] = PropertyTemplate(
     name=name,
-    description='Possible values in the "Material Processing" menu buttons in the "Sample" layout',
+    description='Possible values in the "Material" menu buttons in the "Sample" layout',
     bounds=CategoricalBounds(['Metal','Ceramic','Polymer','BMG','HEA','Composite'])
 )
 
@@ -116,7 +116,7 @@ name = 'Sample Raw Material Composition'
 ATTR_TEMPL[name] = PropertyTemplate(
     name=name,
     description="The composition of a raw material that's processed to produce a Laser Shock Sample",
-    bounds=CompositionBounds(components=('Mg','Al','Zr','Ti','Cu','Ni','Be'))
+    bounds=CompositionBounds(components=('Mg','Al','Zr','Ti','Cu','Ni','Be','Zn','Ca'))
 )
 
 name = 'Density'
@@ -228,14 +228,21 @@ name = 'Max Velocity'
 ATTR_TEMPL[name] = PropertyTemplate(
     name=name,
     description='Maximum velocity measured using PDV',
-    bounds=RealBounds(0.,1.e3,'m/s')
+    bounds=RealBounds(0.,3.e3,'m/s')
 )
 
 name = 'Est Impact Velocity'
 ATTR_TEMPL[name] = PropertyTemplate(
     name=name,
     description='Estimated velocity of the flyer at impact',
-    bounds=RealBounds(0.,1.e3,'m/s')
+    bounds=RealBounds(0.,3.e3,'m/s')
+)
+
+name = 'Check Plateau'
+ATTR_TEMPL[name] = PropertyTemplate(
+    name=name,
+    description='Did the spall velocity plateau?',
+    bounds=CategoricalBounds(['Yes','No'])
 )
 
 #################### PARAMETERS ####################
@@ -251,7 +258,7 @@ name = 'Glass Part Number'
 ATTR_TEMPL[name] = ParameterTemplate(
     name=name,
     description="The manufacturer's part number for a piece of glass that was purchased",
-    bounds=CategoricalBounds(['B8476012']),
+    bounds=CategoricalBounds(['B8476012','B84760126','B84760127','B84760128']),
 )
 
 name = 'Epoxy Supplier'
@@ -279,7 +286,7 @@ name = 'Spacer Supplier'
 ATTR_TEMPL[name] = ParameterTemplate(
     name=name,
     description='The name of a supplier from which a spacer was procured',
-    bounds=CategoricalBounds(['AluFoil']),
+    bounds=CategoricalBounds(['CS Hyde']),
 )
 
 name = 'Spacer Part Number'
@@ -335,7 +342,7 @@ name = 'Compression Weight'
 ATTR_TEMPL[name] = ParameterTemplate(
     name=name,
     description='How many pounds of force should be used to compress a glass/epoxy/foil stack while the epoxy cures',
-    bounds=RealBounds(0,100,'lb')
+    bounds=RealBounds(0,500,'lb')
 )
 
 name = 'Compression Time'
@@ -801,6 +808,13 @@ ATTR_TEMPL[name] = ConditionTemplate(
     name=name,
     description='The diameter of the PDV laser spot',
     bounds=RealBounds(0.,1.e3,'um')
+)
+
+name = 'Check Vacuum'
+ATTR_TEMPL[name] = ConditionTemplate(
+    name=name,
+    description='Is the vacuum on?',
+    bounds=CategoricalBounds(['On','Off'])
 )
 
 name = 'Base Pressure'

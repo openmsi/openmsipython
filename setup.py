@@ -26,7 +26,7 @@ setupkwargs = dict(
                       'pandas>=1.3.0',
                       'scipy>=1.7.0',
                       'python-fmrest>=1.4.0',
-                      'gemd>=1.2.0',
+                      'gemd>=1.8.1',
                       'kafkacrypto>=0.9.9.11a0',
                      ],
     extras_require = {'test': ['pyflakes>=2.2.0',],},

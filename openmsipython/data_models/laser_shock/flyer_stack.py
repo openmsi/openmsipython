@@ -60,19 +60,31 @@ class LaserShockFlyerStackSpec(SpecForRun) :
         #process, materials, and ingredients for mixing epoxy
         mixing_epoxy_params = []
         if self.mixing_time!='' :
+            if type(self.mixing_time)==str :
+                val = int(self.mixing_time.split(':')[0]) # assume an int # of mins like 05:00:00
+            elif type(self.mixing_time)==int :
+                val = self.mixing_time
+            else :
+                self.logger.error(f'ERROR: receivied a mixing time value of type {type(self.mixing_time)}',TypeError)
             mixing_epoxy_params.append(
                 Parameter(
                     name='Mixing Time',
-                    value=NominalInteger(int(self.mixing_time.split(':')[0])), # assume an int # of mins like 05:00:00
+                    value=NominalInteger(val), 
                     template=ATTR_TEMPL['Mixing Time'],
                     origin='specified',
                     )
             )
         if self.resting_time!='' :
+            if type(self.resting_time)==str :
+                val = int(self.resting_time.split(':')[0]) # ^ same with resting time
+            elif type(self.resting_time)==int :
+                val = self.resting_time
+            else :
+                self.logger.error(f'ERROR: receivied a resting time value of type {type(self.resting_time)}',TypeError)
             mixing_epoxy_params.append(
                 Parameter(
                     name='Resting Time',
-                    value=NominalInteger(int(self.resting_time.split(':')[0])), # ^ same with resting time
+                    value=NominalInteger(val), 
                     template=ATTR_TEMPL['Resting Time'],
                     origin='specified',
                     )
@@ -90,6 +102,16 @@ class LaserShockFlyerStackSpec(SpecForRun) :
                        process=mixing_epoxy,absolute_quantity=aq)
         mixed_epoxy = MaterialSpec(name='Mixed Epoxy',process=mixing_epoxy)
         #process and ingredients for making the glass/epoxy/foil stack
+        epoxying_conds = []
+        if self.comp_method!='' :
+            epoxying_conds.append(
+                Condition(
+                    name='Compression Method',
+                    value=NominalCategorical(str(self.comp_method)),
+                    template=ATTR_TEMPL['Compression Method'],
+                    origin='specified',
+                    )
+            )
         epoxying_params = []
         if self.comp_weight!='' :
             epoxying_params.append(
@@ -111,14 +133,7 @@ class LaserShockFlyerStackSpec(SpecForRun) :
             )
         epoxying = ProcessSpec(
             name='Epoxying a Flyer Stack',
-            conditions=[
-                Condition(
-                    name='Compression Method',
-                    value=NominalCategorical(str(self.comp_method)),
-                    template=ATTR_TEMPL['Compression Method'],
-                    origin='specified',
-                    )
-                ],
+            conditions=epoxying_conds,
             parameters=epoxying_params,
             template=OBJ_TEMPL['Epoxying a Flyer Stack'],
             )
@@ -159,19 +174,19 @@ class LaserShockFlyerStackSpec(SpecForRun) :
                     )
                 )
         if self.cutting_energy!='' :
+            temp = ATTR_TEMPL['Laser Cutting Energy']
             laser_cutting_energy_par = None
             for p in cutting.parameters :
                 if p.name=='LaserCuttingEnergy' :
                     laser_cutting_energy_par = p
                     break
             if laser_cutting_energy_par is not None :
-                new_value=NominalReal(float(self.cutting_energy))
-                msg =  'WARNING: replacing laser cutting energy in a created Spec based on new information in the '
-                msg+= f'Flyer Stack layout. Old value = {p.value}, new value = {new_value}'
-                self.logger.warning(msg)
+                new_value=NominalReal(float(self.cutting_energy),temp.bounds.default_units)
+                #msg =  'WARNING: replacing laser cutting energy in a created Spec based on new information in the '
+                #msg+= f'Flyer Stack layout. Old value = {p.value}, new value = {new_value}'
+                #self.logger.warning(msg)
                 p.value=new_value
             else :
-                temp = ATTR_TEMPL['Laser Cutting Energy']
                 cutting.parameters.append(
                     Parameter(
                         name='LaserCuttingEnergy',
@@ -188,9 +203,9 @@ class LaserShockFlyerStackSpec(SpecForRun) :
                     break
             if n_passes_par is not None :
                 new_value=NominalInteger(int(self.n_passes))
-                msg =  'WARNING: replacing number of passes in a created Spec based on new information in the '
-                msg+= f'Flyer Stack layout. Old value = {p.value}, new value = {new_value}'
-                self.logger.warning(msg)
+                #msg =  'WARNING: replacing number of passes in a created Spec based on new information in the '
+                #msg+= f'Flyer Stack layout. Old value = {p.value}, new value = {new_value}'
+                #self.logger.warning(msg)
                 p.value=new_value
             else :
                 cutting.parameters.append(
@@ -230,7 +245,7 @@ class LaserShockFlyerStack(MaterialRunFromFileMakerRecord) :
                                           'template':ATTR_TEMPL['Stack Thickness']}
             rd[f'Epoxy Thickness {i}'] = {'valuetype':NominalReal,
                                           'datatype':float,
-                                          'template':ATTR_TEMPL['Stack Thickness'],
+                                          'template':ATTR_TEMPL['Epoxy Thickness'],
                                           'origin':'computed'}
         return rd
 

@@ -117,6 +117,7 @@ OBJ_TEMPL[name] = MeasurementTemplate(
                 ATTR_TEMPL['Theoretical Beam Diameter'],
                 ATTR_TEMPL['PreAmp Output Power'],
                 ATTR_TEMPL['PDV Spot Size'],
+                ATTR_TEMPL['Check Vacuum'],
                 ATTR_TEMPL['Base Pressure'],
                 ATTR_TEMPL['PDV spot flyer ratio'],
                 ATTR_TEMPL['Launch Ratio'],
@@ -144,6 +145,7 @@ OBJ_TEMPL[name] = MeasurementTemplate(
                 ATTR_TEMPL['Return Signal Strength'],
                 ATTR_TEMPL['Max Velocity'],
                 ATTR_TEMPL['Est Impact Velocity'],
+                ATTR_TEMPL['Check Plateau'],
         ],
 )
 
