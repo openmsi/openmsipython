@@ -1,5 +1,4 @@
 #imports
-import time
 from confluent_kafka import DeserializingConsumer
 from kafkacrypto import KafkaConsumer
 from ..shared.logging import LogOwner
@@ -13,8 +12,6 @@ class MyConsumer(LogOwner) :
     Convenience class for working with a Consumer of some type
     """
 
-    MAX_WAIT_TIME_PER_KC_MESSAGE = 10 #in seconds
-
     def __init__(self,consumer_type,configs,kafkacrypto=None,**kwargs) :
         """
         consumer_type = the type of Consumer underlying this object
@@ -26,6 +23,7 @@ class MyConsumer(LogOwner) :
                 self.logger.error('ERROR: creating a KafkaConsumer requires holding onto its KafkaCrypto objects!')
             self.__kafkacrypto = kafkacrypto
             self.__consumer = consumer_type(**configs)
+            self.__messages = []
         elif consumer_type==DeserializingConsumer :
             self.__consumer = consumer_type(configs)
         else :
@@ -80,40 +78,39 @@ class MyConsumer(LogOwner) :
         """
         Call "poll" for this consumer and return any successfully consumed message's value
         otherwise log a warning if there's an error
-        """
-        consumed_msg = None
-        try :
-            #import logging
-            #logging.basicConfig(level=logging.DEBUG)
-            #logging.getLogger('kafkaCrypto').setLevel(level=logging.DEBUG)
-            #print(f'Calling poll on consumer {self.__consumer}')
-            consumed_msg = self.__consumer.poll(*poll_args,**poll_kwargs)
-            #print(f'Returned from poll for consumer {self.__consumer}')
-        except Exception as e :
-            warnmsg = 'WARNING: encountered an error in a call to consumer.poll() and this message will be skipped. '
-            warnmsg+= f'Exception: {e}'
-            self.logger.warning(warnmsg)
-            #raise e
-            return
-        if consumed_msg is not None and consumed_msg!={} :
-            #wait for the message to be decrypted if necessary
-            if isinstance(self.__consumer,KafkaConsumer) :
-                elapsed = 0
-                while (not consumed_msg.value.isCleartext()) and elapsed<MyConsumer.MAX_WAIT_TIME_PER_KC_MESSAGE :
-                    time.sleep(1)
-                    elapsed+=1
-                if consumed_msg.value.isCleartext() :
-                    return consumed_msg.value
-                else :
-                    self.logger.warning('WARNING: failed to decrypt a message!')
-            else :
+        """ 
+        #There's one version for the result of a KafkaConsumer.poll() call
+        if isinstance(self.__consumer,KafkaConsumer) :
+            #check if there are any messages still waiting to be processed from a recent KafkaCrypto poll call
+            if isinstance(self.__consumer,KafkaConsumer) and len(self.__messages)>0 :
+                consumed_msg = self.__messages.pop(0)
+                return consumed_msg.value
+            msg_dict = self.__consumer.poll(*poll_args,**poll_kwargs)
+            if msg_dict=={} :
+                return
+            for pk in msg_dict.keys() :
+                for m in msg_dict[pk] :
+                    self.__messages.append(m)
+            return self.get_next_message_value(*poll_args,**poll_kwargs)
+        #And another version for a regular Consumer
+        else :
+            consumed_msg = None
+            try :
+                consumed_msg = self.__consumer.poll(*poll_args,**poll_kwargs)
+            except Exception as e :
+                warnmsg = 'WARNING: encountered an error in a call to consumer.poll() and this message will be skipped. '
+                warnmsg+= f'Exception: {e}'
+                self.logger.warning(warnmsg)
+                #raise e
+                return
+            if consumed_msg is not None and consumed_msg!={} :
                 if consumed_msg.error() is not None or consumed_msg.value() is None :
                     warnmsg = f'WARNING: unexpected consumed message, consumed_msg = {consumed_msg}'
                     warnmsg+= f', consumed_msg.error() = {consumed_msg.error()}, consumed_msg.value() = {consumed_msg.value()}'
                     self.logger.warning(warnmsg)
                 return consumed_msg.value()
-        else :
-            return
+            else :
+                return
 
     def subscribe(self,*args,**kwargs) :
         self.__consumer.subscribe(*args,**kwargs)

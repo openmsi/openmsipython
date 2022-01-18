@@ -39,6 +39,7 @@ class MyProducer(LogOwner) :
         #get the cluster and producer configurations
         all_configs = {**parser.cluster_configs,**parser.producer_configs}
         all_configs = add_kwargs_to_configs(all_configs,**kwargs)
+        #all_configs['debug']='broker,topic,msg'
         #if there are configs for KafkaCrypto, use a KafkaProducer
         if parser.kc_config_file_str is not None :
             if logger is not None :
@@ -54,7 +55,6 @@ class MyProducer(LogOwner) :
                 valser = kc.value_serializer
             all_configs['key_serializer']=keyser
             all_configs['value_serializer']=valser
-            #all_configs['debug']='broker,topic,msg'
             return cls(KafkaProducer,all_configs,kafkacrypto=kc,logger=logger)
         #otherwise use a SerializingProducer
         else :
