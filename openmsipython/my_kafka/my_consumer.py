@@ -47,6 +47,7 @@ class MyConsumer(LogOwner) :
         #get the cluster and consumer configurations
         all_configs = {**parser.cluster_configs,**parser.consumer_configs}
         all_configs = add_kwargs_to_configs(all_configs,**kwargs)
+        #all_configs['debug']='broker,topic,msg'
         #if there are configs for KafkaCrypto, use a KafkaConsumer
         if parser.kc_config_file_str is not None :
             if logger is not None :
@@ -62,7 +63,6 @@ class MyConsumer(LogOwner) :
                 valdes = kc.value_deserializer
             all_configs['key_deserializer']=keydes
             all_configs['value_deserializer']=valdes
-            #all_configs['debug']='broker,topic,msg'
             ret_args = [KafkaConsumer,all_configs]
             ret_kwargs['kafkacrypto']=kc
         #otherwise use a DeserializingConsumer

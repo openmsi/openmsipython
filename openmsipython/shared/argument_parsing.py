@@ -25,7 +25,7 @@ def create_dir(argstring) :
     if pathlib.Path.is_dir(pathlib.Path(argstring)) :
         return pathlib.Path(argstring).resolve()
     try :
-        pathlib.Path.mkdir(pathlib.Path(argstring),exist_ok=True)
+        pathlib.Path.mkdir(pathlib.Path(argstring),parents=True,exist_ok=True)
         return pathlib.Path(argstring).resolve()
     except Exception as e :
         raise RuntimeError(f'ERROR: failed to create directory with name {argstring}! error: {e}')
