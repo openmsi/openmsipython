@@ -2,7 +2,6 @@
 import pathlib, traceback
 from threading import Lock
 from abc import ABC, abstractmethod
-from ..utilities.misc import populated_kwargs
 from ..shared.logging import LogOwner
 from ..shared.controlled_process import ControlledProcessMultiThreaded
 from ..my_kafka.consumer_group import ConsumerGroup
@@ -20,9 +19,6 @@ class DataFileStreamProcessor(ControlledProcessMultiThreaded,LogOwner,ConsumerGr
     def other_datafile_kwargs(self) :
         return {} #Overload in child classes to add additional keyword arguments to the datafile constructor
     @property
-    def n_msgs_read(self) :
-        return self.__n_msgs_read
-    @property
     def processed_filepaths(self) :
         return self.__processed_filepaths
     @property
@@ -37,14 +33,12 @@ class DataFileStreamProcessor(ControlledProcessMultiThreaded,LogOwner,ConsumerGr
     #################### PUBLIC FUNCTIONS ####################
 
     def __init__(self,*args,datafile_type=DownloadDataFileToMemory,**kwargs) :
-        kwargs = populated_kwargs(kwargs,{'n_consumers':kwargs.get('n_threads')})
         super().__init__(*args,**kwargs)
         if not issubclass(datafile_type,DownloadDataFileToMemory) :
             errmsg = 'ERROR: DataFileStreamProcessor requires a datafile_type that is a subclass of '
             errmsg+= f'DownloadDataFileToMemory but {datafile_type} was given!'
             self.logger.error(errmsg,ValueError)
         self.__datafile_type = datafile_type
-        self.__n_msgs_read = 0
         self.__processed_filepaths = []
         self.__data_files_by_filepath = {}
         self.__thread_locks = {}
@@ -89,7 +83,7 @@ class DataFileStreamProcessor(ControlledProcessMultiThreaded,LogOwner,ConsumerGr
         #start the loop for while the controlled process is alive
         while self.alive :
             #consume a message from the topic
-            dfc = consumer.get_next_message_value(0)
+            dfc = consumer.get_next_message_value(1)
             if dfc is None :
                 continue
             #set the chunk's rootdir to the current directory
