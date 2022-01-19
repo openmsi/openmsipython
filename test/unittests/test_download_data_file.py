@@ -32,7 +32,7 @@ class TestDownloadDataFile(unittest.TestCase) :
         try :
             #add all of the chunks from an upload file, checking that the return codes are correct
             for ic,dfc in enumerate(self.ul_datafile.chunks_to_upload) :
-                dfc._populate_with_file_data(logger=LOGGER)
+                dfc.populate_with_file_data(logger=LOGGER)
                 subdir_as_path = pathlib.Path('').joinpath(*(pathlib.PurePosixPath(TEST_CONST.TEST_DATA_FILE_SUB_DIR_NAME).parts))
                 dfc_as_dl = DataFileChunk(subdir_as_path/dfc.filename,dfc.filename,
                                           dfc.file_hash,dfc.chunk_hash,

@@ -1,8 +1,10 @@
 #imports
+import time
 from confluent_kafka import SerializingProducer
 from kafkacrypto import KafkaProducer
 from ..shared.logging import LogOwner
-from .utilities import add_kwargs_to_configs
+from ..shared.producible import Producible
+from .utilities import add_kwargs_to_configs, producer_callback, PRODUCER_CALLBACK_LOGGER
 from .config_file_parser import MyKafkaConfigFileParser
 from .my_kafka_crypto import MyKafkaCrypto
 from .serialization import CompoundSerializer
@@ -59,6 +61,51 @@ class MyProducer(LogOwner) :
         #otherwise use a SerializingProducer
         else :
             return cls(SerializingProducer,all_configs,logger=logger)
+
+    def produce_from_queue(self,queue,topic_name,print_every=1000,timeout=60,retry_sleep=5) :
+        """
+        Get Producible objects from a given queue and Produce them to the given topic.
+        Runs until "None" is pulled from the Queue
+        Meant to be run in multiple threads in parallel
+
+        queue       = the Queue holding objects that should be Produced
+        topic_name  = the name of the topic to Produce to
+        print_every = how often to print/log progress messages
+        timeout     = max time (s) to wait for the message to be produced in the event of (repeated) BufferError(s)
+        retry_sleep = how long (s) to wait between produce attempts if one fails with a BufferError
+        """
+        #set the logger so the callback can use it
+        PRODUCER_CALLBACK_LOGGER.logger = self.logger
+        #get the next object from the Queue
+        obj = queue.get()
+        #loop until "None" is pulled from the Queue
+        while obj is not None :
+            if isinstance(obj,Producible) :
+                #log a line about this message if applicable
+                logmsg = obj.get_log_msg(print_every)
+                if logmsg is not None :
+                    self.logger.info(logmsg)
+                #produce the message to the topic
+                success=False; total_wait_secs=0 
+                if (not success) and total_wait_secs<timeout :
+                    try :
+                        self.produce(topic=topic_name,key=obj.msg_key,value=obj.msg_value,on_delivery=producer_callback)
+                        success=True
+                    except BufferError :
+                        time.sleep(retry_sleep)
+                        total_wait_secs+=retry_sleep
+                if not success :
+                    warnmsg = f'WARNING: message with key {obj.msg_key} failed to buffer for more than '
+                    warnmsg+= f'{total_wait_secs}s and was dropped!'
+                    self.logger.warning(warnmsg)
+                self.poll(0.025)
+            else :
+                warnmsg = f'WARNING: found an object of type {type(obj)} in a Producer queue that should only contain '
+                warnmsg+= 'Producible objects. This object will be skipped!'
+                self.logger.warning(warnmsg)
+            #get the next object in the Queue
+            obj = queue.get()
+        queue.task_done()
 
     def produce(self,*args,topic,key,value,**kwargs) :
         if isinstance(self.__producer,KafkaProducer) :

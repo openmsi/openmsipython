@@ -10,7 +10,7 @@ from utilities import MyThread
 #constants
 LOGGER = Logger(pathlib.Path(__file__).name.split('.')[0],logging.ERROR)
 UPDATE_SECS = 5
-TIMEOUT_SECS = 90
+TIMEOUT_SECS = 20
 JOIN_TIMEOUT_SECS = 30
 TOPIC_NAME = 'test_pdv_plots'
 

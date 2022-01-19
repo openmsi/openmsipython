@@ -97,6 +97,10 @@ class DataFileChunkSerializer(Serializer) :
             raise SerializationError('ERROR: object passed to FileChunkSerializer is not a DataFileChunk!')
         #pack up all the relevant bits of information into a single bytearray
         try :
+            #get the chunk's data from the file if necessary
+            if file_chunk_obj.data is None :
+                file_chunk_obj.populate_with_file_data()
+            #pack up all of the properties of the message
             ordered_properties = []
             ordered_properties.append(str(file_chunk_obj.filename))
             ordered_properties.append(file_chunk_obj.file_hash)

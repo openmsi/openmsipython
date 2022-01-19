@@ -1,20 +1,5 @@
 #constants for data file upload/download/handling
 
-class InternalProductionConstants :
-    @property
-    def DEFAULT_PRINT_EVERY(self) :
-        return 1000   # default number of messages to wait between printing production call notifications
-    @property
-    def DEFAULT_TIMEOUT(self) :
-        return 60     # default max number of seconds to wait for a single message to be produced 
-                      #in case of BufferError(s) on call to produce()
-    @property
-    def DEFAULT_RETRY_SLEEP(self) :
-        return 5      # default number of seconds to wait between retrying a call to produce() 
-                      #in case of BufferError(s)
-
-INTERNAL_PRODUCTION_CONST = InternalProductionConstants()
-
 class DataFileHandlingConstants :
     @property
     def CHUNK_ALREADY_WRITTEN_CODE(self) :

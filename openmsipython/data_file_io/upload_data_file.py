@@ -3,11 +3,9 @@ import traceback
 from threading import Thread
 from queue import Queue
 from hashlib import sha512
-from ..utilities.misc import populated_kwargs
 from ..shared.runnable import Runnable
 from ..my_kafka.my_producer import MyProducer
 from .config import RUN_OPT_CONST
-from .utilities import produce_from_queue_of_file_chunks
 from .data_file_chunk import DataFileChunk
 from .data_file import DataFile
 
@@ -86,7 +84,7 @@ class UploadDataFile(DataFile,Runnable) :
         self.__fully_enqueued = False
         self.__chunks_to_upload = []
 
-    def add_chunks_to_upload_queue(self,queue,**kwargs) :
+    def add_chunks_to_upload_queue(self,queue,n_threads=None,chunk_size=RUN_OPT_CONST.DEFAULT_CHUNK_SIZE) :
         """
         Add chunks of this file to a given upload queue. 
         If the file runs out of chunks it will be marked as fully enqueued.
@@ -107,9 +105,8 @@ class UploadDataFile(DataFile,Runnable) :
         if queue.full() :
             return
         if len(self.__chunks_to_upload)==0 :
-            kwargs = populated_kwargs(kwargs,{'chunk_size': RUN_OPT_CONST.DEFAULT_CHUNK_SIZE},self.logger)
             try :
-                self._build_list_of_file_chunks(kwargs['chunk_size'])
+                self._build_list_of_file_chunks(chunk_size)
             except Exception :
                 self.logger.info(traceback.format_exc())
                 fp = self.filepath.relative_to(self.__rootdir) if self.__rootdir is not None else self.filepath
@@ -118,8 +115,8 @@ class UploadDataFile(DataFile,Runnable) :
                 self.logger.error(errmsg)
                 self.__to_upload = False
                 return
-        if kwargs.get('n_threads') is not None :
-            n_chunks_to_add = 5*kwargs['n_threads']
+        if n_threads is not None :
+            n_chunks_to_add = 5*n_threads
         else :
             n_chunks_to_add = len(self.__chunks_to_upload)
         ic = 0
@@ -129,40 +126,32 @@ class UploadDataFile(DataFile,Runnable) :
         if len(self.__chunks_to_upload)==0 :
             self.__fully_enqueued = True
     
-    def upload_whole_file(self,config_path,topic_name,**kwargs) :
+    def upload_whole_file(self,config_path,topic_name,
+                          n_threads=RUN_OPT_CONST.N_DEFAULT_UPLOAD_THREADS,
+                          chunk_size=RUN_OPT_CONST.DEFAULT_CHUNK_SIZE) :
         """
         Chunk and upload an entire file on disk to a cluster's topic.
 
         config_path = path to the config file to use in defining the producer
         topic_name  = name of the topic to produce messages to
-        
-        Possible keyword arguments:
-        n_threads  = the number of threads to run at once during uploading
-        chunk_size = the size of each file chunk in bytes
+        n_threads   = the number of threads to run at once during uploading
+        chunk_size  = the size of each file chunk in bytes
         """
-        #set the important variables
-        kwargs = populated_kwargs(kwargs,
-                                  {'n_threads': RUN_OPT_CONST.N_DEFAULT_UPLOAD_THREADS,
-                                   'chunk_size': RUN_OPT_CONST.DEFAULT_CHUNK_SIZE,
-                                  },self.logger)
         #start the producer
         producer = MyProducer.from_file(config_path,logger=self.logger)
-        startup_msg = f"Uploading entire file {self.filepath} to {topic_name} in {kwargs['chunk_size']} byte chunks "
-        startup_msg+=f"using {kwargs['n_threads']} threads...."
+        startup_msg = f"Uploading entire file {self.filepath} to {topic_name} in {chunk_size} byte chunks "
+        startup_msg+=f"using {n_threads} threads...."
         self.logger.info(startup_msg)
         #add all the chunks to the upload queue
         upload_queue = Queue()
-        self.add_chunks_to_upload_queue(upload_queue,chunk_size=kwargs['chunk_size'])
+        self.add_chunks_to_upload_queue(upload_queue,chunk_size=chunk_size)
         #add "None" to the queue for each thread as the final values
-        for ti in range(kwargs['n_threads']) :
+        for ti in range(n_threads) :
             upload_queue.put(None)
         #produce all the messages in the queue using multiple threads
         upload_threads = []
-        for ti in range(kwargs['n_threads']) :
-            t = Thread(target=produce_from_queue_of_file_chunks, args=(upload_queue,
-                                                                       producer,
-                                                                       topic_name,
-                                                                       self.logger))
+        for ti in range(n_threads) :
+            t = Thread(target=producer.produce_from_queue, args=(upload_queue,topic_name))
             t.start()
             upload_threads.append(t)
         #join the threads
