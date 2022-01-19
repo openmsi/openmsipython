@@ -83,11 +83,13 @@ class Logger :
             msg = f'WARNING: {msg}'
         self._logger_obj.warning(msg,*args,**kwargs)
 
-    #log an error message and optionally raise an exception with the same message
-    def error(self,msg,exception_type=None,*args,**kwargs) :
+    #log an error message and optionally raise an exception with the same message, or raise a different exception
+    def error(self,msg,exception_type=None,exc_obj=None,*args,**kwargs) :
         if not msg.startswith('ERROR:') :
             msg = f'ERROR: {msg}'
         self._logger_obj.error(msg,*args,**kwargs)
+        if exc_obj is not None :
+            raise exc_obj
         if exception_type is not None :
             raise exception_type(msg)
 

@@ -1,6 +1,5 @@
 #imports
 import uuid
-from ..shared.config import UTIL_CONST
 from .my_consumer import MyConsumer
 
 class ConsumerGroup :
@@ -9,14 +8,10 @@ class ConsumerGroup :
     """
 
     @property
-    def consumers(self) :
-        return self.__consumers
-    @property
     def topic_name(self) :
         return self.__topic_name
 
-    def __init__(self,config_path,topic_name,*,
-                 consumer_group_ID=str(uuid.uuid1()),n_consumers=UTIL_CONST.DEFAULT_N_THREADS,**other_kwargs) :
+    def __init__(self,config_path,topic_name,*,consumer_group_ID=str(uuid.uuid1()),**other_kwargs) :
         """
         arguments:
         config_path = path to the config file that should be used to define the consumer group
@@ -24,14 +19,19 @@ class ConsumerGroup :
 
         keyword arguments:
         consumer_group_ID = ID to use for all consumers in the group (a new & unique ID is created by default)
-        n_consumers = the number of Consumers to create in the group
         """
         self.__topic_name = topic_name
-        #create a Consumer for each thread and subscribe it to the topic
-        c_args, c_kwargs = MyConsumer.get_consumer_args_kwargs(config_path,group_id=consumer_group_ID,**other_kwargs)
-        self.__consumers = []
-        for i in range(n_consumers) :
-            consumer = MyConsumer(*c_args,**c_kwargs)
-            self.__consumers.append(consumer)
-        for consumer in self.__consumers :
-            consumer.subscribe([self.__topic_name])        
+        self.__c_args, self.__c_kwargs = MyConsumer.get_consumer_args_kwargs(config_path,
+                                                                             group_id=consumer_group_ID,**other_kwargs)
+        self.n_msgs_read = 0   
+
+    def get_new_subscribed_consumer(self) :
+        """
+        Return a new Consumer, subscribed to the topic and with the shared group ID
+        Call this function from a child thread to get thread-independent Consumers 
+        This function just creates and subscribes the Consumer. Polling it, closing 
+        it, and everything else must be handled by whatever calls this function.
+        """
+        consumer = MyConsumer(*self.__c_args,**self.__c_kwargs)
+        consumer.subscribe([self.__topic_name])
+        return consumer

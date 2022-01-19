@@ -1,7 +1,6 @@
 #imports
 import datetime, time
 from threading import Lock
-from ..utilities.misc import populated_kwargs
 from ..shared.runnable import Runnable
 from ..shared.controlled_process import ControlledProcessMultiThreaded
 from ..my_kafka.consumer_group import ConsumerGroup
@@ -21,9 +20,6 @@ class DataFileDownloadDirectory(DataFileDirectory,ControlledProcessMultiThreaded
         return {} #Overload this in child classes to define additional keyword arguments 
                   #that should go to the specific datafile constructor
     @property
-    def n_msgs_read(self) :
-        return self.__n_msgs_read
-    @property
     def completely_reconstructed_filepaths(self) :
         return self.__completely_reconstructed_filepaths
     @property
@@ -42,16 +38,14 @@ class DataFileDownloadDirectory(DataFileDirectory,ControlledProcessMultiThreaded
         datafile_type = the type of datafile that the consumed messages should be assumed to represent
         In this class datafile_type should be something that extends DownloadDataFileToDisk
         """    
-        kwargs = populated_kwargs(kwargs,{'n_consumers':kwargs.get('n_threads')})
         super().__init__(*args,**kwargs)
         if not issubclass(datafile_type,DownloadDataFileToDisk) :
             errmsg = 'ERROR: DataFileDownloadDirectory requires a datafile_type that is a subclass of '
             errmsg+= f'DownloadDataFileToDisk but {datafile_type} was given!'
             self.logger.error(errmsg,ValueError)
         self.__datafile_type = datafile_type
-        self.__n_msgs_read = 0
         self.__completely_reconstructed_filepaths = []
-        self.__thread_locks = {}
+        self.__locks_by_fp = {}
 
     def reconstruct(self) :
         """
@@ -62,19 +56,24 @@ class DataFileDownloadDirectory(DataFileDirectory,ControlledProcessMultiThreaded
         msg = f'Will reconstruct files from messages in the {self.topic_name} topic using {self.n_threads} '
         msg+= f'thread{"s" if self.n_threads!=1 else ""}'
         self.logger.info(msg)
-        lock = Lock()
-        self.run([(lock,self.consumers[i]) for i in range(self.n_threads)])
-        return self.__n_msgs_read, self.__completely_reconstructed_filepaths
+        self.run()
+        return self.n_msgs_read, self.__completely_reconstructed_filepaths
 
     #################### PRIVATE HELPER FUNCTIONS ####################
 
-    def _run_worker(self,lock,consumer) :
+    def _run_worker(self,lock) :
         """
         Consume messages expected to be DataFileChunks and try to write their data to disk in the directory, 
         paying attention to whether/how the files they're coming from end up fully reconstructed or mismatched 
         with their original hashes.
         Several iterations of this function run in parallel threads as part of a ControlledProcessMultiThreaded
         """
+        #create the Consumer for this thread
+        if self.alive :
+            try :
+                consumer = self.get_new_subscribed_consumer()
+            except Exception as e :
+                self.logger.error('ERROR: failed to get a new subscribed Consumer. Will reraise Exception.',exc_obj=e)
         #start the loop for while the controlled process is alive
         while self.alive :
             #consume a DataFileChunk message from the topic
@@ -90,13 +89,13 @@ class DataFileDownloadDirectory(DataFileDirectory,ControlledProcessMultiThreaded
             dfc.rootdir = self.dirpath
             #add the chunk's data to the file that's being reconstructed
             with lock :
-                self.__n_msgs_read+=1
+                self.n_msgs_read+=1
                 if dfc.filepath not in self.data_files_by_path.keys() :
                     self.data_files_by_path[dfc.filepath] = self.__datafile_type(dfc.filepath,
                                                                                  logger=self.logger,
                                                                                  **self.other_datafile_kwargs)
-                    self.__thread_locks[dfc.filepath] = Lock()
-            return_value = self.data_files_by_path[dfc.filepath].add_chunk(dfc,self.__thread_locks[dfc.filepath])
+                    self.__locks_by_fp[dfc.filepath] = Lock()
+            return_value = self.data_files_by_path[dfc.filepath].add_chunk(dfc,self.__locks_by_fp[dfc.filepath])
             if return_value in (DATA_FILE_HANDLING_CONST.FILE_IN_PROGRESS,
                                 DATA_FILE_HANDLING_CONST.CHUNK_ALREADY_WRITTEN_CODE) :
                 continue
@@ -106,7 +105,7 @@ class DataFileDownloadDirectory(DataFileDirectory,ControlledProcessMultiThreaded
                 self.logger.warning(warnmsg)
                 with lock :
                     del self.data_files_by_path[dfc.filepath]
-                    del self.__thread_locks[dfc.filepath]
+                    del self.__locks_by_fp[dfc.filepath]
             elif return_value==DATA_FILE_HANDLING_CONST.FILE_SUCCESSFULLY_RECONSTRUCTED_CODE :
                 msg = f'File {self.data_files_by_path[dfc.filepath].full_filepath.relative_to(dfc.rootdir)} '
                 msg+= 'successfully reconstructed from stream'
@@ -114,19 +113,16 @@ class DataFileDownloadDirectory(DataFileDirectory,ControlledProcessMultiThreaded
                 self.__completely_reconstructed_filepaths.append(dfc.filepath)
                 with lock :
                     del self.data_files_by_path[dfc.filepath]
-                    del self.__thread_locks[dfc.filepath]
+                    del self.__locks_by_fp[dfc.filepath]
+        #shut down the Consumer that was created when the process isn't alive anymore
+        consumer.close()
 
     def _on_check(self) :
-        msg = f'{self.__n_msgs_read} messages read, {len(self.__completely_reconstructed_filepaths)} files '
+        msg = f'{self.n_msgs_read} messages read, {len(self.__completely_reconstructed_filepaths)} files '
         msg+= 'completely reconstructed so far'
         self.logger.debug(msg)
         if len(self.data_files_by_path)>0 or len(self.__completely_reconstructed_filepaths)>0 :
             self.logger.debug(self.progress_msg)
-
-    def _on_shutdown(self) :
-        super()._on_shutdown()
-        for consumer in self.consumers :
-            consumer.close()
 
     #################### CLASS METHODS ####################
 
