@@ -24,10 +24,10 @@ class DataFileHandlingConstants :
         return -1 # code indicating that a file's hashes didn't match
     @property
     def FILE_SUCCESSFULLY_RECONSTRUCTED_CODE(self) :
-        return 1  # code indicating that a file was successfully fully reconstructed
+        return 3  # code indicating that a file was successfully fully reconstructed
     @property
     def FILE_IN_PROGRESS(self) :
-        return 0  # code indicating that a file is in the process of being reconstructed
+        return 2  # code indicating that a file is in the process of being reconstructed
     
 DATA_FILE_HANDLING_CONST=DataFileHandlingConstants()
 

@@ -22,8 +22,7 @@ class ConsumerGroup :
         """
         self.__topic_name = topic_name
         self.__c_args, self.__c_kwargs = MyConsumer.get_consumer_args_kwargs(config_path,
-                                                                             group_id=consumer_group_ID,**other_kwargs)
-        self.n_msgs_read = 0   
+                                                                             group_id=consumer_group_ID,**other_kwargs)   
 
     def get_new_subscribed_consumer(self) :
         """

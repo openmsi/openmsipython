@@ -41,7 +41,7 @@ class PDVPlotMaker(DataFileStreamProcessor,Runnable) :
         """
         When new files are fully available in memory, make plots of the data they contain
         """
-        _,processed_data_filepaths = self.process_files_as_read()
+        _,_,processed_data_filepaths = self.process_files_as_read()
         created_plot_paths = []
         for pdfp in processed_data_filepaths :
             fn = self.__pdv_analysis_type.plot_file_name_from_input_file_name(pdfp.name,
@@ -49,7 +49,7 @@ class PDVPlotMaker(DataFileStreamProcessor,Runnable) :
             created_plot_paths.append(self.__output_dir/fn)
         return self.n_msgs_read, created_plot_paths
 
-    def _process_downloaded_data_file(self,datafile) :
+    def _process_downloaded_data_file(self,datafile,lock) :
         """
         Make plots for the data in the given file
         """
@@ -106,7 +106,7 @@ class PDVPlotMaker(DataFileStreamProcessor,Runnable) :
         msg = f'Listening to the {args.topic_name} topic to find Lecroy data files and create '
         msg+= f'{args.pdv_plot_type} plots'
         plot_maker.logger.info(msg)
-        n_msgs,plot_filepaths = plot_maker.make_plots_as_available()
+        n_read,n_processed,plot_filepaths = plot_maker.make_plots_as_available()
         run_stop = datetime.datetime.now()
         #shut down when that function returns
         msg = 'PDV plot maker '
@@ -114,11 +114,14 @@ class PDVPlotMaker(DataFileStreamProcessor,Runnable) :
             msg+=f'writing to {args.output_dir} '
         msg+= 'shut down'
         plot_maker.logger.info(msg)
-        msg = f'{n_msgs} total messages were consumed'
+        msg = f'{n_read} total messages were consumed'
         if len(plot_filepaths)>0 :
+            msg+=f', {n_processed} messages were successfully processed,'
             msg+=f' and the following {len(plot_filepaths)} plot file'
             msg+=' was' if len(plot_filepaths)==1 else 's were'
             msg+=' created'
+        else :
+            msg+=f'and {n_processed} messages were successfully processed'
         msg+=f' from {run_start} to {run_stop}'
         for fn in plot_filepaths :
             msg+=f'\n\t{fn}'

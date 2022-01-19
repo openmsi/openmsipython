@@ -103,7 +103,7 @@ class TestDataFileDirectories(unittest.TestCase) :
             msg+= f'(will timeout after {TIMEOUT_SECS} seconds)...'
             LOGGER.info(msg)
             LOGGER.set_stream_level(logging.ERROR)
-            while ( (TEST_CONST.TEST_DATA_FILE_NAME not in dfdd.completely_reconstructed_filepaths) and 
+            while ( (TEST_CONST.TEST_DATA_FILE_NAME not in dfdd.completely_processed_filepaths) and 
                     current_messages_read<dfdd.n_msgs_read and time_waited<TIMEOUT_SECS ) :
                 current_messages_read = dfdd.n_msgs_read
                 LOGGER.set_stream_level(logging.INFO)

@@ -1,6 +1,5 @@
 #imports
 import unittest, time
-from threading import Lock
 from openmsipython.shared.controlled_process import ControlledProcessSingleThread, ControlledProcessMultiThreaded
 from utilities import MyThread
 
@@ -65,14 +64,14 @@ class TestControlledProcess(unittest.TestCase) :
         run_thread.start()
         try :
             self.assertFalse(cpst.checked)
-            time.sleep(0.2)
+            time.sleep(0.5)
             cpst.control_command_queue.put('c')
             cpst.control_command_queue.put('check')
-            time.sleep(0.2)
+            time.sleep(0.5)
             self.assertTrue(cpst.checked)
             self.assertFalse(cpst.on_shutdown_called)
             cpst.control_command_queue.put('q')
-            time.sleep(0.2)
+            time.sleep(1.0)
             self.assertTrue(cpst.on_shutdown_called)
             run_thread.join(timeout=TIMEOUT_SECS)
             if run_thread.is_alive() :
@@ -97,15 +96,14 @@ class TestControlledProcess(unittest.TestCase) :
     def test_controlled_process_multi_threaded(self) :
         cpmt = ControlledProcessMultiThreadedForTesting(n_threads=N_THREADS,update_secs=5)
         self.assertEqual(cpmt.counter,0)
-        lock = Lock()
-        run_thread = MyThread(target=cpmt.run,args=((lock,),))
+        run_thread = MyThread(target=cpmt.run)
         run_thread.start()
         try :
             self.assertFalse(cpmt.checked)
-            time.sleep(0.2)
+            time.sleep(0.5)
             cpmt.control_command_queue.put('c')
             cpmt.control_command_queue.put('check')
-            time.sleep(0.2)
+            time.sleep(0.5)
             self.assertTrue(cpmt.checked)
             self.assertFalse(cpmt.on_shutdown_called)
             cpmt.control_command_queue.put('q')

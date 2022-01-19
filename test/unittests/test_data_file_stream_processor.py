@@ -9,7 +9,7 @@ from utilities import MyThread
 
 #constants
 LOGGER = Logger(pathlib.Path(__file__).name.split('.')[0],logging.ERROR)
-TIMEOUT_SECS = 90
+TIMEOUT_SECS = 30
 JOIN_TIMEOUT_SECS = 30
 TOPIC_NAME = 'test_data_file_stream_processor'
 
@@ -20,11 +20,13 @@ class DataFileStreamProcessorForTesting(DataFileStreamProcessor) :
 
     def __init__(self,*args,**kwargs) :
         self.checked = False
-        self.completed_bytestrings_by_filename = {}
+        self.completed_filenames_bytestrings = []
         super().__init__(*args,**kwargs)
 
-    def _process_downloaded_data_file(self,datafile) :
-        self.completed_bytestrings_by_filename[datafile.filename] = datafile.bytestring
+    def _process_downloaded_data_file(self,datafile,lock) :
+        with lock :
+            self.completed_filenames_bytestrings.append((datafile.filename,datafile.bytestring))
+        return None
 
     def _on_check(self) :
         self.checked = True
@@ -67,7 +69,7 @@ class TestDataFileStreamProcessor(unittest.TestCase) :
             msg+= f'(will timeout after {TIMEOUT_SECS} seconds)...'
             LOGGER.info(msg)
             LOGGER.set_stream_level(logging.ERROR)
-            while ( (TEST_CONST.TEST_DATA_FILE_2_NAME not in dfsp.completed_bytestrings_by_filename.keys()) and 
+            while ( (TEST_CONST.TEST_DATA_FILE_2_NAME not in [t[0] for t in dfsp.completed_filenames_bytestrings]) and 
                     time_waited<TIMEOUT_SECS ) :
                 current_messages_read = dfsp.n_msgs_read
                 LOGGER.set_stream_level(logging.INFO)
@@ -87,11 +89,10 @@ class TestDataFileStreamProcessor(unittest.TestCase) :
                 errmsg+= f'{JOIN_TIMEOUT_SECS} seconds!'
                 raise TimeoutError(errmsg)
             #make sure the contents of the file in memory are the same as the original
-            self.assertTrue(TEST_CONST.TEST_DATA_FILE_2_NAME in dfsp.completed_bytestrings_by_filename.keys())
             ref_bytestring = None
             with open(TEST_CONST.TEST_DATA_FILE_2_PATH,'rb') as fp :
                 ref_bytestring = fp.read()
-            self.assertEqual(ref_bytestring,dfsp.completed_bytestrings_by_filename[TEST_CONST.TEST_DATA_FILE_2_NAME])
+            self.assertTrue((TEST_CONST.TEST_DATA_FILE_2_NAME,ref_bytestring) in dfsp.completed_filenames_bytestrings)
         except Exception as e :
             raise e
         finally :

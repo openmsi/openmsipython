@@ -105,7 +105,7 @@ class TestPDVPlots(unittest.TestCase) :
             msg+= f'(will timeout after {TIMEOUT_SECS} seconds)...'
             LOGGER.info(msg)
             LOGGER.set_stream_level(logging.ERROR)
-            while ( (TEST_CONST.TEST_LECROY_DATA_FILE_PATH not in pdvpm.processed_filepaths) and 
+            while ( (TEST_CONST.TEST_LECROY_DATA_FILE_PATH not in pdvpm.completely_processed_filepaths) and 
                     time_waited<TIMEOUT_SECS ) :
                 current_messages_read = pdvpm.n_msgs_read
                 LOGGER.set_stream_level(logging.INFO)
