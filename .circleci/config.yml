@@ -52,6 +52,7 @@ jobs:
           at: .
       - python/install-packages:
           pkg-manager: pip
+          args: .[all]
       - run:
           name: run tests
           command: |
