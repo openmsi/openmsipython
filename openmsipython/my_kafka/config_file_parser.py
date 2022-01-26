@@ -99,26 +99,21 @@ class MyKafkaConfigFileParser(ConfigFileParser) :
         and it will be assumed that no configuration for KafkaCrypto exists
 
         Options are:
-        1) The regular config file also has the KafkaCrypto configs in it, as indicated by the presence of 
-        the "node_id" in the DEFAULT section
-        2) The regular config file has a "kafkacrypto" section with a "config_file" parameter that is the 
+        1) The regular config file has a "kafkacrypto" section with a "config_file" parameter that is the 
         path to the KafkaCrypo config file
-        3) The regular config file has a "kafkacrypto" section with a "node_id" parameter corresponding to 
+        2) The regular config file has a "kafkacrypto" section with a "node_id" parameter corresponding to 
         a named subdirectory in openmsipython/my_kafka/config_files that was created when the node was provisioned
         """
-        #option 1 above
-        if self.has_default and 'node_id' in (self.get_config_dict_for_groups('DEFAULT')).keys() :
-            return str(self.filepath)
-        elif 'kafkacrypto' in self.available_group_names :
+        if 'kafkacrypto' in self.available_group_names :
             kc_configs = self.get_config_dict_for_groups('kafkacrypto')
-            #option 2 above
+            #option 1 above
             if 'config_file' in kc_configs.keys() :
                 path_as_str = (kc_configs['config_file']).lstrip('file#')
-                if not pathlib.Path(path_as_str.is_file()) :
+                if not pathlib.Path(path_as_str).is_file() :
                     errmsg = f'ERROR: KafkaCrypto config file {path_as_str} (from config file {self.filepath}) not found!'
                     self.logger.error(errmsg,FileNotFoundError)
                 return path_as_str
-            #option 3 above
+            #option 2 above
             elif 'node_id' in kc_configs.keys() :
                 node_id = kc_configs['node_id']
                 dirpath = UTIL_CONST.CONFIG_FILE_DIR / node_id
