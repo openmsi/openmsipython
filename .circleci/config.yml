@@ -46,7 +46,7 @@ jobs:
         auth:
           username: $IDIESDOCKER_USERNAME
           password: $IDIESDOCKER_PASSWORD
-    parallelism: 11
+    parallelism: 12
     steps:
       - attach_workspace:
           at: .

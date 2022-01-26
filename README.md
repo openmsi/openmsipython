@@ -100,7 +100,7 @@ and if that line runs without any problems then the package was installed correc
 
 ### Environment variables
 
-Interacting with the Kafka Cluster, including running code tests as described [here](./test), requires that some environment variables are set on your system. If you're installing any software to run as a Windows Service (as described [here](./openmsipython/services)]) then you'll be prompted to enter these variables' values, but you may find it more convenient to set them once. The environment variables are called `KAFKA_TEST_CLUSTER_USERNAME`, `KAFKA_TEST_CLUSTER_PASSWORD`, `KAFKA_PROD_CLUSTER_USERNAME`, and `KAFKA_PROD_CLUSTER_PASSWORD`. The "`TEST`" variables are used to connect to the test cluster, and must be set to successfully run the automatic code tests. The "`PROD`" variables are used to connect to the full production cluster and are only needed for fully deployed code.
+Interacting with the Kafka Cluster, including running code tests as described [here](./test), requires that some environment variables are set on your system. If you're installing any software to run as a Windows Service (as described [here](./openmsipython/services)) then you'll be prompted to enter these variables' values, but you may find it more convenient to set them once. The environment variables are called `KAFKA_TEST_CLUSTER_USERNAME`, `KAFKA_TEST_CLUSTER_PASSWORD`, `KAFKA_PROD_CLUSTER_USERNAME`, and `KAFKA_PROD_CLUSTER_PASSWORD`. The "`TEST`" variables are used to connect to the test cluster, and must be set to successfully run the automatic code tests. The "`PROD`" variables are used to connect to the full production cluster and are only needed for fully deployed code.
 
 You can set these environment variables in a shell `.rc` or `.profile` file if running on Linux or Mac OS. On Windows you can set them as machine environment variables using commands like `[Environment]::SetEnvironmentVariable("NAME","VALUE",[EnvironmentVariableTarget]::Machine)`. You can also set them as "User" environment variables on Windows if you don't have the necessary permissions to set them for the "Machine". 
 
@@ -120,7 +120,7 @@ The [readme file here](./openmsipython/data_file_io/) explains programs used to 
 
 The [readme file here](./openmsipython/pdv) explains programs used to upload specific portions of data in Lecroy Oscilloscope files and produce sheets of plots for PDV spall or velocity analyses.
 
-The [readme file here](./openmsipython/my_kafka) gives more details about options for configuration files used to define which kafka cluster(s) the programs interact with and how data are produced to/consumed from topics within them.
+The [readme file here](./openmsipython/my_kafka) explains how to enable message-layer encryption through [KafkaCrypto](https://github.com/tmcqueen-materials/kafkacrypto), and gives more details about options for configuration files used to define which kafka cluster(s) the programs interact with and how data are produced to/consumed from topics within them.
 
 The [readme file here](./openmsipython/services) details procedures for installing any available command-line program as a Windows Service and working with it.
 

@@ -26,4 +26,4 @@ After installing a Service, you can use the `ManageService [program_name]` comma
 
 ### Output in the "working directory"
 
-Working with Services will create a few files in the ["`working_dir`" subdirectory](./working_dir). A logfile called "Services.log" will contain some lines related to installing or working with any Services. Python files in that directory will correspond to the executables that are installed as Services, and so checking these files will give details on the setup for their corresponding Services. None of these created files will be tracked in the repo (they're in the [gitignore](../.gitignore)).
+Working with Services will create a few files in the ["`working_dir`" subdirectory](./working_dir). A logfile called "Services.log" will contain some lines related to installing or working with any Services. Python files in that directory will correspond to the executables that are installed as Services, and so checking these files will give details on the setup for their corresponding Services. None of these created files will be tracked in the repo (they're in the [gitignore](../../.gitignore)).
