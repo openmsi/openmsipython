@@ -29,7 +29,13 @@ setupkwargs = dict(
                       'gemd>=1.8.1',
                       'kafkacrypto>=0.9.9.11a1',
                      ],
-    extras_require = {'test': ['pyflakes>=2.2.0',],},
+    extras_require = {'test': ['beautifulsoup4',
+                               'gitpython',
+                               'lxml',
+                               'marko[toc]',
+                               'pyflakes>=2.2.0',
+                               ],
+                        },
 )
 
 setupkwargs["extras_require"]["all"] = sum(setupkwargs["extras_require"].values(), [])
