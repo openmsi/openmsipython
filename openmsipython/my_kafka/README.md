@@ -20,3 +20,40 @@ The different sections recognized by the `openmsipython` code are:
     - `auto.offset.reset` to tell the Consumer where in the log to start consuming messages if no previously-committed offset for the consumer group can be found. "`earliest`" will start at the beginning of the topic and "`latest`" will start at the end. Giving "`none`" for this parameter will remove it from the configs, and an error will be thrown if no previously-committed offset for the consumer group can be found.
     - `fetch.min.bytes` to change how many bytes must accumulate before a batch of messages is consumed from the topic (consuming batches of messages is also subject to a timeout, so changing this parameter will only ever adjust the tradeoff between throughput and latency, but will not prevent any messages from being consumed in general)
     - `key.deserializer` and `value.deserializer` to change methods used to convert message keys and values (respectively) from byte arrays to objects. The `openmsipython` code provides an additional option called [`DataFileChunkDeserializer`](./serialization.py#L33-#L75) to convert a chunk of a data file as a byte array to a [DataFileChunk object](./openmsipython/data_file_io/data_file_chunk.py#L7).
+
+## Message Encryption
+
+Encryption of messages sent and received through Kafka is implemented in OpenMSIPython using a Kafka wrapper library called [KafkaCrypto](https://github.com/tmcqueen-materials/kafkacrypto). KafkaCrypto provides message-layer encryption for Kafka assuming an untrusted broker, meaning that the keys and values of messages stored within topics are encrypted. The initial encryption is performed before production using a custom Serializer, and decryption is performed after consumption using a custom Deserializer. Please see the documentation for KafkaCrypto for more information.
+
+KafkaCrypto has been wrapped in OpenMSIPython to minimize setup and maximize flexibility. Successfully producing/consuming encrypted messages requires just a few steps after installing OpenMSIPython:
+1. Create a new topic to hold encrypted messages. It is not possible to mix unencrypted and encrypted messages within a topic.
+1. Create additional key-passing topics (if automatic topic creation is turned off). These new topics are "sub-topics" of the topic created in the previous step, and have special names to reflect this. If the newly-created topic that will hold encrypted messages is called "topic," for example, then topics called "topic.keys", "topic.reqs", and "topic.subs" must also be created. These sub-topics can be compacted.
+1. Provision each node that will act as a producer to, or consumer from, a topic containing encrypted messages (more details below)
+1. Add a `[kafkacrypto]` section to the config file(s) you use for producers and consumers that will handle encrypted messages (more details below)
+
+Lastly, note that **consuming encrypted messages requires that the producer that produced them is running** so that encryption keys can be validated. Users should not, therefore, use OpenMSIPython programs such as `UploadDataFile` that automatically shut down producers without user input to produce encrypted messages and should instead use controlled programs like `DataFileUploadDirectory`.
+
+### Provisioning a node
+
+KafkaCrypto manages which producers and consumers are permitted to send and receive messages to which topics, and keeps these producers and consumers interacting with one another through the key exchange sub-topics. Setting up a set of producers/consumers for a particular topic or set of topics is called "provisioning".
+
+KafkaCrypto provides [a Python script](https://raw.githubusercontent.com/tmcqueen-materials/kafkacrypto/master/tools/simple-provision.py) to walk users through this process. You can invoke the provisioning script in OpenMSIPython using the command:
+
+`ProvisionNode`
+
+and following the prompts (the defaults are sensible). If, for any reason, the `ProvisionNode` command can't find the `simple-provision.py` script, you can download it from the link above and rerun the command while providing its location like:
+
+`ProvisionNode --script-path [path_to_simple_provision_script]`
+
+(But OpenMSIPython should be able to do this on its own in most installation contexts.)
+
+For any other issues with provisioning please refer to KafkaCrypto's documentation.
+
+### Additional configurations needed
+
+Successfully running the `ProvisionNode` command will create a new directory in the [`config_files` directory](./config_files) with a name corresponding to the node ID, containing a `my-node-id.config file`, a `my-node-id.crypto` file, and a `my-node-id.seed` file. KafkaCrypto needs the `my-node-id.config` file to setup producers and consumers, and that file is not secret. The `my-node-id.crypto` and `my-node-id.seed` files, however, should never be saved or transmitted plaintext. An example of one of these created directories can be found [here](./config_files/testing_node) with all files intact because they're used for testing.
+
+To point OpenMSIPython to the config file that's created, one of two options must be added to the config file passed as discussed in the documentation [here](../data_file_io/README.md). Both options list a single new parameter under a heading called `[kafkacrypto]`. The first option is to add just the node id, like `node_id = my-node-id`, which works if a directory called `my-node-id` exists in the location expected from running the `ProvisionNode` command. If provisioning has been performed without using the `ProvisionNode` command, or if the config, crypto, and seed files are in some location other than a new directory within the config files directory, then the second option should be used, where instead of the `node_id` a parameter `config_file = path_to_config_file` is added, where `path_to_config_file` is the path to the `my-node-id.config` file.
+
+An example of a config file used to set up producers/consumers passing encrypted messages can be found [here](./config_files/test_encrypted.config).
+

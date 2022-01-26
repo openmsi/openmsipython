@@ -19,7 +19,7 @@ Developed for Open MSI (NSF DMREF award #1921959)
 
 ## Installation
 
-Programs use the Python implementation of the Apache Kafka API, and are designed to run on Windows machines connected to laboratory instruments. The only base requirements are Python >=3.7, <3.10, `git`, and `pip`. 
+Programs use the Python implementation of the Apache Kafka API, and are designed to run on Windows machines connected to laboratory instruments. 
 
 ### Quick start with miniconda3
 
@@ -42,6 +42,12 @@ Miniconda installs `pip`, and if you need to install Git you can do so with
 
 (or use the instructions on [the website here](https://github.com/git-guides/install-git).)
 
+Lastly, you will need to install the `libsodium` package through Miniconda as well, using the command
+
+`conda install -c anaconda libsodium`
+
+This step is required to use the [`pysodium` package](https://pypi.org/project/pysodium/), needed for encrypting messages.
+
 #### Extra setup on Windows
 
 This environment needs a special variable set to allow the Kafka Python code to find its dependencies on Windows (see [here](https://github.com/ContinuumIO/anaconda-issues/issues/12475) for more details), so after you've done the above, type the following commands to set the variable and then refresh the environment:
@@ -60,6 +66,14 @@ Mac OS is not officially supported for `openmsipython`, but if you would like to
 xcode-select --install
 brew install librdkafka
 ```
+
+Some Mac machines may also run into an esoteric issue related to the number of active file descriptors, which appears as repeated error messages like
+
+`% ERROR: Local: Host resolution failure: kafka-xyz.example.com:9092/42: Failed to resolve 'kafka-xyz.example.com:9092': nodename nor servname provided, or not known (after 0ms in state CONNECT)`
+
+when the Kafka server is otherwise available and should be fine, especially when using relatively large numbers of parallel threads. Instead of the above error, you may get `too many open files` errors.
+
+These errors may be due to running out of file descriptors as discussed in [this known `confluent-kafka`/`librdkafka` issue](https://github.com/edenhill/kcat/issues/209): using a broker hosted on Confluent Cloud may increase the likelihood of getting errors like these, because `librdkafka` creates two separate file descriptors for each known broker regardless of whether a connection is established. If you type `ulimit -n` into a Terminal window and get an output like `256`, it's likely this is the cause. To solve this issue, you will need to increase the limit of the number of allowed file descriptors, by running `ulimit -n 4096`. If that makes the errors go away, then you might want to add that line to your shell `.profile` or `.rc` file.
 
 ### Cloning this repo and installing the openmsipython package
 

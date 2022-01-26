@@ -1,16 +1,19 @@
 #imports
 import os, sys, inspect, time, contextlib
 
-#listen for and add user input to a queue
 def add_user_input(input_queue) :
-    #listen for user input at one second intervals
+    """
+    Listen for and add user input to a queue at one second intervals
+    """
     while True :
         time.sleep(1)
         input_queue.put(sys.stdin.read(1))
 
-#return a kwargs dictionary where every possible entry from the defaults has a valid value
-#can use this to make sure certain entries are present in kwargs
 def populated_kwargs(given_kwargs,defaults,logger=None) :
+    """
+    Return a kwargs dictionary where every possible entry from the defaults has a valid value
+    Can use this to make sure certain entries are present in kwargs
+    """
     #for all the needed keys
     for key in defaults.keys() :
         #if it was given and is not None

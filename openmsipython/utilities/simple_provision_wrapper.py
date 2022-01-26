@@ -9,7 +9,7 @@ from .misc import cd
 LOGGER = Logger('ProvisionNode',logging.INFO)
 KC_PATH = kafkacrypto.__path__
 SP_NAME = 'simple-provision.py'
-GITHUB_URL = 'https://raw.githubusercontent.com/tmcqueen-materials/kafkacrypto/master/tools/simple-provision.py'
+GITHUB_URL = f'https://raw.githubusercontent.com/tmcqueen-materials/kafkacrypto/master/tools/{SP_NAME}'
 TEMP_DIR_PATH = pathlib.Path(__file__).parent.parent/'my_kafka'/'config_files'/'temp_kafkacrypto_dir'
 
 def main() :
