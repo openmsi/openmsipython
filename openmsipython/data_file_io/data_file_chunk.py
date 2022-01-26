@@ -99,7 +99,6 @@ class DataFileChunk(Producible) :
         retval = self.filename == other.filename
         retval = retval and self.file_hash == other.file_hash
         retval = retval and self.chunk_hash == other.chunk_hash
-        retval = retval and self.chunk_offset_read == other.chunk_offset_read
         retval = retval and self.chunk_offset_write == other.chunk_offset_write
         retval = retval and self.chunk_size == other.chunk_size
         retval = retval and self.chunk_i == other.chunk_i
@@ -108,6 +107,22 @@ class DataFileChunk(Producible) :
         retval = retval and self.filename_append == other.filename_append
         retval = retval and self.__data == other.data
         return retval
+
+    def __str__(self) :
+        s = 'DataFileChunk('
+        s+=f'filename: {self.filename}, '
+        s+=f'file_hash: {self.file_hash}, '
+        s+=f'chunk_hash: {self.chunk_hash}, '
+        s+=f'chunk_offset_read: {self.chunk_offset_read}, '
+        s+=f'chunk_offset_write: {self.chunk_offset_write}, '
+        s+=f'chunk_size: {self.chunk_size}, '
+        s+=f'chunk_i: {self.chunk_i}, '
+        s+=f'n_total_chunks: {self.n_total_chunks}, '
+        s+=f'subdir_str: {self.subdir_str}, '
+        s+=f'filename_append: {self.filename_append}, '
+        #s+=f'data: {self.__data}, '
+        s+=')'
+        return s
 
     def get_log_msg(self, print_every=None):
         if (self.chunk_i-1)%print_every==0 or self.chunk_i==self.n_total_chunks :

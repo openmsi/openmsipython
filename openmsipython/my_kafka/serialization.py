@@ -81,8 +81,8 @@ class CompoundDeserializer(Deserializer):
                 else :
                     data = des(data,ctx=None)
             except Exception as e :
-                errmsg = f'ERROR: failed to deserialize at step {istep} (of {len(self.__steps)}) in CompoundDeserializer! '
-                errmsg+= f'Callable = {des}, exception = {e}'
+                errmsg = f'ERROR: failed to deserialize at step {istep} (of {len(self.__steps)})'
+                errmsg+= f' in CompoundDeserializer! Callable = {des}, exception = {e}'
                 raise SerializationError(errmsg)
         return data
 

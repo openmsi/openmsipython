@@ -2,7 +2,10 @@
 import unittest, pathlib, logging
 from confluent_kafka.error import SerializationError
 from openmsipython.shared.logging import Logger
+from openmsipython.my_kafka.config_file_parser import MyKafkaConfigFileParser
 from openmsipython.my_kafka.serialization import DataFileChunkSerializer, DataFileChunkDeserializer
+from openmsipython.my_kafka.serialization import CompoundSerializer, CompoundDeserializer
+from openmsipython.my_kafka.my_kafka_crypto import MyKafkaCrypto
 from openmsipython.data_file_io.upload_data_file import UploadDataFile
 from openmsipython.data_file_io.data_file_chunk import DataFileChunk
 from openmsipython.data_file_io.config import RUN_OPT_CONST
@@ -10,6 +13,7 @@ from config import TEST_CONST
 
 #constants
 LOGGER = Logger(pathlib.Path(__file__).name.split('.')[0],logging.ERROR)
+TOPIC_NAME = 'test_encryption'
 
 class TestSerialization(unittest.TestCase) :
     """
@@ -60,3 +64,21 @@ class TestSerialization(unittest.TestCase) :
             dfcds('This is a string, not an array of bytes!')
         for chunk_i in self.test_chunk_binaries.keys() :
             self.assertEqual(self.test_dl_chunk_objects[chunk_i],dfcds(self.test_chunk_binaries[chunk_i]))
+
+    def test_encrypted_compound_serdes_kafka(self) :
+        parser = MyKafkaConfigFileParser(TEST_CONST.TEST_CONFIG_FILE_PATH_ENCRYPTED,logger=LOGGER)
+        kc = MyKafkaCrypto(parser.cluster_configs,parser.kc_config_file_str)
+        dfcs = DataFileChunkSerializer()
+        dfcds = DataFileChunkDeserializer()
+        comp_ser = CompoundSerializer(dfcs,kc.value_serializer)
+        comp_des = CompoundDeserializer(kc.value_deserializer,dfcds)
+        self.assertIsNone(comp_ser.serialize(TOPIC_NAME,None))
+        self.assertIsNone(comp_des.deserialize(TOPIC_NAME,None))
+        with self.assertRaises(SerializationError) :
+            comp_ser.serialize(TOPIC_NAME,'This is a string, not a DataFileChunk!')
+        with self.assertRaises(SerializationError) :
+            comp_des.deserialize(TOPIC_NAME,'This is a string, not a DataFileChunk!')
+        for chunk_i in self.test_chunk_binaries.keys() :
+            serialized = comp_ser.serialize(TOPIC_NAME,self.test_ul_chunk_objects[chunk_i])
+            deserialized = comp_des.deserialize(TOPIC_NAME,serialized)
+            self.assertEqual(deserialized,self.test_ul_chunk_objects[chunk_i])
