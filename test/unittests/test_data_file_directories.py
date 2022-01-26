@@ -95,7 +95,6 @@ class TestDataFileDirectories(unittest.TestCase) :
             dfdd.control_command_queue.put('c')
             dfdd.control_command_queue.put('check')
             #wait for the timeout for the test file to be completely reconstructed 
-            #or for the reconstructor to stop getting new messages
             current_messages_read = -1
             time_waited = 0
             LOGGER.set_stream_level(logging.INFO)
@@ -103,8 +102,8 @@ class TestDataFileDirectories(unittest.TestCase) :
             msg+= f'(will timeout after {TIMEOUT_SECS} seconds)...'
             LOGGER.info(msg)
             LOGGER.set_stream_level(logging.ERROR)
-            while ( (TEST_CONST.TEST_DATA_FILE_NAME not in dfdd.completely_processed_filepaths) and 
-                    current_messages_read<dfdd.n_msgs_read and time_waited<TIMEOUT_SECS ) :
+            recofp = TEST_CONST.TEST_RECO_DIR_PATH/TEST_CONST.TEST_DATA_FILE_SUB_DIR_NAME/TEST_CONST.TEST_DATA_FILE_NAME
+            while (recofp not in dfdd.completely_processed_filepaths) and time_waited<TIMEOUT_SECS :
                 current_messages_read = dfdd.n_msgs_read
                 LOGGER.set_stream_level(logging.INFO)
                 LOGGER.info(f'\t{current_messages_read} messages read after waiting {time_waited} seconds....')
