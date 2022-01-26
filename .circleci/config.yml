@@ -31,9 +31,7 @@ jobs:
       - checkout
       - python/install-packages:
           pkg-manager: pip
-      - run:
-          name: pip install
-          command: cd ~/project; pip install .[all]; cd -
+          args: .[all]
       - run:
           name: code check
           command: cd ~/project; python -m pyflakes .; cd -
