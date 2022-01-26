@@ -3,7 +3,7 @@
   "name": "240um Kapton (double adhesive)",
   "notes": "",
   "process": {
-    "id": "2c0dbcf9-d4ed-422a-b452-8c11a231b508",
+    "id": "ce71a3ca-4a3c-4ec5-8cd3-a3d65cb12573",
     "scope": "auto",
     "type": "link_by_uid"
   },
@@ -12,11 +12,32 @@
       "conditions": [],
       "property": {
         "file_links": [],
+        "name": "SpacerThickness",
+        "notes": null,
+        "origin": "specified",
+        "template": {
+          "id": "862057f1-9583-4100-b911-672c9e28e447",
+          "scope": "auto",
+          "type": "link_by_uid"
+        },
+        "type": "property",
+        "value": {
+          "nominal": 240.0,
+          "type": "nominal_real",
+          "units": "micrometer"
+        }
+      },
+      "type": "property_and_conditions"
+    },
+    {
+      "conditions": [],
+      "property": {
+        "file_links": [],
         "name": "SpacerMaterial",
         "notes": null,
         "origin": "specified",
         "template": {
-          "id": "254fd354-5a5e-4d5b-b2be-be80cb2f8031",
+          "id": "f9f79b01-484a-4580-a693-0eb2c5079c9a",
           "scope": "auto",
           "type": "link_by_uid"
         },
@@ -36,7 +57,7 @@
         "notes": null,
         "origin": "specified",
         "template": {
-          "id": "8820f4a4-c589-442d-93d6-5ebcf67afb9f",
+          "id": "11f09349-2e82-4de4-9eb7-59a285db16a5",
           "scope": "auto",
           "type": "link_by_uid"
         },
@@ -56,7 +77,7 @@
         "notes": null,
         "origin": "specified",
         "template": {
-          "id": "c2d6d660-b003-4730-88b3-4d74d11cb59b",
+          "id": "1428c115-1fa9-48ec-b016-251054a3c52b",
           "scope": "auto",
           "type": "link_by_uid"
         },
@@ -70,17 +91,17 @@
     }
   ],
   "tags": [
-    "SpacerID::S001",
+    "SpacerID::S002",
     "recordId::2",
-    "modId::0"
+    "modId::2"
   ],
   "template": {
-    "id": "66a9e0e5-7ad6-4aea-aed4-035a2c27c65e",
+    "id": "67312aef-7b28-4f04-835e-ac6833894a13",
     "scope": "auto",
     "type": "link_by_uid"
   },
   "type": "material_spec",
   "uids": {
-    "auto": "611c9d97-dcc4-4b83-933a-d1f58f0b7283"
+    "auto": "0dd061f3-83cc-4a4b-ae37-cd900733cc76"
   }
 }

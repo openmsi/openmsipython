@@ -1,9 +1,90 @@
 #imports
-from ..data_file_io.data_file_chunk import DataFileChunk
-from confluent_kafka.serialization import Serializer, Deserializer
-from confluent_kafka.error import SerializationError
+import msgpack, pathlib, inspect, time
 from hashlib import sha512
-import msgpack, pathlib
+from kafkacrypto.message import KafkaCryptoMessage, KafkaCryptoMessageError
+from confluent_kafka.error import SerializationError
+from confluent_kafka.serialization import Serializer, Deserializer
+from ..data_file_io.data_file_chunk import DataFileChunk
+
+####################### COMPOUND (DE)SERIALIZERS FOR STACKING MULTIPLE STEPS #######################
+
+class CompoundSerDes(Serializer, Deserializer):
+    """
+    A Serializer/Deserializer that stacks multiple Serialization/Deserialization steps
+    """
+
+    def __init__(self, *args):
+        """
+        args = a list of (De)Serializer (or otherwise callable) objects to apply IN GIVEN ORDER to some data 
+        """
+        self.__steps = list(args)
+
+    def __call__(self,data,ctx=None) :
+        if data is None :
+            return None
+        for istep,serdes in enumerate(self.__steps,start=1) :
+            try :
+                data = serdes(data)
+            except Exception as e :
+                errmsg = f'ERROR: failed to (de)serialize at step {istep} (of {len(self.__steps)}) in CompoundSerDes! '
+                errmsg+= f'Callable = {serdes}, exception = {e}'
+                raise SerializationError(errmsg)
+        return data
+
+class CompoundSerializer(Serializer):
+    """
+    A Serializer that stacks multiple steps
+    For use with KafkaCrypto since topic names must be passed
+    """
+
+    def __init__(self, *args):
+        self.__steps = list(args)
+
+    def serialize(self,topic,data) :
+        for istep,ser in enumerate(self.__steps,start=1) :
+            try :
+                if hasattr(ser,'serialize') and inspect.isroutine(ser.serialize) :
+                    data = ser.serialize(topic,data)
+                else :
+                    data = ser(data,ctx=None)
+            except Exception as e :
+                errmsg = f'ERROR: failed to serialize at step {istep} (of {len(self.__steps)}) in CompoundSerializer! '
+                errmsg+= f'Callable = {ser}, exception = {e}'
+                raise SerializationError(errmsg)
+        return data
+
+class CompoundDeserializer(Deserializer):
+    """
+    A Deserializer that stacks multiple steps
+    For use with KafkaCrypto since topic names must be passed
+    """
+
+    MAX_WAIT_PER_MESSAGE = 600 #in seconds
+
+    def __init__(self, *args):
+        self.__steps = list(args)
+
+    def deserialize(self,topic,data) :
+        for istep,des in enumerate(self.__steps,start=1) :
+            try :
+                if hasattr(des,'deserialize') and inspect.isroutine(des.deserialize) :
+                    data = des.deserialize(topic,data)
+                    if isinstance(data,KafkaCryptoMessage) :
+                        success = False; elapsed = 0
+                        while (not success) and elapsed<CompoundDeserializer.MAX_WAIT_PER_MESSAGE :
+                            try :
+                                data = data.getMessage()
+                                success = True
+                            except KafkaCryptoMessageError :
+                                time.sleep(1)
+                                elapsed+=1
+                else :
+                    data = des(data,ctx=None)
+            except Exception as e :
+                errmsg = f'ERROR: failed to deserialize at step {istep} (of {len(self.__steps)})'
+                errmsg+= f' in CompoundDeserializer! Callable = {des}, exception = {e}'
+                raise SerializationError(errmsg)
+        return data
 
 ####################### SERIALIZING/DESERIALIZING FILE CHUNKS #######################
 
@@ -16,6 +97,10 @@ class DataFileChunkSerializer(Serializer) :
             raise SerializationError('ERROR: object passed to FileChunkSerializer is not a DataFileChunk!')
         #pack up all the relevant bits of information into a single bytearray
         try :
+            #get the chunk's data from the file if necessary
+            if file_chunk_obj.data is None :
+                file_chunk_obj.populate_with_file_data()
+            #pack up all of the properties of the message
             ordered_properties = []
             ordered_properties.append(str(file_chunk_obj.filename))
             ordered_properties.append(file_chunk_obj.file_hash)

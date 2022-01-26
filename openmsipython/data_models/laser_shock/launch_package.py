@@ -22,6 +22,10 @@ class LaserShockLaunchPackageSpec(SpecForRun) :
         self.flyerspec = kwargs.get('flyerspec')
         self.spacerID = kwargs.get('spacerID')
         self.spacercutting = kwargs.get('spacercutting')
+        self.spacercuttingenergy = kwargs.get('spacercuttingenergy')
+        self.spacercuttingnpasses_1 = kwargs.get('spacercuttingnpasses_1')
+        self.spacercuttingnpasses_2 = kwargs.get('spacercuttingnpasses_2')
+        self.spacercuttingnpasses_3 = kwargs.get('spacercuttingnpasses_3')
         self.impactsamplespec = kwargs.get('impactsamplespec')
         self.flyerrow = kwargs.get('flyerrow')
         self.flyercol = kwargs.get('flyercol')
@@ -84,6 +88,45 @@ class LaserShockLaunchPackageSpec(SpecForRun) :
                 name='Cutting Spacer',
                 template=OBJ_TEMPL['Cutting Spacer']
                 )
+        if self.spacercuttingenergy!='' :
+            temp = ATTR_TEMPL['Laser Cutting Energy']
+            laser_cutting_energy_par = None
+            for p in cutting_spacer.parameters :
+                if p.name=='LaserCuttingEnergy' :
+                    laser_cutting_energy_par = p
+                    break
+            if laser_cutting_energy_par is not None :
+                new_value=NominalReal(float(self.spacercuttingenergy),temp.bounds.default_units)
+                p.value=new_value
+            else :
+                cutting_spacer.parameters.append(
+                    Parameter(
+                        name='LaserCuttingEnergy',
+                        value=NominalReal(float(self.spacercuttingenergy),temp.bounds.default_units),
+                        template=temp,
+                        origin='specified',
+                        )
+                )
+        n_passes_values = [self.spacercuttingnpasses_1,self.spacercuttingnpasses_2,self.spacercuttingnpasses_3]
+        for ival,val in enumerate(n_passes_values,start=1) :
+            if val!='' :
+                n_passes_par = None
+                for p in cutting_spacer.parameters :
+                    if p.name==f'NumberofPasses{ival}' :
+                        n_passes_par = p
+                        break
+                if n_passes_par is not None :
+                    new_value=NominalInteger(int(val))
+                    p.value=new_value
+                else :
+                    cutting_spacer.parameters.append(
+                        Parameter(
+                            name=f'NumberofPasses{ival}',
+                            value=NominalInteger(int(val)),
+                            template=ATTR_TEMPL['Number of Passes'],
+                            origin='specified',
+                            )
+                    )
         IngredientSpec(name='Spacer Material',
                        material=self.spacerID if self.spacerID is not None else None,
                        process=cutting_spacer)
@@ -111,15 +154,18 @@ class LaserShockLaunchPackageSpec(SpecForRun) :
         # Attach Impact Sample to Flyer/Spacer stack
         if not self.use_sample :
             return attaching_spacer
-        attaching_sample = ProcessSpec(
-            name='Attaching Sample',
-            parameters=[
+        params = []
+        if self.samp_orientation!='' :
+            params.append(
                 Parameter(name='Sample Orientation',
                           value=NominalCategorical(str(self.samp_orientation)),
                           template=ATTR_TEMPL['Sample Orientation'],
                           origin='specified',
                     )
-                ],
+            )
+        attaching_sample = ProcessSpec(
+            name='Attaching Sample',
+            parameters=params,
             template=OBJ_TEMPL['Attaching Sample']
             )
         for ai,a in enumerate(self.samp_attachments_adhesives) :
@@ -247,6 +293,10 @@ class LaserShockLaunchPackage(MaterialRunFromFileMakerRecord) :
         kwargs['flyerspec'] = self.flyerstack.spec if self.flyerstack is not None else None
         kwargs['spacerID'] = self.spacerID
         kwargs['spacercutting'] = self.spacercutting
+        kwargs['spacercuttingenergy'] = record.pop('Spacer Cutting Energy')
+        kwargs['spacercuttingnpasses_1'] = record.pop('Spacer Cut Num of Pass 1')
+        kwargs['spacercuttingnpasses_2'] = record.pop('Spacer Cut Num of Pass 2')
+        kwargs['spacercuttingnpasses_3'] = record.pop('Spacer Cut Num of Pass 3')
         kwargs['impactsamplespec'] = self.impactsample.spec if self.impactsample is not None else None
         # Choosing the Flyer from the stack
         kwargs['flyerrow']=record.pop('Flyer Row Location')
@@ -271,7 +321,7 @@ class LaserShockLaunchPackage(MaterialRunFromFileMakerRecord) :
         polish_pad = record.pop('Polishing Pad')
         sl = record.pop('Sample Location')
         slbo = record.pop('Sample Location based Order')
-        polish_proc = record.pop('Polishing Process')
+        polish_proc = (record.pop('Polishing Process')).rstrip() #extra space at the end of some values in the DB
         cutting_procs = record.pop('Cutting Procedures Used').split('\r')
         ns = ['Diamond Grit','Silicon Carbide Grit']
         vs = [record.pop(n) for n in ns]
@@ -279,12 +329,14 @@ class LaserShockLaunchPackage(MaterialRunFromFileMakerRecord) :
         if self.sample is None :
             return None
         #initial Spec
-        params = [
-            Parameter(name='Polishing Pad',
-                      value=NominalCategorical(str(polish_pad)),
-                      template=ATTR_TEMPL['Polishing Pad'],
-                      origin='specified')
-        ]
+        params = []
+        if polish_pad!='' :
+            params.append(
+                Parameter(name='Polishing Pad',
+                          value=NominalCategorical(str(polish_pad)),
+                          template=ATTR_TEMPL['Polishing Pad'],
+                          origin='specified')
+            )
         if sl!='' :
             params.append(
                 Parameter(name='Sample Location',
@@ -299,16 +351,19 @@ class LaserShockLaunchPackage(MaterialRunFromFileMakerRecord) :
                           template=ATTR_TEMPL['Sample Location Based Order'],
                           origin='specified'),
             )
+        conditions = []
+        if polish_proc!='' :
+            conditions.append(
+                Condition(name='Polishing Process',
+                          value=NominalCategorical(str(polish_proc)),
+                          template=ATTR_TEMPL['Polishing Process'],
+                          origin='specified')
+            )
         impactsamplespec = MaterialSpec(
             name='Impact Sample',
             process=ProcessSpec(
                 name='Impact Sample Cutting and Polishing',
-                conditions=[
-                    Condition(name='Polishing Process',
-                              value=NominalCategorical(str(polish_proc)),
-                              template=ATTR_TEMPL['Polishing Process'],
-                              origin='specified')
-                    ],
+                conditions=conditions,
                 parameters=params,
                 template=OBJ_TEMPL['Impact Sample Cutting and Polishing'],
                 ),
@@ -317,6 +372,8 @@ class LaserShockLaunchPackage(MaterialRunFromFileMakerRecord) :
         #add the cutting procedures as parameters of the process
         n = 'Impact Sample Cutting Procedure'
         for cp in cutting_procs :
+            if cp=='' :
+                continue
             impactsamplespec.process.conditions.append(Condition(name=n,
                                                                  value=NominalCategorical(str(cp)),
                                                                  template=ATTR_TEMPL[n],

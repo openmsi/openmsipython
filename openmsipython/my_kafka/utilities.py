@@ -1,64 +1,40 @@
-#imports
-from .serialization import DataFileChunkSerializer, DataFileChunkDeserializer
-from confluent_kafka.serialization import DoubleSerializer, IntegerSerializer, StringSerializer
-from confluent_kafka.serialization import DoubleDeserializer, IntegerDeserializer, StringDeserializer
+def add_kwargs_to_configs(configs,**kwargs) :
+    """
+    Add any kwargs with underscores replaced with dots to a given config dictionary
+    """
+    new_configs = configs.copy()
+    for argname,arg in kwargs.items() :
+        new_configs[argname.replace('_','.')]=arg
+    return new_configs
 
-def get_transformed_configs(configs,names_to_classes) :
-    """
-    Returns a configuration dictionary with some parameter names replaced by instances of classes
+#a very small class (and instance thereof) to hold a logger object to use in the producer callback 
+# (literally exists because I don't think I can add extra keyword or other arguments to the producer callback function)
+class ProducerCallbackLogger :
 
-    configs = the configurations dictionary to alter and return
-    names_to_classes = a dictionary whose keys are plaintext parameter values that may be in config files
-                       and whose values are instances of the corresponding classes
-    """
-    for cfg_name,cfg_value in configs.items() :
-        if cfg_value in names_to_classes.keys() :
-            configs[cfg_name] = names_to_classes[cfg_value]()
-    return configs
+    @property
+    def logger(self) :
+        return self._logger
+    @logger.setter
+    def logger(self,logger_val) :
+        self._logger = logger_val
+    def __init__(self) :
+        self._logger = None
 
-def get_replaced_configs(configs,replacement_type) :
-    """
-    Returns a configuration dictionary with (de)serialization parameters replaced by instances of corresponding classes
+PRODUCER_CALLBACK_LOGGER = ProducerCallbackLogger()
 
-    configs = the configurations dictionary to alter and return
-    replacement_type = a string indicating the type of replacement that should be performed
-    """
-    if replacement_type=='serialization' :
-        names_classes = {
-                'DoubleSerializer': DoubleSerializer,
-                'IntegerSerializer': IntegerSerializer,
-                'StringSerializer': StringSerializer,
-                'DataFileChunkSerializer': DataFileChunkSerializer,
-            }
-    elif replacement_type=='deserialization' :
-        names_classes = {
-                'DoubleDeserializer': DoubleDeserializer,
-                'IntegerDeserializer': IntegerDeserializer,
-                'StringDeserializer': StringDeserializer,
-                'DataFileChunkDeserializer': DataFileChunkDeserializer,
-            }
-    else :
-        raise ValueError(f'ERROR: unrecognized replacement_type "{replacement_type}" in get_replaced_configs!')
-    return get_transformed_configs(configs,names_classes)
-
-def get_next_message(consumer,logger,*poll_args,**poll_kwargs) :
-    """
-    Call "poll" for the given consumer and return any successfully consumed message
-    otherwise log a warning if there's an error
-    """
-    consumed_msg = None
-    try :
-        consumed_msg = consumer.poll(*poll_args,**poll_kwargs)
-    except Exception as e :
-        warnmsg = 'WARNING: encountered an error in a call to consumer.poll() and will skip the offending message. '
-        warnmsg+= f'Error: {e}'
-        logger.warning(warnmsg)
-        return
-    if consumed_msg is not None :
-        if consumed_msg.error() is not None or consumed_msg.value() is None :
-            warnmsg = f'WARNING: unexpected consumed message, consumed_msg = {consumed_msg}'
-            warnmsg+= f', consumed_msg.error() = {consumed_msg.error()}, consumed_msg.value() = {consumed_msg.value()}'
-            logger.warning(warnmsg)
-        return consumed_msg.value()
-    else :
-        return
+#a callback function to use for testing whether a message has been successfully produced to the topic
+def producer_callback(err,msg) :
+    global PRODUCER_CALLBACK_LOGGER
+    if err is not None: #raise an error if the message wasn't sent successfully
+        if err.fatal() :
+            logmsg=f'ERROR: fatally failed to deliver message with key {msg.key()}. Error reason: {err.str()}'
+            if PRODUCER_CALLBACK_LOGGER.logger is not None :
+                PRODUCER_CALLBACK_LOGGER.logger.error(logmsg,RuntimeError)
+            else :
+                raise RuntimeError(logmsg)
+        elif not err.retriable() :
+            logmsg=f'ERROR: Failed to deliver message with key {msg.key()} and cannot retry. Error reason: {err.str()}'
+            if PRODUCER_CALLBACK_LOGGER.logger is not None :
+                PRODUCER_CALLBACK_LOGGER.logger.error(logmsg,RuntimeError)
+            else :
+                raise RuntimeError(logmsg)

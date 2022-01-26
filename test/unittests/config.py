@@ -1,7 +1,7 @@
 #imports
-from openmsipython.utilities.config import UTIL_CONST
-from openmsipython.data_file_io.config import RUN_OPT_CONST
 import pathlib
+from openmsipython.shared.config import UTIL_CONST
+from openmsipython.data_file_io.config import RUN_OPT_CONST
 
 class TestRoutineConstants :
     """
@@ -12,14 +12,14 @@ class TestRoutineConstants :
     def TEST_CONFIG_FILE_PATH(self) : # The path to the Kafka config file to use
         return (UTIL_CONST.CONFIG_FILE_DIR / f'{RUN_OPT_CONST.DEFAULT_CONFIG_FILE}{UTIL_CONST.CONFIG_FILE_EXT}').resolve()
     @property
+    def TEST_CONFIG_FILE_PATH_ENCRYPTED(self) : # Same as above except it includes a node_id to test encryption
+        return (UTIL_CONST.CONFIG_FILE_DIR / f'test_encrypted{UTIL_CONST.CONFIG_FILE_EXT}').resolve()
+    @property
     def PROD_CONFIG_FILE_PATH(self) : # The path to the "prod" Kafka config file to use in making sure that the prod environment variables are not set
         return (UTIL_CONST.CONFIG_FILE_DIR / f'prod{UTIL_CONST.CONFIG_FILE_EXT}').resolve()
     @property
     def FAKE_PROD_CONFIG_FILE_PATH(self) : # The path to the "prod" Kafka config file to use in making sure that the prod environment variables are not set
         return (self.TEST_DATA_DIR_PATH / f'fake_prod{UTIL_CONST.CONFIG_FILE_EXT}').resolve()
-    @property
-    def TEST_CONFIG_FILE_PATH_NO_SERIALIZATION(self) : # Same as above except it's the config file that doesn't have the serialization stuff in it
-        return (UTIL_CONST.CONFIG_FILE_DIR / 'test_no_serialization.config').resolve()
     @property
     def TEST_DATA_DIR_PATH(self) : #path to the test data directory
         return pathlib.Path(__file__).parent.parent / 'data'
@@ -54,13 +54,20 @@ class TestRoutineConstants :
     def TEST_WATCHED_DIR_PATH(self) : #path to the "watched" directory to use in testing DataFileDirectory etc.
         return pathlib.Path(__file__).parent.parent / 'test_watched_dir'
     @property
-    def TEST_RECO_DIR_PATH(self) : # Path to the test data file
+    def TEST_WATCHED_DIR_PATH_ENCRYPTED(self) : #same as above except for the encrypted tests
+        return pathlib.Path(__file__).parent.parent / 'test_watched_dir_encrypted'
+    @property
+    def TEST_RECO_DIR_PATH(self) : # Path to the directory where consumed files should be reconstructed
         return pathlib.Path(__file__).parent.parent / 'test_reco'
     @property
-    def FILEMAKER_RECORD_PICKLE_FILENAME(self) :
+    def TEST_RECO_DIR_PATH_ENCRYPTED(self) : # same as above except for encrypted tests
+        return pathlib.Path(__file__).parent.parent / 'test_reco_encrypted'
+    @property
+    def FILEMAKER_RECORD_PICKLE_FILENAME(self) : # path to the pickle file holding a bunch of mocked FileMaker records
         return 'filemaker_records_for_testing.pickle'
     @property
-    def LASER_SHOCK_DATA_MODEL_OUTPUT_DIRNAME(self) :
+    def LASER_SHOCK_DATA_MODEL_OUTPUT_DIRNAME(self) : 
+        # path to the directory where the laser shock GEMD output files should go
         return 'laser_shock_data_model_output'
     
 TEST_CONST=TestRoutineConstants()

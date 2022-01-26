@@ -52,23 +52,31 @@ class LaserShockSampleSpec(SpecForRun) :
         comp_dict = {}
         for c in self.constituents :
             comp_dict[c[0]]=c[1]
+        raw_mat_properties = []
+        if comp_dict!={} :
+            condition = None
+            if self.pct_meas not in ('','N/A') :
+                condition = Condition(name='CompositionMeasure',
+                                      value=NominalCategorical(str(self.pct_meas)),
+                                      template=ATTR_TEMPL['Composition Measure'],
+                                      origin='specified')
+            raw_mat_properties.append(
+                PropertyAndConditions(Property(name='MaterialComposition',
+                                               value=NominalComposition(comp_dict),
+                                               template=ATTR_TEMPL['Sample Raw Material Composition'],
+                                               origin='specified'),condition)
+                )
         raw_mat_spec = MaterialSpec(
             name='Raw Material',
-            properties=[
+            properties=raw_mat_properties,
+            template=OBJ_TEMPL['Raw Sample Material'],
+            )
+        if self.mat_type!='' :
+            raw_mat_spec.properties.append(
                 PropertyAndConditions(Property(name='MaterialType',
                                                value=NominalCategorical(str(self.mat_type)),
                                                template=ATTR_TEMPL['Sample Material Type'],
                                                origin='specified')),
-                PropertyAndConditions(Property(name='MaterialComposition',
-                                               value=NominalComposition(comp_dict),
-                                               template=ATTR_TEMPL['Sample Raw Material Composition'],
-                                               origin='specified'),
-                                      Condition(name='CompositionMeasure',
-                                                value=NominalCategorical(str(self.pct_meas)),
-                                                template=ATTR_TEMPL['Composition Measure'],
-                                                origin='specified')),
-                ],
-            template=OBJ_TEMPL['Raw Sample Material'],
             )
         #some variables to use while dynamically figuring out the process
         proc_to_take_raw_material = None
@@ -106,20 +114,26 @@ class LaserShockSampleSpec(SpecForRun) :
             input_material_for_next = preprocessing.output_material
             final_output_proc = preprocessing
         #Define sample processing
-        sample_processing = ProcessSpec(
-            name='Sample Processing',
-            conditions=[
+        sample_processing_conditions = []
+        sample_processing_parameters = []
+        if self.proc_geom!='' :
+            sample_processing_conditions.append(
                 Condition(name='ProcessingGeometry',
                           value=NominalCategorical(str(self.proc_geom)),
                           template=ATTR_TEMPL['Processing Geometry'],
-                          origin='specified'),
-                ],
-            parameters=[
-                        Parameter(name='ProcessingRoute',
+                          origin='specified')
+            )
+        if self.proc_route!='' :
+            sample_processing_parameters.append(
+                Parameter(name='ProcessingRoute',
                                   value=NominalCategorical(str(self.proc_route)),
                                   template=ATTR_TEMPL['Processing Route'],
                                   origin='specified'),
-                ],
+            )
+        sample_processing = ProcessSpec(
+            name='Sample Processing',
+            conditions=sample_processing_conditions,
+            parameters=sample_processing_parameters,
             template=OBJ_TEMPL['Sample Processing']
             )
         #add some optional conditions

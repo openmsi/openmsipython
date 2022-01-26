@@ -1,39 +1,15 @@
 #imports
-import datetime, time
-from threading import Lock
-from ..utilities.controlled_process import ControlledProcessMultiThreaded
-from ..utilities.runnable import Runnable
-from ..utilities.misc import populated_kwargs
-from ..my_kafka.consumer_group import ConsumerGroup
+import datetime
+from ..shared.runnable import Runnable
 from .config import DATA_FILE_HANDLING_CONST, RUN_OPT_CONST
 from .download_data_file import DownloadDataFileToDisk
 from .data_file_directory import DataFileDirectory
+from .data_file_chunk_processor import DataFileChunkProcessor
 
-class DataFileDownloadDirectory(DataFileDirectory,ControlledProcessMultiThreaded,ConsumerGroup,Runnable) :
+class DataFileDownloadDirectory(DataFileChunkProcessor,DataFileDirectory,Runnable) :
     """
     Class representing a directory into which files are being reconstructed
     """
-
-    #################### PROPERTIES ####################
-
-    @property
-    def other_datafile_kwargs(self) :
-        return {} #Overload this in child classes to define additional keyword arguments 
-                  #that should go to the specific datafile constructor
-    @property
-    def n_msgs_read(self) :
-        return self.__n_msgs_read
-    @property
-    def completely_reconstructed_filepaths(self) :
-        return self.__completely_reconstructed_filepaths
-    @property
-    def progress_msg(self) :
-        progress_msg = 'The following files have been recognized so far:\n'
-        for datafile in self.data_files_by_path.values() :
-            progress_msg+=f'\t{datafile.full_filepath} (in progress)\n'
-        for fp in self.completely_reconstructed_filepaths :
-            progress_msg+=f'\t{fp} (completed)\n'
-        return progress_msg
 
     #################### PUBLIC FUNCTIONS ####################
 
@@ -42,16 +18,11 @@ class DataFileDownloadDirectory(DataFileDirectory,ControlledProcessMultiThreaded
         datafile_type = the type of datafile that the consumed messages should be assumed to represent
         In this class datafile_type should be something that extends DownloadDataFileToDisk
         """    
-        kwargs = populated_kwargs(kwargs,{'n_consumers':kwargs.get('n_threads')})
-        super().__init__(*args,**kwargs)
-        if not issubclass(datafile_type,DownloadDataFileToDisk) :
+        super().__init__(*args,datafile_type=datafile_type,**kwargs)
+        if not issubclass(self.datafile_type,DownloadDataFileToDisk) :
             errmsg = 'ERROR: DataFileDownloadDirectory requires a datafile_type that is a subclass of '
-            errmsg+= f'DownloadDataFileToDisk but {datafile_type} was given!'
+            errmsg+= f'DownloadDataFileToDisk but {self.datafile_type} was given!'
             self.logger.error(errmsg,ValueError)
-        self.__datafile_type = datafile_type
-        self.__n_msgs_read = 0
-        self.__completely_reconstructed_filepaths = []
-        self.__thread_locks = {}
 
     def reconstruct(self) :
         """
@@ -62,71 +33,44 @@ class DataFileDownloadDirectory(DataFileDirectory,ControlledProcessMultiThreaded
         msg = f'Will reconstruct files from messages in the {self.topic_name} topic using {self.n_threads} '
         msg+= f'thread{"s" if self.n_threads!=1 else ""}'
         self.logger.info(msg)
-        lock = Lock()
-        self.run([(lock,self.consumers[i]) for i in range(self.n_threads)])
-        return self.__n_msgs_read, self.__completely_reconstructed_filepaths
+        self.run()
+        return self.n_msgs_read, self.n_msgs_processed, self.completely_processed_filepaths
 
     #################### PRIVATE HELPER FUNCTIONS ####################
 
-    def _run_worker(self,lock,consumer) :
-        """
-        Consume messages expected to be DataFileChunks and try to write their data to disk in the directory, 
-        paying attention to whether/how the files they're coming from end up fully reconstructed or mismatched 
-        with their original hashes.
-        Several iterations of this function run in parallel threads as part of a ControlledProcessMultiThreaded
-        """
-        #start the loop for while the controlled process is alive
-        while self.alive :
-            #consume a DataFileChunk message from the topic
-            dfc = consumer.get_next_message(self.logger,0)
-            if dfc is None :
-                time.sleep(0.25) #wait just a bit to not over-tax things
-                continue
-            #set the chunk's rootdir to the working directory
-            if dfc.rootdir is not None :
-                errmsg = f'ERROR: message with key {dfc.message_key} has rootdir={dfc.rootdir} '
-                errmsg+= '(should be None as it was just consumed)! Will ignore this message and continue.'
-                self.logger.error(errmsg)
-            dfc.rootdir = self.dirpath
-            #add the chunk's data to the file that's being reconstructed
+    def _process_message(self, lock, dfc):
+        retval = super()._process_message(lock,dfc,self.dirpath,self.logger)
+        if retval==True :
+            return retval
+        #If the file was successfully reconstructed, return True
+        if retval==DATA_FILE_HANDLING_CONST.FILE_SUCCESSFULLY_RECONSTRUCTED_CODE :
+            msg = f'File {self.files_in_progress_by_path[dfc.filepath].full_filepath.relative_to(dfc.rootdir)} '
+            msg+= 'successfully reconstructed from stream'
+            self.logger.info(msg)
+            self.completely_processed_filepaths.append(dfc.filepath)
             with lock :
-                self.__n_msgs_read+=1
-                if dfc.filepath not in self.data_files_by_path.keys() :
-                    self.data_files_by_path[dfc.filepath] = self.__datafile_type(dfc.filepath,
-                                                                                 logger=self.logger,
-                                                                                 **self.other_datafile_kwargs)
-                    self.__thread_locks[dfc.filepath] = Lock()
-            return_value = self.data_files_by_path[dfc.filepath].add_chunk(dfc,self.__thread_locks[dfc.filepath])
-            if return_value in (DATA_FILE_HANDLING_CONST.FILE_IN_PROGRESS,
-                                DATA_FILE_HANDLING_CONST.CHUNK_ALREADY_WRITTEN_CODE) :
-                continue
-            elif return_value==DATA_FILE_HANDLING_CONST.FILE_HASH_MISMATCH_CODE :
-                warnmsg = f'WARNING: hashes for file {self.data_files_by_path[dfc.filepath].filename} not matched '
-                warnmsg+= 'after reconstruction! All data have been written to disk, but not as they were uploaded.'
-                self.logger.warning(warnmsg)
-                with lock :
-                    del self.data_files_by_path[dfc.filepath]
-                    del self.__thread_locks[dfc.filepath]
-            elif return_value==DATA_FILE_HANDLING_CONST.FILE_SUCCESSFULLY_RECONSTRUCTED_CODE :
-                msg = f'File {self.data_files_by_path[dfc.filepath].full_filepath.relative_to(dfc.rootdir)} '
-                msg+= 'successfully reconstructed from stream'
-                self.logger.info(msg)
-                self.__completely_reconstructed_filepaths.append(dfc.filepath)
-                with lock :
-                    del self.data_files_by_path[dfc.filepath]
-                    del self.__thread_locks[dfc.filepath]
+                del self.files_in_progress_by_path[dfc.filepath]
+                del self.locks_by_fp[dfc.filepath]
+            return True
+        #If the file hash was mismatched after reconstruction, return False
+        elif retval==DATA_FILE_HANDLING_CONST.FILE_HASH_MISMATCH_CODE :
+            warnmsg = f'WARNING: hashes for file {self.files_in_progress_by_path[dfc.filepath].filename} not matched '
+            warnmsg+= 'after reconstruction! All data have been written to disk, but not as they were uploaded.'
+            self.logger.warning(warnmsg)
+            with lock :
+                del self.files_in_progress_by_path[dfc.filepath]
+                del self.locks_by_fp[dfc.filepath]
+            return False
+        else :
+            self.logger.error(f'ERROR: unrecognized add_chunk return code ({retval})!',NotImplementedError)
+            return False
 
     def _on_check(self) :
-        msg = f'{self.__n_msgs_read} messages read, {len(self.__completely_reconstructed_filepaths)} files '
-        msg+= 'completely reconstructed so far'
+        msg = f'{self.n_msgs_read} messages read, {self.n_msgs_processed} messages processed, '
+        msg+= f'{len(self.completely_processed_filepaths)} files completely reconstructed so far'
         self.logger.debug(msg)
-        if len(self.data_files_by_path)>0 or len(self.__completely_reconstructed_filepaths)>0 :
+        if len(self.files_in_progress_by_path)>0 or len(self.completely_processed_filepaths)>0 :
             self.logger.debug(self.progress_msg)
-
-    def _on_shutdown(self) :
-        super()._on_shutdown()
-        for consumer in self.consumers :
-            consumer.close()
 
     #################### CLASS METHODS ####################
 
@@ -152,15 +96,18 @@ class DataFileDownloadDirectory(DataFileDirectory,ControlledProcessMultiThreaded
         #start the reconstructor running
         run_start = datetime.datetime.now()
         reconstructor_directory.logger.info(f'Listening for files to reconstruct in {args.output_dir}')
-        n_msgs,complete_filenames = reconstructor_directory.reconstruct()
+        n_read,n_processed,complete_filenames = reconstructor_directory.reconstruct()
         run_stop = datetime.datetime.now()
         #shut down when that function returns
         reconstructor_directory.logger.info(f'File reconstructor writing to {args.output_dir} shut down')
-        msg = f'{n_msgs} total messages were consumed'
+        msg = f'{n_read} total messages were consumed'
         if len(complete_filenames)>0 :
+            msg+=f', {n_processed} messages were successfully processed,'
             msg+=f' and the following {len(complete_filenames)} file'
             msg+=' was' if len(complete_filenames)==1 else 's were'
             msg+=' successfully reconstructed'
+        else :
+            msg+=f' and {n_processed} messages were successfully processed'
         msg+=f' from {run_start} to {run_stop}'
         for fn in complete_filenames :
             msg+=f'\n\t{fn}'

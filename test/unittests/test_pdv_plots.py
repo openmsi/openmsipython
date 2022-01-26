@@ -1,7 +1,7 @@
 #imports
 import unittest, pathlib, logging, time, shutil
+from openmsipython.shared.logging import Logger
 from openmsipython.data_file_io.config import RUN_OPT_CONST
-from openmsipython.utilities.logging import Logger
 from openmsipython.pdv.lecroy_file_upload_directory import LecroyFileUploadDirectory
 from openmsipython.pdv.pdv_plot_maker import PDVPlotMaker
 from config import TEST_CONST
@@ -10,7 +10,8 @@ from utilities import MyThread
 #constants
 LOGGER = Logger(pathlib.Path(__file__).name.split('.')[0],logging.ERROR)
 UPDATE_SECS = 5
-TIMEOUT_SECS = 90
+TIMEOUT_SECS = 20
+JOIN_TIMEOUT_SECS = 30
 TOPIC_NAME = 'test_pdv_plots'
 
 class TestPDVPlots(unittest.TestCase) :
@@ -62,9 +63,10 @@ class TestPDVPlots(unittest.TestCase) :
             if upload_thread.is_alive() :
                 try :
                     lfud.shutdown()
-                    upload_thread.join(timeout=5)
+                    upload_thread.join(timeout=JOIN_TIMEOUT_SECS)
                     if upload_thread.is_alive() :
-                        errmsg = 'ERROR: upload thread in run_lecroy_file_upload_directory timed out after 5 seconds!'
+                        errmsg = 'ERROR: upload thread in run_lecroy_file_upload_directory timed out after '
+                        errmsg+= f'{JOIN_TIMEOUT_SECS} seconds!'
                         raise TimeoutError(errmsg)
                 except Exception as e :
                     raise e
@@ -103,7 +105,7 @@ class TestPDVPlots(unittest.TestCase) :
             msg+= f'(will timeout after {TIMEOUT_SECS} seconds)...'
             LOGGER.info(msg)
             LOGGER.set_stream_level(logging.ERROR)
-            while ( (TEST_CONST.TEST_LECROY_DATA_FILE_PATH not in pdvpm.processed_filepaths) and 
+            while ( (TEST_CONST.TEST_LECROY_DATA_FILE_PATH not in pdvpm.completely_processed_filepaths) and 
                     time_waited<TIMEOUT_SECS ) :
                 current_messages_read = pdvpm.n_msgs_read
                 LOGGER.set_stream_level(logging.INFO)
@@ -115,14 +117,15 @@ class TestPDVPlots(unittest.TestCase) :
             #put the "quit" command into the input queue, which SHOULD stop the method running
             LOGGER.set_stream_level(logging.INFO)
             msg = f'Quitting download thread in run_pdv_plot_maker after reading {pdvpm.n_msgs_read} messages; '
-            msg+= 'will timeout after 5 seconds....'
+            msg+= f'will timeout after {JOIN_TIMEOUT_SECS} seconds....'
             LOGGER.info(msg)
             LOGGER.set_stream_level(logging.ERROR)
             pdvpm.control_command_queue.put('q')
             #wait for the download thread to finish
-            download_thread.join(timeout=5)
+            download_thread.join(timeout=JOIN_TIMEOUT_SECS)
             if download_thread.is_alive() :
-                raise TimeoutError('ERROR: download thread in run_pdv_plot_maker timed out after 5 seconds!')
+                errmsg = f'ERROR: download thread in run_pdv_plot_maker timed out after {JOIN_TIMEOUT_SECS} seconds!'
+                raise TimeoutError(errmsg)
             #make sure the plot image file exists
             pfp = TEST_CONST.TEST_RECO_DIR_PATH/f'pdv_spall_plots_{TEST_CONST.TEST_LECROY_DATA_FILE_NAME.rstrip(".txt")}.png'
             self.assertTrue(pfp.is_file())
@@ -132,9 +135,11 @@ class TestPDVPlots(unittest.TestCase) :
             if download_thread.is_alive() :
                 try :
                     pdvpm.control_command_queue.put('q')
-                    download_thread.join(timeout=5)
+                    download_thread.join(timeout=JOIN_TIMEOUT_SECS)
                     if download_thread.is_alive() :
-                        raise TimeoutError('ERROR: download thread in run_pdv_plot_maker timed out after 5 seconds!')
+                        errmsg = 'ERROR: download thread in run_pdv_plot_maker timed out after '
+                        errmsg+= f'{JOIN_TIMEOUT_SECS} seconds!'
+                        raise TimeoutError(errmsg)
                 except Exception as e :
                     raise e
                 finally :

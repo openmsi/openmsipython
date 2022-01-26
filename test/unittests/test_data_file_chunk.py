@@ -1,11 +1,12 @@
 #imports
-from config import TEST_CONST
+import unittest, pathlib, logging
+from confluent_kafka.error import SerializationError
+from openmsipython.shared.logging import Logger
+from openmsipython.data_file_io.config import RUN_OPT_CONST
 from openmsipython.data_file_io.upload_data_file import UploadDataFile
 from openmsipython.data_file_io.data_file_chunk import DataFileChunk
-from openmsipython.my_kafka.my_producers import MySerializingProducer
-from openmsipython.data_file_io.config import RUN_OPT_CONST
-from openmsipython.utilities.logging import Logger
-import unittest, pathlib, logging
+from openmsipython.my_kafka.my_producer import MyProducer
+from config import TEST_CONST
 
 #constants
 LOGGER = Logger(pathlib.Path(__file__).name.split('.')[0],logging.ERROR)
@@ -22,14 +23,16 @@ class TestDataFileChunk(unittest.TestCase) :
         udf._build_list_of_file_chunks(RUN_OPT_CONST.DEFAULT_CHUNK_SIZE)
         self.test_chunk_1 = udf.chunks_to_upload[0]
         self.test_chunk_2 = udf.chunks_to_upload[1]
-        self.test_chunk_1._populate_with_file_data(logger=LOGGER)
-        self.test_chunk_2._populate_with_file_data(logger=LOGGER)
+        self.test_chunk_1.populate_with_file_data(logger=LOGGER)
+        self.test_chunk_2.populate_with_file_data(logger=LOGGER)
 
     def test_produce_to_topic_kafka(self) :
-        producer = MySerializingProducer.from_file(TEST_CONST.TEST_CONFIG_FILE_PATH,logger=LOGGER)
-        self.test_chunk_1.produce_to_topic(producer,RUN_OPT_CONST.DEFAULT_TOPIC_NAME,logger=LOGGER)
+        producer = MyProducer.from_file(TEST_CONST.TEST_CONFIG_FILE_PATH,logger=LOGGER)
+        producer.produce(topic=RUN_OPT_CONST.DEFAULT_TOPIC_NAME,
+                         key=self.test_chunk_1.msg_key,value=self.test_chunk_1.msg_value)
         producer.flush()
-        self.test_chunk_2.produce_to_topic(producer,RUN_OPT_CONST.DEFAULT_TOPIC_NAME,logger=LOGGER)
+        producer.produce(topic=RUN_OPT_CONST.DEFAULT_TOPIC_NAME,
+                         key=self.test_chunk_2.msg_key,value=self.test_chunk_2.msg_value)
         producer.flush()
 
     def test_chunk_of_nonexistent_file_kafka(self) :
@@ -44,10 +47,11 @@ class TestDataFileChunk(unittest.TestCase) :
         LOGGER.info('\nExpecting two errors below:')
         LOGGER.set_stream_level(logging.ERROR)
         with self.assertRaises(FileNotFoundError) :
-            chunk_to_fail._populate_with_file_data(logger=LOGGER)
-        producer = MySerializingProducer.from_file(TEST_CONST.TEST_CONFIG_FILE_PATH,logger=LOGGER)
-        with self.assertRaises(FileNotFoundError) :
-            chunk_to_fail.produce_to_topic(producer,RUN_OPT_CONST.DEFAULT_TOPIC_NAME,logger=LOGGER)
+            chunk_to_fail.populate_with_file_data(logger=LOGGER)
+        producer = MyProducer.from_file(TEST_CONST.TEST_CONFIG_FILE_PATH,logger=LOGGER)
+        with self.assertRaises(SerializationError) :
+            producer.produce(topic=RUN_OPT_CONST.DEFAULT_TOPIC_NAME,
+                             key=chunk_to_fail.msg_key,value=chunk_to_fail.msg_value)
 
     def test_eq(self) :
         test_chunk_1_copied_no_data = DataFileChunk(self.test_chunk_1.filepath,self.test_chunk_1.filename,

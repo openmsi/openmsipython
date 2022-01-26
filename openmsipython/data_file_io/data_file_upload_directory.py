@@ -2,11 +2,9 @@
 import pathlib, datetime, time
 from threading import Thread
 from queue import Queue
-from ..utilities.runnable import Runnable
-from ..utilities.controlled_process import ControlledProcessSingleThread
-from ..utilities.misc import populated_kwargs
-from ..my_kafka.my_producers import MySerializingProducer
-from .utilities import produce_from_queue_of_file_chunks
+from ..shared.runnable import Runnable
+from ..shared.controlled_process import ControlledProcessSingleThread
+from ..my_kafka.my_producer import MyProducer
 from .config import RUN_OPT_CONST
 from .data_file_directory import DataFileDirectory
 from .upload_data_file import UploadDataFile
@@ -54,14 +52,16 @@ class DataFileUploadDirectory(DataFileDirectory,ControlledProcessSingleThread,Ru
         self.__datafile_type = datafile_type
         
 
-    def upload_files_as_added(self,config_path,topic_name,**kwargs) :
+    def upload_files_as_added(self,config_path,topic_name,
+                              n_threads=RUN_OPT_CONST.N_DEFAULT_UPLOAD_THREADS,
+                              chunk_size=RUN_OPT_CONST.DEFAULT_CHUNK_SIZE,
+                              max_queue_size=RUN_OPT_CONST.DEFAULT_MAX_UPLOAD_QUEUE_SIZE,
+                              new_files_only=False) :
         """
         Listen for new files to be added to the directory. Chunk and produce newly added files as messages to the topic.
 
-        config_path = path to the config file to use in defining the producer
-        topic_name  = name of the topic to produce messages to
-
-        Possible keyword arguments:
+        config_path      = path to the config file to use in defining the producer
+        topic_name       = name of the topic to produce messages to
         n_threads        = the number of threads to use to produce from the shared queue
         chunk_size       = the size of each file chunk in bytes
         max_queue_size   = maximum number of items allowed to be placed in the upload queue at once
@@ -69,33 +69,24 @@ class DataFileUploadDirectory(DataFileDirectory,ControlledProcessSingleThread,Ru
                            i.e., if False (the default) then even files that are already in the directory will be 
                            enqueued to the producer
         """
-        #set the important variables
-        kwargs = populated_kwargs(kwargs,
-                                  {'chunk_size': RUN_OPT_CONST.DEFAULT_CHUNK_SIZE,
-                                   'max_queue_size':RUN_OPT_CONST.DEFAULT_MAX_UPLOAD_QUEUE_SIZE,
-                                   'new_files_only':False,
-                                  },self.logger)
-        self.__chunk_size = kwargs.get('chunk_size')
+        self.__chunk_size = chunk_size
         #start the producer 
-        self.__producer = MySerializingProducer.from_file(config_path,logger=self.logger)
+        self.__producer = MyProducer.from_file(config_path,logger=self.logger)
         #if we're only going to upload new files, exclude what's already in the directory
-        if kwargs['new_files_only'] :
+        if new_files_only :
             self.__find_new_files(to_upload=False)
         #start the upload queue and thread
         msg = 'Will upload '
-        if kwargs['new_files_only'] :
+        if new_files_only :
             msg+='new files added to '
         else :
             msg+='files in '
-        msg+=f'{self.dirpath} to the {topic_name} topic using {kwargs["n_threads"]} threads'
+        msg+=f'{self.dirpath} to the {topic_name} topic using {n_threads} threads'
         self.logger.info(msg)
-        self.__upload_queue = Queue(kwargs['max_queue_size'])
+        self.__upload_queue = Queue(max_queue_size)
         self.__upload_threads = []
-        for ti in range(kwargs['n_threads']) :
-            t = Thread(target=produce_from_queue_of_file_chunks,args=(self.__upload_queue,
-                                                                      self.__producer,
-                                                                      topic_name,
-                                                                      self.logger))
+        for _ in range(n_threads) :
+            t = Thread(target=self.__producer.produce_from_queue,args=(self.__upload_queue,topic_name))
             t.start()
             self.__upload_threads.append(t)
         #loop until the user inputs a command to stop
@@ -157,7 +148,7 @@ class DataFileUploadDirectory(DataFileDirectory,ControlledProcessSingleThread,Ru
         for ut in self.__upload_threads :
             ut.join()
         self.logger.info('Waiting for all enqueued messages to be delivered (this may take a moment)....')
-        self.__producer.flush() #don't move on until all enqueued messages have been sent/received
+        self.__producer.flush(timeout=-1) #don't move on until all enqueued messages have been sent/received
 
     def __find_new_files(self,to_upload=True) :
         """

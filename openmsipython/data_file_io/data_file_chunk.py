@@ -1,13 +1,10 @@
 #imports
-from .utilities import producer_callback, PRODUCER_CALLBACK_LOGGER
-from .config import INTERNAL_PRODUCTION_CONST
-from ..utilities.logging import Logger
-from ..utilities.misc import populated_kwargs
+import pathlib
 from hashlib import sha512
-import time, pathlib
+from ..shared.logging import Logger
+from ..shared.producible import Producible
 
-# DataFileChunk Class 
-class DataFileChunk :
+class DataFileChunk(Producible) :
     """
     Class to deal with single chunks of file info
     """
@@ -17,10 +14,12 @@ class DataFileChunk :
     @property
     def filepath(self) :
         return self.__filepath #the path to the file
+
     @property
     def rootdir(self) :
         return self.__rootdir #the path to the file's root directory (already set if chunk is to be produced, 
                               #but must be set later if chunk is a consumed message)
+
     @rootdir.setter
     def rootdir(self,rd) : #also resets the overall filepath (used in consuming messages for files in subdirectories)
         self.__rootdir=rd
@@ -29,12 +28,15 @@ class DataFileChunk :
         except ValueError :
             pass
         self.__filepath = self.__rootdir / self.__filepath
+    
     @property
     def data(self) :
         return self.__data #the binary data in the file chunk (populated at time of production or when consumed)
+
     @data.setter
     def data(self,d) :
         self.__data=d
+    
     @property
     def subdir_str(self) :
         if self.__rootdir is None :
@@ -43,14 +45,19 @@ class DataFileChunk :
         if relpath==pathlib.Path() :
             return ''
         return relpath.as_posix()
+
     @property
-    def message_key(self) :
+    def msg_key(self) :
         key_pp = f'{"_".join(self.subdir_str.split("/"))}'
         if key_pp!='' :
             key_pp+='_'
-        return f'{key_pp}{self.filename}_chunk_{self.chunk_i}_of_{self.n_total_chunks}' #the key of the message
+        return f'{key_pp}{self.filename}_chunk_{self.chunk_i}_of_{self.n_total_chunks}'
 
-    #################### SPECIAL FUNCTIONS ####################
+    @property
+    def msg_value(self) :
+        return self
+
+    #################### PUBLIC FUNCTIONS ####################
 
     def __init__(self,filepath,filename,file_hash,chunk_hash,chunk_offset_read,chunk_offset_write,chunk_size,chunk_i,
                  n_total_chunks,rootdir=None,filename_append='',data=None) :
@@ -92,7 +99,6 @@ class DataFileChunk :
         retval = self.filename == other.filename
         retval = retval and self.file_hash == other.file_hash
         retval = retval and self.chunk_hash == other.chunk_hash
-        retval = retval and self.chunk_offset_read == other.chunk_offset_read
         retval = retval and self.chunk_offset_write == other.chunk_offset_write
         retval = retval and self.chunk_size == other.chunk_size
         retval = retval and self.chunk_i == other.chunk_i
@@ -102,56 +108,35 @@ class DataFileChunk :
         retval = retval and self.__data == other.data
         return retval
 
-    #################### PUBLIC FUNCTIONS ####################
+    def __str__(self) :
+        s = 'DataFileChunk('
+        s+=f'filename: {self.filename}, '
+        s+=f'file_hash: {self.file_hash}, '
+        s+=f'chunk_hash: {self.chunk_hash}, '
+        s+=f'chunk_offset_read: {self.chunk_offset_read}, '
+        s+=f'chunk_offset_write: {self.chunk_offset_write}, '
+        s+=f'chunk_size: {self.chunk_size}, '
+        s+=f'chunk_i: {self.chunk_i}, '
+        s+=f'n_total_chunks: {self.n_total_chunks}, '
+        s+=f'subdir_str: {self.subdir_str}, '
+        s+=f'filename_append: {self.filename_append}, '
+        #s+=f'data: {self.__data}, '
+        s+=')'
+        return s
 
-    def produce_to_topic(self,producer,topic_name,logger,**kwargs) :
+    def get_log_msg(self, print_every=None):
+        if (self.chunk_i-1)%print_every==0 or self.chunk_i==self.n_total_chunks :
+            return f'uploading {self.filename} chunk {self.chunk_i} (out of {self.n_total_chunks})'
+        else :
+            return None
+
+    def populate_with_file_data(self,logger=None) :
         """
-        Upload the file chunk as a message to the specified topic using the specified SerializingProducer
-        Meant to be run in parallel
-        producer     = the producer to use
-        topic_name   = the name of the topic to produce the message to
-        logger       = the logger object to use
-
-        Possible keyword arguments (default values will be used if not given:
-        print_every = how often to print/log progress messages
-        timeout     = max time to wait for the message to be produced in the event of (possibly repeated) BufferError(s)
-        retry_sleep = how long to wait between produce attempts if one fails with a BufferError
+        Populate this chunk with the actual data from the file
         """
-        kwargs = populated_kwargs(kwargs,
-                                  {'print_every':INTERNAL_PRODUCTION_CONST.DEFAULT_PRINT_EVERY,
-                                   'timeout':INTERNAL_PRODUCTION_CONST.DEFAULT_TIMEOUT,
-                                   'retry_sleep':INTERNAL_PRODUCTION_CONST.DEFAULT_RETRY_SLEEP
-                                  },logger)
-        #set the logger so the callback can use it
-        PRODUCER_CALLBACK_LOGGER.logger = logger
-        #log a line about this file chunk if applicable
-        if (self.chunk_i-1)%kwargs['print_every']==0 or self.chunk_i==self.n_total_chunks :
-            logger.info(f'uploading {self.filename} chunk {self.chunk_i} (out of {self.n_total_chunks})')
-        #get this chunk's data from the file if necessary
-        if self.__data is None :
-            self._populate_with_file_data(logger)
-        #produce the message to the topic
-        success=False; total_wait_secs=0 
-        if (not success) and total_wait_secs<kwargs['timeout'] :
-            try :
-                producer.produce(topic=topic_name,key=self.message_key,value=self,on_delivery=producer_callback)
-                success=True
-            except BufferError :
-                time.sleep(kwargs['retry_sleep'])
-                total_wait_secs+=kwargs['retry_sleep']
-        if not success :
-            warnmsg = f'WARNING: message with key {self.message_key} failed to buffer for more than '
-            warnmsg+= f'{total_wait_secs}s and was dropped!'
-            logger.warning(warnmsg)
-        producer.poll(0.025)
-
-    #################### PRIVATE HELPER FUNCTIONS ####################
-
-    #populate this chunk with the actual data from the file
-    def _populate_with_file_data(self,logger=None) :
         #create a new logger if one isn't given
         if logger is None :
-            logger = Logger(self.__name__)
+            logger = Logger(self.__class__.__name__)
         #make sure the file exists
         if not self.filepath.is_file() :
             logger.error(f'ERROR: file {self.filepath} does not exist!',FileNotFoundError)

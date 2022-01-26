@@ -1,13 +1,12 @@
 #imports
 import unittest, pathlib, logging, filecmp, shutil
 from hashlib import sha512
+from openmsipython.shared.logging import Logger
 from openmsipython.data_file_io.config import RUN_OPT_CONST, DATA_FILE_HANDLING_CONST
-from openmsipython.utilities.logging import Logger
 from openmsipython.data_file_io.data_file_chunk import DataFileChunk
 from openmsipython.data_file_io.upload_data_file import UploadDataFile
 from openmsipython.data_file_io.download_data_file import DownloadDataFileToDisk, DownloadDataFileToMemory
 from config import TEST_CONST
-
 
 #constants
 LOGGER = Logger(pathlib.Path(__file__).name.split('.')[0],logging.ERROR)
@@ -33,7 +32,7 @@ class TestDownloadDataFile(unittest.TestCase) :
         try :
             #add all of the chunks from an upload file, checking that the return codes are correct
             for ic,dfc in enumerate(self.ul_datafile.chunks_to_upload) :
-                dfc._populate_with_file_data(logger=LOGGER)
+                dfc.populate_with_file_data(logger=LOGGER)
                 subdir_as_path = pathlib.Path('').joinpath(*(pathlib.PurePosixPath(TEST_CONST.TEST_DATA_FILE_SUB_DIR_NAME).parts))
                 dfc_as_dl = DataFileChunk(subdir_as_path/dfc.filename,dfc.filename,
                                           dfc.file_hash,dfc.chunk_hash,

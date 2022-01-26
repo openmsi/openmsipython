@@ -1,7 +1,7 @@
 #imports
 import unittest, pathlib, time, logging, shutil, filecmp
+from openmsipython.shared.logging import Logger
 from openmsipython.data_file_io.config import RUN_OPT_CONST
-from openmsipython.utilities.logging import Logger
 from openmsipython.data_file_io.data_file_upload_directory import DataFileUploadDirectory
 from openmsipython.data_file_io.data_file_download_directory import DataFileDownloadDirectory
 from config import TEST_CONST
@@ -11,6 +11,7 @@ from utilities import MyThread
 LOGGER = Logger(pathlib.Path(__file__).name.split('.')[0],logging.ERROR)
 UPDATE_SECS = 5
 TIMEOUT_SECS = 90
+JOIN_TIMEOUT_SECS = 60
 TOPIC_NAME = 'test_data_file_directories'
 
 class TestDataFileDirectories(unittest.TestCase) :
@@ -61,9 +62,10 @@ class TestDataFileDirectories(unittest.TestCase) :
             if upload_thread.is_alive() :
                 try :
                     dfud.shutdown()
-                    upload_thread.join(timeout=5)
+                    upload_thread.join(timeout=JOIN_TIMEOUT_SECS)
                     if upload_thread.is_alive() :
-                        errmsg = 'ERROR: upload thread in run_data_file_upload_directory timed out after 5 seconds!'
+                        errmsg = 'ERROR: upload thread in run_data_file_upload_directory timed out after '
+                        errmsg+= f'{JOIN_TIMEOUT_SECS} seconds!'
                         raise TimeoutError(errmsg)
                 except Exception as e :
                     raise e
@@ -93,7 +95,6 @@ class TestDataFileDirectories(unittest.TestCase) :
             dfdd.control_command_queue.put('c')
             dfdd.control_command_queue.put('check')
             #wait for the timeout for the test file to be completely reconstructed 
-            #or for the reconstructor to stop getting new messages
             current_messages_read = -1
             time_waited = 0
             LOGGER.set_stream_level(logging.INFO)
@@ -101,8 +102,8 @@ class TestDataFileDirectories(unittest.TestCase) :
             msg+= f'(will timeout after {TIMEOUT_SECS} seconds)...'
             LOGGER.info(msg)
             LOGGER.set_stream_level(logging.ERROR)
-            while ( (TEST_CONST.TEST_DATA_FILE_NAME not in dfdd.completely_reconstructed_filepaths) and 
-                    current_messages_read<dfdd.n_msgs_read and time_waited<TIMEOUT_SECS ) :
+            recofp = TEST_CONST.TEST_RECO_DIR_PATH/TEST_CONST.TEST_DATA_FILE_SUB_DIR_NAME/TEST_CONST.TEST_DATA_FILE_NAME
+            while (recofp not in dfdd.completely_processed_filepaths) and time_waited<TIMEOUT_SECS :
                 current_messages_read = dfdd.n_msgs_read
                 LOGGER.set_stream_level(logging.INFO)
                 LOGGER.info(f'\t{current_messages_read} messages read after waiting {time_waited} seconds....')
@@ -113,14 +114,15 @@ class TestDataFileDirectories(unittest.TestCase) :
             #put the "quit" command into the input queue, which SHOULD stop the method running
             LOGGER.set_stream_level(logging.INFO)
             msg = f'Quitting download thread in run_data_file_download_directory after reading {dfdd.n_msgs_read} '
-            msg+= 'messages; will timeout after 5 seconds....'
+            msg+= f'messages; will timeout after {JOIN_TIMEOUT_SECS} seconds....'
             LOGGER.info(msg)
             LOGGER.set_stream_level(logging.ERROR)
             dfdd.control_command_queue.put('q')
             #wait for the download thread to finish
-            download_thread.join(timeout=5)
+            download_thread.join(timeout=JOIN_TIMEOUT_SECS)
             if download_thread.is_alive() :
-                errmsg = 'ERROR: download thread in run_data_file_download_directory timed out after 5 seconds!'
+                errmsg = 'ERROR: download thread in run_data_file_download_directory timed out after '
+                errmsg+= f'{JOIN_TIMEOUT_SECS} seconds!'
                 raise TimeoutError(errmsg)
             #make sure the reconstructed file exists with the same name and content as the original
             fp = TEST_CONST.TEST_RECO_DIR_PATH/TEST_CONST.TEST_DATA_FILE_SUB_DIR_NAME/TEST_CONST.TEST_DATA_FILE_NAME
@@ -135,9 +137,10 @@ class TestDataFileDirectories(unittest.TestCase) :
             if download_thread.is_alive() :
                 try :
                     dfdd.control_command_queue.put('q')
-                    download_thread.join(timeout=5)
+                    download_thread.join(timeout=JOIN_TIMEOUT_SECS)
                     if download_thread.is_alive() :
-                        errmsg = 'ERROR: download thread in run_data_file_download_directory timed out after 5 seconds!'
+                        errmsg = 'ERROR: download thread in run_data_file_download_directory timed out after '
+                        errmsg+= f'{JOIN_TIMEOUT_SECS} seconds!'
                         raise TimeoutError(errmsg)
                 except Exception as e :
                     raise e

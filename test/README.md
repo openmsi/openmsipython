@@ -13,7 +13,7 @@ There are also a few options you can add to `run_all_tests.py` if you only want 
 
 ### Continuous Integration with CircleCI
 
-Continuous integration for the repo is set up using CircleCI. On their website you can manually run tests on any branch you'd like, and the tests will also automatically be run when pull requests are submitted. The configuration for CircleCI is in the [`.circleci/config.yml`](./.circleci/config.yml) file. Running tests successfully on CircleCI requires that the Project on CircleCI has environment variables for the test cluster username and password registered within it.
+Continuous integration for the repo is set up using CircleCI. On their website you can manually run tests on any branch you'd like, and the tests will also automatically be run when pull requests are submitted. The configuration for CircleCI is in the `.circleci/config.yml` file in the root directory of the repository. Running tests successfully on CircleCI requires that the Project on CircleCI has environment variables for the test cluster username and password registered within it, as well as environment variables to allow access to the IDIES/SciServer Docker registry.
 
 ### Rebuilding static test data
 Some of the tests rely on static example data in `test/data`. If you need to regenerate these data under some new conditions (i.e., because you've changed default options someplace), you can run `python test/rebuild_test_reference_data.py` and follow the prompts it gives you to replace the necessary files. You can also add to that script if you write any new tests that rely on example data. Static test data should be committed to the repo like any other file, and they'll be picked up both interactively and on CircleCI.

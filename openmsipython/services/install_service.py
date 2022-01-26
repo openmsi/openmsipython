@@ -1,7 +1,7 @@
 #imports
 import sys, pathlib, os, textwrap
 from subprocess import Popen, PIPE, STDOUT
-from ..utilities.argument_parsing import MyArgumentParser
+from ..shared.argument_parsing import MyArgumentParser
 from .config import SERVICE_CONST
 from .utilities import set_env_var_from_user_input, find_install_NSSM, run_cmd_in_subprocess
 

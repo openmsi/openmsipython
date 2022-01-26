@@ -1,10 +1,10 @@
 #imports
 import time
 from queue import Queue
-from threading import Thread
+from threading import Thread, Lock
 from abc import ABC, abstractmethod
+from ..utilities.misc import add_user_input
 from .config import UTIL_CONST
-from .misc import add_user_input
 from .logging import LogOwner
 
 class ControlledProcess(LogOwner,ABC) :
@@ -132,14 +132,18 @@ class ControlledProcessMultiThreaded(ControlledProcess,ABC) :
         """
         self.__n_threads = n_threads
         super().__init__(*args,**kwargs)
+        self.__lock = Lock()
 
-    def run(self,args_per_thread) :
+    def run(self,args_per_thread=[],kwargs_per_thread={}) :
         """
-        args_per_thread = a list of arguments that should be given to the independent threads, one entry per thread
+        args_per_thread = a list of lists of arguments that should be given to the independent threads
+                          one list of arguments per thread
+        kwargs_per_thread = a list of dicts of keyword arguments that should be given to the independent threads
+                          one dict of keyword arguments per thread
         """
         super().run()
         #correct the arguments for each thread
-        if not type(args_per_thread)==list :
+        if args_per_thread==[] or (not type(args_per_thread)==list) :
             args_per_thread = [args_per_thread]
         if not len(args_per_thread)==self.__n_threads :
             if not len(args_per_thread)==1 :
@@ -148,10 +152,22 @@ class ControlledProcessMultiThreaded(ControlledProcess,ABC) :
                 self.logger.error(errmsg,ValueError)
             else :
                 args_per_thread = self.__n_threads*args_per_thread
+        #correct the keyword arguments for each thread
+        if not type(kwargs_per_thread)==list :
+            kwargs_per_thread = [kwargs_per_thread]
+        if not len(kwargs_per_thread)==self.__n_threads :
+            if not len(kwargs_per_thread)==1 :
+                errmsg = 'ERROR: ControlledProcessMultiThreaded.run was given a list of arguments with '
+                errmsg+= f'{len(kwargs_per_thread)} entries, but was set up to use {self.__n_threads} threads!'
+                self.logger.error(errmsg,ValueError)
+            else :
+                kwargs_per_thread = self.__n_threads*kwargs_per_thread
         #create and start the independent threads
         self.__threads = []
         for i in range(self.__n_threads) :
-            self.__threads.append(Thread(target=self._run_worker,args=args_per_thread[i]))
+            self.__threads.append(Thread(target=self._run_worker,
+                                         args=(self.__lock,*args_per_thread[i]),
+                                         kwargs={**kwargs_per_thread[i]}))
             self.__threads[-1].start()
         #loop while the process is alive, checking the control command queue and printing the "still alive" character
         while self.alive :
@@ -166,10 +182,13 @@ class ControlledProcessMultiThreaded(ControlledProcess,ABC) :
             t.join()
 
     @abstractmethod
-    def _run_worker(self,*args) :
+    def _run_worker(self,lock,*args,**kwargs) :
         """
         A function that should include a while self.alive loop for each independent thread to run 
         until the process is shut down
+
+        lock = a Lock that can be used across all shared threads to guaranteee exactly one process is running
+
         Not implemented in the base class
         """
         pass

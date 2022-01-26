@@ -1,7 +1,19 @@
 # Specific files that may exist in the repo's tree but shouldn't be added
+# Files for working with Services in openmsiython/services/working_dir
 /openmsipython/services/working_dir/Services.log
 /openmsipython/services/working_dir/nssm.exe
 /openmsipython/services/working_dir/*Service_*.py
+# *.config, *.seed, and *.crypto files (other than the testing files) in openmsipython/my_kafka/config_files/[some_node_name]
+/openmsipython/my_kafka/config_files/*.config
+/openmsipython/my_kafka/config_files/*/*.config
+/openmsipython/my_kafka/config_files/*/*.seed
+/openmsipython/my_kafka/config_files/*/*.crypto
+!/openmsipython/my_kafka/config_files/test.config
+!/openmsipython/my_kafka/config_files/test_encrypted.config
+!/openmsipython/my_kafka/config_files/prod.config
+!/openmsipython/my_kafka/config_files/testing_node/testing_node.config
+!/openmsipython/my_kafka/config_files/testing_node/testing_node.seed
+!/openmsipython/my_kafka/config_files/testing_node/testing_node.crypto
 
 # Misc. other stuff I don't like
 __pycache__/

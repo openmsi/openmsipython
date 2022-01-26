@@ -1,11 +1,11 @@
 #imports
 import pathlib, logging, shutil, filecmp, os, getpass, requests, fmrest, pickle
+from openmsipython.shared.logging import Logger
 from openmsipython.data_file_io.config import RUN_OPT_CONST
-from openmsipython.data_models.laser_shock.config import LASER_SHOCK_CONST
-from openmsipython.utilities.logging import Logger
-from openmsipython.my_kafka.serialization import DataFileChunkSerializer
 from openmsipython.data_file_io.upload_data_file import UploadDataFile
+from openmsipython.my_kafka.serialization import DataFileChunkSerializer
 from openmsipython.services.install_service import write_executable_file
+from openmsipython.data_models.laser_shock.config import LASER_SHOCK_CONST
 from openmsipython.data_models.laser_shock.laser_shock_lab import LaserShockLab
 from unittests.config import TEST_CONST
 
@@ -13,7 +13,6 @@ from unittests.config import TEST_CONST
 EXISTING_TEST_DATA_DIR = (pathlib.Path(__file__).parent / 'data').resolve()
 NEW_TEST_DATA_DIR = (pathlib.Path(__file__).parent / 'new_test_data').resolve()
 LOGGER = Logger(pathlib.Path(__file__).name.split('.')[0],logging.INFO)
-
 
 #################### OTHER HELPER FUNCTIONS ####################
 

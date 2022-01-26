@@ -5,7 +5,7 @@ site.ENABLE_USER_SITE = True #https://www.scivision.dev/python-pip-devel-user-in
 
 setupkwargs = dict(
     name='openmsipython',
-    version='0.1.0',
+    version='0.7.0',
     packages=setuptools.find_packages(include=['openmsipython*']),
     include_package_data=True,
     entry_points = {
@@ -16,18 +16,26 @@ setupkwargs = dict(
                              'ManageService=openmsipython.services.manage_service:main',
                              'LecroyFileUploadDirectory=openmsipython.pdv.lecroy_file_upload_directory:main',
                              'PDVPlotMaker=openmsipython.pdv.pdv_plot_maker:main',
+                             'ProvisionNode=openmsipython.utilities.simple_provision_wrapper:main',
                             ],
     },
     python_requires='>=3.7,<3.10',
-    install_requires=['confluent-kafka>=1.6.0',
-                      'python-fmrest>=1.4.0',
-                      'gemd>=1.2.0',
+    install_requires=['confluent-kafka>=1.8.2',
                       'matplotlib>=3.4.0',
                       'msgpack>=1.0.0',
                       'pandas>=1.3.0',
                       'scipy>=1.7.0',
+                      'python-fmrest>=1.4.0',
+                      'gemd>=1.8.1',
+                      'kafkacrypto>=0.9.9.11a1',
                      ],
-    extras_require = {'test': ['pyflakes>=2.2.0',],},
+    extras_require = {'test': ['beautifulsoup4',
+                               'gitpython',
+                               'lxml',
+                               'marko[toc]',
+                               'pyflakes>=2.2.0',
+                               ],
+                        },
 )
 
 setupkwargs["extras_require"]["all"] = sum(setupkwargs["extras_require"].values(), [])

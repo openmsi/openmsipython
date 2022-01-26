@@ -1,6 +1,6 @@
 #imports
 from subprocess import CalledProcessError
-from ..utilities.argument_parsing import MyArgumentParser
+from ..shared.argument_parsing import MyArgumentParser
 from .config import SERVICE_CONST
 from .utilities import run_cmd_in_subprocess, remove_machine_env_var, find_install_NSSM
 

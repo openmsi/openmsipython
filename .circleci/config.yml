@@ -23,14 +23,15 @@ jobs:
   # Build the repo and check the code using pyflakes 
   build-and-code-check:
     docker:
-      - image: cimg/python:3.9
+      - image: containers.repo.sciserver.org/openmsipython:1.0.0
+        auth:
+          username: $IDIESDOCKER_USERNAME
+          password: $IDIESDOCKER_PASSWORD
     steps:
       - checkout
       - python/install-packages:
           pkg-manager: pip
-      - run:
-          name: pip install
-          command: cd ~/project; pip install .[all]; cd -
+          args: .[all]
       - run:
           name: code check
           command: cd ~/project; python -m pyflakes .; cd -
@@ -41,13 +42,17 @@ jobs:
   # Run unittests 
   run-tests:
     docker:
-      - image: cimg/python:3.9
-    parallelism: 11
+      - image: containers.repo.sciserver.org/openmsipython:1.0.0
+        auth:
+          username: $IDIESDOCKER_USERNAME
+          password: $IDIESDOCKER_PASSWORD
+    parallelism: 12
     steps:
       - attach_workspace:
           at: .
       - python/install-packages:
           pkg-manager: pip
+          args: .[all]
       - run:
           name: run tests
           command: |
@@ -61,7 +66,10 @@ jobs:
   # Make sure that the repository is clean after all tests have been run
   check-repo:
     docker:
-      - image: cimg/python:3.9
+      - image: containers.repo.sciserver.org/openmsipython:1.0.0
+        auth:
+          username: $IDIESDOCKER_USERNAME
+          password: $IDIESDOCKER_PASSWORD
     steps:
       - attach_workspace:
           at: .
