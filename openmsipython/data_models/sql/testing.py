@@ -23,5 +23,7 @@ FROM sys.schemas s
 ORDER BY s.name
 """
 with engine.connect() as con:
-    r = con.execute(sql)
-print(f'result = {r}')
+    rs = con.execute(sql)
+
+for r in rs :
+    print(r)
