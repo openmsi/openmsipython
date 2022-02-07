@@ -24,6 +24,5 @@ ORDER BY s.name
 """
 with engine.connect() as con:
     rs = con.execute(sql)
-
-for r in rs :
-    print(r)
+    for r in rs :
+        print(r)
