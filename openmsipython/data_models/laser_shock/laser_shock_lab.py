@@ -98,44 +98,46 @@ class LaserShockLab(LogOwner) :
         self.logger.info(msg)
         #"Inventory" pages (create Specs)
         self.logger.debug('Creating Inventory objects...')
-        self.glass_IDs = self.get_objects(LaserShockGlassID,'Glass ID',**extra_kwargs)
+        self.glass_IDs = self.get_objects_from_records(LaserShockGlassID,'Glass ID',**extra_kwargs)
         self.logger.debug(f'Created {len(self.glass_IDs)} Glass ID objects...')
-        self.epoxy_IDs = self.get_objects(LaserShockEpoxyID,'Epoxy ID',**extra_kwargs)
+        self.epoxy_IDs = self.get_objects_from_records(LaserShockEpoxyID,'Epoxy ID',**extra_kwargs)
         self.logger.debug(f'Created {len(self.epoxy_IDs)} Epoxy ID objects...')
-        self.foil_IDs = self.get_objects(LaserShockFoilID,'Foil ID',**extra_kwargs)
+        self.foil_IDs = self.get_objects_from_records(LaserShockFoilID,'Foil ID',**extra_kwargs)
         self.logger.debug(f'Created {len(self.foil_IDs)} Foil ID objects...')
-        self.spacer_IDs = self.get_objects(LaserShockSpacerID,'Spacer ID',**extra_kwargs)
+        self.spacer_IDs = self.get_objects_from_records(LaserShockSpacerID,'Spacer ID',**extra_kwargs)
         self.logger.debug(f'Created {len(self.spacer_IDs)} Spacer ID objects...')
-        self.flyer_cutting_programs = self.get_objects(LaserShockFlyerCuttingProgram,'Flyer Cutting Program',
-                                                       **extra_kwargs)
+        self.flyer_cutting_programs = self.get_objects_from_records(LaserShockFlyerCuttingProgram,
+                                                                    'Flyer Cutting Program',**extra_kwargs)
         self.logger.debug(f'Created {len(self.flyer_cutting_programs)} Flyer Cutting Program objects...')
-        self.spacer_cutting_programs = self.get_objects(LaserShockSpacerCuttingProgram,'Spacer Cutting Program',
-                                                        **extra_kwargs)
+        self.spacer_cutting_programs = self.get_objects_from_records(LaserShockSpacerCuttingProgram,
+                                                                     'Spacer Cutting Program',**extra_kwargs)
         self.logger.debug(f'Created {len(self.spacer_cutting_programs)} Spacer Cutting Program objects...')
         #Flyer Stacks (Materials)
         self.logger.debug('Creating Flyer Stacks...')
-        self.flyer_stacks = self.get_objects(LaserShockFlyerStack,'Flyer Stack',self.glass_IDs,self.foil_IDs,
-                                             self.epoxy_IDs,self.flyer_cutting_programs,**extra_kwargs)
+        self.flyer_stacks = self.get_objects_from_records(LaserShockFlyerStack,'Flyer Stack',self.glass_IDs,
+                                                          self.foil_IDs,self.epoxy_IDs,self.flyer_cutting_programs,
+                                                          **extra_kwargs)
         self.logger.debug(f'Created {len(self.flyer_stacks)} Flyer Stack objects...')
         #Samples (Materials)
         self.logger.debug('Creating Samples...')
-        self.samples = self.get_objects(LaserShockSample,'Sample',**extra_kwargs)
+        self.samples = self.get_objects_from_records(LaserShockSample,'Sample',**extra_kwargs)
         self.logger.debug(f'Created {len(self.samples)} Sample objects...')
         #Launch packages (Materials)
         self.logger.debug('Creating Launch Packages...')
-        self.launch_packages = self.get_objects(LaserShockLaunchPackage,'Launch Package',self.flyer_stacks,
-                                                self.spacer_IDs,self.spacer_cutting_programs,self.samples,
-                                                **extra_kwargs)
+        self.launch_packages = self.get_objects_from_records(LaserShockLaunchPackage,'Launch Package',self.flyer_stacks,
+                                                             self.spacer_IDs,self.spacer_cutting_programs,self.samples,
+                                                             **extra_kwargs)
         self.logger.debug(f'Created {len(self.launch_packages)} Launch Package objects...')
         #Experiments (Measurements)
         self.logger.debug('Creating Experiments...')
-        self.experiments = self.get_objects(LaserShockExperiment,'Experiment',self.launch_packages,**extra_kwargs)
+        self.experiments = self.get_objects_from_records(LaserShockExperiment,'Experiment',self.launch_packages,
+                                                         **extra_kwargs)
         self.logger.debug(f'Created {len(self.experiments)} Experiment objects...')
         #Make sure that there is only one of each unique spec (dynamically-created specs may be duplicated)
         self.__replace_specs()
         self.logger.info('Done creating GEMD objects')
     
-    def get_objects(self,obj_type,layout_name,*args,n_max_records=1000,records_dict=None,**kwargs) :
+    def get_objects_from_records(self,obj_type,layout_name,*args,n_max_records=10000,records_dict=None,**kwargs) :
         """
         Return a list of LaserShock/GEMD constructs based on FileMaker records 
         or records in a dictionary (useful for testing)
@@ -192,6 +194,13 @@ class LaserShockLab(LogOwner) :
                         with open(self.ofd/fn.replace('.json','_material_history.json'),'w') as fp :
                             fp.write(json.dumps(context_list,indent=2))
         self.logger.info('Done.')
+
+    def create_sql_db(self) :
+        """
+        Recreate the SQL DB with JSON entries for every object
+        """
+        self.logger.info('Recreating the SQL DB...')
+        pass
 
     #################### PRIVATE HELPER FUNCTIONS ####################
     
@@ -299,7 +308,9 @@ def main() :
     model = LaserShockLab()
     model.create_gemd_objects()
     #dump its pieces to json files
-    model.dump_to_json_files(1,True)
+    #model.dump_to_json_files(1,True)
+    #recreate the SQL database from all of the JSON data
+    model.create_sql_db()
 
 if __name__=='__main__' :
     main()

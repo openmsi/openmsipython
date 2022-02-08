@@ -1,16 +1,8 @@
 #imports
-import os
-from sqlalchemy import create_engine
-
-#constants
-UNAME = 'openmsi_writer'
-PWD = os.path.expandvars('$OPENMSI_WRITER_PWORD')
-HOST = 'dsp056'
-DB_NAME = 'OpenMSI'
+from .utilities import get_engine
 
 #create the engine
-connection_string=f'mssql+pymssql://{UNAME}:{PWD}@{HOST}/{DB_NAME}'
-engine = create_engine(connection_string,echo=True)
+engine = get_engine()
 
 #print out the schemas in the database
 sql = """
