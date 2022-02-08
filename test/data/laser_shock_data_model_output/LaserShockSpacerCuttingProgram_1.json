@@ -6,7 +6,7 @@
       "notes": null,
       "origin": "specified",
       "template": {
-        "id": "8beea93d-f5d3-478d-92ad-c449651ba67a",
+        "id": "a9ed34eb-3dc6-4148-94cc-bb69c8598a96",
         "scope": "auto",
         "type": "link_by_uid"
       },
@@ -22,7 +22,7 @@
       "notes": null,
       "origin": "specified",
       "template": {
-        "id": "0976a76d-619f-48d2-aa86-d3a8fda56663",
+        "id": "85c280f8-565a-4db2-86eb-778a2c88e09a",
         "scope": "auto",
         "type": "link_by_uid"
       },
@@ -50,7 +50,7 @@
       "notes": null,
       "origin": "specified",
       "template": {
-        "id": "d59648e2-c076-41fc-8cce-055dc3ada2a9",
+        "id": "dd10b5fd-3174-4fe8-87de-ebf64e4e6291",
         "scope": "auto",
         "type": "link_by_uid"
       },
@@ -67,7 +67,7 @@
       "notes": null,
       "origin": "specified",
       "template": {
-        "id": "b85ccb35-2feb-4113-8d01-75473de7610d",
+        "id": "ede9e33d-157b-4e40-95bd-db0210f713e6",
         "scope": "auto",
         "type": "link_by_uid"
       },
@@ -83,7 +83,7 @@
       "notes": null,
       "origin": "specified",
       "template": {
-        "id": "5ed6aa3c-3f05-4b66-8096-e44db60ad502",
+        "id": "84d48d14-58cd-48a8-9c61-dac78ddd05a1",
         "scope": "auto",
         "type": "link_by_uid"
       },
@@ -101,12 +101,12 @@
     "modId::6"
   ],
   "template": {
-    "id": "2abbb2e3-b107-40c0-b544-27061480b1b3",
+    "id": "3af1258a-cab3-416c-b9ac-29f8fc924504",
     "scope": "auto",
     "type": "link_by_uid"
   },
   "type": "process_spec",
   "uids": {
-    "auto": "949c5d73-7b1f-4a38-ac13-f78944cbff52"
+    "auto": "cb5363db-92b8-45fa-8155-2fda95ab3ece"
   }
 }
