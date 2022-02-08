@@ -53,7 +53,7 @@ name = 'Foil Material'
 ATTR_TEMPL[name] = PropertyTemplate(
     name=name,
     description='The type of Material of the Foil',
-    bounds=CategoricalBounds(['Aluminum'])
+    bounds=CategoricalBounds(['Aluminum','Copper'])
 )
 
 name = 'Spacer Thickness'
@@ -103,6 +103,27 @@ ATTR_TEMPL[name] = PropertyTemplate(
     name=name,
     description='The thickness of a glass/epoxy/foil stack at some point',
     bounds=RealBounds(0,100,'mm')
+)
+
+name = 'Flyer Cutting Depth Success'
+ATTR_TEMPL[name] = PropertyTemplate(
+    name=name,
+    description='Are the flyers completely cut out?',
+    bounds=CategoricalBounds(['Complete','Incomplete'])
+)
+
+name = 'Flyer Cutting Completeness'
+ATTR_TEMPL[name] = PropertyTemplate(
+    name=name,
+    description='What percentage of the grid of flyers were cut without issue?',
+    bounds=IntegerBounds(0,100)
+)
+
+name = 'Time To Cut'
+ATTR_TEMPL[name] = PropertyTemplate(
+    name=name,
+    description='How long did it take to cut the flyers?',
+    bounds=RealBounds(0.,300.,'min')
 )
 
 name = 'Sample Material Type'
@@ -272,14 +293,14 @@ name = 'Foil Supplier'
 ATTR_TEMPL[name] = ParameterTemplate(
     name=name,
     description='The name of a supplier from which a foil was procured',
-    bounds=CategoricalBounds(['AluFoil']),
+    bounds=CategoricalBounds(['AluFoil','McMaster Carr']),
 )
 
 name = 'Foil Part Number'
 ATTR_TEMPL[name] = ParameterTemplate(
     name=name,
     description="The manufacturer's part number for a foil that was purchased",
-    bounds=CategoricalBounds([]),
+    bounds=CategoricalBounds(['9709K91']),
 )
 
 name = 'Spacer Supplier'
@@ -413,6 +434,20 @@ ATTR_TEMPL[name] = ParameterTemplate(
     name=name,
     description='What was used to polish an impact sample intended for a Launch Package',
     bounds=CategoricalBounds(['Diamond','Silicon Carbide']),
+)
+
+name = 'Asymmetric Polish'
+ATTR_TEMPL[name] = ParameterTemplate(
+    name=name,
+    description='Was the impact sample polished asymmetrically?',
+    bounds=CategoricalBounds(['Yes','No']),
+)
+
+name = 'Polishing Side 2'
+ATTR_TEMPL[name] = ParameterTemplate(
+    name=name,
+    description='Which was the other side of the sample that was polished?',
+    bounds=CategoricalBounds(['Impact Side','PDV Side']),
 )
 
 name = 'Sample Location'
@@ -570,8 +605,8 @@ ATTR_TEMPL[name] = ParameterTemplate(
 name = 'Beam Profiler Gain'
 ATTR_TEMPL[name] = ParameterTemplate(
     name=name,
-    description='The gain setting on the beam profiler',
-    bounds=RealBounds(0.,10.,'dB')
+    description='The gain setting on the beam profiler (units of decibels, dB, not recognized by GEMD)',
+    bounds=RealBounds(0.,50.,'')
 )
 
 name = 'Beam Profiler Exposure'
@@ -769,7 +804,7 @@ name = 'Sample Recovery Method'
 ATTR_TEMPL[name] = ConditionTemplate(
     name=name,
     description='How the sample was recovered after impact',
-    bounds=CategoricalBounds(['Glass Petri Dish','PDMS','none'])
+    bounds=CategoricalBounds(['Glass Petri Dish','PDMS','3D printed grid','none'])
 )
 
 name = 'Launch Package Holder'

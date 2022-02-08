@@ -323,8 +323,11 @@ class LaserShockLaunchPackage(MaterialRunFromFileMakerRecord) :
         slbo = record.pop('Sample Location based Order')
         polish_proc = (record.pop('Polishing Process')).rstrip() #extra space at the end of some values in the DB
         cutting_procs = record.pop('Cutting Procedures Used').split('\r')
-        ns = ['Diamond Grit','Silicon Carbide Grit']
+        asym_polish = record.pop('Asymmetric Polish')
+        polishing_side_2 = record.pop('Polishing Side 2')
+        ns = ['Diamond Grit','Silicon Carbide Grit','Polishing Diamond Grit 2','Polishing Silicon Grit 2']
         vs = [record.pop(n) for n in ns]
+        tns = ['Diamond Grit','Silicon Carbide Grit','Diamond Grit','Silicon Carbide Grit']
         #if there was no sample found, then there's no impact sample either
         if self.sample is None :
             return None
@@ -335,6 +338,21 @@ class LaserShockLaunchPackage(MaterialRunFromFileMakerRecord) :
                 Parameter(name='Polishing Pad',
                           value=NominalCategorical(str(polish_pad)),
                           template=ATTR_TEMPL['Polishing Pad'],
+                          origin='specified')
+            )
+        if asym_polish=='' :
+            asym_polish = 'No'
+        params.append(
+            Parameter(name='Asymmetric Polish',
+                      value=NominalCategorical(str(asym_polish)),
+                      template=ATTR_TEMPL['Asymmetric Polish'],
+                      origin='specified')
+        )
+        if asym_polish!='No' :
+            params.append(
+                Parameter(name='Polishing Side 2',
+                          value=NominalCategorical(str(polishing_side_2)),
+                          template=ATTR_TEMPL['Polishing Side 2'],
                           origin='specified')
             )
         if sl!='' :
@@ -379,11 +397,11 @@ class LaserShockLaunchPackage(MaterialRunFromFileMakerRecord) :
                                                                  template=ATTR_TEMPL[n],
                                                                  origin='specified'))
         #add the polishing grit(s) as parameters of the process
-        for n,v in zip(ns,vs) :
+        for n,v,tn in zip(ns,vs,tns) :
             if v!='' and v!='N/A':
                 impactsamplespec.process.parameters.append(Parameter(name=n,
                                                                      value=NominalCategorical(str(v)),
-                                                                     template=ATTR_TEMPL[n],
+                                                                     template=ATTR_TEMPL[tn],
                                                                      origin='specified'))
         #add the sample as an ingredient in the process
         IngredientSpec(name='Sample',material=self.sample.spec,process=impactsamplespec.process)
