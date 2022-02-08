@@ -2,7 +2,7 @@
   "conditions": [],
   "file_links": [
     {
-      "filename": "15_55_40",
+      "filename": "BP--20211122--00025",
       "type": "file_link",
       "url": null
     },
@@ -12,13 +12,13 @@
       "url": null
     },
     {
-      "filename": "BP--20211122--00025",
+      "filename": "15_55_40",
       "type": "file_link",
       "url": null
     }
   ],
   "material": {
-    "id": "fd564713-63c8-4a09-9cd0-e82bba1c66ce",
+    "id": "6896e67b-a271-4903-8427-2d46bdc362bc",
     "scope": "auto",
     "type": "link_by_uid"
   },
@@ -32,7 +32,7 @@
       "notes": null,
       "origin": "measured",
       "template": {
-        "id": "96b0653b-4e32-402f-ae92-109a2e946f5d",
+        "id": "eb87a1c0-c249-4b10-ac84-cf5d5f12bbfd",
         "scope": "auto",
         "type": "link_by_uid"
       },
@@ -49,7 +49,7 @@
       "notes": null,
       "origin": "measured",
       "template": {
-        "id": "a6a96506-e0af-4e64-a8f0-b469fb151d15",
+        "id": "c44e33b2-530b-46f8-a592-9b200d891ce4",
         "scope": "auto",
         "type": "link_by_uid"
       },
@@ -62,11 +62,27 @@
     },
     {
       "file_links": [],
+      "name": "SpallState",
+      "notes": null,
+      "origin": "measured",
+      "template": {
+        "id": "cbed10e6-1cad-4f3c-886b-f89bd7368e19",
+        "scope": "auto",
+        "type": "link_by_uid"
+      },
+      "type": "property",
+      "value": {
+        "category": "Through sample",
+        "type": "nominal_categorical"
+      }
+    },
+    {
+      "file_links": [],
       "name": "LaunchPackageOrientation",
       "notes": null,
       "origin": "measured",
       "template": {
-        "id": "91b4f3df-171f-4a6e-8c16-2d7dc4497969",
+        "id": "485d68f6-e9db-4f7b-9aac-ef1a6ccea539",
         "scope": "auto",
         "type": "link_by_uid"
       },
@@ -82,29 +98,13 @@
       "notes": null,
       "origin": "measured",
       "template": {
-        "id": "a56b68a5-e9f0-4574-b0fc-a53c5ca78142",
+        "id": "b38c7508-977f-4f5f-acff-3852e9516ded",
         "scope": "auto",
         "type": "link_by_uid"
       },
       "type": "property",
       "value": {
         "category": "Great",
-        "type": "nominal_categorical"
-      }
-    },
-    {
-      "file_links": [],
-      "name": "SpallState",
-      "notes": null,
-      "origin": "measured",
-      "template": {
-        "id": "433c5f03-358d-4c98-8bf3-ad36bcb17eb8",
-        "scope": "auto",
-        "type": "link_by_uid"
-      },
-      "type": "property",
-      "value": {
-        "category": "Through sample",
         "type": "nominal_categorical"
       }
     }
@@ -115,21 +115,21 @@
     "type": "performed_source"
   },
   "spec": {
-    "id": "3fc8af77-fc5f-4b03-aabc-f58fe8095bba",
+    "id": "0d072c9a-f7df-43af-868a-bb2a8f1e3049",
     "scope": "auto",
     "type": "link_by_uid"
   },
   "tags": [
+    "GrantFunding::MEDE_Metals",
     "NewEnergyMeasurement::No",
     "RecoveryBox::5",
     "RecoveryRow::3",
     "RecoveryColumn::4",
-    "GrantFunding::MEDE_Metals",
     "recordId::689",
     "modId::9"
   ],
   "type": "measurement_run",
   "uids": {
-    "auto": "0de10f21-455f-4c0c-83d4-22ee7013142f"
+    "auto": "9675bad2-bfc8-4859-955e-c6f781f4684b"
   }
 }
