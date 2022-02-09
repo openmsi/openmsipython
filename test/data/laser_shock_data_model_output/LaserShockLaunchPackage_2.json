@@ -3,22 +3,22 @@
   "name": "F071-R2C2-Spacer-Sample",
   "notes": null,
   "process": {
-    "id": "e55b22fc-b434-44d9-adfd-5b666e56d1a1",
+    "id": "f9474dbe-947d-417f-b2c6-9b235421b63d",
     "scope": "auto",
     "type": "link_by_uid"
   },
   "sample_type": "unknown",
   "spec": {
-    "id": "6d4bd85f-c811-4562-ad7a-8d3e22ec8b6c",
+    "id": "05fa2217-3a9a-450a-9e27-8521a3d7e8d4",
     "scope": "auto",
     "type": "link_by_uid"
   },
   "tags": [
     "recordId::690",
-    "modId::5"
+    "modId::6"
   ],
   "type": "material_run",
   "uids": {
-    "auto": "fd564713-63c8-4a09-9cd0-e82bba1c66ce"
+    "auto": "6896e67b-a271-4903-8427-2d46bdc362bc"
   }
 }

@@ -247,6 +247,14 @@ class LaserShockFlyerStack(MaterialRunFromFileMakerRecord) :
                                           'datatype':float,
                                           'template':ATTR_TEMPL['Epoxy Thickness'],
                                           'origin':'computed'}
+        rd['Time to Cut'] = {'valuetype':NominalReal,
+                             'datatype':float,
+                             'template':ATTR_TEMPL['Time To Cut']}
+        rd['Flyer Cutting Depth Success'] = {'valuetype':NominalCategorical,
+                                             'template':ATTR_TEMPL['Flyer Cutting Depth Success']}
+        rd['Flyer Cutting Completeness'] = {'valuetype':NominalInteger,
+                                            'datatype':int,
+                                            'template':ATTR_TEMPL['Flyer Cutting Completeness']}
         return rd
 
     @property
