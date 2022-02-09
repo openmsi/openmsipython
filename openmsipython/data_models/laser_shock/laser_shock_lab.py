@@ -6,8 +6,6 @@ from gemd.json import GEMDJson
 from gemd.entity.object import MaterialSpec, ProcessSpec, IngredientSpec, MeasurementSpec
 from gemd.entity.object import MaterialRun, ProcessRun, IngredientRun, MeasurementRun
 from ...shared.logging import LogOwner
-from ..sql.utilities import get_engine
-from ..sql.openmsidb import OpenMSIDB
 from ..run_from_filemaker_record import MaterialRunFromFileMakerRecord, RunFromFileMakerRecord
 from ..spec_from_filemaker_record import SpecFromFileMakerRecord
 from .config import LASER_SHOCK_CONST
@@ -22,7 +20,7 @@ from .sample import LaserShockSample
 from .launch_package import LaserShockLaunchPackage
 from .experiment import LaserShockExperiment
 
-class LaserShockLab(OpenMSIDB) :
+class LaserShockLab(LogOwner) :
     """
     Representation of all the information in the Laser Shock Lab's FileMaker database in GEMD language
     """
@@ -197,39 +195,6 @@ class LaserShockLab(OpenMSIDB) :
                             fp.write(json.dumps(context_list,indent=2))
         self.logger.info('Done.')
 
-    def create_sql_db(self) :
-        """
-        Recreate the SQL DB with JSON entries for every object
-        """
-        self.logger.info('Recreating the SQL DB...')
-        #create the schema if it doesn't already exist
-        schema_exists = False
-        with self.query_result("SELECT s.name AS schema_name FROM sys.schemas s") as res :
-            for row in res :
-                if row['schema_name']==LASER_SHOCK_CONST.SQL_DB_SCHEMA :
-                    schema_exists = True
-                    break
-        if not schema_exists :
-            self.execute(f"CREATE SCHEMA {LASER_SHOCK_CONST.SQL_DB_SCHEMA}")
-        #drop existing tables that we're going to replace
-        self.execute(f'DROP TABLE IF EXISTS {LASER_SHOCK_CONST.SQL_DB_SCHEMA}.glassIDs')
-        #set up the new tables
-        sql = f"""
-        CREATE TABLE {LASER_SHOCK_CONST.SQL_DB_SCHEMA}.glassIDs (
-            id BIGINT PRIMARY KEY IDENTITY,
-            obj NVARCHAR(8000)
-        )
-        """
-        self.execute(sql)
-        #insert new records
-        encoder = GEMDJson()
-        for glassid in self.glass_IDs :
-            json_to_insert = encoder.thin_dumps(glassid.spec,indent=2)
-            sql = f"""
-            INSERT INTO {LASER_SHOCK_CONST.SQL_DB_SCHEMA}.glassIDs (obj) VALUES ({json_to_insert})
-            """
-            self.execute(sql)
-
     #################### PRIVATE HELPER FUNCTIONS ####################
     
     def __get_filemaker_records(self,layout_name,n_max_records=1000) :
@@ -336,9 +301,7 @@ def main() :
     model = LaserShockLab()
     model.create_gemd_objects()
     #dump its pieces to json files
-    #model.dump_to_json_files(1,True)
-    #recreate the SQL database from all of the JSON data
-    model.create_sql_db()
+    model.dump_to_json_files(10,True)
 
 if __name__=='__main__' :
     main()

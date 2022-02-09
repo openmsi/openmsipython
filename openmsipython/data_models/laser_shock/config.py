@@ -8,8 +8,5 @@ class LaserShockConstants :
     @property
     def DATABASE_NAME(self) :
         return 'Laser Shock' #Name of the Laser Shock Lab's FileMaker database
-    @property
-    def SQL_DB_SCHEMA(self) :
-        return 'laser_shock_gemd' #Name of the schema in the SQL DB that stores the Laser Shock Lab's GEMD data model
 
 LASER_SHOCK_CONST = LaserShockConstants()
