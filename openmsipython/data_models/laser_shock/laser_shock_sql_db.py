@@ -1,16 +1,19 @@
 #imports
+from ...shared.runnable import Runnable
 from ..sql.openmsidb import OpenMSIDB
 
-class LaserShockSQLDB(OpenMSIDB) :
+class LaserShockSQLDB(OpenMSIDB,Runnable) :
     """
     Class to handle the laser shock portion of the OpenMSI SQL database
     """
 
     SCHEMA = 'laser_shock_gemd' #Name of the schema in the SQL DB that stores the Laser Shock Lab's GEMD data model
 
-    def recreate_from_files(self) :
+    def recreate_from_files(self,json_dir) :
         """
         Recreate the SQL DB with JSON entries for every object dumped to a directory of files
+
+        json_dir = path to the directory holding all of the JSON files that should be added to the database
         """
         self.logger.info('Recreating the SQL DB...')
         #create the schema if it doesn't already exist
@@ -32,21 +35,34 @@ class LaserShockSQLDB(OpenMSIDB) :
         )
         """
         self.execute(sql)
-        ##insert new records
-        #encoder = GEMDJson()
-        #for glassid in self.glass_IDs :
-        #    json_to_insert = encoder.thin_dumps(glassid.spec,indent=2)
-        #    sql = f"""
-        #    INSERT INTO {self.SCHEMA}.glassIDs (obj) VALUES ({json_to_insert})
-        #    """
-        #    self.execute(sql)
+        #insert new records
+        for glassIDfp in json_dir.glob('LaserShockGlassID_*.json') :
+            json_content = None
+            with open(glassIDfp,'r') as fp :
+                json_content = fp.read()
+            sql = f"""
+            INSERT INTO {self.SCHEMA}.glassIDs (obj) VALUES ({json_content})
+            """
+            self.execute(sql)
+
+    @classmethod
+    def get_command_line_arguments(cls) :
+        args = ['gemd_json_dir']
+        kwargs = {}
+        return args, kwargs
+
+    @classmethod
+    def run_from_command_line(cls, args=None):
+        parser = cls.get_argument_parser()
+        args = parser.parse_args(args=args)
+        db = cls()
+        #recreate the SQL database from dumped JSON files
+        db.recreate_from_files(args.gemd_json_dir)    
 
 #################### MAIN FUNCTION ####################
 
-def main() :
-    db = LaserShockSQLDB()
-    #recreate the SQL database from dumped JSON files
-    db.recreate_from_files()
+def main(args=None) :
+    LaserShockSQLDB.run_from_command_line(args)
 
 if __name__=='__main__' :
     main()
