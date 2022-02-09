@@ -1,6 +1,16 @@
 #imports
 from ...shared.runnable import Runnable
 from ..sql.openmsidb import OpenMSIDB
+from .glass_ID import LaserShockGlassID
+from .epoxy_ID import LaserShockEpoxyID
+from .foil_ID import LaserShockFoilID
+from .spacer_ID import LaserShockSpacerID
+from .flyer_cutting_program import LaserShockFlyerCuttingProgram
+from .spacer_cutting_program import LaserShockSpacerCuttingProgram
+from .flyer_stack import LaserShockFlyerStack
+from .sample import LaserShockSample
+from .launch_package import LaserShockLaunchPackage
+from .experiment import LaserShockExperiment
 
 class LaserShockSQLDB(OpenMSIDB,Runnable) :
     """
@@ -25,25 +35,39 @@ class LaserShockSQLDB(OpenMSIDB,Runnable) :
                     break
         if not schema_exists :
             self.execute(f"CREATE SCHEMA {self.SCHEMA}")
-        #drop existing tables that we're going to replace
-        self.execute(f'DROP TABLE IF EXISTS {self.SCHEMA}.glassIDs')
-        #set up the new tables
-        sql = f"""
-        CREATE TABLE {self.SCHEMA}.glassIDs (
-            id BIGINT PRIMARY KEY IDENTITY,
-            obj NVARCHAR(4000)
-        )
-        """
-        self.execute(sql)
-        #insert new records
-        for glassIDfp in json_dir.glob('LaserShockGlassID_*.json') :
-            json_content = None
-            with open(glassIDfp,'r') as fp :
-                json_content = fp.read()
+        #list the dumped objects' classes and their table names
+        classes_tables = [
+            (LaserShockGlassID,'glassIDs'),
+            (LaserShockEpoxyID,'epoxyIDs'),
+            (LaserShockFoilID,'foilIDs'),
+            (LaserShockSpacerID,'spacerIDs'),
+            (LaserShockFlyerCuttingProgram,'flyercuttingprograms'),
+            (LaserShockSpacerCuttingProgram,'spacercuttingprograms'),
+            (LaserShockFlyerStack,'flyerstacks'),
+            (LaserShockSample,'samples'),
+            (LaserShockLaunchPackage,'launchpackages'),
+            (LaserShockExperiment,'experiments'),
+        ]
+        for ct in classes_tables :
+            #drop existing tables that we're going to replace
+            self.execute(f'DROP TABLE IF EXISTS {self.SCHEMA}.{ct[1]}')
+            #set up the new tables
             sql = f"""
-            INSERT INTO {self.SCHEMA}.glassIDs (obj) VALUES ('[{json_content}]')
+            CREATE TABLE {self.SCHEMA}.{ct[1]} (
+                id BIGINT PRIMARY KEY IDENTITY,
+                obj NVARCHAR(4000)
+            )
             """
             self.execute(sql)
+            #insert new records
+            for jsonfp in json_dir.glob(f'{c[0].__name__}_*.json') :
+                json_content = None
+                with open(jsonfp,'r') as fp :
+                    json_content = fp.read()
+                sql = f"""
+                INSERT INTO {self.SCHEMA}.{ct[1]} (obj) VALUES ('[{json_content}]')
+                """
+                self.execute(sql)
 
     @classmethod
     def get_command_line_arguments(cls) :

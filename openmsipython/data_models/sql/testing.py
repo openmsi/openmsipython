@@ -18,12 +18,26 @@ def main() :
     with openmsi_db.query_result(sql) as res :
         for row in res :
             print(row)
-    #print out the glassIDs in the database
-    print('Glass IDs:')
-    sql = "SELECT * FROM laser_shock_gemd.glassIDs"
-    with openmsi_db.query_result(sql) as res :
-        for row in res :
-            print(row)
+    table_names = [
+        'glassIDs',
+        'epoxyIDs',
+        'foilIDs',
+        'spacerIDs',
+        'flyercuttingprograms',
+        'spacercuttingprograms',
+        'flyerstacks',
+        'samples',
+        'launchpackages',
+        'experiments',
+    ]
+    #print out the entries in the database
+    for table_name in table_names :
+        print(f'Entries in laser_shock_gemd.{table_name}:')
+        sql = "SELECT * FROM laser_shock_gemd.glassIDs"
+        with openmsi_db.query_result(sql) as res :
+            for row in res :
+                print(row)
+        print('')
     print('Done.')
 
 if __name__=='__main__' :
