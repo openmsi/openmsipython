@@ -60,7 +60,7 @@ class LaserShockSQLDB(OpenMSIDB,Runnable) :
             """
             self.execute(sql)
             #insert new records
-            for jsonfp in json_dir.glob(f'{c[0].__name__}_*.json') :
+            for jsonfp in json_dir.glob(f'{ct[0].__name__}_*.json') :
                 json_content = None
                 with open(jsonfp,'r') as fp :
                     json_content = fp.read()
