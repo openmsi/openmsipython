@@ -33,7 +33,7 @@ def main() :
     #print out the entries in the database
     for table_name in table_names :
         print(f'Entries in laser_shock_gemd.{table_name}:')
-        sql = "SELECT * FROM laser_shock_gemd.glassIDs"
+        sql = f"SELECT * FROM laser_shock_gemd.{table_name}"
         with openmsi_db.query_result(sql) as res :
             for row in res :
                 print(row)
