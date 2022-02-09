@@ -31,7 +31,7 @@ class LaserShockSQLDB(OpenMSIDB,Runnable) :
         sql = f"""
         CREATE TABLE {self.SCHEMA}.glassIDs (
             id BIGINT PRIMARY KEY IDENTITY,
-            obj NVARCHAR(8000)
+            obj NVARCHAR(4000)
         )
         """
         self.execute(sql)
