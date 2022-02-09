@@ -41,7 +41,7 @@ class LaserShockSQLDB(OpenMSIDB,Runnable) :
             with open(glassIDfp,'r') as fp :
                 json_content = fp.read()
             sql = f"""
-            INSERT INTO {self.SCHEMA}.glassIDs (obj) VALUES ({json_content})
+            INSERT INTO {self.SCHEMA}.glassIDs (obj) VALUES ('[{json_content}]')
             """
             self.execute(sql)
 
