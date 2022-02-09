@@ -165,14 +165,16 @@ class LaserShockLab(LogOwner) :
         self.__check_unique_values(objs)
         return objs
 
-    def dump_to_json_files(self,n_max_objs=-1,complete_histories=False) :
+    def dump_to_json_files(self,n_max_objs=-1,complete_histories=False,indent=None) :
         """
         Write out different parts of the lab as json files
         
         n_max_objs = the maximum number of objects of each type to dump to json files
-                     (default = -1 writes out all objects)
+            (default = -1 writes out all objects)
         complete_histories = if True, complete material histories are written out for any
-                             MaterialRunFromFileMakerRecord objects (default = False)
+            MaterialRunFromFileMakerRecord objects (default = False)
+        indent = the indent to use when the files are written out (argument to json.dump). 
+            Default results in most compact representation
         """
         self.logger.info('Dumping GEMD objects to JSON files...')
         #create the encoder
@@ -187,12 +189,12 @@ class LaserShockLab(LogOwner) :
                     obj_to_write = obj.spec
                 fn = f'{obj.__class__.__name__}_{iobj}.json'
                 with open(self.ofd/fn,'w') as fp :
-                    fp.write(encoder.thin_dumps(obj_to_write,indent=2))
+                    fp.write(encoder.thin_dumps(obj_to_write,indent=indent))
                 if complete_histories :
                     if isinstance(obj,MaterialRunFromFileMakerRecord) :
                         context_list = complete_material_history(obj_to_write)
                         with open(self.ofd/fn.replace('.json','_material_history.json'),'w') as fp :
-                            fp.write(json.dumps(context_list,indent=2))
+                            fp.write(json.dumps(context_list,indent=indent))
         self.logger.info('Done.')
 
     #################### PRIVATE HELPER FUNCTIONS ####################
