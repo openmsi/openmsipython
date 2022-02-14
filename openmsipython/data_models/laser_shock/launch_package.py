@@ -150,8 +150,8 @@ class LaserShockLaunchPackageSpec(SpecForRun) :
             )
         IngredientSpec(name='Chosen Flyer',material=chosen_flyer,process=attaching_spacer)
         IngredientSpec(name='Spacer',material=cut_spacer,process=attaching_spacer)
-        flyer_and_spacer = MaterialSpec(name='Flyer/Spacer',process=attaching_spacer)
-        # Attach Impact Sample to Flyer/Spacer stack
+        flyer_and_spacer = MaterialSpec(name='Flyer and Spacer',process=attaching_spacer)
+        # Attach Impact Sample to Flyer and Spacer stack
         if not self.use_sample :
             return attaching_spacer
         params = []
@@ -183,7 +183,7 @@ class LaserShockLaunchPackageSpec(SpecForRun) :
                               template=ATTR_TEMPL['Sample Attachment Adhesive'],
                               origin='specified')
                     )
-        IngredientSpec(name='Flyer/Spacer',material=flyer_and_spacer,process=attaching_sample)
+        IngredientSpec(name='Flyer and Spacer',material=flyer_and_spacer,process=attaching_sample)
         IngredientSpec(name='Impact Sample',
                        material=self.impactsamplespec if self.impactsamplespec is not None else None,
                        process=attaching_sample)
@@ -236,7 +236,7 @@ class LaserShockLaunchPackage(MaterialRunFromFileMakerRecord) :
         super().__init__(record)
         # link some objects back into the created Run
         for ing in self.run.process.ingredients :
-            if ing.name=='Flyer/Spacer' :
+            if ing.name=='Flyer and Spacer' :
                 for ing2 in ing.material.process.ingredients :
                     if ing2.name=='Chosen Flyer' :
                         for ing3 in ing2.material.process.ingredients :
@@ -305,7 +305,7 @@ class LaserShockLaunchPackage(MaterialRunFromFileMakerRecord) :
         kwargs['use_spacer']=record.pop('Spacer Flag')=='Yes'
         kwargs['spacer_attachment']=record.pop('Spacer Attachment Method')
         kwargs['spacer_adhesive']=record.pop('Spacer Attachment Adhesive')
-        # Attaching impact sample to flyer/spacer
+        # Attaching impact sample to flyer and spacer
         kwargs['use_sample']=record.pop('Sample Flag')=='Yes'
         kwargs['samp_attachments_adhesives']=record.pop('Sample Attachment Method').split('\r')
         kwargs['samp_orientation']=record.pop('Sample Impact Orientation')
@@ -404,10 +404,10 @@ class LaserShockLaunchPackage(MaterialRunFromFileMakerRecord) :
                                                                      template=ATTR_TEMPL[tn],
                                                                      origin='specified'))
         #add the sample as an ingredient in the process
-        IngredientSpec(name='Sample',material=self.sample.spec,process=impactsamplespec.process)
+        samplespec = IngredientSpec(name='Sample',material=self.sample.spec,process=impactsamplespec.process)
         #create the Run from the Spec
         impactsample = make_instance(impactsamplespec)
         #add the sample to the Run
-        IngredientRun(material=self.sample,process=impactsample.process)
+        IngredientRun(material=self.sample,process=impactsample.process,spec=samplespec)
         #return the ImpactSample Run
         return impactsample

@@ -44,6 +44,12 @@ class LaserShockLab(LogOwner) :
         return self.__password
 
     @property
+    def encoder(self) :
+        if self.__encoder is None :
+            self.__encoder = GEMDJson()
+        return self.__encoder
+
+    @property
     def all_object_lists(self) :
         return [self.glass_IDs,self.epoxy_IDs,self.foil_IDs,self.spacer_IDs,self.flyer_cutting_programs,
                 self.spacer_cutting_programs,self.flyer_stacks,self.samples,self.launch_packages,self.experiments]
@@ -81,6 +87,8 @@ class LaserShockLab(LogOwner) :
         super().__init__(*args,**kwargs)
         #initialize empty username/password
         self.__username = None; self.__password = None
+        #JSON encoder placeholder
+        self.__encoder = None
 
     def create_gemd_objects(self,records_dict=None) :
         """
@@ -137,7 +145,7 @@ class LaserShockLab(LogOwner) :
         self.__replace_specs()
         self.logger.info('Done creating GEMD objects')
     
-    def get_objects_from_records(self,obj_type,layout_name,*args,n_max_records=10000,records_dict=None,**kwargs) :
+    def get_objects_from_records(self,obj_type,layout_name,*args,n_max_records=100000,records_dict=None,**kwargs) :
         """
         Return a list of LaserShock/GEMD constructs based on FileMaker records 
         or records in a dictionary (useful for testing)
@@ -165,9 +173,9 @@ class LaserShockLab(LogOwner) :
         self.__check_unique_values(objs)
         return objs
 
-    def dump_to_json_files(self,n_max_objs=-1,complete_histories=False,indent=None) :
+    def dump_to_json_files(self,n_max_objs=-1,complete_histories=False,indent=None,recursive=True) :
         """
-        Write out different parts of the lab as json files
+        Write out GEMD object json files
         
         n_max_objs = the maximum number of objects of each type to dump to json files
             (default = -1 writes out all objects)
@@ -175,26 +183,28 @@ class LaserShockLab(LogOwner) :
             MaterialRunFromFileMakerRecord objects (default = False)
         indent = the indent to use when the files are written out (argument to json.dump). 
             Default results in most compact representation
+        recursive = if True, also write out json files for all objects linked to each chosen object
         """
         self.logger.info('Dumping GEMD objects to JSON files...')
-        #create the encoder
-        encoder = GEMDJson()
+        #set some variables so the recursive function knows how to dump the files
+        self.__indent = indent
+        self.__uids_written = []
         #dump the different parts of the lab data model to json files
         for obj_list in self.all_object_lists :
             objs_to_dump = obj_list[:min(n_max_objs,len(obj_list))] if n_max_objs>0 else obj_list
             for iobj,obj in enumerate(objs_to_dump,start=1) :
-                if isinstance(obj,RunFromFileMakerRecord) :
-                    obj_to_write = obj.run
-                elif isinstance(obj,SpecFromFileMakerRecord) :
-                    obj_to_write = obj.spec
+                obj_to_write = obj.gemd_object
                 fn = f'{obj.__class__.__name__}_{iobj}.json'
                 with open(self.ofd/fn,'w') as fp :
-                    fp.write(encoder.thin_dumps(obj_to_write,indent=indent))
+                    fp.write(self.encoder.thin_dumps(obj_to_write,indent=indent))
                 if complete_histories :
                     if isinstance(obj,MaterialRunFromFileMakerRecord) :
                         context_list = complete_material_history(obj_to_write)
                         with open(self.ofd/fn.replace('.json','_material_history.json'),'w') as fp :
                             fp.write(json.dumps(context_list,indent=indent))
+                self.__uids_written.append(obj_to_write.uids["auto"])
+                if recursive :
+                    recursive_foreach(obj_to_write,self.__dump_obj_to_json)
         self.logger.info('Done.')
 
     #################### PRIVATE HELPER FUNCTIONS ####################
@@ -296,6 +306,17 @@ class LaserShockLab(LogOwner) :
         self.logger.debug('Recursively replacing all duplicated lower level Specs...')
         recursive_foreach(self.all_top_objs,self.__replace_duplicated_specs_in_runs)
 
+    def __dump_obj_to_json(self,item) :
+        uid = item.uids["auto"]
+        if uid not in self.__uids_written :
+            fn = f'{item.__class__.__name__}'
+            if item.name is not None :
+                fn+=f'_{item.name.replace(" ","-").replace("/","")}'
+            fn+= f'_{uid}.json'
+            with open(self.ofd/fn,'w') as fp :
+                fp.write(self.encoder.thin_dumps(item,indent=self.__indent))
+            self.__uids_written.append(uid)
+
 #################### MAIN FUNCTION ####################
 
 def main() :
@@ -303,7 +324,7 @@ def main() :
     model = LaserShockLab()
     model.create_gemd_objects()
     #dump its pieces to json files
-    model.dump_to_json_files(10,True)
+    model.dump_to_json_files()
 
 if __name__=='__main__' :
     main()

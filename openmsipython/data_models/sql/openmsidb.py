@@ -1,8 +1,9 @@
 #imports
 from contextlib import contextmanager
+from sqlalchemy import create_engine
 from sqlalchemy import text
 from ...shared.logging import LogOwner
-from .utilities import get_engine
+from .config import SQL_CONST
 
 class OpenMSIDB(LogOwner) :
     """
@@ -11,7 +12,7 @@ class OpenMSIDB(LogOwner) :
 
     def __init__(self,*args,**kwargs) :
         super().__init__(*args,**kwargs)
-        self.engine=get_engine()
+        self.engine=self.__get_engine()
 
     def execute(self,sql) :
         """
@@ -37,3 +38,10 @@ class OpenMSIDB(LogOwner) :
         finally :
             if con is not None :
                 con.close()
+
+    def __get_engine(self,uname=SQL_CONST.SQL_UNAME,pwd=SQL_CONST.SQL_PWD,
+                     host=SQL_CONST.SQL_HOST,db_name=SQL_CONST.SQL_DB_NAME) :
+        #create and return the engine
+        connection_string=f'mssql+pymssql://{uname}:{pwd}@{host}/{db_name}'
+        engine = create_engine(connection_string,echo=True)
+        return engine

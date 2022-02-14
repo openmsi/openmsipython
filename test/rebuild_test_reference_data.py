@@ -144,7 +144,7 @@ def rebuild_laser_shock_filemaker_refs() :
     #Run the LaserShockLab to create GEMD constructs and dump them as .json files
     lsl = LaserShockLab(working_dir=NEW_TEST_DATA_DIR/TEST_CONST.LASER_SHOCK_DATA_MODEL_OUTPUT_DIRNAME)
     lsl.create_gemd_objects(records_dict=filemaker_records)
-    lsl.dump_to_json_files(complete_histories=True)
+    lsl.dump_to_json_files(complete_histories=True,recursive=False)
     for fp in (NEW_TEST_DATA_DIR/TEST_CONST.LASER_SHOCK_DATA_MODEL_OUTPUT_DIRNAME).glob('*') :
         compare_and_check_old_and_new_files(fp.name,fp.parent.name)
 
