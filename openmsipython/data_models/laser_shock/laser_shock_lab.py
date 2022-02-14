@@ -1,6 +1,6 @@
 #imports
 import os, pathlib, json, requests, getpass, fmrest
-from gemd.util.impl import recursive_foreach
+from gemd.util.impl import set_uuids, recursive_foreach
 from gemd.entity.util import complete_material_history
 from gemd.json import GEMDJson
 from gemd.entity.object import MaterialSpec, ProcessSpec, IngredientSpec, MeasurementSpec
@@ -9,6 +9,8 @@ from ...shared.logging import LogOwner
 from ..run_from_filemaker_record import MaterialRunFromFileMakerRecord, RunFromFileMakerRecord
 from ..spec_from_filemaker_record import SpecFromFileMakerRecord
 from .config import LASER_SHOCK_CONST
+from .attribute_templates import ATTR_TEMPL
+from .object_templates import OBJ_TEMPL
 from .glass_ID import LaserShockGlassID
 from .epoxy_ID import LaserShockEpoxyID
 from .foil_ID import LaserShockFoilID
@@ -42,12 +44,6 @@ class LaserShockLab(LogOwner) :
             if self.__password=='$JHED_PWORD' :
                 self.__password = getpass.getpass(f'Please enter the JHED password for {self.username}: ')
         return self.__password
-
-    @property
-    def encoder(self) :
-        if self.__encoder is None :
-            self.__encoder = GEMDJson()
-        return self.__encoder
 
     @property
     def all_object_lists(self) :
@@ -87,8 +83,11 @@ class LaserShockLab(LogOwner) :
         super().__init__(*args,**kwargs)
         #initialize empty username/password
         self.__username = None; self.__password = None
-        #JSON encoder placeholder
-        self.__encoder = None
+        #JSON encoder
+        self.encoder = GEMDJson()
+        #set uuids for templates to make sure they're all unique
+        for template in [*(ATTR_TEMPL.values()),*(OBJ_TEMPL.values())] :
+            set_uuids(template,self.encoder.scope)
 
     def create_gemd_objects(self,records_dict=None) :
         """
