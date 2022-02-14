@@ -3,7 +3,8 @@ from abc import abstractmethod
 from gemd.entity.util import make_instance
 from gemd.entity.source.performed_source import PerformedSource
 from gemd.entity.attribute import Property
-from gemd.entity.object import MeasurementSpec, MeasurementRun
+#from gemd.entity.object import MeasurementSpec
+from gemd.entity.object import MeasurementRun
 from .utilities import name_value_template_origin_from_key_value_dict
 from .from_filemaker_record import FromFileMakerRecordBase
 
@@ -27,6 +28,15 @@ class RunFromFileMakerRecord(FromFileMakerRecordBase) :
     @property
     def run(self) :
         return self.__run
+
+    @run.setter
+    def run(self,r) :
+        if type(r)==type(self.__run) :
+            self.__run = r
+        else :
+            errmsg = f'ERROR: tried to overwrite runs with mistmatched types! Run is of type {type(self.__run)} '
+            errmsg+= f'but new run has type {type(r)}'
+            self.logger.error(errmsg)
 
     @property
     def gemd_object(self):
@@ -146,7 +156,7 @@ class MaterialRunFromFileMakerRecord(HasSourceFromFileMakerRecord) :
             if name is None or value is None :
                 return
             meas = MeasurementRun(name=name,material=self.run)
-            meas.spec = MeasurementSpec(name=name)
+            #meas.spec = MeasurementSpec(name=name) # This doesn't do much bc most MeasurementTemplates are implied
             meas.properties.append(Property(name=name,
                                             value=value,
                                             origin=origin if origin is not None else 'measured',

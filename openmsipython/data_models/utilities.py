@@ -1,4 +1,5 @@
 #imports
+from typing import Callable, Union, Type, Tuple
 from gemd.entity.value import NominalCategorical, NominalReal, NominalInteger
 
 def search_for_name(obj_list,name) :
@@ -102,3 +103,29 @@ def name_value_template_origin_from_key_value_dict(key,value,d,logger=None,raise
         value = d['valuetype'](val)
     origin = d['origin'] if 'origin' in d.keys() else None
     return name, value, temp, origin
+
+######### THE FUNCTION BELOW IS COPIED/PASTED FROM GEMD CODE #########
+def cached_isinstance_generator(class_or_tuple: Union[Type, Tuple[Type]]) -> Callable[[object], bool]:
+    """
+    Generate a function that checks and caches an isinstance(obj, class_or_tuple) call.
+
+    Parameters
+    ----------
+    class_or_tuple: Union[Type, Tuple[Type]]
+        A single type or a tuple of types
+
+    Returns
+    -------
+    Callable[[object], bool]
+        function with signature function(obj), returning isinstance(obj, class_or_tuple)
+
+    """
+    cache = dict()
+
+    def func(obj):
+        obj_type = type(obj)
+        if obj_type not in cache:
+            cache[obj_type] = isinstance(obj, class_or_tuple)
+        return cache[obj_type]
+
+    return func

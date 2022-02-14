@@ -6,6 +6,7 @@ from gemd.json import GEMDJson
 from gemd.entity.object import MaterialSpec, ProcessSpec, IngredientSpec, MeasurementSpec
 from gemd.entity.object import MaterialRun, ProcessRun, IngredientRun, MeasurementRun
 from ...shared.logging import LogOwner
+from ..utilities import cached_isinstance_generator
 from ..run_from_filemaker_record import MaterialRunFromFileMakerRecord, RunFromFileMakerRecord
 from ..spec_from_filemaker_record import SpecFromFileMakerRecord
 from .config import LASER_SHOCK_CONST
@@ -21,6 +22,18 @@ from .flyer_stack import LaserShockFlyerStack
 from .sample import LaserShockSample
 from .launch_package import LaserShockLaunchPackage
 from .experiment import LaserShockExperiment
+
+#Some cached isinstance functions to reduce overhead
+isinstance_spec_from_filemaker_record = cached_isinstance_generator(SpecFromFileMakerRecord)
+isinstance_run_from_filemaker_record = cached_isinstance_generator(RunFromFileMakerRecord)
+isinstance_material_run_from_filemaker_record = cached_isinstance_generator(MaterialRunFromFileMakerRecord)
+isinstance_spec = cached_isinstance_generator((MaterialSpec,ProcessSpec,IngredientSpec,MeasurementSpec))
+isinstance_material_ingredient_spec = cached_isinstance_generator((MaterialSpec,IngredientSpec))
+isinstance_ingredient_spec = cached_isinstance_generator(IngredientSpec)
+isinstance_run = cached_isinstance_generator((MaterialRun,ProcessRun,IngredientRun,MeasurementRun))
+isinstance_material_ingredient_run = cached_isinstance_generator((MaterialRun,IngredientRun))
+isinstance_ingredient_measurement_run = cached_isinstance_generator((IngredientRun,MeasurementRun))
+isinstance_ingredient_run = cached_isinstance_generator(IngredientRun)
 
 class LaserShockLab(LogOwner) :
     """
@@ -63,9 +76,18 @@ class LaserShockLab(LogOwner) :
         specs_from_records = []
         for obj_list in self.all_object_lists :
             for obj in obj_list :
-                if isinstance(obj,SpecFromFileMakerRecord) :
+                if isinstance_spec_from_filemaker_record(obj) :
                     specs_from_records.append(obj)
         return specs_from_records
+
+    @property
+    def runs_from_records(self) :
+        runs_from_records = []
+        for obj_list in self.all_object_lists :
+            for obj in obj_list :
+                if isinstance_run_from_filemaker_record(obj) :
+                    runs_from_records.append(obj)
+        return runs_from_records
 
     #################### PUBLIC METHODS ####################
 
@@ -101,8 +123,8 @@ class LaserShockLab(LogOwner) :
         else :
             msg+='FileMakerDB entries'
             extra_kwargs = {}
-        #add all the information to the lab object based on entries in the FileMaker DB
         self.logger.info(msg)
+        #add all the information to the lab object based on entries in the FileMaker DB
         #"Inventory" pages (create Specs)
         self.logger.debug('Creating Inventory objects...')
         self.glass_IDs = self.get_objects_from_records(LaserShockGlassID,'Glass ID',**extra_kwargs)
@@ -140,8 +162,8 @@ class LaserShockLab(LogOwner) :
         self.experiments = self.get_objects_from_records(LaserShockExperiment,'Experiment',self.launch_packages,
                                                          **extra_kwargs)
         self.logger.debug(f'Created {len(self.experiments)} Experiment objects...')
-        #Make sure that there is only one of each unique spec (dynamically-created specs may be duplicated)
-        self.__replace_specs()
+        #Make sure that there is only one of each unique spec and run (dynamically-created specs may be duplicated)
+        self.__replace_duplicated_specs_and_runs()
         self.logger.info('Done creating GEMD objects')
     
     def get_objects_from_records(self,obj_type,layout_name,*args,n_max_records=100000,records_dict=None,**kwargs) :
@@ -197,7 +219,7 @@ class LaserShockLab(LogOwner) :
                 with open(self.ofd/fn,'w') as fp :
                     fp.write(self.encoder.thin_dumps(obj_to_write,indent=indent))
                 if complete_histories :
-                    if isinstance(obj,MaterialRunFromFileMakerRecord) :
+                    if isinstance_material_run_from_filemaker_record(obj) :
                         context_list = complete_material_history(obj_to_write)
                         with open(self.ofd/fn.replace('.json','_material_history.json'),'w') as fp :
                             fp.write(json.dumps(context_list,indent=indent))
@@ -250,12 +272,11 @@ class LaserShockLab(LogOwner) :
                 done.add(uv)
 
     def __count_specs(self,item) :
-        if not isinstance(item, (MaterialSpec, ProcessSpec, IngredientSpec, MeasurementSpec)):
-            return
-        self.__n_total_specs+=1
+        if isinstance_spec(item):
+            self.__n_total_specs+=1
 
     def __find_unique_spec_objs(self,item) :
-        if not isinstance(item, (MaterialSpec, ProcessSpec, IngredientSpec, MeasurementSpec)):
+        if not isinstance_spec(item):
             return
         itemname = item.name
         if itemname not in self.__unique_specs_by_name.keys() :
@@ -269,9 +290,9 @@ class LaserShockLab(LogOwner) :
         if not found :
             self.__unique_specs_by_name[itemname].append((itemdict,item))
 
-    def __replace_duplicated_specs_in_runs(self,item) :
+    def __replace_duplicated_specs(self,item) :
         #replace specs for MaterialRuns, ProcessRuns, IngredientRuns, and MeasurementRuns
-        if isinstance(item,(MaterialRun,ProcessRun,IngredientRun,MeasurementRun)) :
+        if isinstance_run(item) :
             if item.spec is not None :
                 thisspecname = item.spec.name
                 thisspecdict = item.spec.as_dict()
@@ -279,19 +300,103 @@ class LaserShockLab(LogOwner) :
                     if thisspecdict==specdict :
                         item.spec = spec
                         break
+        #replace ProcessSpecs for MaterialSpecs and IngredientSpecs
+        if isinstance_material_ingredient_spec(item) :
+            if item.process is not None :
+                thisspecname = item.process.name
+                thisspecdict = item.process.as_dict()
+                for specdict,spec in self.__unique_specs_by_name[thisspecname] :
+                    if thisspecdict==specdict :
+                        #ingredients only have their processes reset if they're not in the process's ingredients already
+                        should_add = True
+                        if isinstance_ingredient_spec(item) :
+                            for existing_ing_spec in spec.ingredients :
+                                if existing_ing_spec.as_dict()==item.as_dict() :
+                                    should_add=False
+                                    break
+                        if should_add :
+                            item.process = spec
+                        break
+        #replace MaterialSpecs for IngredientSpecs
+        if isinstance_ingredient_spec(item) :
+            if item.material is not None :
+                thisspecname = item.material.name
+                thisspecdict = item.material.as_dict()
+                for specdict,spec in self.__unique_specs_by_name[thisspecname] :
+                    if thisspecdict==specdict :
+                        item.material = spec
+                        break
 
-    def __replace_specs(self) :
-        #get a list of all the unique specs that have been dynamically created
+    def __count_runs(self,item) :
+        if isinstance_run(item):
+            self.__n_total_runs+=1
+
+    def __find_unique_run_objs(self,item) :
+        if not isinstance_run(item):
+            return
+        itemname = item.name
+        if itemname not in self.__unique_runs_by_name.keys() :
+            self.__unique_runs_by_name[itemname] = []
+        itemdict = item.as_dict()
+        found = False
+        for urundict,_ in self.__unique_runs_by_name[itemname] :
+            if itemdict==urundict :
+                found = True
+                break
+        if not found :
+            self.__unique_runs_by_name[itemname].append((itemdict,item))
+
+    def __replace_duplicated_runs(self,item) :
+        #replace ProcessRuns for MaterialRuns and IngredientRuns
+        if isinstance_material_ingredient_run(item) :
+            if item.process is not None :
+                thisrunname = item.process.name
+                thisrundict = item.process.as_dict()
+                for rundict,run in self.__unique_runs_by_name[thisrunname] :
+                    if thisrundict==rundict :
+                        #ingredients only have their processes reset if they're not in the process's ingredients already
+                        should_add = True
+                        if isinstance_ingredient_run(item) :
+                            for existing_ing_run in run.ingredients :
+                                if existing_ing_run.as_dict()==item.as_dict() :
+                                    should_add=False
+                                    break
+                        if should_add :
+                            item.process = run
+                        break
+        #replace MaterialRuns for IngredientRuns and MeasurementRuns
+        if isinstance_ingredient_measurement_run(item) :
+            if item.material is not None :
+                thisrunname = item.material.name
+                thisrundict = item.material.as_dict()
+                for rundict,run in self.__unique_runs_by_name[thisrunname] :
+                    if thisrundict==rundict :
+                        item.material = run
+                        break
+
+    def __replace_duplicated_specs_and_runs(self) :
+        # Find the sets of unique specs and runs
         self.logger.debug('Finding the set of unique Specs...')
         self.__n_total_specs = 0
         recursive_foreach(self.all_top_objs,self.__count_specs)
         self.__unique_specs_by_name = {}
         recursive_foreach(self.all_top_objs,self.__find_unique_spec_objs)
-        all_unique_specs = []
+        n_unique_specs = 0
         for t in self.__unique_specs_by_name.keys() :
             for us in self.__unique_specs_by_name[t] :
-                all_unique_specs.append(us)
-        self.logger.debug(f'Found {len(all_unique_specs)} unique Specs from a set of {self.__n_total_specs} total')
+                n_unique_specs+=1
+        self.logger.debug(f'Found {n_unique_specs} unique Specs from a set of {self.__n_total_specs} total')
+        #get a list of all the unique runs that have been dynamically created
+        self.logger.debug('Finding the set of unique Runs...')
+        self.__n_total_runs = 0
+        recursive_foreach(self.all_top_objs,self.__count_runs)
+        self.__unique_runs_by_name = {}
+        recursive_foreach(self.all_top_objs,self.__find_unique_run_objs)
+        n_unique_runs = 0
+        for t in self.__unique_runs_by_name.keys() :
+            for us in self.__unique_runs_by_name[t] :
+                n_unique_runs+=1
+        self.logger.debug(f'Found {n_unique_runs} unique Runs from a set of {self.__n_total_runs} total')
         #replace duplicate specs in the SpecFromFileMakerRecord objects
         self.logger.debug('Replacing duplicated top level Specs...')
         for sfr in self.specs_from_records :
@@ -300,10 +405,33 @@ class LaserShockLab(LogOwner) :
             for specdict,spec in self.__unique_specs_by_name[thisspecname] :
                 if thisspecdict==specdict :
                     sfr.spec = spec
+
                     break
-        #replace all of the lower-level specs recursively
-        self.logger.debug('Recursively replacing all duplicated lower level Specs...')
-        recursive_foreach(self.all_top_objs,self.__replace_duplicated_specs_in_runs)
+        #replace duplicate runs in the RunFromFileMakerRecord objects
+        self.logger.debug('Replacing duplicated top level Runs...')
+        for rfr in self.runs_from_records :
+            thisrunname = rfr.run.name
+            thisrundict = rfr.run.as_dict()
+            for rundict,run in self.__unique_runs_by_name[thisrunname] :
+                if thisrundict==rundict :
+                    rfr.run = run
+                    break
+        #iterate recursively replacing specs/runs until only the unique ones remain
+        iter_i = 1
+        while (self.__n_total_specs>n_unique_specs or self.__n_total_runs>n_unique_runs) and iter_i<11 :
+            msg = f'Recursively replacing all duplicated lower level Specs (iteration {iter_i},'
+            msg+= f' {self.__n_total_specs} total, {n_unique_specs} unique)...'
+            self.logger.debug(msg)
+            recursive_foreach(self.all_top_objs,self.__replace_duplicated_specs)
+            msg = f'Recursively replacing all duplicated lower level Runs (iteration {iter_i},'
+            msg+= f' {self.__n_total_runs} total, {n_unique_runs} unique)...'
+            self.logger.debug(msg)
+            recursive_foreach(self.all_top_objs,self.__replace_duplicated_runs)
+            self.__n_total_specs = 0
+            recursive_foreach(self.all_top_objs,self.__count_specs)
+            self.__n_total_runs = 0
+            recursive_foreach(self.all_top_objs,self.__count_runs)
+            iter_i+=1
 
     def __dump_obj_to_json(self,item) :
         uid = item.uids["auto"]
