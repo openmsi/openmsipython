@@ -24,6 +24,7 @@ setupkwargs = dict(
                       'gemd>=1.8.1',
                       'kafkacrypto>=0.9.9.11a1',
                       'matplotlib',
+                      'methodtools',
                       'msgpack',
                       'pandas',
                       'pymssql',

@@ -130,7 +130,7 @@ class LaserShockLaunchPackageSpec(SpecForRun) :
         IngredientSpec(name='Spacer Material',
                        material=self.spacerID if self.spacerID is not None else None,
                        process=cutting_spacer)
-        cut_spacer = MaterialSpec(name='Spacer',process=cutting_spacer)
+        cut_spacer = MaterialSpec(name='Cut Spacer',process=cutting_spacer)
         # Attach Spacer to Flyer
         attaching_spacer = ProcessSpec(
             name='Attaching Spacer',
@@ -149,7 +149,7 @@ class LaserShockLaunchPackageSpec(SpecForRun) :
             template=OBJ_TEMPL['Attaching Spacer']
             )
         IngredientSpec(name='Chosen Flyer',material=chosen_flyer,process=attaching_spacer)
-        IngredientSpec(name='Spacer',material=cut_spacer,process=attaching_spacer)
+        IngredientSpec(name='Cut Spacer',material=cut_spacer,process=attaching_spacer)
         flyer_and_spacer = MaterialSpec(name='Flyer and Spacer',process=attaching_spacer)
         # Attach Impact Sample to Flyer and Spacer stack
         if not self.use_sample :
