@@ -190,9 +190,10 @@ class DataFileUploadDirectory(DataFileDirectory,ControlledProcessSingleThread,Ru
 
     @classmethod
     def get_command_line_arguments(cls) :
-        args = ['upload_dir','config','topic_name','upload_regex',
+        superargs,superkwargs = super().get_command_line_arguments()
+        args = [*superargs,'upload_dir','config','topic_name','upload_regex',
                 'chunk_size','queue_max_size','update_seconds','new_files_only']
-        kwargs = {'n_threads':RUN_OPT_CONST.N_DEFAULT_UPLOAD_THREADS}
+        kwargs = {**superkwargs,'n_threads':RUN_OPT_CONST.N_DEFAULT_UPLOAD_THREADS}
         return args, kwargs
 
     @classmethod

@@ -160,7 +160,11 @@ class MyArgumentParser(ArgumentParser) :
         """
         if len(args)<1 and len(kwargs)<1 :
             raise ValueError('ERROR: must specify at least one desired argument to create an argument parser!')
-        for argname in args :
+        args_to_use = list(set(args))
+        for argname in kwargs.keys() :
+            if argname in args_to_use :
+                args_to_use.remove(argname)
+        for argname in args_to_use :
             argname_to_add, kwargs_for_arg = self.__get_argname_and_kwargs(argname)
             self.add_argument(argname_to_add,**kwargs_for_arg)
         for argname,argdefault in kwargs.items() :
