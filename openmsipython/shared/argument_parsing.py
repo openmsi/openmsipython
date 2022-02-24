@@ -1,5 +1,5 @@
 #imports
-import pathlib, math, uuid
+import pathlib, math, uuid, re
 from argparse import ArgumentParser
 from ..data_file_io.config import RUN_OPT_CONST
 from .config import UTIL_CONST
@@ -85,6 +85,9 @@ class MyArgumentParser(ArgumentParser) :
         'n_threads':
             ['optional',{'default':UTIL_CONST.DEFAULT_N_THREADS,'type':positive_int,
                          'help':'Maximum number of threads to use'}],
+        'upload_regex':
+            ['optional',{'default':UTIL_CONST.DEFAULT_UPLOAD_REGEX,'type':re.compile,
+                         'help':'Only files matching this regular expression will be uploaded'}],
         'chunk_size':
             ['optional',{'default':RUN_OPT_CONST.DEFAULT_CHUNK_SIZE,'type':int_power_of_two,
                          'help':'''Max size (in bytes) of chunks into which files should be broken 
