@@ -1,1 +1,107 @@
-{"file_links": [], "name": "240um Kapton (double adhesive)", "notes": "", "process": {"id": "89ce6117-c728-437a-9fdb-d2f3eedc6dde", "scope": "auto", "type": "link_by_uid"}, "properties": [{"conditions": [], "property": {"file_links": [], "name": "SpacerThickness", "notes": null, "origin": "specified", "template": {"id": "3a008615-12f8-42d1-8555-3de2d9f61a83", "scope": "auto", "type": "link_by_uid"}, "type": "property", "value": {"nominal": 240.0, "type": "nominal_real", "units": "micrometer"}}, "type": "property_and_conditions"}, {"conditions": [], "property": {"file_links": [], "name": "SpacerMaterial", "notes": null, "origin": "specified", "template": {"id": "76c949b3-3371-4e19-b7ab-2b0320b33d0c", "scope": "auto", "type": "link_by_uid"}, "type": "property", "value": {"category": "Kapton", "type": "nominal_categorical"}}, "type": "property_and_conditions"}, {"conditions": [], "property": {"file_links": [], "name": "SpacerAdhesive", "notes": null, "origin": "specified", "template": {"id": "c477caae-13d4-4546-9339-9ca4db12f13a", "scope": "auto", "type": "link_by_uid"}, "type": "property", "value": {"category": "Double", "type": "nominal_categorical"}}, "type": "property_and_conditions"}, {"conditions": [], "property": {"file_links": [], "name": "AdhesiveType", "notes": null, "origin": "specified", "template": {"id": "d2911a6c-982c-4fe6-a58b-7c4b599e0b18", "scope": "auto", "type": "link_by_uid"}, "type": "property", "value": {"category": "Silicone", "type": "nominal_categorical"}}, "type": "property_and_conditions"}], "tags": ["SpacerID::S002", "recordId::2", "modId::2"], "template": {"id": "e2071953-dfe3-4fa8-86c8-2106cc3d1224", "scope": "auto", "type": "link_by_uid"}, "type": "material_spec", "uids": {"auto": "87f664cc-9fe8-4660-9091-1872211ef837"}}
+{
+  "file_links": [],
+  "name": "240um Kapton (double adhesive)",
+  "notes": "",
+  "process": {
+    "id": "02917bc5-03a2-46c7-8f49-1071fa4ba601",
+    "scope": "auto",
+    "type": "link_by_uid"
+  },
+  "properties": [
+    {
+      "conditions": [],
+      "property": {
+        "file_links": [],
+        "name": "SpacerThickness",
+        "notes": null,
+        "origin": "specified",
+        "template": {
+          "id": "625d4fa5-75f8-45ae-a234-dcc035d1a59e",
+          "scope": "auto",
+          "type": "link_by_uid"
+        },
+        "type": "property",
+        "value": {
+          "nominal": 240.0,
+          "type": "nominal_real",
+          "units": "micrometer"
+        }
+      },
+      "type": "property_and_conditions"
+    },
+    {
+      "conditions": [],
+      "property": {
+        "file_links": [],
+        "name": "SpacerMaterial",
+        "notes": null,
+        "origin": "specified",
+        "template": {
+          "id": "b23b2ffc-29d1-4b54-9480-7f921fa8771a",
+          "scope": "auto",
+          "type": "link_by_uid"
+        },
+        "type": "property",
+        "value": {
+          "category": "Kapton",
+          "type": "nominal_categorical"
+        }
+      },
+      "type": "property_and_conditions"
+    },
+    {
+      "conditions": [],
+      "property": {
+        "file_links": [],
+        "name": "SpacerAdhesive",
+        "notes": null,
+        "origin": "specified",
+        "template": {
+          "id": "0f5e0dad-7ec0-4591-8cad-75dc82d30b18",
+          "scope": "auto",
+          "type": "link_by_uid"
+        },
+        "type": "property",
+        "value": {
+          "category": "Double",
+          "type": "nominal_categorical"
+        }
+      },
+      "type": "property_and_conditions"
+    },
+    {
+      "conditions": [],
+      "property": {
+        "file_links": [],
+        "name": "AdhesiveType",
+        "notes": null,
+        "origin": "specified",
+        "template": {
+          "id": "0c7c5ac7-970d-4b01-9beb-b2a5f197845f",
+          "scope": "auto",
+          "type": "link_by_uid"
+        },
+        "type": "property",
+        "value": {
+          "category": "Silicone",
+          "type": "nominal_categorical"
+        }
+      },
+      "type": "property_and_conditions"
+    }
+  ],
+  "tags": [
+    "SpacerID::S002",
+    "recordId::2",
+    "modId::2"
+  ],
+  "template": {
+    "id": "07b643dd-ef3e-48bd-8d84-795035ce4546",
+    "scope": "auto",
+    "type": "link_by_uid"
+  },
+  "type": "material_spec",
+  "uids": {
+    "auto": "72e66336-8a1c-4706-9423-929002e6774f"
+  }
+}

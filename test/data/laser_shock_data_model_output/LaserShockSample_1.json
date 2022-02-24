@@ -1,1 +1,28 @@
-{"file_links": [], "name": "23-17 Mg-9Al 1Bc+3Bc ECAE Plate", "notes": "", "process": {"id": "0c16df4c-b9f9-4bf7-9269-f8112de9ed56", "scope": "auto", "type": "link_by_uid"}, "sample_type": "unknown", "spec": {"id": "d2c998f1-62bd-4052-97fb-a1d22507d949", "scope": "auto", "type": "link_by_uid"}, "tags": ["SampleID::23-17", "Date::11/22/2021", "PerformedBy::Lezcano", "GrantFunding::MEDE_Metals", "recordId::16", "modId::15"], "type": "material_run", "uids": {"auto": "7416249a-e3e6-4dd1-b2a9-62b2c7615241"}}
+{
+  "file_links": [],
+  "name": "23-17 Mg-9Al 1Bc+3Bc ECAE Plate",
+  "notes": "",
+  "process": {
+    "id": "97cd105a-25c2-4b1e-9bf5-ec0ed4100193",
+    "scope": "auto",
+    "type": "link_by_uid"
+  },
+  "sample_type": "unknown",
+  "spec": {
+    "id": "26deb70f-ee48-4376-9da2-65b9c6bfd26f",
+    "scope": "auto",
+    "type": "link_by_uid"
+  },
+  "tags": [
+    "SampleID::23-17",
+    "Date::11/22/2021",
+    "PerformedBy::Lezcano",
+    "GrantFunding::MEDE_Metals",
+    "recordId::16",
+    "modId::15"
+  ],
+  "type": "material_run",
+  "uids": {
+    "auto": "27d3bf63-b966-4dc9-852b-67288e9bf30c"
+  }
+}

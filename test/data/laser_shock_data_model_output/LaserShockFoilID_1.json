@@ -1,1 +1,129 @@
-{"file_links": [], "name": "50.4um (0.002\") Hard Al (AluFoil)", "notes": "", "process": {"id": "18f50372-c39e-4b09-9183-eca06d30f010", "scope": "auto", "type": "link_by_uid"}, "properties": [{"conditions": [], "property": {"file_links": [], "name": "FoilThickness", "notes": null, "origin": "specified", "template": {"id": "d8025681-86f8-43e8-82ac-44d55261a057", "scope": "auto", "type": "link_by_uid"}, "type": "property", "value": {"nominal": 0.002, "type": "nominal_real", "units": "micrometer"}}, "type": "property_and_conditions"}, {"conditions": [], "property": {"file_links": [], "name": "FoilLength", "notes": null, "origin": "specified", "template": {"id": "4b398837-0665-4209-90b2-e40128af3945", "scope": "auto", "type": "link_by_uid"}, "type": "property", "value": {"nominal": 4.0, "type": "nominal_real", "units": "inch"}}, "type": "property_and_conditions"}, {"conditions": [], "property": {"file_links": [], "name": "FoilWidth", "notes": null, "origin": "specified", "template": {"id": "56f1074f-cba6-4ce8-a5c7-af1b7bd724db", "scope": "auto", "type": "link_by_uid"}, "type": "property", "value": {"nominal": 4.0, "type": "nominal_real", "units": "inch"}}, "type": "property_and_conditions"}, {"conditions": [], "property": {"file_links": [], "name": "FoilHardness", "notes": null, "origin": "specified", "template": {"id": "a5d3dfcf-b70e-408d-ad02-2d16535de72f", "scope": "auto", "type": "link_by_uid"}, "type": "property", "value": {"category": "Hard", "type": "nominal_categorical"}}, "type": "property_and_conditions"}, {"conditions": [], "property": {"file_links": [], "name": "FoilMaterial", "notes": null, "origin": "specified", "template": {"id": "f90c1d3e-c518-449b-b355-ebbfd6822019", "scope": "auto", "type": "link_by_uid"}, "type": "property", "value": {"category": "Aluminum", "type": "nominal_categorical"}}, "type": "property_and_conditions"}], "tags": ["FoilID::M004", "recordId::11", "modId::4"], "template": {"id": "2f1b83b2-36b1-42a1-bc08-644588110f39", "scope": "auto", "type": "link_by_uid"}, "type": "material_spec", "uids": {"auto": "80f4ebb6-7312-4acf-a1ee-b04a6f1d3bc1"}}
+{
+  "file_links": [],
+  "name": "50.4um (0.002\") Hard Al (AluFoil)",
+  "notes": "",
+  "process": {
+    "id": "4b389a25-716c-4d65-9bd6-e1846aa9a222",
+    "scope": "auto",
+    "type": "link_by_uid"
+  },
+  "properties": [
+    {
+      "conditions": [],
+      "property": {
+        "file_links": [],
+        "name": "FoilThickness",
+        "notes": null,
+        "origin": "specified",
+        "template": {
+          "id": "2f4098c4-1a13-4d4a-a484-ead9158549f4",
+          "scope": "auto",
+          "type": "link_by_uid"
+        },
+        "type": "property",
+        "value": {
+          "nominal": 0.002,
+          "type": "nominal_real",
+          "units": "micrometer"
+        }
+      },
+      "type": "property_and_conditions"
+    },
+    {
+      "conditions": [],
+      "property": {
+        "file_links": [],
+        "name": "FoilLength",
+        "notes": null,
+        "origin": "specified",
+        "template": {
+          "id": "afeebc65-2aac-4001-aadf-4beeca09ac48",
+          "scope": "auto",
+          "type": "link_by_uid"
+        },
+        "type": "property",
+        "value": {
+          "nominal": 4.0,
+          "type": "nominal_real",
+          "units": "inch"
+        }
+      },
+      "type": "property_and_conditions"
+    },
+    {
+      "conditions": [],
+      "property": {
+        "file_links": [],
+        "name": "FoilWidth",
+        "notes": null,
+        "origin": "specified",
+        "template": {
+          "id": "0a8c7e81-36b7-4c6b-92c1-56465e160cb2",
+          "scope": "auto",
+          "type": "link_by_uid"
+        },
+        "type": "property",
+        "value": {
+          "nominal": 4.0,
+          "type": "nominal_real",
+          "units": "inch"
+        }
+      },
+      "type": "property_and_conditions"
+    },
+    {
+      "conditions": [],
+      "property": {
+        "file_links": [],
+        "name": "FoilHardness",
+        "notes": null,
+        "origin": "specified",
+        "template": {
+          "id": "5e4006cf-4e17-4a48-a14a-88d102fa13da",
+          "scope": "auto",
+          "type": "link_by_uid"
+        },
+        "type": "property",
+        "value": {
+          "category": "Hard",
+          "type": "nominal_categorical"
+        }
+      },
+      "type": "property_and_conditions"
+    },
+    {
+      "conditions": [],
+      "property": {
+        "file_links": [],
+        "name": "FoilMaterial",
+        "notes": null,
+        "origin": "specified",
+        "template": {
+          "id": "4fc2f59f-b57d-466b-943a-56f7720ffa3d",
+          "scope": "auto",
+          "type": "link_by_uid"
+        },
+        "type": "property",
+        "value": {
+          "category": "Aluminum",
+          "type": "nominal_categorical"
+        }
+      },
+      "type": "property_and_conditions"
+    }
+  ],
+  "tags": [
+    "FoilID::M004",
+    "recordId::11",
+    "modId::4"
+  ],
+  "template": {
+    "id": "2a67776c-8536-4065-afb8-e6d08ed775af",
+    "scope": "auto",
+    "type": "link_by_uid"
+  },
+  "type": "material_spec",
+  "uids": {
+    "auto": "8b6e4b7e-78d5-47e4-b371-4acfc26c8c6e"
+  }
+}

@@ -1,1 +1,115 @@
-{"conditions": [], "file_links": [{"filename": "10_56_18", "type": "file_link", "url": null}, {"filename": "F2--20211108--00000", "type": "file_link", "url": null}, {"filename": "BP--20211108--00000", "type": "file_link", "url": null}], "material": {"id": "86b4c852-f93d-4e7d-b5ab-36b73e38e5dc", "scope": "auto", "type": "link_by_uid"}, "name": "Flyer planarity analysis", "notes": "video is zoomed out because no doubler was used", "parameters": [], "properties": [{"file_links": [], "name": "FlyerTilt", "notes": null, "origin": "measured", "template": {"id": "3c966a06-7bf8-437b-af99-4d1b765c577c", "scope": "auto", "type": "link_by_uid"}, "type": "property", "value": {"category": "None", "type": "nominal_categorical"}}, {"file_links": [], "name": "FlyerCurvature", "notes": null, "origin": "measured", "template": {"id": "386aa11c-eae3-4551-8f90-9f94141e19d2", "scope": "auto", "type": "link_by_uid"}, "type": "property", "value": {"category": "None", "type": "nominal_categorical"}}, {"file_links": [], "name": "MaxVelocity", "notes": null, "origin": "measured", "template": {"id": "36fe571a-f213-4313-84aa-fb9a8d8b9645", "scope": "auto", "type": "link_by_uid"}, "type": "property", "value": {"nominal": 743.0, "type": "nominal_real", "units": "meter / second"}}, {"file_links": [], "name": "VideoQuality", "notes": null, "origin": "measured", "template": {"id": "f620542a-dbcf-46db-9192-5da0ccd63e56", "scope": "auto", "type": "link_by_uid"}, "type": "property", "value": {"category": "OK", "type": "nominal_categorical"}}], "source": {"performed_by": "Lezcano", "performed_date": "11/08/2021", "type": "performed_source"}, "spec": {"id": "9ef37306-e949-47ef-98a3-07e03a4f9c25", "scope": "auto", "type": "link_by_uid"}, "tags": ["NewEnergyMeasurement::Yes", "GrantFunding::MEDE_Metals", "recordId::407", "modId::22"], "type": "measurement_run", "uids": {"auto": "4e69ac7a-f246-4f62-a8f5-82f17933152d"}}
+{
+  "conditions": [],
+  "file_links": [
+    {
+      "filename": "10_56_18",
+      "type": "file_link",
+      "url": null
+    },
+    {
+      "filename": "F2--20211108--00000",
+      "type": "file_link",
+      "url": null
+    },
+    {
+      "filename": "BP--20211108--00000",
+      "type": "file_link",
+      "url": null
+    }
+  ],
+  "material": {
+    "id": "0a4b7f30-21ea-4a70-bcc7-c6a74a609047",
+    "scope": "auto",
+    "type": "link_by_uid"
+  },
+  "name": "Flyer planarity analysis",
+  "notes": "video is zoomed out because no doubler was used",
+  "parameters": [],
+  "properties": [
+    {
+      "file_links": [],
+      "name": "FlyerTilt",
+      "notes": null,
+      "origin": "measured",
+      "template": {
+        "id": "a920db09-f701-459b-b5e4-d39bdab29d6e",
+        "scope": "auto",
+        "type": "link_by_uid"
+      },
+      "type": "property",
+      "value": {
+        "category": "None",
+        "type": "nominal_categorical"
+      }
+    },
+    {
+      "file_links": [],
+      "name": "FlyerCurvature",
+      "notes": null,
+      "origin": "measured",
+      "template": {
+        "id": "da26badd-0fb9-4028-8751-6b228ca4b968",
+        "scope": "auto",
+        "type": "link_by_uid"
+      },
+      "type": "property",
+      "value": {
+        "category": "None",
+        "type": "nominal_categorical"
+      }
+    },
+    {
+      "file_links": [],
+      "name": "MaxVelocity",
+      "notes": null,
+      "origin": "measured",
+      "template": {
+        "id": "89752c56-4f89-4674-b372-28fa976adf5f",
+        "scope": "auto",
+        "type": "link_by_uid"
+      },
+      "type": "property",
+      "value": {
+        "nominal": 743.0,
+        "type": "nominal_real",
+        "units": "meter / second"
+      }
+    },
+    {
+      "file_links": [],
+      "name": "VideoQuality",
+      "notes": null,
+      "origin": "measured",
+      "template": {
+        "id": "573ab553-81c2-4046-b3cd-bd8c01d884c4",
+        "scope": "auto",
+        "type": "link_by_uid"
+      },
+      "type": "property",
+      "value": {
+        "category": "OK",
+        "type": "nominal_categorical"
+      }
+    }
+  ],
+  "source": {
+    "performed_by": "Lezcano",
+    "performed_date": "11/08/2021",
+    "type": "performed_source"
+  },
+  "spec": {
+    "id": "bb1840d6-4bb5-4bbb-b543-def230d1e435",
+    "scope": "auto",
+    "type": "link_by_uid"
+  },
+  "tags": [
+    "NewEnergyMeasurement::Yes",
+    "GrantFunding::MEDE_Metals",
+    "recordId::407",
+    "modId::22"
+  ],
+  "type": "measurement_run",
+  "uids": {
+    "auto": "ae22189d-4634-48db-b6c5-904fbdfc42a7"
+  }
+}

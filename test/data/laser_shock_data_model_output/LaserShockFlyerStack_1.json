@@ -1,1 +1,25 @@
-{"file_links": [], "name": "Flyer Stack", "notes": "", "process": {"id": "d96413a6-83ed-4cbd-a606-3c27e305620b", "scope": "auto", "type": "link_by_uid"}, "sample_type": "unknown", "spec": {"id": "aa46ef77-796b-4a8a-8dea-6a179e149972", "scope": "auto", "type": "link_by_uid"}, "tags": ["FlyerID::F054", "recordId::74", "modId::16"], "type": "material_run", "uids": {"auto": "3f09e2d7-d928-403a-8e41-d553f0882344"}}
+{
+  "file_links": [],
+  "name": "Flyer Stack",
+  "notes": "",
+  "process": {
+    "id": "5139a899-a9f6-4dbf-bbbd-e78554c86f3f",
+    "scope": "auto",
+    "type": "link_by_uid"
+  },
+  "sample_type": "unknown",
+  "spec": {
+    "id": "8488607b-6865-402e-a1c2-5f6f837ecd44",
+    "scope": "auto",
+    "type": "link_by_uid"
+  },
+  "tags": [
+    "FlyerID::F054",
+    "recordId::74",
+    "modId::16"
+  ],
+  "type": "material_run",
+  "uids": {
+    "auto": "cb059e12-a890-4554-8aca-c331693e95b3"
+  }
+}

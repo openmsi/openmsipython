@@ -1,1 +1,89 @@
-{"file_links": [], "name": "Borosilicate, T=0.25\"", "notes": "", "process": {"id": "66d773d1-a3e6-4a5c-979b-4a7ab878e798", "scope": "auto", "type": "link_by_uid"}, "properties": [{"conditions": [], "property": {"file_links": [], "name": "GlassThickness", "notes": null, "origin": "specified", "template": {"id": "9f5f783a-a3b8-4770-955e-6a0572561277", "scope": "auto", "type": "link_by_uid"}, "type": "property", "value": {"nominal": 0.25, "type": "nominal_real", "units": "inch"}}, "type": "property_and_conditions"}, {"conditions": [], "property": {"file_links": [], "name": "GlassLength", "notes": null, "origin": "specified", "template": {"id": "e264fceb-236e-4335-b067-77244004d293", "scope": "auto", "type": "link_by_uid"}, "type": "property", "value": {"nominal": 2.0, "type": "nominal_real", "units": "inch"}}, "type": "property_and_conditions"}, {"conditions": [], "property": {"file_links": [], "name": "GlassWidth", "notes": null, "origin": "specified", "template": {"id": "ae6dc777-1423-4207-bef6-85a8ade154f5", "scope": "auto", "type": "link_by_uid"}, "type": "property", "value": {"nominal": 2.0, "type": "nominal_real", "units": "inch"}}, "type": "property_and_conditions"}], "tags": ["GlassID::G001", "recordId::2", "modId::13"], "template": {"id": "dd1df10b-752a-4ccf-9b8a-b271d329fdc5", "scope": "auto", "type": "link_by_uid"}, "type": "material_spec", "uids": {"auto": "97b28579-24d9-4028-b00c-d113a646f457"}}
+{
+  "file_links": [],
+  "name": "Borosilicate, T=0.25\"",
+  "notes": "",
+  "process": {
+    "id": "48292ddb-5500-449a-9e4d-7d0d8be0ab7e",
+    "scope": "auto",
+    "type": "link_by_uid"
+  },
+  "properties": [
+    {
+      "conditions": [],
+      "property": {
+        "file_links": [],
+        "name": "GlassThickness",
+        "notes": null,
+        "origin": "specified",
+        "template": {
+          "id": "c3614bbb-b8ce-4c2f-8475-93f58372184d",
+          "scope": "auto",
+          "type": "link_by_uid"
+        },
+        "type": "property",
+        "value": {
+          "nominal": 0.25,
+          "type": "nominal_real",
+          "units": "inch"
+        }
+      },
+      "type": "property_and_conditions"
+    },
+    {
+      "conditions": [],
+      "property": {
+        "file_links": [],
+        "name": "GlassLength",
+        "notes": null,
+        "origin": "specified",
+        "template": {
+          "id": "0cbfa52a-e380-47c4-be7f-8a955778d2c5",
+          "scope": "auto",
+          "type": "link_by_uid"
+        },
+        "type": "property",
+        "value": {
+          "nominal": 2.0,
+          "type": "nominal_real",
+          "units": "inch"
+        }
+      },
+      "type": "property_and_conditions"
+    },
+    {
+      "conditions": [],
+      "property": {
+        "file_links": [],
+        "name": "GlassWidth",
+        "notes": null,
+        "origin": "specified",
+        "template": {
+          "id": "d6725d43-8ca2-4d6c-adba-e913bd11bdd7",
+          "scope": "auto",
+          "type": "link_by_uid"
+        },
+        "type": "property",
+        "value": {
+          "nominal": 2.0,
+          "type": "nominal_real",
+          "units": "inch"
+        }
+      },
+      "type": "property_and_conditions"
+    }
+  ],
+  "tags": [
+    "GlassID::G001",
+    "recordId::2",
+    "modId::13"
+  ],
+  "template": {
+    "id": "b160f34f-33dc-4aff-aeb1-8bb4cfa39b6f",
+    "scope": "auto",
+    "type": "link_by_uid"
+  },
+  "type": "material_spec",
+  "uids": {
+    "auto": "ebd5b45c-a825-4a86-9d2a-6a8022a07e0c"
+  }
+}

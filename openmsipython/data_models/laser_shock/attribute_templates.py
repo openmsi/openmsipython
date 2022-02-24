@@ -468,7 +468,7 @@ name = 'Diamond Grit'
 ATTR_TEMPL[name] = ParameterTemplate(
     name=name,
     description='Grit of the diamond pad used to polish an impact sample',
-    bounds=CategoricalBounds(['0.10','0.25','0.50','1.0','3.0','9.0','15','30','35','45','60']),
+    bounds=CategoricalBounds(['0.10','0.25','0.50','1.0','3.0','6.0','9.0','15','30','35','45','60']),
 )
 
 name = 'Silicon Carbide Grit'
