@@ -80,8 +80,10 @@ class PDVPlotMaker(DataFileStreamProcessor,Runnable) :
 
     @classmethod
     def get_command_line_arguments(cls) :
-        args = ['output_dir','pdv_plot_type','update_seconds']
-        kwargs = {'config':RUN_OPT_CONST.PRODUCTION_CONFIG_FILE,
+        superargs,superkwargs = super().get_command_line_arguments()
+        args = [*superargs,'output_dir','pdv_plot_type','update_seconds']
+        kwargs = {**superkwargs,
+                  'config':RUN_OPT_CONST.PRODUCTION_CONFIG_FILE,
                   'topic_name':LECROY_CONST.TOPIC_NAME,
                   'n_threads':RUN_OPT_CONST.N_DEFAULT_DOWNLOAD_THREADS,
                   'consumer_group_ID':'pdv_plot_maker_v1'}

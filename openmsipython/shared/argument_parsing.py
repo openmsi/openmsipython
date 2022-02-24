@@ -1,5 +1,5 @@
 #imports
-import pathlib, math, uuid
+import pathlib, math, uuid, re
 from argparse import ArgumentParser
 from ..data_file_io.config import RUN_OPT_CONST
 from .config import UTIL_CONST
@@ -89,6 +89,9 @@ class MyArgumentParser(ArgumentParser) :
         'n_threads':
             ['optional',{'default':UTIL_CONST.DEFAULT_N_THREADS,'type':positive_int,
                          'help':'Maximum number of threads to use'}],
+        'upload_regex':
+            ['optional',{'default':UTIL_CONST.DEFAULT_UPLOAD_REGEX,'type':re.compile,
+                         'help':'Only files matching this regular expression will be uploaded'}],
         'chunk_size':
             ['optional',{'default':RUN_OPT_CONST.DEFAULT_CHUNK_SIZE,'type':int_power_of_two,
                          'help':'''Max size (in bytes) of chunks into which files should be broken 
@@ -133,6 +136,7 @@ class MyArgumentParser(ArgumentParser) :
 
     def __init__(self,*args,**kwargs) :
         super().__init__(*args,**kwargs)
+        self.__argnames_added = []
         self.__subparsers_action_obj = None
         self.__subparsers = {}
 
@@ -146,13 +150,13 @@ class MyArgumentParser(ArgumentParser) :
 
     def parse_args(self,**kwargs) :
         """
-        Overloaded from base class to catch errors in parsing arguments
+        Overloaded from base class to print usage when catching errors in parsing arguments
         """
         try :
             return super().parse_args(**kwargs)
-        except TypeError :
+        except Exception :
             self.print_usage()
-            return None
+            raise
 
     #################### UNIQUE FUNCTIONS ####################
 
@@ -164,12 +168,23 @@ class MyArgumentParser(ArgumentParser) :
         """
         if len(args)<1 and len(kwargs)<1 :
             raise ValueError('ERROR: must specify at least one desired argument to create an argument parser!')
+        args_to_use = []
         for argname in args :
+            if argname not in args_to_use :
+                args_to_use.append(argname)
+        for argname in kwargs.keys() :
+            if argname in args_to_use :
+                args_to_use.remove(argname)
+        for argname in args_to_use :
             argname_to_add, kwargs_for_arg = self.__get_argname_and_kwargs(argname)
-            self.add_argument(argname_to_add,**kwargs_for_arg)
+            if argname_to_add not in self.__argnames_added :
+                self.add_argument(argname_to_add,**kwargs_for_arg)
+                self.__argnames_added.append(argname_to_add)
         for argname,argdefault in kwargs.items() :
             argname_to_add, kwargs_for_arg = self.__get_argname_and_kwargs(argname,argdefault)
-            self.add_argument(argname_to_add,**kwargs_for_arg)
+            if argname_to_add not in self.__argnames_added :
+                self.add_argument(argname_to_add,**kwargs_for_arg)
+                self.__argnames_added.append(argname_to_add)
 
     def add_subparser(self,cmd,**kwargs) :
         """
@@ -202,10 +217,14 @@ class MyArgumentParser(ArgumentParser) :
         argnames, argnames_with_defaults = class_to_add.get_command_line_arguments()
         for argname in argnames :
             argname_to_add, kwargs_for_arg = self.__get_argname_and_kwargs(argname)
-            self.__subparsers[class_name].add_argument(argname_to_add,**kwargs_for_arg)
+            if argname_to_add not in self.__argnames_added :
+                self.__subparsers[class_name].add_argument(argname_to_add,**kwargs_for_arg)
+                self.__argnames_added.append(argname_to_add)
         for argname,argdefault in argnames_with_defaults.items() :
             argname,kwargs = self.__get_argname_and_kwargs(argname,argdefault)
-            self.__subparsers[class_name].add_argument(argname,**kwargs)
+            if argname_to_add not in self.__argnames_added :
+                self.__subparsers[class_name].add_argument(argname,**kwargs)
+                self.__argnames_added.append(argname_to_add)
 
     def __get_argname_and_kwargs(self,argname,new_default=None) :
         """

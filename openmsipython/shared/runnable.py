@@ -14,7 +14,7 @@ class Runnable(ABC) :
         child classes should implement this function to return a list of argument names 
         and a dictionary of argument names/default values to add to the argument parser
         """
-        pass
+        return [],{}
 
     @classmethod
     def get_argument_parser(cls,*args,**kwargs) :

@@ -76,8 +76,9 @@ class DataFileDownloadDirectory(DataFileChunkProcessor,DataFileDirectory,Runnabl
 
     @classmethod
     def get_command_line_arguments(cls) :
-        args = ['output_dir','config','topic_name','update_seconds','consumer_group_ID']
-        kwargs = {'n_threads':RUN_OPT_CONST.N_DEFAULT_DOWNLOAD_THREADS}
+        superargs,superkwargs = super().get_command_line_arguments()
+        args = [*superargs,'output_dir','config','topic_name','update_seconds','consumer_group_ID']
+        kwargs = {**superkwargs,'n_threads':RUN_OPT_CONST.N_DEFAULT_DOWNLOAD_THREADS}
         return args,kwargs
 
     @classmethod
