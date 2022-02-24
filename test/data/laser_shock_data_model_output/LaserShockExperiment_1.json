@@ -2,7 +2,7 @@
   "conditions": [],
   "file_links": [
     {
-      "filename": "BP--20211108--00000",
+      "filename": "10_56_18",
       "type": "file_link",
       "url": null
     },
@@ -12,13 +12,13 @@
       "url": null
     },
     {
-      "filename": "10_56_18",
+      "filename": "BP--20211108--00000",
       "type": "file_link",
       "url": null
     }
   ],
   "material": {
-    "id": "41bc64e5-bc62-4651-b466-bf2b7788a703",
+    "id": "0a4b7f30-21ea-4a70-bcc7-c6a74a609047",
     "scope": "auto",
     "type": "link_by_uid"
   },
@@ -28,11 +28,43 @@
   "properties": [
     {
       "file_links": [],
+      "name": "FlyerTilt",
+      "notes": null,
+      "origin": "measured",
+      "template": {
+        "id": "a920db09-f701-459b-b5e4-d39bdab29d6e",
+        "scope": "auto",
+        "type": "link_by_uid"
+      },
+      "type": "property",
+      "value": {
+        "category": "None",
+        "type": "nominal_categorical"
+      }
+    },
+    {
+      "file_links": [],
+      "name": "FlyerCurvature",
+      "notes": null,
+      "origin": "measured",
+      "template": {
+        "id": "da26badd-0fb9-4028-8751-6b228ca4b968",
+        "scope": "auto",
+        "type": "link_by_uid"
+      },
+      "type": "property",
+      "value": {
+        "category": "None",
+        "type": "nominal_categorical"
+      }
+    },
+    {
+      "file_links": [],
       "name": "MaxVelocity",
       "notes": null,
       "origin": "measured",
       "template": {
-        "id": "eb87a1c0-c249-4b10-ac84-cf5d5f12bbfd",
+        "id": "89752c56-4f89-4674-b372-28fa976adf5f",
         "scope": "auto",
         "type": "link_by_uid"
       },
@@ -49,45 +81,13 @@
       "notes": null,
       "origin": "measured",
       "template": {
-        "id": "b38c7508-977f-4f5f-acff-3852e9516ded",
+        "id": "573ab553-81c2-4046-b3cd-bd8c01d884c4",
         "scope": "auto",
         "type": "link_by_uid"
       },
       "type": "property",
       "value": {
         "category": "OK",
-        "type": "nominal_categorical"
-      }
-    },
-    {
-      "file_links": [],
-      "name": "FlyerTilt",
-      "notes": null,
-      "origin": "measured",
-      "template": {
-        "id": "5a842d90-c334-45fe-95b0-41930eb984a1",
-        "scope": "auto",
-        "type": "link_by_uid"
-      },
-      "type": "property",
-      "value": {
-        "category": "None",
-        "type": "nominal_categorical"
-      }
-    },
-    {
-      "file_links": [],
-      "name": "FlyerCurvature",
-      "notes": null,
-      "origin": "measured",
-      "template": {
-        "id": "daa05b50-eb4b-4a52-8b5e-d9114343aadd",
-        "scope": "auto",
-        "type": "link_by_uid"
-      },
-      "type": "property",
-      "value": {
-        "category": "None",
         "type": "nominal_categorical"
       }
     }
@@ -98,18 +98,18 @@
     "type": "performed_source"
   },
   "spec": {
-    "id": "48c20c2d-e15d-4340-8465-480a04ec1714",
+    "id": "bb1840d6-4bb5-4bbb-b543-def230d1e435",
     "scope": "auto",
     "type": "link_by_uid"
   },
   "tags": [
-    "GrantFunding::MEDE_Metals",
     "NewEnergyMeasurement::Yes",
+    "GrantFunding::MEDE_Metals",
     "recordId::407",
     "modId::22"
   ],
   "type": "measurement_run",
   "uids": {
-    "auto": "5c5d1a3e-9c44-4863-9d51-a7aa07da97a5"
+    "auto": "ae22189d-4634-48db-b6c5-904fbdfc42a7"
   }
 }
