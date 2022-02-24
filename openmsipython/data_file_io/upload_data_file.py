@@ -223,8 +223,9 @@ class UploadDataFile(DataFile,Runnable) :
 
     @classmethod
     def get_command_line_arguments(cls) :
-        args = ['filepath','config','topic_name','chunk_size']
-        kwargs = {'n_threads':RUN_OPT_CONST.N_DEFAULT_UPLOAD_THREADS}
+        superargs,superkwargs = super().get_command_line_arguments()
+        args = [*superargs,'filepath','config','topic_name','chunk_size']
+        kwargs = {**superkwargs,'n_threads':RUN_OPT_CONST.N_DEFAULT_UPLOAD_THREADS}
         return args,kwargs
 
     @classmethod

@@ -2,6 +2,7 @@
 import pathlib, datetime, time
 from threading import Thread
 from queue import Queue
+from ..shared.config import UTIL_CONST
 from ..shared.runnable import Runnable
 from ..shared.controlled_process import ControlledProcessSingleThread
 from ..my_kafka.my_producer import MyProducer
@@ -43,12 +44,18 @@ class DataFileUploadDirectory(DataFileDirectory,ControlledProcessSingleThread,Ru
 
     #################### PUBLIC FUNCTIONS ####################
 
-    def __init__(self,dirpath,datafile_type=UploadDataFile,**kwargs) :
-        super().__init__(dirpath,**kwargs)
+    def __init__(self,*args,upload_regex=UTIL_CONST.DEFAULT_UPLOAD_REGEX,datafile_type=UploadDataFile,**kwargs) :
+        """
+        upload_regex = only files matching this regular expression will be uploaded
+        datafile_type = the type of data file that recognized files should be uploaded as 
+            (must be a subclass of UploadDataFile)
+        """
+        super().__init__(*args,**kwargs)
         if not issubclass(datafile_type,UploadDataFile) :
             errmsg = 'ERROR: DataFileUploadDirectory requires a datafile_type that is a subclass of '
             errmsg+= f'UploadDataFile but {datafile_type} was given!'
             self.logger.error(errmsg,ValueError)
+        self.__upload_regex = upload_regex
         self.__datafile_type = datafile_type
         
 
@@ -102,11 +109,9 @@ class DataFileUploadDirectory(DataFileDirectory,ControlledProcessSingleThread,Ru
             self.logger.error(f'ERROR: {filepath} passed to filepath_should_be_uploaded is not a Path!',TypeError)
         if not filepath.is_file() :
             return False
-        if filepath.name.startswith('.') :
-            return False
-        if filepath.name.endswith('.log') :
-            return False
-        return True
+        if self.__upload_regex.match(filepath.name) :
+            return True
+        return False
 
     #################### PRIVATE HELPER FUNCTIONS ####################
 
@@ -185,8 +190,10 @@ class DataFileUploadDirectory(DataFileDirectory,ControlledProcessSingleThread,Ru
 
     @classmethod
     def get_command_line_arguments(cls) :
-        args = ['upload_dir','config','topic_name','chunk_size','queue_max_size','update_seconds','new_files_only']
-        kwargs = {'n_threads':RUN_OPT_CONST.N_DEFAULT_UPLOAD_THREADS}
+        superargs,superkwargs = super().get_command_line_arguments()
+        args = [*superargs,'upload_dir','config','topic_name','upload_regex',
+                'chunk_size','queue_max_size','update_seconds','new_files_only']
+        kwargs = {**superkwargs,'n_threads':RUN_OPT_CONST.N_DEFAULT_UPLOAD_THREADS}
         return args, kwargs
 
     @classmethod
@@ -197,7 +204,7 @@ class DataFileUploadDirectory(DataFileDirectory,ControlledProcessSingleThread,Ru
         parser = cls.get_argument_parser()
         args = parser.parse_args(args=args)
         #make the DataFileDirectory for the specified directory
-        upload_file_directory = cls(args.upload_dir,update_secs=args.update_seconds)
+        upload_file_directory = cls(args.upload_dir,args.upload_regex,update_secs=args.update_seconds)
         #listen for new files in the directory and run uploads as they come in until the process is shut down
         run_start = datetime.datetime.now()
         if args.new_files_only :

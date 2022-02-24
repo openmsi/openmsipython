@@ -37,10 +37,12 @@ class LecroyFileUploadDirectory(DataFileUploadDirectory) :
 
     @classmethod
     def get_command_line_arguments(cls) :
-        args = ['upload_dir','chunk_size','queue_max_size','update_seconds']
-        kwargs = {'config':RUN_OPT_CONST.PRODUCTION_CONFIG_FILE,
-                  'topic_name':LECROY_CONST.TOPIC_NAME,
-                  'n_threads':1}
+        superargs,superkwargs = super().get_command_line_arguments()
+        args = [*superargs]
+        kwargs = superkwargs
+        kwargs['config']=RUN_OPT_CONST.PRODUCTION_CONFIG_FILE
+        kwargs['topic_name']=LECROY_CONST.TOPIC_NAME
+        kwargs['n_threads']=1
         return args, kwargs
 
     @classmethod
@@ -59,7 +61,7 @@ class LecroyFileUploadDirectory(DataFileUploadDirectory) :
                                                                          n_threads=args.n_threads,
                                                                          chunk_size=args.chunk_size,
                                                                          max_queue_size=args.queue_max_size,
-                                                                         new_files_only=True)
+                                                                         new_files_only=args.new_files_only)
         run_stop = datetime.datetime.now()
         upload_file_directory.logger.info(f'Done listening to {args.upload_dir} for Lecroy files to skim and upload')
         final_msg = f'The following {len(uploaded_filepaths)} file'

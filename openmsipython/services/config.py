@@ -14,6 +14,7 @@ class ServicesConstants :
         for script in pkg_resources.iter_entry_points('console_scripts') :
             if script.dist.key == 'openmsipython' :
                 if script.name in ('InstallService','ManageService','ProvisionNode') :
+                    
                     continue
                 scriptstr = str(script)
                 cmd = (scriptstr.split())[0]
