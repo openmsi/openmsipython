@@ -2,6 +2,19 @@
 from typing import Callable, Union, Type, Tuple
 from gemd.entity.value import NominalCategorical, NominalReal, NominalInteger
 
+def get_tag_value_from_list(tag_list,tag_name) :
+    tag_value = None
+    for t in tag_list :
+        tsplit = t.split('::')
+        if len(tsplit)!=2 :
+            continue
+        if tsplit[0]==tag_name :
+            tag_value=tsplit[1]
+            break
+    if tag_value is None :
+        raise ValueError(f'ERROR: failed to find a tag with name {tag_name}!')
+    return tag_value
+
 def search_for_name(obj_list,name) :
     """
     Filter a given list of objects for any that have a name matching the given name

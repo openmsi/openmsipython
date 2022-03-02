@@ -3,6 +3,7 @@ import functools
 from abc import ABC, abstractmethod
 from gemd.entity.file_link import FileLink
 from ..shared.logging import LogOwner
+from .utilities import get_tag_value_from_list
 
 class FromFileMakerRecordBase(LogOwner,ABC) :
     """
@@ -198,14 +199,7 @@ class FromFileMakerRecordBase(LogOwner,ABC) :
         """
         Search through the tags for this Run and return the value of the tag with the specified name
         """
-        tag_value = None
-        for t in self.gemd_object.tags :
-            tsplit = t.split('::')
-            if len(tsplit)!=2 :
-                continue
-            if tsplit[0]==tag_name :
-                tag_value=tsplit[1]
-                break
-        if tag_value is None :
-            self.logger.error(f'ERROR: failed to find a tag with name {tag_name}!',ValueError)
-        return tag_value
+        try :
+            return get_tag_value_from_list(self.gemd_object.tags,tag_name)
+        except Exception as e :
+            self.logger.error(f'ERROR: failed to get a value for tag {tag_name}! Will reraise Exception.',exc_obj=e)

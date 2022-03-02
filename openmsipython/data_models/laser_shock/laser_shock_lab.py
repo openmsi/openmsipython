@@ -5,8 +5,8 @@ from gemd.entity.util import complete_material_history
 from gemd.json import GEMDJson
 from gemd.entity.object import MaterialSpec, ProcessSpec, IngredientSpec, MeasurementSpec
 from gemd.entity.object import MaterialRun, ProcessRun, IngredientRun, MeasurementRun
-from ...shared.logging import LogOwner
-from ..utilities import cached_isinstance_generator
+from ...data_file_io.data_file_directory import DataFileDirectory
+from ..utilities import get_tag_value_from_list, cached_isinstance_generator
 from ..run_from_filemaker_record import MaterialRunFromFileMakerRecord, RunFromFileMakerRecord
 from ..spec_from_filemaker_record import SpecFromFileMakerRecord
 from .config import LASER_SHOCK_CONST
@@ -33,7 +33,7 @@ isinstance_material_ingredient_spec = cached_isinstance_generator((MaterialSpec,
 isinstance_ingredient_spec = cached_isinstance_generator(IngredientSpec)
 isinstance_run = cached_isinstance_generator((MaterialRun,ProcessRun,IngredientRun,MeasurementRun))
 
-class LaserShockLab(LogOwner) :
+class LaserShockLab(DataFileDirectory) :
     """
     Representation of all the information in the Laser Shock Lab's FileMaker database in GEMD language
     """
@@ -92,18 +92,17 @@ class LaserShockLab(LogOwner) :
 
     #################### PUBLIC METHODS ####################
 
-    def __init__(self,*args,working_dir=pathlib.Path('./gemd_data_model_dumps'),**kwargs) :
+    def __init__(self,dirpath=pathlib.Path('./gemd_data_model_dumps'),*args,**kwargs) :
         """
-        working_dir = path to the directory that should hold the log file and any other output (like the JSON dumps)
+        dirpath = path to the directory that should hold the log file and any other output (like the JSON dumps)
         """
         #define the output location
-        self.ofd = working_dir
-        if not self.ofd.is_dir() :
-            self.ofd.mkdir(parents=True)
+        if not dirpath.is_dir() :
+            dirpath.mkdir(parents=True)
         #start up the logger
         if kwargs.get('logger_file') is None :
-            kwargs['logger_file'] = self.ofd
-        super().__init__(*args,**kwargs)
+            kwargs['logger_file'] = dirpath
+        super().__init__(dirpath,*args,**kwargs)
         #initialize empty username/password
         self.__username = None; self.__password = None
         #JSON encoder
@@ -129,45 +128,45 @@ class LaserShockLab(LogOwner) :
         #"Inventory" pages (create Specs)
         self.logger.debug('Creating Inventory objects...')
         self.glass_IDs = self.get_objects_from_records(LaserShockGlassID,'Glass ID',**extra_kwargs)
-        self.logger.debug(f'Created {len(self.glass_IDs)} Glass ID objects...')
+        self.logger.debug(f'Created {len(self.glass_IDs)} new Glass ID objects')
         self.foil_IDs = self.get_objects_from_records(LaserShockFoilID,'Foil ID',**extra_kwargs)
-        self.logger.debug(f'Created {len(self.foil_IDs)} Foil ID objects...')
+        self.logger.debug(f'Created {len(self.foil_IDs)} new Foil ID objects')
         self.epoxy_IDs = self.get_objects_from_records(LaserShockEpoxyID,'Epoxy ID',**extra_kwargs)
-        self.logger.debug(f'Created {len(self.epoxy_IDs)} Epoxy ID objects...')
+        self.logger.debug(f'Created {len(self.epoxy_IDs)} new Epoxy ID objects')
         self.spacer_IDs = self.get_objects_from_records(LaserShockSpacerID,'Spacer ID',**extra_kwargs)
-        self.logger.debug(f'Created {len(self.spacer_IDs)} Spacer ID objects...')
+        self.logger.debug(f'Created {len(self.spacer_IDs)} new Spacer ID objects')
         self.flyer_cutting_programs = self.get_objects_from_records(LaserShockFlyerCuttingProgram,
                                                                     'Flyer Cutting Program',**extra_kwargs)
-        self.logger.debug(f'Created {len(self.flyer_cutting_programs)} Flyer Cutting Program objects...')
+        self.logger.debug(f'Created {len(self.flyer_cutting_programs)} new Flyer Cutting Program objects')
         self.spacer_cutting_programs = self.get_objects_from_records(LaserShockSpacerCuttingProgram,
                                                                      'Spacer Cutting Program',**extra_kwargs)
-        self.logger.debug(f'Created {len(self.spacer_cutting_programs)} Spacer Cutting Program objects...')
+        self.logger.debug(f'Created {len(self.spacer_cutting_programs)} new Spacer Cutting Program objects')
         #Flyer Stacks (Materials)
         self.logger.debug('Creating Flyer Stacks...')
         self.flyer_stacks = self.get_objects_from_records(LaserShockFlyerStack,'Flyer Stack',self.glass_IDs,
                                                           self.foil_IDs,self.epoxy_IDs,self.flyer_cutting_programs,
                                                           **extra_kwargs)
-        self.logger.debug(f'Created {len(self.flyer_stacks)} Flyer Stack objects...')
+        self.logger.debug(f'Created {len(self.flyer_stacks)} new Flyer Stack objects')
         #Samples (Materials)
         self.logger.debug('Creating Samples...')
         self.samples = self.get_objects_from_records(LaserShockSample,'Sample',**extra_kwargs)
-        self.logger.debug(f'Created {len(self.samples)} Sample objects...')
+        self.logger.debug(f'Created {len(self.samples)} new Sample objects')
         #Launch packages (Materials)
         self.logger.debug('Creating Launch Packages...')
         self.launch_packages = self.get_objects_from_records(LaserShockLaunchPackage,'Launch Package',self.flyer_stacks,
                                                              self.spacer_IDs,self.spacer_cutting_programs,self.samples,
                                                              **extra_kwargs)
-        self.logger.debug(f'Created {len(self.launch_packages)} Launch Package objects...')
+        self.logger.debug(f'Created {len(self.launch_packages)} new Launch Package objects')
         #Experiments (Measurements)
         self.logger.debug('Creating Experiments...')
         self.experiments = self.get_objects_from_records(LaserShockExperiment,'Experiment',self.launch_packages,
                                                          **extra_kwargs)
-        self.logger.debug(f'Created {len(self.experiments)} Experiment objects...')
+        self.logger.debug(f'Created {len(self.experiments)} new Experiment objects')
         #Make sure that there is only one of each unique spec and run (dynamically-created specs may be duplicated)
         self.__replace_duplicated_specs()
         self.logger.info('Done creating GEMD objects')
     
-    def get_objects_from_records(self,obj_type,layout_name,*args,n_max_records=100000,records_dict=None,**kwargs) :
+    def get_objects_from_records(self,obj_type,layout_name,*args,n_max_records=100,records_dict=None,**kwargs) :
         """
         Return a list of LaserShock/GEMD constructs based on FileMaker records 
         or records in a dictionary (useful for testing)
@@ -184,11 +183,36 @@ class LaserShockLab(LogOwner) :
         objs = []
         if records_dict is not None :
             #get records from the dictionary
-            records = records_dict[layout_name]
+            all_records = records_dict[layout_name]
         else :
             #get records from the FileMaker server
-            records = self.__get_filemaker_records(layout_name,n_max_records)
-        for record in records :
+            all_records = self.__get_filemaker_records(layout_name,n_max_records)
+        #get recordId/modId pairs for all existing objects of this type that are in the directory already
+        existing_rec_mod_ids = {}
+        for fp in self.dirpath.glob(f'{obj_type.__name__}_*.json') :
+            with open(fp,'r') as ofp :
+                as_json = json.load(ofp)
+            tags = as_json['tags']
+            try :
+                rec_id = get_tag_value_from_list(tags,'recordId')
+                mod_id = get_tag_value_from_list(tags,'modId')
+            except Exception as e :
+                errmsg = f'ERROR: failed to find a recordId and modId from json file {fp.name} '
+                errmsg+= f'from a FileMaker record! Will reraise exception. JSON contents: {as_json}'
+                self.logger.error(errmsg,exc_obj=e)
+            existing_rec_mod_ids[rec_id]=mod_id
+        #make the list of records that are new or have been modified from what's currently in the json
+        n_recs_skipped = 0
+        records_to_use = []
+        for record in all_records :
+            if record['recordId'] in existing_rec_mod_ids.keys() :
+                if record['modId']==existing_rec_mod_ids[record['recordId']] :
+                    n_recs_skipped+=1
+                    continue
+            records_to_use.append(record)
+        if n_recs_skipped>0 :
+            self.logger.info(f'Skipped {n_recs_skipped} {layout_name} records that already exist in {self.dirpath}')
+        for record in records_to_use :
             objs.append(obj_type(record,*args,logger=self.logger,**kwargs))
         if len(objs)<=0 :
             return objs
@@ -214,15 +238,15 @@ class LaserShockLab(LogOwner) :
         #dump the different parts of the lab data model to json files
         for obj_list in self.all_object_lists :
             objs_to_dump = obj_list[:min(n_max_objs,len(obj_list))] if n_max_objs>0 else obj_list
-            for iobj,obj in enumerate(objs_to_dump,start=1) :
+            for obj in objs_to_dump :
                 obj_to_write = obj.gemd_object
-                fn = f'{obj.__class__.__name__}_{iobj}.json'
-                with open(self.ofd/fn,'w') as fp :
+                fn = f'{obj.__class__.__name__}_recordId_{obj.get_tag_value("recordId")}.json'
+                with open(self.dirpath/fn,'w') as fp :
                     fp.write(self.encoder.thin_dumps(obj_to_write,indent=indent))
                 if complete_histories :
                     if isinstance_material_run_from_filemaker_record(obj) :
                         context_list = complete_material_history(obj_to_write)
-                        with open(self.ofd/fn.replace('.json','_material_history.json'),'w') as fp :
+                        with open(self.dirpath/fn.replace('.json','_material_history.json'),'w') as fp :
                             fp.write(json.dumps(context_list,indent=indent))
                 self.__uids_written.append(obj_to_write.uids["auto"])
                 if recursive :
@@ -396,7 +420,7 @@ class LaserShockLab(LogOwner) :
             if item.name is not None :
                 fn+=f'_{item.name.replace(" ","-").replace("/","")}'
             fn+= f'_{uid}.json'
-            with open(self.ofd/fn,'w') as fp :
+            with open(self.dirpath/fn,'w') as fp :
                 fp.write(self.encoder.thin_dumps(item,indent=self.__indent))
             self.__uids_written.append(uid)
 
