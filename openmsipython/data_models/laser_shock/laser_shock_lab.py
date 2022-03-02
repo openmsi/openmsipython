@@ -1,14 +1,15 @@
 #imports
 import os, pathlib, methodtools, json, requests, getpass, fmrest
-from gemd.util.impl import set_uuids, recursive_foreach
+from gemd.util.impl import recursive_foreach
 from gemd.entity.util import complete_material_history
 from gemd.json import GEMDJson
 from gemd.entity.object import MaterialSpec, ProcessSpec, IngredientSpec, MeasurementSpec
 from gemd.entity.object import MaterialRun, ProcessRun, IngredientRun, MeasurementRun
 from ...data_file_io.data_file_directory import DataFileDirectory
-from ..utilities import get_tag_value_from_list, cached_isinstance_generator
-from ..run_from_filemaker_record import MaterialRunFromFileMakerRecord, RunFromFileMakerRecord
+from ..utilities import cached_isinstance_generator, get_tag_value_from_list, get_json_filename_for_gemd_object
+from ..gemd_template_store import GEMDTemplateStore
 from ..spec_from_filemaker_record import SpecFromFileMakerRecord
+from ..run_from_filemaker_record import MaterialRunFromFileMakerRecord, RunFromFileMakerRecord
 from .config import LASER_SHOCK_CONST
 from .attribute_templates import ATTR_TEMPL
 from .object_templates import OBJ_TEMPL
@@ -107,9 +108,14 @@ class LaserShockLab(DataFileDirectory) :
         self.__username = None; self.__password = None
         #JSON encoder
         self.encoder = GEMDJson()
-        #set uuids for templates to make sure they're all unique
-        for template in [*(ATTR_TEMPL.values()),*(OBJ_TEMPL.values())] :
-            set_uuids(template,self.encoder.scope)
+        #build the template store from what's in the directory already, plus what's hard coded
+        try :
+            self._template_store = GEMDTemplateStore(self.dirpath,ATTR_TEMPL,OBJ_TEMPL,encoder=self.encoder)
+        except Exception as e :
+            self.logger.error('ERROR: failed to instantiate the template store! Will reraise exception.',exc_obj=e)
+        msg = f'Template store initialized with {self._template_store.n_hardcoded} hardcoded templates and '
+        msg+= f'{self._template_store.n_from_files} templates read from files in {self.dirpath}'
+        self.logger.info(msg)
 
     def create_gemd_objects(self,records_dict=None) :
         """
@@ -416,10 +422,7 @@ class LaserShockLab(DataFileDirectory) :
     def __dump_obj_to_json(self,item) :
         uid = item.uids["auto"]
         if uid not in self.__uids_written :
-            fn = f'{item.__class__.__name__}'
-            if item.name is not None :
-                fn+=f'_{item.name.replace(" ","-").replace("/","")}'
-            fn+= f'_{uid}.json'
+            fn = get_json_filename_for_gemd_object(item,self.encoder)
             with open(self.dirpath/fn,'w') as fp :
                 fp.write(self.encoder.thin_dumps(item,indent=self.__indent))
             self.__uids_written.append(uid)

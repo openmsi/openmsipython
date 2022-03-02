@@ -1,5 +1,6 @@
 #imports
 from typing import Callable, Union, Type, Tuple
+from gemd.json import GEMDJson
 from gemd.entity.value import NominalCategorical, NominalReal, NominalInteger
 
 def get_tag_value_from_list(tag_list,tag_name) :
@@ -116,6 +117,19 @@ def name_value_template_origin_from_key_value_dict(key,value,d,logger=None,raise
         value = d['valuetype'](val)
     origin = d['origin'] if 'origin' in d.keys() else None
     return name, value, temp, origin
+
+def get_json_filename_for_gemd_object(obj,encoder=GEMDJson()) :
+    """
+    Given a generic GEMD object (and, optionally, the encoder that will be used), 
+    return the name of the file to which the object should be dumped as JSON
+    """
+    fn = f'{obj.__class__.__name__}'
+    if obj.name is not None :
+        fn+=f'_{obj.name.replace(" ","-").replace("/","")}'
+    if obj.uids is not None and encoder.scope in obj.uids.keys() :
+        fn+=f'_{obj.uids[encoder.scope]}'
+    fn+= '.json'
+    return fn
 
 ######### THE FUNCTION BELOW IS COPIED/PASTED FROM GEMD CODE #########
 def cached_isinstance_generator(class_or_tuple: Union[Type, Tuple[Type]]) -> Callable[[object], bool]:
