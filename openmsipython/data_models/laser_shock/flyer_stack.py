@@ -1,11 +1,13 @@
 #imports
 import copy
+from gemd.util.impl import recursive_foreach
 from gemd.entity.util import make_instance
 from gemd.entity.source.performed_source import PerformedSource
 from gemd.entity.value import NominalCategorical, NominalInteger, NominalReal
 from gemd.entity.attribute import Property, Parameter, Condition
 from gemd.entity.object import ProcessSpec, MaterialSpec, MeasurementSpec, MeasurementRun, IngredientSpec
 from ..utilities import search_for_single_name
+from ..cached_isinstance_functions import isinstance_ingredient_run
 from ..spec_for_run import SpecForRun
 from ..run_from_filemaker_record import MaterialRunFromFileMakerRecord
 from .attribute_templates import ATTR_TEMPL
@@ -22,6 +24,7 @@ class LaserShockFlyerStackSpec(SpecForRun) :
         self.glassID = kwargs.get('glassID')
         self.foilID = kwargs.get('foilID')
         self.epoxyID = kwargs.get('epoxyID')
+        self.cutting_proc_name = kwargs.get('cutting_proc_name')
         self.cutting = kwargs.get('cutting')
         self.part_a = kwargs.get('part_a')
         self.part_b = kwargs.get('part_b')
@@ -145,7 +148,7 @@ class LaserShockFlyerStackSpec(SpecForRun) :
         if self.cutting is not None :
             cutting = copy.deepcopy(self.cutting)
         else :
-            cutting = ProcessSpec(name='Cutting Flyer Discs')
+            cutting = ProcessSpec(name=self.cutting_proc_name,template=OBJ_TEMPL['Flyer Cutting Program'])
         if self.s!='' :
             cutting.parameters.append(
                 Parameter(
@@ -285,21 +288,16 @@ class LaserShockFlyerStack(MaterialRunFromFileMakerRecord) :
                                              record.pop('Foil Name'),logger=kwargs.get('logger'))
         self.epoxyID = search_for_single_name([eid.spec for eid in epoxy_IDs],
                                               record.pop('Epoxy Name'),logger=kwargs.get('logger'))
+        self.cutting_procedure_name = record.pop('Cutting Procedure Name')
         self.cutting = search_for_single_name([fcp.spec for fcp in flyer_cutting_programs],
-                                              record.pop('Cutting Procedure Name'),logger=kwargs.get('logger'))
+                                              self.cutting_procedure_name,logger=kwargs.get('logger'))
         #create Runs from the Specs found
         self.glass = make_instance(self.glassID) if self.glassID is not None else None
         self.foil = make_instance(self.foilID) if self.foilID is not None else None
         #run the rest of the creating the MaterialRun
         super().__init__(record)
         #add the runs from above to each part of the created Run as necessary
-        for ing in self.run.process.ingredients :
-            if ing.name=='Glass Epoxy Foil Stack' :
-                for ing2 in ing.material.process.ingredients :
-                    if ing2.name=='Glass ID' :
-                        ing2.material=self.glass
-                    elif ing2.name=='Foil ID' :
-                        ing2.material=self.foil
+        recursive_foreach(self.run.process.ingredients,self.__make_replacements,apply_first=True)
 
     def ignore_key(self,key) :
         #I don't have access to the "Flyer Epoxy Thickness" calculated box through the API 
@@ -358,6 +356,7 @@ class LaserShockFlyerStack(MaterialRunFromFileMakerRecord) :
         kwargs['glassID'] = self.glassID
         kwargs['foilID'] = self.foilID
         kwargs['epoxyID'] = self.epoxyID
+        kwargs['cutting_proc_name'] = self.cutting_procedure_name
         kwargs['cutting'] = self.cutting
         # Ingredients/Parameters for mixing epoxy
         kwargs['part_a'] = record.pop('Part A')
@@ -377,3 +376,13 @@ class LaserShockFlyerStack(MaterialRunFromFileMakerRecord) :
         # The logger (creating the Spec might throw some warnings)
         kwargs['logger'] = self.logger
         return kwargs
+
+    #################### PRIVATE HELPER FUNCTIONS ####################
+
+    def __make_replacements(self,item) :
+        if not isinstance_ingredient_run(item) :
+            return
+        if item.name=='Glass ID' :
+            item.material = self.glass
+        elif item.name=='Foil ID' :
+            item.material = self.foil

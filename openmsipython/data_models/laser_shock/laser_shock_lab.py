@@ -3,10 +3,10 @@ import os, pathlib, methodtools, json, requests, getpass, fmrest
 from gemd.util.impl import recursive_foreach
 from gemd.entity.util import complete_material_history
 from gemd.json import GEMDJson
-from gemd.entity.object import MaterialSpec, ProcessSpec, IngredientSpec, MeasurementSpec
-from gemd.entity.object import MaterialRun, ProcessRun, IngredientRun, MeasurementRun
 from ...data_file_io.data_file_directory import DataFileDirectory
 from ..utilities import cached_isinstance_generator, get_tag_value_from_list, get_json_filename_for_gemd_object
+from ..cached_isinstance_functions import isinstance_spec, isinstance_run, isinstance_process_spec
+from ..cached_isinstance_functions import isinstance_ingredient_spec, isinstance_material_ingredient_spec
 from ..gemd_template_store import GEMDTemplateStore
 from ..spec_from_filemaker_record import SpecFromFileMakerRecord
 from ..run_from_filemaker_record import MaterialRunFromFileMakerRecord, RunFromFileMakerRecord
@@ -28,11 +28,6 @@ from .experiment import LaserShockExperiment
 isinstance_spec_from_filemaker_record = cached_isinstance_generator(SpecFromFileMakerRecord)
 isinstance_run_from_filemaker_record = cached_isinstance_generator(RunFromFileMakerRecord)
 isinstance_material_run_from_filemaker_record = cached_isinstance_generator(MaterialRunFromFileMakerRecord)
-isinstance_spec = cached_isinstance_generator((MaterialSpec,ProcessSpec,IngredientSpec,MeasurementSpec))
-isinstance_process_spec = cached_isinstance_generator(ProcessSpec)
-isinstance_material_ingredient_spec = cached_isinstance_generator((MaterialSpec,IngredientSpec))
-isinstance_ingredient_spec = cached_isinstance_generator(IngredientSpec)
-isinstance_run = cached_isinstance_generator((MaterialRun,ProcessRun,IngredientRun,MeasurementRun))
 
 class LaserShockLab(DataFileDirectory) :
     """
@@ -405,8 +400,8 @@ class LaserShockLab(DataFileDirectory) :
             msg = f'Recursively replacing all duplicated lower level Specs (iteration {iter_i},'
             msg+= f' {self.__n_total_specs} total, {n_unique_specs} unique)...'
             self.logger.debug(msg)
-            recursive_foreach(self.all_top_objs,self.__replace_duplicated_specs_recursive)
-            recursive_foreach(self.all_top_objs,self.__remove_duplicate_ingredients)
+            recursive_foreach(self.all_top_objs,self.__replace_duplicated_specs_recursive,apply_first=True)
+            #recursive_foreach(self.all_top_objs,self.__remove_duplicate_ingredients,apply_first=True)
             previous_n_specs = self.__n_total_specs
             self.__n_total_specs = 0
             recursive_foreach(self.all_top_objs,self.__count_specs)

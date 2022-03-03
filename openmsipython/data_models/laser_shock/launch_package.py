@@ -1,11 +1,13 @@
 #imports 
 import copy
+from gemd.util.impl import recursive_foreach
 from gemd.entity.util import make_instance
 from gemd.entity.source.performed_source import PerformedSource
 from gemd.entity.value import NominalCategorical, NominalInteger, NominalReal
 from gemd.entity.attribute import Property, Parameter, Condition
 from gemd.entity.object import ProcessSpec, MaterialSpec, MeasurementSpec, MeasurementRun, IngredientSpec, IngredientRun
 from ..utilities import search_for_single_name, search_for_single_tag
+from ..cached_isinstance_functions import isinstance_ingredient_run
 from ..spec_for_run import SpecForRun
 from ..run_from_filemaker_record import MaterialRunFromFileMakerRecord
 from .attribute_templates import ATTR_TEMPL
@@ -218,7 +220,7 @@ class LaserShockLaunchPackage(MaterialRunFromFileMakerRecord) :
         return {**super().unique_values,self.name_key:self.run.name}
 
     #################### PUBLIC FUNCTIONS ####################
-
+    
     def __init__(self,record,flyer_stacks,spacer_IDs,spacer_cutting_programs,samples,**kwargs) :
         # find the flyer stack, spacer ID, spacer cutting program, and sample that were used
         self.flyerstack = search_for_single_tag([fs.run for fs in flyer_stacks],'FlyerID',record.pop('Flyer ID').replace(' ','_'))
@@ -235,19 +237,7 @@ class LaserShockLaunchPackage(MaterialRunFromFileMakerRecord) :
         # create the rest of the Run
         super().__init__(record)
         # link some objects back into the created Run
-        for ing in self.run.process.ingredients :
-            if ing.name=='Flyer and Spacer' :
-                for ing2 in ing.material.process.ingredients :
-                    if ing2.name=='Chosen Flyer' :
-                        for ing3 in ing2.material.process.ingredients :
-                            if ing3.name=='Flyer Stack' :
-                                ing3.material=self.flyerstack
-                    elif ing2.name=='Spacer' :
-                        for ing3 in ing2.material.process.ingredients :
-                            if ing3.name=='Spacer Material' :
-                                ing3.material=self.spacer
-            elif ing.name=='Impact Sample' :
-                ing.material=self.impactsample
+        recursive_foreach(self.run.process.ingredients,self.__make_replacements,apply_first=True)
 
     def add_other_key(self,key,value,record) :
         # Measured properties of spacer
@@ -411,3 +401,13 @@ class LaserShockLaunchPackage(MaterialRunFromFileMakerRecord) :
         IngredientRun(material=self.sample,process=impactsample.process,spec=samplespec)
         #return the ImpactSample Run
         return impactsample
+
+    def __make_replacements(self,item) :
+        if not isinstance_ingredient_run(item) :
+            return
+        if item.name=='Flyer Stack' :
+            item.material = self.flyerstack
+        elif item.name=='Spacer Material' :
+            item.material = self.spacer
+        elif item.name=='Impact Sample' :
+            item.material = self.impactsample

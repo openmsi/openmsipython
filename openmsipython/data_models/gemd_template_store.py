@@ -66,7 +66,7 @@ class GEMDTemplateStore :
                     errmsg+=f'\n{fp}'
                 raise RuntimeError(errmsg)
             if name not in new_templates_dict.keys() :
-                print(f'No file found for {template.__class__.__name__} template with name {name}')
+                #print(f'No file found for {template.__class__.__name__} template with name {name}')
                 set_uuids(template,self.encoder.scope)
                 new_templates_dict[name] = template
                 self.__n_hardcoded+=1

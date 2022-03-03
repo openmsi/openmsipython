@@ -110,8 +110,10 @@ class LaserShockSampleSpec(SpecForRun) :
                         origin='specified'
                     )
                 )
+            #create a preprocessed sample
+            preprocessed_mat = MaterialSpec(name='Preprocessed Material',process=preprocessing)
             proc_to_take_raw_material = preprocessing
-            input_material_for_next = preprocessing.output_material
+            input_material_for_next = preprocessed_mat
             final_output_proc = preprocessing
         #Define sample processing
         sample_processing_conditions = []
@@ -169,7 +171,9 @@ class LaserShockSampleSpec(SpecForRun) :
                            material=input_material_for_next,
                            process=sample_processing,
             )
-        input_material_for_next = sample_processing.output_material
+        #create the processed material
+        processed_mat = MaterialSpec(name='Processed Material',process=sample_processing)
+        input_material_for_next = processed_mat
         #if preprocessing wasn't performed, set processing to take the raw material
         if proc_to_take_raw_material is None :
             proc_to_take_raw_material = sample_processing
@@ -210,8 +214,8 @@ class LaserShockSampleSpec(SpecForRun) :
             final_output_proc = annealing
         #add the raw material as the ingredient to the process that takes it
         IngredientSpec(name='Raw Material',
-                       material=raw_mat_spec,
-                       process=proc_to_take_raw_material,
+                    material=raw_mat_spec,
+                    process=proc_to_take_raw_material,
             )
         return final_output_proc
 

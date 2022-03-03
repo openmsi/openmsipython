@@ -373,13 +373,6 @@ ATTR_TEMPL[name] = ParameterTemplate(
     bounds=RealBounds(0,168,'hr')
 )
 
-name = 'Cutting Procedure'
-ATTR_TEMPL[name] = ParameterTemplate(
-    name=name,
-    description='The procedure used to cut flyer discs out of a glass/epoxy/foil stack using the femtosecond laser',
-    bounds=CategoricalBounds(['50um Al Original v1','50um Al Optimized v1','50um Al Optimized v2 (2021-10-22)']),
-)
-
 name = 'Flyer Spacing'
 ATTR_TEMPL[name] = ParameterTemplate(
     name=name,
