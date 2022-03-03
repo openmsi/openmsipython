@@ -8,6 +8,7 @@ from ..utilities import cached_isinstance_generator, get_tag_value_from_list, ge
 from ..cached_isinstance_functions import isinstance_spec, isinstance_run, isinstance_process_spec
 from ..cached_isinstance_functions import isinstance_ingredient_spec, isinstance_material_ingredient_spec
 from ..gemd_template_store import GEMDTemplateStore
+from ..gemd_spec_store import GEMDSpecStore
 from ..spec_from_filemaker_record import SpecFromFileMakerRecord
 from ..run_from_filemaker_record import MaterialRunFromFileMakerRecord, RunFromFileMakerRecord
 from .config import LASER_SHOCK_CONST
@@ -105,11 +106,18 @@ class LaserShockLab(DataFileDirectory) :
         self.encoder = GEMDJson()
         #build the template store from what's in the directory already, plus what's hard coded
         try :
-            self._template_store = GEMDTemplateStore(self.dirpath,ATTR_TEMPL,OBJ_TEMPL,encoder=self.encoder)
+            self._template_store = GEMDTemplateStore(self.dirpath,ATTR_TEMPL,OBJ_TEMPL,self.encoder)
         except Exception as e :
             self.logger.error('ERROR: failed to instantiate the template store! Will reraise exception.',exc_obj=e)
         msg = f'Template store initialized with {self._template_store.n_hardcoded} hardcoded templates and '
         msg+= f'{self._template_store.n_from_files} templates read from files in {self.dirpath}'
+        self.logger.info(msg)
+        #build the spec store from what's in the directory
+        try :
+            self._spec_store = GEMDSpecStore(self.dirpath,self.encoder)
+        except Exception as e :
+            self.logger.error(f'ERROR: failed to instantiate the spec store! Will reraise exception.',exc_obj=e)
+        msg=f'Spec store initialized with {self._spec_store.n_specs} specs read from files in {self.dirpath}'
         self.logger.info(msg)
 
     def create_gemd_objects(self,records_dict=None) :
@@ -401,7 +409,7 @@ class LaserShockLab(DataFileDirectory) :
             msg+= f' {self.__n_total_specs} total, {n_unique_specs} unique)...'
             self.logger.debug(msg)
             recursive_foreach(self.all_top_objs,self.__replace_duplicated_specs_recursive,apply_first=True)
-            #recursive_foreach(self.all_top_objs,self.__remove_duplicate_ingredients,apply_first=True)
+            recursive_foreach(self.all_top_objs,self.__remove_duplicate_ingredients)
             previous_n_specs = self.__n_total_specs
             self.__n_total_specs = 0
             recursive_foreach(self.all_top_objs,self.__count_specs)
