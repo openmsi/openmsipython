@@ -1,18 +1,22 @@
 #imports
 from gemd.entity.value import NominalCategorical, NominalReal
 from ..spec_from_filemaker_record import MaterialSpecFromFileMakerRecord
-from .attribute_templates import ATTR_TEMPL
-from .object_templates import OBJ_TEMPL
 
 class LaserShockGlassID(MaterialSpecFromFileMakerRecord) :
     """
     GEMD representation of a type of glass used in the Laser Shock Lab as a Material Spec
     """
 
-    template = OBJ_TEMPL['Glass ID']
-    process_template = OBJ_TEMPL['Purchasing Glass']
     name_key = 'Glass name'
     notes_key = 'Description'
+
+    @property
+    def template(self) :
+        return self.templates.obj('Glass ID')
+
+    @property
+    def process_template(self) :
+        return self.templates.obj('Purchasing Glass')
 
     @property
     def tags_keys(self) :
@@ -22,21 +26,21 @@ class LaserShockGlassID(MaterialSpecFromFileMakerRecord) :
     def property_dict(self) :
         return {'Glass Thickness':{'valuetype':NominalReal,
                                    'datatype':float,
-                                   'template':ATTR_TEMPL['Glass Thickness']},
+                                   'template':self.templates.attr('Glass Thickness')},
                 'Glass Length':{'valuetype':NominalReal,
                                    'datatype':float,
-                                   'template':ATTR_TEMPL['Glass Length']},
+                                   'template':self.templates.attr('Glass Length')},
                 'Glass Width':{'valuetype':NominalReal,
                                    'datatype':float,
-                                   'template':ATTR_TEMPL['Glass Width']},
+                                   'template':self.templates.attr('Glass Width')},
             }
 
     @property
     def process_parameter_dict(self) :
         return {'Glass Supplier':{'valuetype':NominalCategorical,
-                                  'template':ATTR_TEMPL['Glass Supplier']},
+                                  'template':self.templates.attr('Glass Supplier')},
                 'Glass Part Number':{'valuetype':NominalCategorical,
-                                     'template':ATTR_TEMPL['Glass Part Number']},
+                                     'template':self.templates.attr('Glass Part Number')},
             }
 
     @property

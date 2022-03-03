@@ -32,6 +32,24 @@ class GEMDTemplateStore :
         self.__attribute_templates = self.__get_template_dict(dirpath,attr_hardcoded)
         self.__object_templates = self.__get_template_dict(dirpath,obj_hardcoded)
 
+    def attr(self,template_name) :
+        """
+        Return an attribute template given its name
+        """
+        try :
+            return self.__attribute_templates[template_name]
+        except KeyError :
+            raise ValueError(f'ERROR: no stored attribute template called "{template_name}"')
+
+    def obj(self,template_name) :
+        """
+        Return an object template given its name
+        """
+        try :
+            return self.__object_templates[template_name]
+        except KeyError :
+            raise ValueError(f'ERROR: no stored object template called "{template_name}"')
+
     def __get_template_dict(self,dirpath,hardcoded) :
         new_templates_dict = {}
         names_seen = set()

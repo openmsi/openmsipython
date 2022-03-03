@@ -5,8 +5,6 @@ from gemd.entity.object import MeasurementSpec
 from ..utilities import search_for_single_name
 from ..spec_for_run import SpecForRun
 from ..run_from_filemaker_record import MeasurementRunFromFileMakerRecord
-from .attribute_templates import ATTR_TEMPL
-from .object_templates import OBJ_TEMPL
 
 class LaserShockExperimentSpec(SpecForRun) :
     """
@@ -31,7 +29,7 @@ class LaserShockExperimentSpec(SpecForRun) :
         #parameters
         spec_kwargs['parameters'] = self.__get_parameters()
         #the template
-        spec_kwargs['template'] = OBJ_TEMPL['Laser Shock Experiment']
+        spec_kwargs['template'] = self.templates.obj('Laser Shock Experiment')
         return spec_kwargs
 
     def __get_conditions(self) :
@@ -42,8 +40,8 @@ class LaserShockExperimentSpec(SpecForRun) :
         if self.kwargs.get('Fluence')!='' :
             conditions.append(Condition(name='Fluence',
                                         value=NominalReal(self.kwargs.get('Fluence'),
-                                                        ATTR_TEMPL['Fluence'].bounds.default_units),
-                                        template=ATTR_TEMPL['Fluence'],
+                                                        self.templates.attr('Fluence').bounds.default_units),
+                                        template=self.templates.attr('Fluence'),
                                         origin='computed'))
         names = [
             'Beam Shaper',
@@ -64,7 +62,7 @@ class LaserShockExperimentSpec(SpecForRun) :
         for name,val in namesvals :
             if val in ('','N/A','?') :
                 continue
-            temp = ATTR_TEMPL[name]
+            temp = self.templates.attr(name)
             conditions.append(Condition(name=name.replace(' ',''),
                                         value=NominalCategorical(str(val)),
                                         template=temp,
@@ -83,7 +81,7 @@ class LaserShockExperimentSpec(SpecForRun) :
         for name,val in namesvals :
             if val in ('','N/A','?') :
                 continue
-            temp = ATTR_TEMPL[name]
+            temp = self.templates.attr(name)
             try :
                 conditions.append(Condition(name=name.replace(' ',''),
                                             value=NominalReal(float(val),temp.bounds.default_units),
@@ -110,7 +108,7 @@ class LaserShockExperimentSpec(SpecForRun) :
                 continue
             parameters.append(Parameter(name=name.replace(' ',''),
                                         value=NominalInteger(val),
-                                        template=ATTR_TEMPL[name],
+                                        template=self.templates.attr(name),
                                         origin='specified'))
         names = [
             'Drive Laser Mode',
@@ -124,7 +122,7 @@ class LaserShockExperimentSpec(SpecForRun) :
         for name,val in namesvals :
             if val in ('','N/A') :
                 continue
-            temp = ATTR_TEMPL[name]
+            temp = self.templates.attr(name)
             parameters.append(Parameter(name=name.replace(' ',''),
                                         value=NominalCategorical(str(val)),
                                         template=temp,
@@ -141,7 +139,7 @@ class LaserShockExperimentSpec(SpecForRun) :
         for name,val in namesvals :
             if val=='' :
                 continue
-            temp = ATTR_TEMPL[name]
+            temp = self.templates.attr(name)
             try :
                 parameters.append(Parameter(name=name.replace(' ',''),
                                             value=NominalReal(float(val),temp.bounds.default_units),
@@ -196,10 +194,10 @@ class LaserShockExperiment(MeasurementRunFromFileMakerRecord) :
         names = ['Flyer Tilt','Flyer Curvature','Launch Package Orientation',
                  'Video Quality','Spall State','Check Plateau']
         for name in names :
-            d[name] = {'valuetype':NominalCategorical,'template':ATTR_TEMPL[name]}
+            d[name] = {'valuetype':NominalCategorical,'template':self.templates.attr(name)}
         names = ['Return Signal Strength','Max Velocity','Est Impact Velocity']
         for name in names :
-            d[name] = {'valuetype':NominalReal,'datatype':float,'template':ATTR_TEMPL[name]}
+            d[name] = {'valuetype':NominalReal,'datatype':float,'template':self.templates.attr(name)}
         return d
 
     @property

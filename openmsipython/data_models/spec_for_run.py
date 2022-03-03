@@ -14,7 +14,13 @@ class SpecForRun(ABC) :
         """
         pass
 
-    def __init__(self,*args,**kwargs) :
+    @property
+    def templates(self) :
+        return self.__template_store
+
+    def __init__(self,*args,templates,**kwargs) :
+        #set the template store
+        self.__template_store = templates
         #get the kwargs that will be used to create the GEMD Spec
         spec_kwargs = self.get_spec_kwargs()
         #create the GEMD spec

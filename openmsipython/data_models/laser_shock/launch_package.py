@@ -10,8 +10,6 @@ from ..utilities import search_for_single_name, search_for_single_tag
 from ..cached_isinstance_functions import isinstance_ingredient_run
 from ..spec_for_run import SpecForRun
 from ..run_from_filemaker_record import MaterialRunFromFileMakerRecord
-from .attribute_templates import ATTR_TEMPL
-from .object_templates import OBJ_TEMPL
 
 class LaserShockLaunchPackageSpec(SpecForRun) :
     """
@@ -48,7 +46,7 @@ class LaserShockLaunchPackageSpec(SpecForRun) :
         #process
         spec_kwargs['process'] = self.__get_process()
         #the template
-        spec_kwargs['template'] = OBJ_TEMPL[spec_kwargs['name']]
+        spec_kwargs['template'] = self.templates.obj(spec_kwargs['name'])
         return spec_kwargs
 
     def __get_process(self) :
@@ -61,20 +59,20 @@ class LaserShockLaunchPackageSpec(SpecForRun) :
             choosing_flyer_params.append(
                 Parameter(name='Flyer Row',
                           value=NominalInteger(int(self.flyerrow)),
-                          template=ATTR_TEMPL['Flyer Row'],
+                          template=self.templates.attr('Flyer Row'),
                           origin='specified')
             )
         if self.flyercol!='' :
             choosing_flyer_params.append(
                 Parameter(name='Flyer Column',
                           value=NominalInteger(int(self.flyercol)),
-                          template=ATTR_TEMPL['Flyer Column'],
+                          template=self.templates.attr('Flyer Column'),
                           origin='specified')
             )
         choosing_flyer = ProcessSpec(
             name='Choosing Flyer',
             parameters=choosing_flyer_params,
-            template=OBJ_TEMPL['Choosing Flyer'],
+            template=self.templates.obj('Choosing Flyer'),
             )
         IngredientSpec(name='Flyer Stack',
                        material=self.flyerspec if self.flyerspec is not None else None,
@@ -88,10 +86,10 @@ class LaserShockLaunchPackageSpec(SpecForRun) :
         else :
             cutting_spacer = ProcessSpec(
                 name='Cutting Spacer',
-                template=OBJ_TEMPL['Cutting Spacer']
+                template=self.templates.obj('Cutting Spacer')
                 )
         if self.spacercuttingenergy!='' :
-            temp = ATTR_TEMPL['Laser Cutting Energy']
+            temp = self.templates.attr('Laser Cutting Energy')
             laser_cutting_energy_par = None
             for p in cutting_spacer.parameters :
                 if p.name=='LaserCuttingEnergy' :
@@ -125,7 +123,7 @@ class LaserShockLaunchPackageSpec(SpecForRun) :
                         Parameter(
                             name=f'NumberofPasses{ival}',
                             value=NominalInteger(int(val)),
-                            template=ATTR_TEMPL['Number of Passes'],
+                            template=self.templates.attr('Number of Passes'),
                             origin='specified',
                             )
                     )
@@ -139,16 +137,16 @@ class LaserShockLaunchPackageSpec(SpecForRun) :
             conditions=[
                 Condition(name='Spacer Attachment Method',
                           value=NominalCategorical(str(self.spacer_attachment)),
-                          template=ATTR_TEMPL['Spacer Attachment Method'],
+                          template=self.templates.attr('Spacer Attachment Method'),
                           origin='specified'),
                 ],
             parameters=[
                 Parameter(name='Spacer Adhesive',
                           value=NominalCategorical(str(self.spacer_adhesive)),
-                          template=ATTR_TEMPL['Spacer Adhesive'],
+                          template=self.templates.attr('Spacer Adhesive'),
                           origin='specified'),
                 ],
-            template=OBJ_TEMPL['Attaching Spacer']
+            template=self.templates.obj('Attaching Spacer')
             )
         IngredientSpec(name='Chosen Flyer',material=chosen_flyer,process=attaching_spacer)
         IngredientSpec(name='Cut Spacer',material=cut_spacer,process=attaching_spacer)
@@ -161,28 +159,28 @@ class LaserShockLaunchPackageSpec(SpecForRun) :
             params.append(
                 Parameter(name='Sample Orientation',
                           value=NominalCategorical(str(self.samp_orientation)),
-                          template=ATTR_TEMPL['Sample Orientation'],
+                          template=self.templates.attr('Sample Orientation'),
                           origin='specified',
                     )
             )
         attaching_sample = ProcessSpec(
             name='Attaching Sample',
             parameters=params,
-            template=OBJ_TEMPL['Attaching Sample']
+            template=self.templates.obj('Attaching Sample')
             )
         for ai,a in enumerate(self.samp_attachments_adhesives) :
             if ai==0 :
                 attaching_sample.conditions.append(
                     Condition(name='Sample Attachment Method',
                               value=NominalCategorical(str(a)),
-                              template=ATTR_TEMPL['Sample Attachment Method'],
+                              template=self.templates.attr('Sample Attachment Method'),
                               origin='specified')
                     )
             else :
                 attaching_sample.parameters.append(
                     Parameter(name='Sample Attachment Adhesive',
                               value=NominalCategorical(str(a)),
-                              template=ATTR_TEMPL['Sample Attachment Adhesive'],
+                              template=self.templates.attr('Sample Attachment Adhesive'),
                               origin='specified')
                     )
         IngredientSpec(name='Flyer and Spacer',material=flyer_and_spacer,process=attaching_sample)
@@ -233,9 +231,9 @@ class LaserShockLaunchPackage(MaterialRunFromFileMakerRecord) :
         # create Runs from Specs that were found
         self.spacer = make_instance(self.spacerID) if self.spacerID is not None else None
         # create the Impact Sample that was cut from the original sample
-        self.impactsample = self.__get_impact_sample(record)
+        self.impactsample = self.__get_impact_sample(record,kwargs.get('templates'))
         # create the rest of the Run
-        super().__init__(record)
+        super().__init__(record,**kwargs)
         # link some objects back into the created Run
         recursive_foreach(self.run.process.ingredients,self.__make_replacements,apply_first=True)
 
@@ -251,7 +249,7 @@ class LaserShockLaunchPackage(MaterialRunFromFileMakerRecord) :
             name=key.replace(' ','')
             meas = MeasurementRun(name=name,material=self.spacer)
             meas.spec = MeasurementSpec(name=name)
-            temp = ATTR_TEMPL['Spacer Diameter']
+            temp = self.templates.attr('Spacer Diameter')
             meas.properties.append(Property(name=name,
                                             value=NominalReal(float(value),temp.bounds.default_units),
                                             origin='measured',
@@ -268,7 +266,7 @@ class LaserShockLaunchPackage(MaterialRunFromFileMakerRecord) :
             name=key.replace(' ','')
             meas = MeasurementRun(name=name,material=self.impactsample)
             meas.spec = MeasurementSpec(name=name)
-            temp = ATTR_TEMPL[key]
+            temp = self.templates.attr(key)
             meas.properties.append(Property(name=name,
                                             value=NominalReal(float(value),temp.bounds.default_units),
                                             origin='measured',
@@ -303,9 +301,9 @@ class LaserShockLaunchPackage(MaterialRunFromFileMakerRecord) :
 
     #################### PRIVATE HELPER FUNCTIONS ####################
 
-    def __get_impact_sample(self,record) :
+    def __get_impact_sample(self,record,templates) :
         """
-        Return an ImpactSample (piece of Sample that is cut and polished) given a FileMaker record
+        Return an ImpactSample (piece of Sample that is cut and polished) given a FileMaker record and a template store
         """
         #pop all of the needed information from the record so it's used no matter what
         polish_pad = record.pop('Polishing Pad')
@@ -327,7 +325,7 @@ class LaserShockLaunchPackage(MaterialRunFromFileMakerRecord) :
             params.append(
                 Parameter(name='Polishing Pad',
                           value=NominalCategorical(str(polish_pad)),
-                          template=ATTR_TEMPL['Polishing Pad'],
+                          template=templates.attr('Polishing Pad'),
                           origin='specified')
             )
         if asym_polish=='' :
@@ -335,28 +333,28 @@ class LaserShockLaunchPackage(MaterialRunFromFileMakerRecord) :
         params.append(
             Parameter(name='Asymmetric Polish',
                       value=NominalCategorical(str(asym_polish)),
-                      template=ATTR_TEMPL['Asymmetric Polish'],
+                      template=templates.attr('Asymmetric Polish'),
                       origin='specified')
         )
         if asym_polish!='No' :
             params.append(
                 Parameter(name='Polishing Side 2',
                           value=NominalCategorical(str(polishing_side_2)),
-                          template=ATTR_TEMPL['Polishing Side 2'],
+                          template=templates.attr('Polishing Side 2'),
                           origin='specified')
             )
         if sl!='' :
             params.append(
                 Parameter(name='Sample Location',
                           value=NominalInteger(int(sl)),
-                          template=ATTR_TEMPL['Sample Location'],
+                          template=templates.attr('Sample Location'),
                           origin='specified')
             )
         if slbo!='' :
             params.append(
                 Parameter(name='Sample Location Based Order',
                           value=NominalInteger(int(slbo)),
-                          template=ATTR_TEMPL['Sample Location Based Order'],
+                          template=templates.attr('Sample Location Based Order'),
                           origin='specified'),
             )
         conditions = []
@@ -364,7 +362,7 @@ class LaserShockLaunchPackage(MaterialRunFromFileMakerRecord) :
             conditions.append(
                 Condition(name='Polishing Process',
                           value=NominalCategorical(str(polish_proc)),
-                          template=ATTR_TEMPL['Polishing Process'],
+                          template=templates.attr('Polishing Process'),
                           origin='specified')
             )
         impactsamplespec = MaterialSpec(
@@ -373,9 +371,9 @@ class LaserShockLaunchPackage(MaterialRunFromFileMakerRecord) :
                 name='Impact Sample Cutting and Polishing',
                 conditions=conditions,
                 parameters=params,
-                template=OBJ_TEMPL['Impact Sample Cutting and Polishing'],
+                template=templates.obj('Impact Sample Cutting and Polishing'),
                 ),
-            template=OBJ_TEMPL['Impact Sample']
+            template=templates.obj('Impact Sample')
             )
         #add the cutting procedures as parameters of the process
         n = 'Impact Sample Cutting Procedure'
@@ -384,14 +382,14 @@ class LaserShockLaunchPackage(MaterialRunFromFileMakerRecord) :
                 continue
             impactsamplespec.process.conditions.append(Condition(name=n,
                                                                  value=NominalCategorical(str(cp)),
-                                                                 template=ATTR_TEMPL[n],
+                                                                 template=templates.attr(n),
                                                                  origin='specified'))
         #add the polishing grit(s) as parameters of the process
         for n,v,tn in zip(ns,vs,tns) :
             if v!='' and v!='N/A':
                 impactsamplespec.process.parameters.append(Parameter(name=n,
                                                                      value=NominalCategorical(str(v)),
-                                                                     template=ATTR_TEMPL[tn],
+                                                                     template=templates.attr(tn),
                                                                      origin='specified'))
         #add the sample as an ingredient in the process
         samplespec = IngredientSpec(name='Sample',material=self.sample.spec,process=impactsamplespec.process)

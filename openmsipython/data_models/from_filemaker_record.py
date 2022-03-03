@@ -1,6 +1,7 @@
 #imports
 import functools
 from abc import ABC, abstractmethod
+from re import template
 from gemd.entity.file_link import FileLink
 from ..shared.logging import LogOwner
 from .utilities import get_tag_value_from_list
@@ -81,17 +82,28 @@ class FromFileMakerRecordBase(LogOwner,ABC) :
         """
         return {}
 
+    @property
+    def templates(self) :
+        return self.__template_store
+
     #################### PUBLIC FUNCTIONS ####################
 
-    def __init__(self,record,obj,**kwargs) :
+    def __init__(self,*,templates,**kwargs) :
         """
-        Use information in the given record to populate the given object
+        template store becomes accessible from this object
         kwargs get sent to the logger object
         """
         #init the Logger
         super().__init__(**kwargs)
+        #the template store
+        self.__template_store = templates
         #A list of keys whose values have been recognized and used in reading the record
         self.keys_used = []
+
+    def read_record(self,record,obj) :
+        """
+        Use information in the given record to populate the given object
+        """
         #loop over all the keys/values for the given record and process them one at a time
         for key, value in zip(record.keys(),record.values()) :
             #skip any keys that have already been used

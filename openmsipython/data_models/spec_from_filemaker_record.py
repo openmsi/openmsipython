@@ -50,14 +50,15 @@ class SpecFromFileMakerRecord(FromFileMakerRecordBase) :
         """
         pass
 
-    def __init__(self,record,**kwargs) :
+    def __init__(self,record,*args,**kwargs) :
         """
         Create the Spec using the given FileMaker record
         """
+        super().__init__(*args,**kwargs)
         #create a placeholder Spec
         self.__spec = self.spec_type(**self.init_spec_kwargs)
-        #call the base class's __init__ with the Spec as the object to modify
-        super().__init__(record,self.__spec,**kwargs)
+        #call the read_record with the Spec as the object to modify
+        self.read_record(record,self.__spec)
 
 class HasTemplateFromFileMakerRecord(SpecFromFileMakerRecord) :
 
