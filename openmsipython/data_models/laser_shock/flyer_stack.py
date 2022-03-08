@@ -101,9 +101,8 @@ class LaserShockFlyerStackSpec(SpecForRun) :
         aq = NominalReal(float(self.part_b),'g') if self.part_b!='' else None
         IngredientSpec(name='Epoxy Part B',material=self.epoxyID if self.epoxyID is not None else None,
                                  process=mixing_epoxy,absolute_quantity=aq)
-        mixed_epoxy = MaterialSpec(name='Mixed Epoxy',process=mixing_epoxy)
-        unique_mixing_epoxy = self.specs.unique_version_of(mixing_epoxy)
-        mixed_epoxy = unique_mixing_epoxy.output_material
+        MaterialSpec(name='Mixed Epoxy',process=mixing_epoxy)
+        mixing_epoxy = self.specs.unique_version_of(mixing_epoxy)
         #process and ingredients for making the glass/epoxy/foil stack
         epoxying_conds = []
         if self.comp_method!='' :
@@ -142,10 +141,9 @@ class LaserShockFlyerStackSpec(SpecForRun) :
             )
         IngredientSpec(name='Glass ID',material=self.glassID if self.glassID is not None else None,process=epoxying)
         IngredientSpec(name='Foil ID',material=self.foilID if self.foilID is not None else None,process=epoxying)
-        IngredientSpec(name='Mixed Epoxy',material=mixed_epoxy,process=epoxying)
-        glass_epoxy_foil_stack = MaterialSpec(name='Glass Epoxy Foil Stack',process=epoxying)
-        unique_epoxying = self.specs.unique_version_of(epoxying)
-        glass_epoxy_foil_stack = unique_epoxying.output_material
+        IngredientSpec(name='Mixed Epoxy',material=mixing_epoxy.output_material,process=epoxying)
+        MaterialSpec(name='Glass Epoxy Foil Stack',process=epoxying)
+        epoxying = self.specs.unique_version_of(epoxying)
         #process and ingredients for cutting flyer discs into the glass/epoxy/foil stack
         if self.cutting is not None :
             cutting = copy.deepcopy(self.cutting)
@@ -222,9 +220,8 @@ class LaserShockFlyerStackSpec(SpecForRun) :
                         origin='specified',
                         )
                 )
-        IngredientSpec(name='Glass Epoxy Foil Stack',material=glass_epoxy_foil_stack,process=cutting)
-        unique_cutting = self.specs.unique_version_of(cutting)
-        return unique_cutting
+        IngredientSpec(name='Glass Epoxy Foil Stack',material=epoxying.output_material,process=cutting)
+        return cutting
 
 class LaserShockFlyerStack(MaterialRunFromFileMakerRecord) :
     """

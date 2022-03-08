@@ -1,4 +1,5 @@
 #imports
+from typing import final
 from gemd.entity.value import NominalCategorical, NominalReal, NominalComposition
 from gemd.entity.attribute import PropertyAndConditions, Property, Parameter, Condition
 from gemd.entity.object import MaterialSpec, ProcessSpec, IngredientSpec
@@ -77,12 +78,14 @@ class LaserShockSampleSpec(SpecForRun) :
                                                origin='specified')),
             )
         #some variables to use while dynamically figuring out the process
+        all_procs = []
         proc_to_take_raw_material = None
-        input_material_for_next = None
+        preprocessed=False
         final_output_proc = None
         #Define sample preprocessing
         if ( (self.preproc is not None and self.preproc!='') or 
              (self.preproc_temp is not None and self.preproc_temp!='') ) :
+            preprocessed = True
             preprocessing = ProcessSpec(
                 name='Sample Preprocessing',
                 conditions=[],
@@ -109,9 +112,9 @@ class LaserShockSampleSpec(SpecForRun) :
                     )
                 )
             #create a preprocessed sample
-            preprocessed_mat = MaterialSpec(name='Preprocessed Material',process=preprocessing)
+            MaterialSpec(name='Preprocessed Material',process=preprocessing)
+            all_procs.append(preprocessing)
             proc_to_take_raw_material = preprocessing
-            input_material_for_next = preprocessed_mat
             final_output_proc = preprocessing
         #Define sample processing
         sample_processing_conditions = []
@@ -163,18 +166,16 @@ class LaserShockSampleSpec(SpecForRun) :
                 template=self.templates.attr('Processing Time'),
                 origin='specified')
             )
-        #define the input to processing if preprocessing was performed
-        if input_material_for_next is not None :
+        #define the input to processing
+        if preprocessed :
             IngredientSpec(name='Preprocessed Material',
-                           material=input_material_for_next,
+                           material=preprocessing.output_material,
                            process=sample_processing,
             )
-        #create the processed material
-        processed_mat = MaterialSpec(name='Processed Material',process=sample_processing)
-        input_material_for_next = processed_mat
-        #if preprocessing wasn't performed, set processing to take the raw material
-        if proc_to_take_raw_material is None :
+        else :
             proc_to_take_raw_material = sample_processing
+        #add processing to the list of processes
+        all_procs.append(sample_processing)
         #reset the output process
         final_output_proc = sample_processing
         #Define the annealing process
@@ -204,18 +205,22 @@ class LaserShockSampleSpec(SpecForRun) :
                               origin='specified')
                 )
             #define the input to annealing
-            if input_material_for_next is not None :
-                IngredientSpec(name='Processed Material',
-                               material=input_material_for_next,
-                               process=annealing,
-                )
+            MaterialSpec(name='Processed Material',process=sample_processing)
+            IngredientSpec(name='Processed Material',
+                            material=sample_processing.output_material,
+                            process=annealing,
+            )
             #reset the output process
+            all_procs.append(annealing)
             final_output_proc = annealing
         #add the raw material as the ingredient to the process that takes it
         IngredientSpec(name='Raw Material',
                     material=raw_mat_spec,
                     process=proc_to_take_raw_material,
             )
+        for proc in all_procs :
+            if proc!=final_output_proc :
+                _ = self.specs.unique_version_of(proc,debug=True)
         return final_output_proc
 
 class LaserShockSample(MaterialRunFromFileMakerRecord) :
@@ -251,6 +256,7 @@ class LaserShockSample(MaterialRunFromFileMakerRecord) :
         return {**super().unique_values,self.name_key:self.run.name}
 
     def get_spec_kwargs(self,record) :
+        print(record['Sample Name'])
         kwargs = {}
         kwargs['mat_type'] = record.pop('Material Type')
         kwargs['pct_meas'] = record.pop('Percentage Measure')

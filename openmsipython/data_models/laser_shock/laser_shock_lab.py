@@ -175,7 +175,7 @@ class LaserShockLab(DataFileDirectory) :
         #self.__replace_duplicated_specs()
         self.logger.info('Done creating GEMD objects')
     
-    def get_objects_from_records(self,obj_type,layout_name,*args,n_max_records=10,records_dict=None,**kwargs) :
+    def get_objects_from_records(self,obj_type,layout_name,*args,n_max_records=16,records_dict=None,**kwargs) :
         """
         Return a list of LaserShock/GEMD constructs based on FileMaker records 
         or records in a dictionary (useful for testing)
@@ -223,7 +223,7 @@ class LaserShockLab(DataFileDirectory) :
             self.logger.info(f'Skipped {n_recs_skipped} {layout_name} records that already exist in {self.dirpath}')
         #create the new objects
         for record in records_to_use :
-            if obj_type==LaserShockSample :
+            if obj_type in (LaserShockFlyerStack,LaserShockSample) :
                 print('------------------------------')
             objs.append(obj_type(record,*args,
                                  templates=self._template_store,specs=self._spec_store,logger=self.logger,**kwargs))

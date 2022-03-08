@@ -1,5 +1,6 @@
 #imports
 from abc import ABC,abstractmethod
+from gemd.entity.object import ProcessSpec
 from .has_template_and_spec_stores import HasTemplateAndSpecStores
 
 class SpecForRun(HasTemplateAndSpecStores,ABC) :
@@ -22,7 +23,7 @@ class SpecForRun(HasTemplateAndSpecStores,ABC) :
         #create the GEMD spec
         self.spec = self.spec_type(**spec_kwargs)
         #ensure it's the unique version of the spec
-        self.spec = self.specs.unique_version_of(self.spec)
+        self.spec = self.specs.unique_version_of(self.spec,debug=True)
 
     @abstractmethod
     def get_spec_kwargs(self) :
