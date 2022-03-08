@@ -97,11 +97,13 @@ class LaserShockFlyerStackSpec(SpecForRun) :
             )
         aq = NominalReal(float(self.part_a),'g') if self.part_a!='' else None
         IngredientSpec(name='Epoxy Part A',material=self.epoxyID if self.epoxyID is not None else None,
-                       process=mixing_epoxy,absolute_quantity=aq)
+                                 process=mixing_epoxy,absolute_quantity=aq)
         aq = NominalReal(float(self.part_b),'g') if self.part_b!='' else None
         IngredientSpec(name='Epoxy Part B',material=self.epoxyID if self.epoxyID is not None else None,
-                       process=mixing_epoxy,absolute_quantity=aq)
+                                 process=mixing_epoxy,absolute_quantity=aq)
         mixed_epoxy = MaterialSpec(name='Mixed Epoxy',process=mixing_epoxy)
+        unique_mixing_epoxy = self.specs.unique_version_of(mixing_epoxy)
+        mixed_epoxy = unique_mixing_epoxy.output_material
         #process and ingredients for making the glass/epoxy/foil stack
         epoxying_conds = []
         if self.comp_method!='' :
@@ -142,11 +144,14 @@ class LaserShockFlyerStackSpec(SpecForRun) :
         IngredientSpec(name='Foil ID',material=self.foilID if self.foilID is not None else None,process=epoxying)
         IngredientSpec(name='Mixed Epoxy',material=mixed_epoxy,process=epoxying)
         glass_epoxy_foil_stack = MaterialSpec(name='Glass Epoxy Foil Stack',process=epoxying)
+        unique_epoxying = self.specs.unique_version_of(epoxying)
+        glass_epoxy_foil_stack = unique_epoxying.output_material
         #process and ingredients for cutting flyer discs into the glass/epoxy/foil stack
         if self.cutting is not None :
             cutting = copy.deepcopy(self.cutting)
         else :
-            cutting = ProcessSpec(name=self.cutting_proc_name,template=self.templates.obj('Flyer Cutting Program'))
+            new_cutting_proc_name = self.cutting_proc_name if self.cutting_proc_name!='' else 'Generic Flyer Cutting'
+            cutting = ProcessSpec(name=new_cutting_proc_name,template=self.templates.obj('Flyer Cutting Program'))
         if self.s!='' :
             cutting.parameters.append(
                 Parameter(
@@ -218,7 +223,8 @@ class LaserShockFlyerStackSpec(SpecForRun) :
                         )
                 )
         IngredientSpec(name='Glass Epoxy Foil Stack',material=glass_epoxy_foil_stack,process=cutting)
-        return cutting
+        unique_cutting = self.specs.unique_version_of(cutting)
+        return unique_cutting
 
 class LaserShockFlyerStack(MaterialRunFromFileMakerRecord) :
     """
@@ -315,7 +321,6 @@ class LaserShockFlyerStack(MaterialRunFromFileMakerRecord) :
                 raise ValueError(errmsg)
             name=key.replace(' ','')
             meas = MeasurementRun(name=name,material=self.glass)
-            meas.spec = MeasurementSpec(name=name)
             temp = None
             if key.startswith('Glass Thickness') :
                 temp = self.templates.attr('Glass Thickness')
@@ -338,7 +343,6 @@ class LaserShockFlyerStack(MaterialRunFromFileMakerRecord) :
                 raise ValueError(errmsg)
             name=key.replace(' ','')
             meas = MeasurementRun(name=name,material=self.foil)
-            meas.spec = MeasurementSpec(name=name)
             temp = self.templates.attr('Foil Thickness')
             meas.properties.append(Property(name=name,
                                             value=NominalReal(float(value),temp.bounds.default_units),

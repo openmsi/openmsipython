@@ -21,6 +21,8 @@ class SpecForRun(HasTemplateAndSpecStores,ABC) :
         spec_kwargs = self.get_spec_kwargs()
         #create the GEMD spec
         self.spec = self.spec_type(**spec_kwargs)
+        #ensure it's the unique version of the spec
+        self.spec = self.specs.unique_version_of(self.spec)
 
     @abstractmethod
     def get_spec_kwargs(self) :

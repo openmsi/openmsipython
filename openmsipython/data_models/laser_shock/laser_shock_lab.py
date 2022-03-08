@@ -160,22 +160,22 @@ class LaserShockLab(DataFileDirectory) :
         self.logger.debug('Creating Samples...')
         self.samples = self.get_objects_from_records(LaserShockSample,'Sample',**extra_kwargs)
         self.logger.debug(f'Created {len(self.samples)} new Sample objects')
-        #Launch packages (Materials)
-        self.logger.debug('Creating Launch Packages...')
-        self.launch_packages = self.get_objects_from_records(LaserShockLaunchPackage,'Launch Package',self.flyer_stacks,
-                                                             self.spacer_IDs,self.spacer_cutting_programs,self.samples,
-                                                             **extra_kwargs)
-        self.logger.debug(f'Created {len(self.launch_packages)} new Launch Package objects')
-        #Experiments (Measurements)
-        self.logger.debug('Creating Experiments...')
-        self.experiments = self.get_objects_from_records(LaserShockExperiment,'Experiment',self.launch_packages,
-                                                         **extra_kwargs)
-        self.logger.debug(f'Created {len(self.experiments)} new Experiment objects')
-        #Make sure that there is only one of each unique spec and run (dynamically-created specs may be duplicated)
-        self.__replace_duplicated_specs()
+        ##Launch packages (Materials)
+        #self.logger.debug('Creating Launch Packages...')
+        #self.launch_packages = self.get_objects_from_records(LaserShockLaunchPackage,'Launch Package',self.flyer_stacks,
+        #                                                     self.spacer_IDs,self.spacer_cutting_programs,self.samples,
+        #                                                     **extra_kwargs)
+        #self.logger.debug(f'Created {len(self.launch_packages)} new Launch Package objects')
+        ##Experiments (Measurements)
+        #self.logger.debug('Creating Experiments...')
+        #self.experiments = self.get_objects_from_records(LaserShockExperiment,'Experiment',self.launch_packages,
+        #                                                 **extra_kwargs)
+        #self.logger.debug(f'Created {len(self.experiments)} new Experiment objects')
+        ##Make sure that there is only one of each unique spec and run (dynamically-created specs may be duplicated)
+        #self.__replace_duplicated_specs()
         self.logger.info('Done creating GEMD objects')
     
-    def get_objects_from_records(self,obj_type,layout_name,*args,n_max_records=100,records_dict=None,**kwargs) :
+    def get_objects_from_records(self,obj_type,layout_name,*args,n_max_records=10,records_dict=None,**kwargs) :
         """
         Return a list of LaserShock/GEMD constructs based on FileMaker records 
         or records in a dictionary (useful for testing)
@@ -221,7 +221,10 @@ class LaserShockLab(DataFileDirectory) :
             records_to_use.append(record)
         if n_recs_skipped>0 :
             self.logger.info(f'Skipped {n_recs_skipped} {layout_name} records that already exist in {self.dirpath}')
+        #create the new objects
         for record in records_to_use :
+            if obj_type==LaserShockSample :
+                print('------------------------------')
             objs.append(obj_type(record,*args,
                                  templates=self._template_store,specs=self._spec_store,logger=self.logger,**kwargs))
         if len(objs)<=0 :
