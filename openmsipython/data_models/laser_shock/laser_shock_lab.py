@@ -222,7 +222,8 @@ class LaserShockLab(DataFileDirectory) :
         if n_recs_skipped>0 :
             self.logger.info(f'Skipped {n_recs_skipped} {layout_name} records that already exist in {self.dirpath}')
         for record in records_to_use :
-            objs.append(obj_type(record,*args,templates=self._template_store,logger=self.logger,**kwargs))
+            objs.append(obj_type(record,*args,
+                                 templates=self._template_store,specs=self._spec_store,logger=self.logger,**kwargs))
         if len(objs)<=0 :
             return objs
         self.__check_unique_values(objs)

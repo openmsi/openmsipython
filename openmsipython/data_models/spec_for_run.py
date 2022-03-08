@@ -1,7 +1,8 @@
 #imports
 from abc import ABC,abstractmethod
+from .has_template_and_spec_stores import HasTemplateAndSpecStores
 
-class SpecForRun(ABC) :
+class SpecForRun(HasTemplateAndSpecStores,ABC) :
     """
     A small base class for dynamically-created Specs
     """
@@ -14,13 +15,8 @@ class SpecForRun(ABC) :
         """
         pass
 
-    @property
-    def templates(self) :
-        return self.__template_store
-
-    def __init__(self,*args,templates,**kwargs) :
-        #set the template store
-        self.__template_store = templates
+    def __init__(self,*args,**kwargs) :
+        super().__init__(*args,**kwargs)
         #get the kwargs that will be used to create the GEMD Spec
         spec_kwargs = self.get_spec_kwargs()
         #create the GEMD spec

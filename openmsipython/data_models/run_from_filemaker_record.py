@@ -21,6 +21,7 @@ class RunFromFileMakerRecord(FromFileMakerRecordBase) :
     def spec_type(self) :
         """
         A property for the type of spec corresponding to this Run object
+        Expected to be a subclass of SpecForRun
         (must be a property of child classes)
         """
         pass
@@ -44,13 +45,13 @@ class RunFromFileMakerRecord(FromFileMakerRecordBase) :
 
     #################### PUBLIC FUNCTIONS ####################
 
-    def __init__(self,record,*args,templates,**kwargs) :
+    def __init__(self,record,*args,**kwargs) :
         """
         Use the information in a given FileMaker record to populate this Run object
         """
-        super().__init__(*args,templates=templates,**kwargs)
+        super().__init__(*args,**kwargs)
         #figure out the Spec for this Run
-        self.__spec = self.get_spec(record,templates)
+        self.__spec = self.get_spec(record)
         #create an initial object from the spec
         self.__run = make_instance(self.__spec)
         #set the name of the Run from the Spec if there is no key defining the name
@@ -68,12 +69,12 @@ class RunFromFileMakerRecord(FromFileMakerRecordBase) :
         """
         pass
 
-    def get_spec(self,record,templates) :
+    def get_spec(self,record) :
         """
         A function to return the Spec for this Run given a FileMaker record
         """
         kwargs = self.get_spec_kwargs(record)
-        new_spec = self.spec_type(templates=templates,**kwargs)
+        new_spec = self.spec_type(templates=self.templates,specs=self.specs,**kwargs)
         return new_spec.spec
 
 class HasSourceFromFileMakerRecord(RunFromFileMakerRecord) :

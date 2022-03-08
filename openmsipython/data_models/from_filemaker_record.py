@@ -5,8 +5,9 @@ from re import template
 from gemd.entity.file_link import FileLink
 from ..shared.logging import LogOwner
 from .utilities import get_tag_value_from_list
+from .has_template_and_spec_stores import HasTemplateAndSpecStores
 
-class FromFileMakerRecordBase(LogOwner,ABC) :
+class FromFileMakerRecordBase(LogOwner,HasTemplateAndSpecStores,ABC) :
     """
     Base class for specs/runs that will be created from FileMaker Records
     """
@@ -82,21 +83,15 @@ class FromFileMakerRecordBase(LogOwner,ABC) :
         """
         return {}
 
-    @property
-    def templates(self) :
-        return self.__template_store
-
     #################### PUBLIC FUNCTIONS ####################
 
-    def __init__(self,*,templates,**kwargs) :
+    def __init__(self,*args,**kwargs) :
         """
-        template store becomes accessible from this object
+        template and spec stores become accessible from this object
         kwargs get sent to the logger object
         """
         #init the Logger
-        super().__init__(**kwargs)
-        #the template store
-        self.__template_store = templates
+        super().__init__(*args,**kwargs)
         #A list of keys whose values have been recognized and used in reading the record
         self.keys_used = []
 
