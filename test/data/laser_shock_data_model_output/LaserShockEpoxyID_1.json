@@ -3,7 +3,7 @@
   "name": "Loctite Ablestik 24",
   "notes": "100:28 Weight Ratio (A:B)\n\n5g to 1.42g - Good for 4 flyers\n10g to 2.84g - Good for 10 flyers",
   "process": {
-    "id": "5b2a10bc-6e8c-4d8b-a629-b65c71e405a7",
+    "id": "ae1aeb98-d40c-4dd6-b330-8576114625f2",
     "scope": "auto",
     "type": "link_by_uid"
   },
@@ -14,12 +14,12 @@
     "modId::2"
   ],
   "template": {
-    "id": "5edff016-6275-488e-9f12-be65416a654b",
+    "id": "d77c80b5-6a60-4c29-883c-db65aa1a6586",
     "scope": "auto",
     "type": "link_by_uid"
   },
   "type": "material_spec",
   "uids": {
-    "auto": "229fd13e-beec-4f68-a3ba-3824691a3bc3"
+    "auto": "a019457f-ec31-4788-8ab1-1f027972b7f0"
   }
 }

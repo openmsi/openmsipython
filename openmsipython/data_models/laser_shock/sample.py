@@ -238,7 +238,7 @@ class LaserShockSample(MaterialRunFromFileMakerRecord) :
 
     @property
     def tags_keys(self) :
-        return [*super().tags_keys,'Sample ID','Supplier Product ID','Date','Performed By','Grant Funding']
+        return [*super().tags_keys,'Sample ID','Supplier Product ID','Date Recorded','Recorded By','Grant Funding']
 
     @property
     def measured_property_dict(self) :

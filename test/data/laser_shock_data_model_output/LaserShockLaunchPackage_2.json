@@ -3,13 +3,13 @@
   "name": "F071-R2C2-Spacer-Sample",
   "notes": null,
   "process": {
-    "id": "699198c7-7223-459c-b6a5-7f55e7e2a6d5",
+    "id": "aa366919-eccb-4126-8383-078b53ef99d3",
     "scope": "auto",
     "type": "link_by_uid"
   },
   "sample_type": "unknown",
   "spec": {
-    "id": "59dd57fc-b37b-4976-b2e7-237f9526e9f2",
+    "id": "d2bb9eb4-2217-40c7-ab2c-750f0cbefd8c",
     "scope": "auto",
     "type": "link_by_uid"
   },
@@ -19,6 +19,6 @@
   ],
   "type": "material_run",
   "uids": {
-    "auto": "99be0c1c-d3c8-4a41-9690-a93611acecbd"
+    "auto": "c01e70e7-900d-4571-8292-3c047ab0c41c"
   }
 }

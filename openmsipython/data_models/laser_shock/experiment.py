@@ -45,6 +45,7 @@ class LaserShockExperimentSpec(SpecForRun) :
                                         origin='computed'))
         names = [
             'Beam Shaper',
+            'PDV Method',
             'Camera Lens',
             'Doubler',
             'Camera Aperture',
@@ -132,6 +133,8 @@ class LaserShockExperimentSpec(SpecForRun) :
             'Attenuator Angle',
             'Booster Amp Setting',
             'Current Set Point',
+            'Seed Laser Wavelength',
+            'Reference Laser Wavelength',
             'Beam Profiler Gain',
             'Beam Profiler Exposure',
         ]
@@ -243,12 +246,15 @@ class LaserShockExperiment(MeasurementRunFromFileMakerRecord) :
             #conditions
             'PreAmp Output Power',
             'PDV Spot Size',
+            'PDV Method',
             #parameters
             'Booster Amp Setting',
             'Focusing Lens Arrangement',
             'System Configuration',
             'Current Set Point',
             'Oscilloscope Range',
+            'Seed Laser Wavelength',
+            'Reference Laser Wavelength',
             #stuff from the camera tab
             #conditions
             'Camera Lens',
