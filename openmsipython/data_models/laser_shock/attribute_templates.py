@@ -602,6 +602,20 @@ ATTR_TEMPL[name] = ParameterTemplate(
     bounds=RealBounds(0.,1.,'A_it')
 )
 
+name = 'Seed Laser Wavelength'
+ATTR_TEMPL[name] = ParameterTemplate(
+    name=name,
+    description='Wavelength of the seed laser',
+    bounds=RealBounds(0.,3.e3,'nm')
+)
+
+name = 'Reference Laser Wavelength'
+ATTR_TEMPL[name] = ParameterTemplate(
+    name=name,
+    description='Wavelength of the reference laser',
+    bounds=RealBounds(0.,3.e3,'nm')
+)
+
 name = 'Beam Profiler Gain'
 ATTR_TEMPL[name] = ParameterTemplate(
     name=name,
@@ -735,6 +749,13 @@ ATTR_TEMPL[name] = ConditionTemplate(
     name=name,
     description='The beam shaper used',
     bounds=CategoricalBounds(['Silios','HoloOr'])
+)
+
+name = 'PDV Method'
+ATTR_TEMPL[name] = ConditionTemplate(
+    name=name,
+    description='The type of PDV performed',
+    bounds=CategoricalBounds(['Standard v1 (US)','Standard v2 (Different Lasers)','Time Lens'])
 )
 
 name = 'Camera Lens'
