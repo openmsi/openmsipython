@@ -3,7 +3,7 @@
   "name": "Borosilicate, T=0.25\"",
   "notes": "",
   "process": {
-    "id": "48292ddb-5500-449a-9e4d-7d0d8be0ab7e",
+    "id": "4bd224d8-332c-4020-8b9e-fbac2a5c2bc4",
     "scope": "auto",
     "type": "link_by_uid"
   },
@@ -16,7 +16,7 @@
         "notes": null,
         "origin": "specified",
         "template": {
-          "id": "c3614bbb-b8ce-4c2f-8475-93f58372184d",
+          "id": "18d6276e-d595-4028-b8de-2b0b35742906",
           "scope": "auto",
           "type": "link_by_uid"
         },
@@ -37,7 +37,7 @@
         "notes": null,
         "origin": "specified",
         "template": {
-          "id": "0cbfa52a-e380-47c4-be7f-8a955778d2c5",
+          "id": "eb08e586-ed49-4471-9232-909f25d3307e",
           "scope": "auto",
           "type": "link_by_uid"
         },
@@ -58,7 +58,7 @@
         "notes": null,
         "origin": "specified",
         "template": {
-          "id": "d6725d43-8ca2-4d6c-adba-e913bd11bdd7",
+          "id": "4e8ad0f6-5495-4c55-8ab5-84001bda08cf",
           "scope": "auto",
           "type": "link_by_uid"
         },
@@ -78,12 +78,12 @@
     "modId::13"
   ],
   "template": {
-    "id": "b160f34f-33dc-4aff-aeb1-8bb4cfa39b6f",
+    "id": "e1bc0030-aacd-4c5e-ac71-d7616642cc4f",
     "scope": "auto",
     "type": "link_by_uid"
   },
   "type": "material_spec",
   "uids": {
-    "auto": "ebd5b45c-a825-4a86-9d2a-6a8022a07e0c"
+    "auto": "fdb2fe53-570c-4c7d-a067-d6daa9275e63"
   }
 }
