@@ -160,7 +160,7 @@ class LaserShockLab(DataFileDirectory) :
         self.logger.debug('Creating Samples...')
         self.samples = self.get_objects_from_records(LaserShockSample,'Sample',**extra_kwargs)
         self.logger.debug(f'Created {len(self.samples)} new Sample objects')
-        ##Launch packages (Materials)
+        #Launch packages (Materials)
         #self.logger.debug('Creating Launch Packages...')
         #self.launch_packages = self.get_objects_from_records(LaserShockLaunchPackage,'Launch Package',self.flyer_stacks,
         #                                                     self.spacer_IDs,self.spacer_cutting_programs,self.samples,
@@ -223,8 +223,7 @@ class LaserShockLab(DataFileDirectory) :
             self.logger.info(f'Skipped {n_recs_skipped} {layout_name} records that already exist in {self.dirpath}')
         #create the new objects
         for record in records_to_use :
-            if obj_type in (LaserShockFlyerStack,LaserShockSample) :
-                print('------------------------------')
+            print('------------------------------')
             objs.append(obj_type(record,*args,
                                  templates=self._template_store,specs=self._spec_store,logger=self.logger,**kwargs))
         if len(objs)<=0 :

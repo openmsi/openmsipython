@@ -221,6 +221,7 @@ class LaserShockFlyerStackSpec(SpecForRun) :
                         )
                 )
         IngredientSpec(name='Glass Epoxy Foil Stack',material=epoxying.output_material,process=cutting)
+        cutting = self.specs.unique_version_of(cutting)
         return cutting
 
 class LaserShockFlyerStack(MaterialRunFromFileMakerRecord) :

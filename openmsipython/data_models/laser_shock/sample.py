@@ -220,8 +220,8 @@ class LaserShockSampleSpec(SpecForRun) :
             )
         for proc in all_procs :
             if proc!=final_output_proc :
-                _ = self.specs.unique_version_of(proc,debug=True)
-        return final_output_proc
+                _ = self.specs.unique_version_of(proc)
+        return self.specs.unique_version_of(final_output_proc)
 
 class LaserShockSample(MaterialRunFromFileMakerRecord) :
     """
