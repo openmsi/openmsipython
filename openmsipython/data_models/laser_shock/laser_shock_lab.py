@@ -161,11 +161,11 @@ class LaserShockLab(DataFileDirectory) :
         self.samples = self.get_objects_from_records(LaserShockSample,'Sample',**extra_kwargs)
         self.logger.debug(f'Created {len(self.samples)} new Sample objects')
         #Launch packages (Materials)
-        #self.logger.debug('Creating Launch Packages...')
-        #self.launch_packages = self.get_objects_from_records(LaserShockLaunchPackage,'Launch Package',self.flyer_stacks,
-        #                                                     self.spacer_IDs,self.spacer_cutting_programs,self.samples,
-        #                                                     **extra_kwargs)
-        #self.logger.debug(f'Created {len(self.launch_packages)} new Launch Package objects')
+        self.logger.debug('Creating Launch Packages...')
+        self.launch_packages = self.get_objects_from_records(LaserShockLaunchPackage,'Launch Package',self.flyer_stacks,
+                                                             self.spacer_IDs,self.spacer_cutting_programs,self.samples,
+                                                             **extra_kwargs)
+        self.logger.debug(f'Created {len(self.launch_packages)} new Launch Package objects')
         ##Experiments (Measurements)
         #self.logger.debug('Creating Experiments...')
         #self.experiments = self.get_objects_from_records(LaserShockExperiment,'Experiment',self.launch_packages,

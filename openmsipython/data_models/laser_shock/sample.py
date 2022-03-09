@@ -256,7 +256,6 @@ class LaserShockSample(MaterialRunFromFileMakerRecord) :
         return {**super().unique_values,self.name_key:self.run.name}
 
     def get_spec_kwargs(self,record) :
-        print(record['Sample Name'])
         kwargs = {}
         kwargs['mat_type'] = record.pop('Material Type')
         kwargs['pct_meas'] = record.pop('Percentage Measure')

@@ -77,7 +77,8 @@ class LaserShockLaunchPackageSpec(SpecForRun) :
         IngredientSpec(name='Flyer Stack',
                        material=self.flyerspec if self.flyerspec is not None else None,
                        process=choosing_flyer)
-        chosen_flyer = MaterialSpec(name='Chosen Flyer',process=choosing_flyer)
+        MaterialSpec(name='Chosen Flyer',process=choosing_flyer)
+        choosing_flyer = self.specs.unique_version_of(choosing_flyer,debug=True)
         # Create Spacer from Spacer ID and Spacer Cutting Program
         if not self.use_spacer :
             return choosing_flyer
@@ -130,7 +131,8 @@ class LaserShockLaunchPackageSpec(SpecForRun) :
         IngredientSpec(name='Spacer Material',
                        material=self.spacerID if self.spacerID is not None else None,
                        process=cutting_spacer)
-        cut_spacer = MaterialSpec(name='Cut Spacer',process=cutting_spacer)
+        MaterialSpec(name='Cut Spacer',process=cutting_spacer)
+        cutting_spacer = self.specs.unique_version_of(cutting_spacer,debug=True)
         # Attach Spacer to Flyer
         attaching_spacer = ProcessSpec(
             name='Attaching Spacer',
@@ -148,9 +150,10 @@ class LaserShockLaunchPackageSpec(SpecForRun) :
                 ],
             template=self.templates.obj('Attaching Spacer')
             )
-        IngredientSpec(name='Chosen Flyer',material=chosen_flyer,process=attaching_spacer)
-        IngredientSpec(name='Cut Spacer',material=cut_spacer,process=attaching_spacer)
-        flyer_and_spacer = MaterialSpec(name='Flyer and Spacer',process=attaching_spacer)
+        IngredientSpec(name='Chosen Flyer',material=choosing_flyer.output_material,process=attaching_spacer)
+        IngredientSpec(name='Cut Spacer',material=cutting_spacer.output_material,process=attaching_spacer)
+        MaterialSpec(name='Flyer and Spacer',process=attaching_spacer)
+        attaching_spacer = self.specs.unique_version_of(attaching_spacer,debug=True)
         # Attach Impact Sample to Flyer and Spacer stack
         if not self.use_sample :
             return attaching_spacer
@@ -183,10 +186,11 @@ class LaserShockLaunchPackageSpec(SpecForRun) :
                               template=self.templates.attr('Sample Attachment Adhesive'),
                               origin='specified')
                     )
-        IngredientSpec(name='Flyer and Spacer',material=flyer_and_spacer,process=attaching_sample)
+        IngredientSpec(name='Flyer and Spacer',material=attaching_spacer.output_material,process=attaching_sample)
         IngredientSpec(name='Impact Sample',
                        material=self.impactsamplespec if self.impactsamplespec is not None else None,
                        process=attaching_sample)
+        attaching_sample = self.specs.unique_version_of(attaching_sample,debug=True)
         return attaching_sample
 
 class LaserShockLaunchPackage(MaterialRunFromFileMakerRecord) :
@@ -220,6 +224,7 @@ class LaserShockLaunchPackage(MaterialRunFromFileMakerRecord) :
     #################### PUBLIC FUNCTIONS ####################
     
     def __init__(self,record,flyer_stacks,spacer_IDs,spacer_cutting_programs,samples,**kwargs) :
+        print(record['Launch ID'])
         # find the flyer stack, spacer ID, spacer cutting program, and sample that were used
         self.flyerstack = search_for_single_tag([fs.run for fs in flyer_stacks],'FlyerID',record.pop('Flyer ID').replace(' ','_'))
         self.spacerID = search_for_single_name([sid.spec for sid in spacer_IDs],
@@ -393,10 +398,13 @@ class LaserShockLaunchPackage(MaterialRunFromFileMakerRecord) :
                                                                      origin='specified'))
         #add the sample as an ingredient in the process
         samplespec = IngredientSpec(name='Sample',material=self.sample.spec,process=impactsamplespec.process)
+        impactsamplespec = self.specs.unique_version_of(impactsamplespec,debug=True)
         #create the Run from the Spec
         impactsample = make_instance(impactsamplespec)
         #add the sample to the Run
-        IngredientRun(material=self.sample,process=impactsample.process,spec=samplespec)
+        for ing in impactsample.process.ingredients :
+            if ing.name=='Sample' :
+                ing.material=self.sample
         #return the ImpactSample Run
         return impactsample
 
