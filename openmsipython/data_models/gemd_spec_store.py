@@ -22,6 +22,12 @@ class GEMDSpecStore :
     @property
     def n_specs(self) :
         return self.__n_specs
+    @property
+    def all_specs(self) :
+        for specdict in self.__types_to_dicts.values() :
+            for name in specdict.keys() :
+                for uid in specdict[name].keys() :
+                    yield specdict[name][uid].spec
 
     def __init__(self,dirpath,encoder=GEMDJson()) :
         self.dirpath = dirpath

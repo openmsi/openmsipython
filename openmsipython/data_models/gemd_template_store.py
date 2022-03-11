@@ -15,6 +15,12 @@ class GEMDTemplateStore :
     @property
     def n_hardcoded(self) :
         return self.__n_hardcoded
+    @property
+    def all_templates(self) :
+        both_dicts = [self.__attribute_templates,self.__object_templates]
+        for tempdict in both_dicts :
+            for name in tempdict.keys() :
+                yield tempdict[name]
 
     def __init__(self,dirpath,attr_hardcoded,obj_hardcoded,encoder=GEMDJson()) :
         """

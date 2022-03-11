@@ -118,6 +118,12 @@ class LaserShockLab(DataFileDirectory) :
         except Exception as e :
             self.logger.error(f'ERROR: failed to instantiate the spec store! Will reraise exception.',exc_obj=e)
         msg=f'Spec store initialized with {self._spec_store.n_specs} specs read from files in {self.dirpath}'
+        #register the UIDs in the template and spec stores as already written
+        self.__uids_written = []
+        for template in self._template_store.all_templates :
+            self.__uids_written.append(template.uids[self.encoder.scope])
+        for spec in self._spec_store.all_specs :
+            self.__uids_written.append(spec.uids[self.encoder.scope])
         self.logger.info(msg)
 
     def create_gemd_objects(self,records_dict=None) :
@@ -172,11 +178,9 @@ class LaserShockLab(DataFileDirectory) :
                                                          **extra_kwargs)
         self.logger.debug(f'Created {len(self.experiments)} new Experiment objects')
         self.logger.debug(f'{self._spec_store.n_specs} total unique Specs stored')
-        ##Make sure that there is only one of each unique spec and run (dynamically-created specs may be duplicated)
-        #self.__replace_duplicated_specs()
         self.logger.info('Done creating GEMD objects')
     
-    def get_objects_from_records(self,obj_type,layout_name,*args,n_max_records=100,records_dict=None,**kwargs) :
+    def get_objects_from_records(self,obj_type,layout_name,*args,n_max_records=100000,records_dict=None,**kwargs) :
         """
         Return a list of LaserShock/GEMD constructs based on FileMaker records 
         or records in a dictionary (useful for testing)
@@ -223,7 +227,9 @@ class LaserShockLab(DataFileDirectory) :
         if n_recs_skipped>0 :
             self.logger.info(f'Skipped {n_recs_skipped} {layout_name} records that already exist in {self.dirpath}')
         #create the new objects
-        for record in records_to_use :
+        for ir,record in enumerate(records_to_use) :
+            if ir>0 and ir%25==0 :
+                self.logger.debug(f'\tCreating {obj_type.__name__} {ir} of {len(records_to_use)}...')
             objs.append(obj_type(record,*args,
                                  templates=self._template_store,specs=self._spec_store,logger=self.logger,**kwargs))
         if len(objs)<=0 :
@@ -244,10 +250,9 @@ class LaserShockLab(DataFileDirectory) :
         recursive = if True, also write out json files for all objects linked to each chosen object
         """
         self.logger.info('Dumping GEMD objects to JSON files...')
-        #set some variables so the recursive function knows how to dump the files
+        #set a variable so the recursive function knows how to dump the files
         self.__indent = indent
-        self.__uids_written = []
-        #dump the different parts of the lab data model to json files
+        #dump the different "Run" parts of the lab data model to json files
         for obj_list in self.all_object_lists :
             objs_to_dump = obj_list[:min(n_max_objs,len(obj_list))] if n_max_objs>0 else obj_list
             for obj in objs_to_dump :
@@ -262,7 +267,13 @@ class LaserShockLab(DataFileDirectory) :
                             fp.write(json.dumps(context_list,indent=indent))
                 self.__uids_written.append(obj_to_write.uids["auto"])
                 if recursive :
-                    recursive_foreach(obj_to_write,self.__dump_obj_to_json)
+                    recursive_foreach(obj_to_write,self.__dump_run_objs_to_json)
+        #dump the specs in the spec store
+        for spec in self._spec_store.all_specs :
+            self.__dump_obj_to_json(spec)
+        #dump the templates in the template store
+        for template in self._template_store.all_templates :
+            self.__dump_obj_to_json(template)
         self.logger.info('Done.')
 
     #################### PRIVATE HELPER FUNCTIONS ####################
@@ -308,122 +319,10 @@ class LaserShockLab(DataFileDirectory) :
                     self.logger.warning(msg)
                 done.add(uv)
 
-    def __count_specs(self,item) :
-        if isinstance_spec(item):
-            self.__n_total_specs+=1
-
-    def __find_unique_spec_objs(self,item) :
-        if not isinstance_spec(item):
+    def __dump_run_objs_to_json(self,item) :
+        if not isinstance_run(item) :
             return
-        itemname = item.name
-        if itemname not in self.__unique_specs_by_name.keys() :
-            self.__unique_specs_by_name[itemname] = []
-        itemdict = item.as_dict()
-        found = False
-        for uspecdict,_,_ in self.__unique_specs_by_name[itemname] :
-            if itemdict==uspecdict :
-                found = True
-                break
-        if not found :
-            ing_dicts = []
-            if isinstance_process_spec(item) :
-                for ing in item.ingredients :
-                    ing_dicts.append(ing.as_dict())
-            self.__unique_specs_by_name[itemname].append((itemdict,item,ing_dicts))
-
-    def __replace_duplicated_specs_recursive(self,item) :
-        #replace specs for MaterialRuns, ProcessRuns, IngredientRuns, and MeasurementRuns
-        if isinstance_run(item) :
-            if item.spec is not None :
-                thisspecname = item.spec.name
-                thisspecdict = item.spec.as_dict()
-                for specdict,spec,_ in self.__unique_specs_by_name[thisspecname] :
-                    if thisspecdict==specdict :
-                        item.spec = spec
-                        break
-        #replace MaterialSpecs for IngredientSpecs
-        if isinstance_ingredient_spec(item) :
-            if item.material is not None :
-                thisspecname = item.material.name
-                thisspecdict = item.material.as_dict()
-                for specdict,spec,_ in self.__unique_specs_by_name[thisspecname] :
-                    if thisspecdict==specdict :
-                        item.material = spec
-                        break
-        #replace ProcessSpecs for MaterialSpecs and IngredientSpecs
-        if isinstance_material_ingredient_spec(item) :
-            if item.process is not None :
-                thisspecname = item.process.name
-                thisspecdict = item.process.as_dict()
-                for specdict,spec,existing_ing_dicts in self.__unique_specs_by_name[thisspecname] :
-                    if thisspecdict==specdict :
-                        #ingredients only have their processes reset if they're not in the process's ingredients already
-                        should_add = True
-                        if isinstance_ingredient_spec(item) :
-                            item_as_dict = item.as_dict()
-                            for existing_ing_as_dict in existing_ing_dicts :
-                                if existing_ing_as_dict==item_as_dict :
-                                    should_add=False
-                                    break
-                        if should_add :
-                            try :
-                                item.process = spec
-                            except Exception :
-                                pass
-                        break
-
-    def __remove_duplicate_ingredients(self,item) :
-        #remove duplicate IngredientSpecs from ProcesSpecs
-        if isinstance_process_spec(item) :
-            unique_ingredient_dicts = []
-            for ing in item.ingredients :
-                ingdict = ing.as_dict()
-                if ingdict in unique_ingredient_dicts :
-                    ing.process = None
-                else :
-                    unique_ingredient_dicts.append(ingdict)
-
-    def __replace_duplicated_specs(self) :
-        # Find the sets of unique specs and runs
-        self.logger.debug('Finding the set of unique Specs...')
-        self.__n_total_specs = 0
-        recursive_foreach(self.all_top_objs,self.__count_specs)
-        self.__unique_specs_by_name = {}
-        recursive_foreach(self.all_top_objs,self.__find_unique_spec_objs)
-        n_unique_specs = 0
-        for t in self.__unique_specs_by_name.keys() :
-            for us in self.__unique_specs_by_name[t] :
-                n_unique_specs+=1
-        self.logger.debug(f'Found {n_unique_specs} unique Specs from a set of {self.__n_total_specs} total')
-        #replace duplicate specs in the SpecFromFileMakerRecord objects
-        self.logger.debug('Replacing duplicated top level Specs...')
-        for sfr in self.specs_from_records :
-            thisspecname = sfr.spec.name
-            thisspecdict = sfr.spec.as_dict()
-            for specdict,spec,_ in self.__unique_specs_by_name[thisspecname] :
-                if thisspecdict==specdict :
-                    sfr.spec = spec
-                    break
-        #iterate recursively replacing specs until only the unique ones remain (or all the replacement links are gone)
-        iter_i = 1
-        previous_n_specs = self.__n_total_specs+1
-        while self.__n_total_specs>n_unique_specs and self.__n_total_specs<previous_n_specs :
-            msg = f'Recursively replacing all duplicated lower level Specs (iteration {iter_i},'
-            msg+= f' {self.__n_total_specs} total, {n_unique_specs} unique)...'
-            self.logger.debug(msg)
-            recursive_foreach(self.all_top_objs,self.__replace_duplicated_specs_recursive,apply_first=True)
-            recursive_foreach(self.all_top_objs,self.__remove_duplicate_ingredients)
-            previous_n_specs = self.__n_total_specs
-            self.__n_total_specs = 0
-            recursive_foreach(self.all_top_objs,self.__count_specs)
-            self.__unique_specs_by_name = {}
-            recursive_foreach(self.all_top_objs,self.__find_unique_spec_objs)
-            n_unique_specs = 0
-            for t in self.__unique_specs_by_name.keys() :
-                for _ in self.__unique_specs_by_name[t] :
-                    n_unique_specs+=1
-            iter_i+=1
-        self.logger.debug(f'Final number of Specs = {self.__n_total_specs}')
+        self.__dump_obj_to_json(item)
 
     def __dump_obj_to_json(self,item) :
         uid = item.uids["auto"]
