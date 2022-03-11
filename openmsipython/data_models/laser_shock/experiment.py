@@ -116,6 +116,7 @@ class LaserShockExperimentSpec(SpecForRun) :
             'Focusing Lens Arrangement',
             'System Configuration',
             'Oscilloscope Range',
+            'Time per Div',
             'Speed',
             'Exposure',
         ]
@@ -135,6 +136,7 @@ class LaserShockExperimentSpec(SpecForRun) :
             'Current Set Point',
             'Seed Laser Wavelength',
             'Reference Laser Wavelength',
+            'Carrier Freq',
             'Beam Profiler Gain',
             'Beam Profiler Exposure',
         ]
@@ -253,8 +255,10 @@ class LaserShockExperiment(MeasurementRunFromFileMakerRecord) :
             'System Configuration',
             'Current Set Point',
             'Oscilloscope Range',
+            'Time per Div',
             'Seed Laser Wavelength',
             'Reference Laser Wavelength',
+            'Carrier Freq',
             #stuff from the camera tab
             #conditions
             'Camera Lens',

@@ -552,8 +552,15 @@ ATTR_TEMPL[name] = ParameterTemplate(
 name = 'Oscilloscope Range'
 ATTR_TEMPL[name] = ParameterTemplate(
     name=name,
-    description="The range setting on the oscilloscope (mV/div, categorical bc it's a dropdown menu)",
-    bounds=CategoricalBounds(['50','100','200'])
+    description="The voltage range setting on the oscilloscope (mV/div, categorical bc it's a dropdown menu)",
+    bounds=CategoricalBounds(['2','5','10','20','50','100','200'])
+)
+
+name = 'Time per Div'
+ATTR_TEMPL[name] = ParameterTemplate(
+    name=name,
+    description="The time range setting on the oscilloscope (us/div, categorical bc it's a dropdown menu)",
+    bounds=CategoricalBounds(['10','20','50'])
 )
 
 name = 'Speed'
@@ -607,6 +614,13 @@ ATTR_TEMPL[name] = ParameterTemplate(
     name=name,
     description='Wavelength of the reference laser',
     bounds=RealBounds(0.,3.e3,'nm')
+)
+
+name = 'Carrier Freq'
+ATTR_TEMPL[name] = ParameterTemplate(
+    name=name,
+    description='Carrier frequency (theoretical)',
+    bounds=RealBounds(0.,20.,'GH')
 )
 
 name = 'Beam Profiler Gain'

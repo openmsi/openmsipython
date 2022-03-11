@@ -4,13 +4,13 @@
     "name": "Flyer Stack",
     "notes": "",
     "process": {
-      "id": "ad6abc07-8b76-4794-ac07-efd3737f194b",
+      "id": "0be74496-7448-442a-9f6f-1bdd0068a5c7",
       "scope": "auto",
       "type": "link_by_uid"
     },
     "sample_type": "unknown",
     "spec": {
-      "id": "38410019-d0fc-41fe-bb21-d34f2281cc63",
+      "id": "fb63f2d1-0a36-42a1-8f9c-1f57c4a7c755",
       "scope": "auto",
       "type": "link_by_uid"
     },
@@ -21,14 +21,14 @@
     ],
     "type": "material_run",
     "uids": {
-      "auto": "f66ad772-e1f6-4410-b381-2f3caeafe301"
+      "auto": "3021c7f2-16f7-44a7-80f8-01e62d7800e9"
     }
   },
   {
     "conditions": [],
     "file_links": [],
     "material": {
-      "id": "f66ad772-e1f6-4410-b381-2f3caeafe301",
+      "id": "3021c7f2-16f7-44a7-80f8-01e62d7800e9",
       "scope": "auto",
       "type": "link_by_uid"
     },
@@ -42,7 +42,7 @@
         "notes": null,
         "origin": "computed",
         "template": {
-          "id": "b41bbbdb-7914-40a7-a951-7de95b253410",
+          "id": "c011721c-9ee4-46c9-a62f-6c0bdd1b496e",
           "scope": "auto",
           "type": "link_by_uid"
         },
@@ -56,14 +56,14 @@
     ],
     "source": null,
     "spec": {
-      "id": "6e6675a9-026a-4699-98c9-004144164208",
+      "id": "e697ac70-dfb5-4267-bdee-acc4df2307eb",
       "scope": "auto",
       "type": "link_by_uid"
     },
     "tags": [],
     "type": "measurement_run",
     "uids": {
-      "auto": "fb66d2c2-4e6b-46a1-a2f5-70596be34496"
+      "auto": "e356790c-70a5-4977-b732-ca45624d6673"
     }
   },
   {
@@ -78,7 +78,7 @@
     "tags": [],
     "type": "property_template",
     "uids": {
-      "auto": "b41bbbdb-7914-40a7-a951-7de95b253410"
+      "auto": "c011721c-9ee4-46c9-a62f-6c0bdd1b496e"
     }
   },
   {
@@ -91,14 +91,14 @@
     "template": null,
     "type": "measurement_spec",
     "uids": {
-      "auto": "6e6675a9-026a-4699-98c9-004144164208"
+      "auto": "e697ac70-dfb5-4267-bdee-acc4df2307eb"
     }
   },
   {
     "conditions": [],
     "file_links": [],
     "material": {
-      "id": "f66ad772-e1f6-4410-b381-2f3caeafe301",
+      "id": "3021c7f2-16f7-44a7-80f8-01e62d7800e9",
       "scope": "auto",
       "type": "link_by_uid"
     },
@@ -112,7 +112,7 @@
         "notes": null,
         "origin": "computed",
         "template": {
-          "id": "b41bbbdb-7914-40a7-a951-7de95b253410",
+          "id": "c011721c-9ee4-46c9-a62f-6c0bdd1b496e",
           "scope": "auto",
           "type": "link_by_uid"
         },
@@ -126,14 +126,14 @@
     ],
     "source": null,
     "spec": {
-      "id": "759dc76d-e354-40a0-8249-afec1a930a92",
+      "id": "a12cd353-53d7-4604-81ed-777a917bae14",
       "scope": "auto",
       "type": "link_by_uid"
     },
     "tags": [],
     "type": "measurement_run",
     "uids": {
-      "auto": "a52f85cb-9354-4424-978d-b750414f1a41"
+      "auto": "f1819ae3-a3ae-4514-91b7-3b083827c3c1"
     }
   },
   {
@@ -146,14 +146,14 @@
     "template": null,
     "type": "measurement_spec",
     "uids": {
-      "auto": "759dc76d-e354-40a0-8249-afec1a930a92"
+      "auto": "a12cd353-53d7-4604-81ed-777a917bae14"
     }
   },
   {
     "conditions": [],
     "file_links": [],
     "material": {
-      "id": "f66ad772-e1f6-4410-b381-2f3caeafe301",
+      "id": "3021c7f2-16f7-44a7-80f8-01e62d7800e9",
       "scope": "auto",
       "type": "link_by_uid"
     },
@@ -167,7 +167,7 @@
         "notes": null,
         "origin": "computed",
         "template": {
-          "id": "b41bbbdb-7914-40a7-a951-7de95b253410",
+          "id": "c011721c-9ee4-46c9-a62f-6c0bdd1b496e",
           "scope": "auto",
           "type": "link_by_uid"
         },
@@ -181,14 +181,14 @@
     ],
     "source": null,
     "spec": {
-      "id": "dde9c3fb-6d7f-4d92-ac35-3fccd44b8520",
+      "id": "be07d580-85d6-411f-92cd-67b5a5dde638",
       "scope": "auto",
       "type": "link_by_uid"
     },
     "tags": [],
     "type": "measurement_run",
     "uids": {
-      "auto": "917484d0-8a36-4e66-9649-a5ede7574a27"
+      "auto": "305da5fe-7a16-4b95-b897-70c76a07681b"
     }
   },
   {
@@ -201,14 +201,14 @@
     "template": null,
     "type": "measurement_spec",
     "uids": {
-      "auto": "dde9c3fb-6d7f-4d92-ac35-3fccd44b8520"
+      "auto": "be07d580-85d6-411f-92cd-67b5a5dde638"
     }
   },
   {
     "conditions": [],
     "file_links": [],
     "material": {
-      "id": "f66ad772-e1f6-4410-b381-2f3caeafe301",
+      "id": "3021c7f2-16f7-44a7-80f8-01e62d7800e9",
       "scope": "auto",
       "type": "link_by_uid"
     },
@@ -222,7 +222,7 @@
         "notes": null,
         "origin": "computed",
         "template": {
-          "id": "b41bbbdb-7914-40a7-a951-7de95b253410",
+          "id": "c011721c-9ee4-46c9-a62f-6c0bdd1b496e",
           "scope": "auto",
           "type": "link_by_uid"
         },
@@ -236,14 +236,14 @@
     ],
     "source": null,
     "spec": {
-      "id": "c8bf4719-96c2-4064-a5b9-1778d6e013c2",
+      "id": "b0555bc5-e0c2-487a-bb6d-4b7b899a7315",
       "scope": "auto",
       "type": "link_by_uid"
     },
     "tags": [],
     "type": "measurement_run",
     "uids": {
-      "auto": "85a29e04-e026-40e2-a8d4-f74965a2c3f6"
+      "auto": "72c6af02-4f71-4033-aa18-f4ff4b4b5147"
     }
   },
   {
@@ -256,14 +256,14 @@
     "template": null,
     "type": "measurement_spec",
     "uids": {
-      "auto": "c8bf4719-96c2-4064-a5b9-1778d6e013c2"
+      "auto": "b0555bc5-e0c2-487a-bb6d-4b7b899a7315"
     }
   },
   {
     "conditions": [],
     "file_links": [],
     "material": {
-      "id": "f66ad772-e1f6-4410-b381-2f3caeafe301",
+      "id": "3021c7f2-16f7-44a7-80f8-01e62d7800e9",
       "scope": "auto",
       "type": "link_by_uid"
     },
@@ -277,7 +277,7 @@
         "notes": null,
         "origin": "measured",
         "template": {
-          "id": "3584c92c-58ed-4920-8d7c-115d4f0a1da9",
+          "id": "ece28d55-f3a4-4419-9636-d38cd49fc430",
           "scope": "auto",
           "type": "link_by_uid"
         },
@@ -291,14 +291,14 @@
     ],
     "source": null,
     "spec": {
-      "id": "53cfe3f8-755c-4e7f-92d7-f9d848edfda9",
+      "id": "5771fde8-54bd-45bd-99a0-4090c9823526",
       "scope": "auto",
       "type": "link_by_uid"
     },
     "tags": [],
     "type": "measurement_run",
     "uids": {
-      "auto": "25e40149-83a7-48b4-bb5d-dd417031158e"
+      "auto": "9e4b0596-e709-4691-967e-30ba1195dd86"
     }
   },
   {
@@ -313,7 +313,7 @@
     "tags": [],
     "type": "property_template",
     "uids": {
-      "auto": "3584c92c-58ed-4920-8d7c-115d4f0a1da9"
+      "auto": "ece28d55-f3a4-4419-9636-d38cd49fc430"
     }
   },
   {
@@ -326,14 +326,14 @@
     "template": null,
     "type": "measurement_spec",
     "uids": {
-      "auto": "53cfe3f8-755c-4e7f-92d7-f9d848edfda9"
+      "auto": "5771fde8-54bd-45bd-99a0-4090c9823526"
     }
   },
   {
     "conditions": [],
     "file_links": [],
     "material": {
-      "id": "f66ad772-e1f6-4410-b381-2f3caeafe301",
+      "id": "3021c7f2-16f7-44a7-80f8-01e62d7800e9",
       "scope": "auto",
       "type": "link_by_uid"
     },
@@ -347,7 +347,7 @@
         "notes": null,
         "origin": "measured",
         "template": {
-          "id": "3584c92c-58ed-4920-8d7c-115d4f0a1da9",
+          "id": "ece28d55-f3a4-4419-9636-d38cd49fc430",
           "scope": "auto",
           "type": "link_by_uid"
         },
@@ -361,14 +361,14 @@
     ],
     "source": null,
     "spec": {
-      "id": "ac7eb7ea-a08e-4d40-ae18-5d9b88a73c93",
+      "id": "f0e6b93a-b69f-4865-a825-54ff7b31f5c0",
       "scope": "auto",
       "type": "link_by_uid"
     },
     "tags": [],
     "type": "measurement_run",
     "uids": {
-      "auto": "8d9f01c1-e5ad-4fc6-8b4b-28cac8ddd731"
+      "auto": "388fbf59-3f2a-49e4-962b-6e0410fe43a2"
     }
   },
   {
@@ -381,14 +381,14 @@
     "template": null,
     "type": "measurement_spec",
     "uids": {
-      "auto": "ac7eb7ea-a08e-4d40-ae18-5d9b88a73c93"
+      "auto": "f0e6b93a-b69f-4865-a825-54ff7b31f5c0"
     }
   },
   {
     "conditions": [],
     "file_links": [],
     "material": {
-      "id": "f66ad772-e1f6-4410-b381-2f3caeafe301",
+      "id": "3021c7f2-16f7-44a7-80f8-01e62d7800e9",
       "scope": "auto",
       "type": "link_by_uid"
     },
@@ -402,7 +402,7 @@
         "notes": null,
         "origin": "measured",
         "template": {
-          "id": "3584c92c-58ed-4920-8d7c-115d4f0a1da9",
+          "id": "ece28d55-f3a4-4419-9636-d38cd49fc430",
           "scope": "auto",
           "type": "link_by_uid"
         },
@@ -416,14 +416,14 @@
     ],
     "source": null,
     "spec": {
-      "id": "03876c13-7943-41e0-962b-9cd190186c82",
+      "id": "5c758856-7769-404e-84f1-a07bd0bb3dea",
       "scope": "auto",
       "type": "link_by_uid"
     },
     "tags": [],
     "type": "measurement_run",
     "uids": {
-      "auto": "b691fb04-b754-4b9c-bf41-026bb1e60e3f"
+      "auto": "0b327a8d-c2f6-479b-a092-e70904032524"
     }
   },
   {
@@ -436,14 +436,14 @@
     "template": null,
     "type": "measurement_spec",
     "uids": {
-      "auto": "03876c13-7943-41e0-962b-9cd190186c82"
+      "auto": "5c758856-7769-404e-84f1-a07bd0bb3dea"
     }
   },
   {
     "conditions": [],
     "file_links": [],
     "material": {
-      "id": "f66ad772-e1f6-4410-b381-2f3caeafe301",
+      "id": "3021c7f2-16f7-44a7-80f8-01e62d7800e9",
       "scope": "auto",
       "type": "link_by_uid"
     },
@@ -457,7 +457,7 @@
         "notes": null,
         "origin": "measured",
         "template": {
-          "id": "3584c92c-58ed-4920-8d7c-115d4f0a1da9",
+          "id": "ece28d55-f3a4-4419-9636-d38cd49fc430",
           "scope": "auto",
           "type": "link_by_uid"
         },
@@ -471,14 +471,14 @@
     ],
     "source": null,
     "spec": {
-      "id": "2bb45767-acb9-43ac-8a96-fe84a2ca6362",
+      "id": "01061501-e1df-4728-9c49-527a80c41381",
       "scope": "auto",
       "type": "link_by_uid"
     },
     "tags": [],
     "type": "measurement_run",
     "uids": {
-      "auto": "d4fdb512-040c-43bb-bb18-3fd0de9e8ef4"
+      "auto": "25098d11-51bc-4a72-8ea0-1206e2a1122a"
     }
   },
   {
@@ -491,7 +491,7 @@
     "template": null,
     "type": "measurement_spec",
     "uids": {
-      "auto": "2bb45767-acb9-43ac-8a96-fe84a2ca6362"
+      "auto": "01061501-e1df-4728-9c49-527a80c41381"
     }
   },
   {
@@ -506,14 +506,14 @@
       "type": "performed_source"
     },
     "spec": {
-      "id": "173d6c59-a27a-47fa-8db1-474d75ca1502",
+      "id": "e5502981-afa0-42ce-82ae-cac81d580774",
       "scope": "auto",
       "type": "link_by_uid"
     },
     "tags": [],
     "type": "process_run",
     "uids": {
-      "auto": "ad6abc07-8b76-4794-ac07-efd3737f194b"
+      "auto": "0be74496-7448-442a-9f6f-1bdd0068a5c7"
     }
   },
   {
@@ -522,7 +522,7 @@
     "labels": [],
     "mass_fraction": null,
     "material": {
-      "id": "edee9cc2-375e-418a-a9d1-8239c59db022",
+      "id": "6951b79c-a23b-43ba-a681-f7c7a8ea02db",
       "scope": "auto",
       "type": "link_by_uid"
     },
@@ -530,19 +530,19 @@
     "notes": null,
     "number_fraction": null,
     "process": {
-      "id": "ad6abc07-8b76-4794-ac07-efd3737f194b",
+      "id": "0be74496-7448-442a-9f6f-1bdd0068a5c7",
       "scope": "auto",
       "type": "link_by_uid"
     },
     "spec": {
-      "id": "a5fb4d81-650c-473f-aba3-5448a7370014",
+      "id": "65ab98d5-1075-481d-9192-ba7c54b49100",
       "scope": "auto",
       "type": "link_by_uid"
     },
     "tags": [],
     "type": "ingredient_run",
     "uids": {
-      "auto": "0ae49050-0683-4b1c-b754-f6b7952e70f3"
+      "auto": "3029bd30-ebf2-42b2-adf7-b4659075a3d9"
     },
     "volume_fraction": null
   },
@@ -551,20 +551,20 @@
     "name": "Glass Epoxy Foil Stack",
     "notes": null,
     "process": {
-      "id": "b6c79c02-b66e-4619-861a-c9e05b664ca7",
+      "id": "29ae1a71-c83d-4ba6-a19a-6a685d0e897f",
       "scope": "auto",
       "type": "link_by_uid"
     },
     "sample_type": "unknown",
     "spec": {
-      "id": "1ac44e3c-aa03-4a0f-9ed1-f592c498bb89",
+      "id": "1dbb6ba0-e089-4b9f-9a75-abda57e9670e",
       "scope": "auto",
       "type": "link_by_uid"
     },
     "tags": [],
     "type": "material_run",
     "uids": {
-      "auto": "edee9cc2-375e-418a-a9d1-8239c59db022"
+      "auto": "6951b79c-a23b-43ba-a681-f7c7a8ea02db"
     }
   },
   {
@@ -575,14 +575,14 @@
     "parameters": [],
     "source": null,
     "spec": {
-      "id": "bd109b2e-3ca4-4015-b353-1e2bf81223a2",
+      "id": "13425a7b-f1e7-4934-a106-5b590d90672a",
       "scope": "auto",
       "type": "link_by_uid"
     },
     "tags": [],
     "type": "process_run",
     "uids": {
-      "auto": "b6c79c02-b66e-4619-861a-c9e05b664ca7"
+      "auto": "29ae1a71-c83d-4ba6-a19a-6a685d0e897f"
     }
   },
   {
@@ -591,7 +591,7 @@
     "labels": [],
     "mass_fraction": null,
     "material": {
-      "id": "cfc9294f-84d0-42ec-8ac6-24eebaefa725",
+      "id": "27c086ee-1f49-4655-8fba-1fd2c9da980d",
       "scope": "auto",
       "type": "link_by_uid"
     },
@@ -599,19 +599,19 @@
     "notes": null,
     "number_fraction": null,
     "process": {
-      "id": "b6c79c02-b66e-4619-861a-c9e05b664ca7",
+      "id": "29ae1a71-c83d-4ba6-a19a-6a685d0e897f",
       "scope": "auto",
       "type": "link_by_uid"
     },
     "spec": {
-      "id": "de1833ad-0d9c-4d11-81cb-5869df6538f6",
+      "id": "b605cbaa-f99e-41d8-8ced-b9ee7095e931",
       "scope": "auto",
       "type": "link_by_uid"
     },
     "tags": [],
     "type": "ingredient_run",
     "uids": {
-      "auto": "001852e6-0149-4499-a54c-69ceea9ad18f"
+      "auto": "c2e43671-12f9-4e47-a921-fd90fabafb23"
     },
     "volume_fraction": null
   },
@@ -620,20 +620,20 @@
     "name": "Mixed Epoxy",
     "notes": null,
     "process": {
-      "id": "4265f6be-c7f0-476d-83b0-5b10bbab109f",
+      "id": "056a5e6f-1242-4e26-ba73-19b13cda4591",
       "scope": "auto",
       "type": "link_by_uid"
     },
     "sample_type": "unknown",
     "spec": {
-      "id": "1e9700d7-56d2-4a44-b922-e59927072748",
+      "id": "8fae1efa-dff9-4409-9ca5-0683de0e11f6",
       "scope": "auto",
       "type": "link_by_uid"
     },
     "tags": [],
     "type": "material_run",
     "uids": {
-      "auto": "cfc9294f-84d0-42ec-8ac6-24eebaefa725"
+      "auto": "27c086ee-1f49-4655-8fba-1fd2c9da980d"
     }
   },
   {
@@ -644,14 +644,14 @@
     "parameters": [],
     "source": null,
     "spec": {
-      "id": "d6ed7c59-5ae6-4ad5-b8bc-1f6bc6395729",
+      "id": "30f74441-36ad-4bc2-973d-4818d1a6c713",
       "scope": "auto",
       "type": "link_by_uid"
     },
     "tags": [],
     "type": "process_run",
     "uids": {
-      "auto": "4265f6be-c7f0-476d-83b0-5b10bbab109f"
+      "auto": "056a5e6f-1242-4e26-ba73-19b13cda4591"
     }
   },
   {
@@ -660,7 +660,7 @@
     "labels": [],
     "mass_fraction": null,
     "material": {
-      "id": "5365b219-48ad-4543-b72c-15140a50585d",
+      "id": "37079edb-390f-462d-ad9e-32c09afd9c7f",
       "scope": "auto",
       "type": "link_by_uid"
     },
@@ -668,19 +668,19 @@
     "notes": null,
     "number_fraction": null,
     "process": {
-      "id": "4265f6be-c7f0-476d-83b0-5b10bbab109f",
+      "id": "056a5e6f-1242-4e26-ba73-19b13cda4591",
       "scope": "auto",
       "type": "link_by_uid"
     },
     "spec": {
-      "id": "608e0ee7-b69e-4b71-afe3-6b01eca9d0b9",
+      "id": "37439985-745f-42fb-9868-e1d50c5dd140",
       "scope": "auto",
       "type": "link_by_uid"
     },
     "tags": [],
     "type": "ingredient_run",
     "uids": {
-      "auto": "1c2e3eff-efd7-471c-820b-71b8286bac93"
+      "auto": "0a7f39b2-5f19-41ec-9ef4-badc054a397f"
     },
     "volume_fraction": null
   },
@@ -689,20 +689,20 @@
     "name": "Loctite Ablestik 24",
     "notes": null,
     "process": {
-      "id": "075cbc9d-5469-4e4b-8a6d-f2ee59f7f8e7",
+      "id": "aef2881d-068f-48e1-b1b6-132dbfcbf587",
       "scope": "auto",
       "type": "link_by_uid"
     },
     "sample_type": "unknown",
     "spec": {
-      "id": "a019457f-ec31-4788-8ab1-1f027972b7f0",
+      "id": "d1284de6-2ab6-4833-ba21-5639b23fc42b",
       "scope": "auto",
       "type": "link_by_uid"
     },
     "tags": [],
     "type": "material_run",
     "uids": {
-      "auto": "5365b219-48ad-4543-b72c-15140a50585d"
+      "auto": "37079edb-390f-462d-ad9e-32c09afd9c7f"
     }
   },
   {
@@ -713,14 +713,14 @@
     "parameters": [],
     "source": null,
     "spec": {
-      "id": "ae1aeb98-d40c-4dd6-b330-8576114625f2",
+      "id": "65a3025d-0539-4f84-9a7f-be8723fc9ea8",
       "scope": "auto",
       "type": "link_by_uid"
     },
     "tags": [],
     "type": "process_run",
     "uids": {
-      "auto": "075cbc9d-5469-4e4b-8a6d-f2ee59f7f8e7"
+      "auto": "aef2881d-068f-48e1-b1b6-132dbfcbf587"
     }
   },
   {
@@ -735,7 +735,7 @@
         "notes": null,
         "origin": "specified",
         "template": {
-          "id": "bc86ad3b-6123-4c74-b05e-ddeda757b864",
+          "id": "ddba2510-e927-4122-b4bf-2a7a8976f30a",
           "scope": "auto",
           "type": "link_by_uid"
         },
@@ -748,13 +748,13 @@
     ],
     "tags": [],
     "template": {
-      "id": "7350b183-2310-4426-bcc7-c218b5a3ac74",
+      "id": "02514ab2-2b4e-4bf7-94f3-a4b53327063b",
       "scope": "auto",
       "type": "link_by_uid"
     },
     "type": "process_spec",
     "uids": {
-      "auto": "ae1aeb98-d40c-4dd6-b330-8576114625f2"
+      "auto": "65a3025d-0539-4f84-9a7f-be8723fc9ea8"
     }
   },
   {
@@ -762,7 +762,7 @@
     "name": "Loctite Ablestik 24",
     "notes": "100:28 Weight Ratio (A:B)\n\n5g to 1.42g - Good for 4 flyers\n10g to 2.84g - Good for 10 flyers",
     "process": {
-      "id": "ae1aeb98-d40c-4dd6-b330-8576114625f2",
+      "id": "65a3025d-0539-4f84-9a7f-be8723fc9ea8",
       "scope": "auto",
       "type": "link_by_uid"
     },
@@ -773,13 +773,13 @@
       "modId::2"
     ],
     "template": {
-      "id": "d77c80b5-6a60-4c29-883c-db65aa1a6586",
+      "id": "dc938fb9-b7fd-47c6-99a9-35c0143e8d44",
       "scope": "auto",
       "type": "link_by_uid"
     },
     "type": "material_spec",
     "uids": {
-      "auto": "a019457f-ec31-4788-8ab1-1f027972b7f0"
+      "auto": "d1284de6-2ab6-4833-ba21-5639b23fc42b"
     }
   },
   {
@@ -789,7 +789,7 @@
     "tags": [],
     "type": "material_template",
     "uids": {
-      "auto": "d77c80b5-6a60-4c29-883c-db65aa1a6586"
+      "auto": "dc938fb9-b7fd-47c6-99a9-35c0143e8d44"
     }
   },
   {
@@ -804,7 +804,7 @@
     "tags": [],
     "type": "parameter_template",
     "uids": {
-      "auto": "bc86ad3b-6123-4c74-b05e-ddeda757b864"
+      "auto": "ddba2510-e927-4122-b4bf-2a7a8976f30a"
     }
   },
   {
@@ -816,7 +816,7 @@
     "parameters": [
       [
         {
-          "id": "bc86ad3b-6123-4c74-b05e-ddeda757b864",
+          "id": "ddba2510-e927-4122-b4bf-2a7a8976f30a",
           "scope": "auto",
           "type": "link_by_uid"
         },
@@ -826,7 +826,7 @@
     "tags": [],
     "type": "process_template",
     "uids": {
-      "auto": "7350b183-2310-4426-bcc7-c218b5a3ac74"
+      "auto": "02514ab2-2b4e-4bf7-94f3-a4b53327063b"
     }
   },
   {
@@ -839,7 +839,7 @@
     "labels": [],
     "mass_fraction": null,
     "material": {
-      "id": "a019457f-ec31-4788-8ab1-1f027972b7f0",
+      "id": "d1284de6-2ab6-4833-ba21-5639b23fc42b",
       "scope": "auto",
       "type": "link_by_uid"
     },
@@ -847,14 +847,14 @@
     "notes": null,
     "number_fraction": null,
     "process": {
-      "id": "89fd691f-2346-486f-bf53-1e728ac545da",
+      "id": "7f1bd2d3-ef6c-48b5-b789-d5d3739f4f1d",
       "scope": "auto",
       "type": "link_by_uid"
     },
     "tags": [],
     "type": "ingredient_spec",
     "uids": {
-      "auto": "608e0ee7-b69e-4b71-afe3-6b01eca9d0b9"
+      "auto": "37439985-745f-42fb-9868-e1d50c5dd140"
     },
     "volume_fraction": null
   },
@@ -870,7 +870,7 @@
         "notes": null,
         "origin": "specified",
         "template": {
-          "id": "3ec4f5e6-00dc-49de-9e6c-16bc70c767be",
+          "id": "cd56f923-c28c-4c20-92e6-3a87095ba570",
           "scope": "auto",
           "type": "link_by_uid"
         },
@@ -886,7 +886,7 @@
         "notes": null,
         "origin": "specified",
         "template": {
-          "id": "9832459c-cc1e-4907-a86d-07618a47265f",
+          "id": "52c75651-2f1f-4faf-aaf9-93b802c94e6b",
           "scope": "auto",
           "type": "link_by_uid"
         },
@@ -899,13 +899,13 @@
     ],
     "tags": [],
     "template": {
-      "id": "3d3ffe27-656b-4883-99f1-3d00d6fcc1a8",
+      "id": "3373a6f5-cf8a-425a-b75e-1e72590bc2a2",
       "scope": "auto",
       "type": "link_by_uid"
     },
     "type": "process_spec",
     "uids": {
-      "auto": "89fd691f-2346-486f-bf53-1e728ac545da"
+      "auto": "7f1bd2d3-ef6c-48b5-b789-d5d3739f4f1d"
     }
   },
   {
@@ -918,7 +918,7 @@
     "labels": [],
     "mass_fraction": null,
     "material": {
-      "id": "a019457f-ec31-4788-8ab1-1f027972b7f0",
+      "id": "d1284de6-2ab6-4833-ba21-5639b23fc42b",
       "scope": "auto",
       "type": "link_by_uid"
     },
@@ -926,14 +926,14 @@
     "notes": null,
     "number_fraction": null,
     "process": {
-      "id": "89fd691f-2346-486f-bf53-1e728ac545da",
+      "id": "7f1bd2d3-ef6c-48b5-b789-d5d3739f4f1d",
       "scope": "auto",
       "type": "link_by_uid"
     },
     "tags": [],
     "type": "ingredient_spec",
     "uids": {
-      "auto": "7100d8a5-b206-4e1c-be58-00c05860a8e7"
+      "auto": "a9d692ef-108f-4ad1-8572-0ee307671a2d"
     },
     "volume_fraction": null
   },
@@ -942,7 +942,7 @@
     "name": "Mixed Epoxy",
     "notes": null,
     "process": {
-      "id": "89fd691f-2346-486f-bf53-1e728ac545da",
+      "id": "7f1bd2d3-ef6c-48b5-b789-d5d3739f4f1d",
       "scope": "auto",
       "type": "link_by_uid"
     },
@@ -951,7 +951,7 @@
     "template": null,
     "type": "material_spec",
     "uids": {
-      "auto": "1e9700d7-56d2-4a44-b922-e59927072748"
+      "auto": "8fae1efa-dff9-4409-9ca5-0683de0e11f6"
     }
   },
   {
@@ -965,7 +965,7 @@
     "tags": [],
     "type": "parameter_template",
     "uids": {
-      "auto": "9832459c-cc1e-4907-a86d-07618a47265f"
+      "auto": "52c75651-2f1f-4faf-aaf9-93b802c94e6b"
     }
   },
   {
@@ -979,7 +979,7 @@
     "tags": [],
     "type": "parameter_template",
     "uids": {
-      "auto": "3ec4f5e6-00dc-49de-9e6c-16bc70c767be"
+      "auto": "cd56f923-c28c-4c20-92e6-3a87095ba570"
     }
   },
   {
@@ -991,7 +991,7 @@
     "parameters": [
       [
         {
-          "id": "3ec4f5e6-00dc-49de-9e6c-16bc70c767be",
+          "id": "cd56f923-c28c-4c20-92e6-3a87095ba570",
           "scope": "auto",
           "type": "link_by_uid"
         },
@@ -999,7 +999,7 @@
       ],
       [
         {
-          "id": "9832459c-cc1e-4907-a86d-07618a47265f",
+          "id": "52c75651-2f1f-4faf-aaf9-93b802c94e6b",
           "scope": "auto",
           "type": "link_by_uid"
         },
@@ -1009,7 +1009,7 @@
     "tags": [],
     "type": "process_template",
     "uids": {
-      "auto": "3d3ffe27-656b-4883-99f1-3d00d6fcc1a8"
+      "auto": "3373a6f5-cf8a-425a-b75e-1e72590bc2a2"
     }
   },
   {
@@ -1018,7 +1018,7 @@
     "labels": [],
     "mass_fraction": null,
     "material": {
-      "id": "5365b219-48ad-4543-b72c-15140a50585d",
+      "id": "37079edb-390f-462d-ad9e-32c09afd9c7f",
       "scope": "auto",
       "type": "link_by_uid"
     },
@@ -1026,19 +1026,19 @@
     "notes": null,
     "number_fraction": null,
     "process": {
-      "id": "4265f6be-c7f0-476d-83b0-5b10bbab109f",
+      "id": "056a5e6f-1242-4e26-ba73-19b13cda4591",
       "scope": "auto",
       "type": "link_by_uid"
     },
     "spec": {
-      "id": "7100d8a5-b206-4e1c-be58-00c05860a8e7",
+      "id": "a9d692ef-108f-4ad1-8572-0ee307671a2d",
       "scope": "auto",
       "type": "link_by_uid"
     },
     "tags": [],
     "type": "ingredient_run",
     "uids": {
-      "auto": "75bcb520-a284-4d49-8a3f-6bc7afdafc4b"
+      "auto": "ee59d05b-4dd9-46d5-b3cd-ad4bb9204db4"
     },
     "volume_fraction": null
   },
@@ -1054,7 +1054,7 @@
         "notes": null,
         "origin": "specified",
         "template": {
-          "id": "3ec4f5e6-00dc-49de-9e6c-16bc70c767be",
+          "id": "cd56f923-c28c-4c20-92e6-3a87095ba570",
           "scope": "auto",
           "type": "link_by_uid"
         },
@@ -1070,7 +1070,7 @@
         "notes": null,
         "origin": "specified",
         "template": {
-          "id": "9832459c-cc1e-4907-a86d-07618a47265f",
+          "id": "52c75651-2f1f-4faf-aaf9-93b802c94e6b",
           "scope": "auto",
           "type": "link_by_uid"
         },
@@ -1083,13 +1083,13 @@
     ],
     "tags": [],
     "template": {
-      "id": "3d3ffe27-656b-4883-99f1-3d00d6fcc1a8",
+      "id": "3373a6f5-cf8a-425a-b75e-1e72590bc2a2",
       "scope": "auto",
       "type": "link_by_uid"
     },
     "type": "process_spec",
     "uids": {
-      "auto": "d6ed7c59-5ae6-4ad5-b8bc-1f6bc6395729"
+      "auto": "30f74441-36ad-4bc2-973d-4818d1a6c713"
     }
   },
   {
@@ -1102,7 +1102,7 @@
     "labels": [],
     "mass_fraction": null,
     "material": {
-      "id": "a019457f-ec31-4788-8ab1-1f027972b7f0",
+      "id": "d1284de6-2ab6-4833-ba21-5639b23fc42b",
       "scope": "auto",
       "type": "link_by_uid"
     },
@@ -1110,14 +1110,14 @@
     "notes": null,
     "number_fraction": null,
     "process": {
-      "id": "d6ed7c59-5ae6-4ad5-b8bc-1f6bc6395729",
+      "id": "30f74441-36ad-4bc2-973d-4818d1a6c713",
       "scope": "auto",
       "type": "link_by_uid"
     },
     "tags": [],
     "type": "ingredient_spec",
     "uids": {
-      "auto": "a8c895f2-186c-4c70-9f8f-d440e0019812"
+      "auto": "ebecc78b-47d6-4a47-b4d0-9df6557036fd"
     },
     "volume_fraction": null
   },
@@ -1131,7 +1131,7 @@
     "labels": [],
     "mass_fraction": null,
     "material": {
-      "id": "a019457f-ec31-4788-8ab1-1f027972b7f0",
+      "id": "d1284de6-2ab6-4833-ba21-5639b23fc42b",
       "scope": "auto",
       "type": "link_by_uid"
     },
@@ -1139,14 +1139,14 @@
     "notes": null,
     "number_fraction": null,
     "process": {
-      "id": "d6ed7c59-5ae6-4ad5-b8bc-1f6bc6395729",
+      "id": "30f74441-36ad-4bc2-973d-4818d1a6c713",
       "scope": "auto",
       "type": "link_by_uid"
     },
     "tags": [],
     "type": "ingredient_spec",
     "uids": {
-      "auto": "485f3270-be67-4939-aa33-10d9c2e76b97"
+      "auto": "6fef8829-3bd2-42f9-9f69-7a03829a4ed1"
     },
     "volume_fraction": null
   },
@@ -1155,7 +1155,7 @@
     "name": "Mixed Epoxy",
     "notes": null,
     "process": {
-      "id": "d6ed7c59-5ae6-4ad5-b8bc-1f6bc6395729",
+      "id": "30f74441-36ad-4bc2-973d-4818d1a6c713",
       "scope": "auto",
       "type": "link_by_uid"
     },
@@ -1164,7 +1164,7 @@
     "template": null,
     "type": "material_spec",
     "uids": {
-      "auto": "0c632bd2-1b0a-48a6-8a4c-32370ffaa01a"
+      "auto": "f2c813c0-06bf-4520-a063-5488b25ad386"
     }
   },
   {
@@ -1173,7 +1173,7 @@
     "labels": [],
     "mass_fraction": null,
     "material": {
-      "id": "1e9700d7-56d2-4a44-b922-e59927072748",
+      "id": "8fae1efa-dff9-4409-9ca5-0683de0e11f6",
       "scope": "auto",
       "type": "link_by_uid"
     },
@@ -1181,14 +1181,14 @@
     "notes": null,
     "number_fraction": null,
     "process": {
-      "id": "bd109b2e-3ca4-4015-b353-1e2bf81223a2",
+      "id": "13425a7b-f1e7-4934-a106-5b590d90672a",
       "scope": "auto",
       "type": "link_by_uid"
     },
     "tags": [],
     "type": "ingredient_spec",
     "uids": {
-      "auto": "de1833ad-0d9c-4d11-81cb-5869df6538f6"
+      "auto": "b605cbaa-f99e-41d8-8ced-b9ee7095e931"
     },
     "volume_fraction": null
   },
@@ -1200,7 +1200,7 @@
         "notes": null,
         "origin": "specified",
         "template": {
-          "id": "1e4d6551-2368-44e4-b4ea-4d1f602ec19a",
+          "id": "c3a9fb93-ed19-4164-8612-526106a22ffc",
           "scope": "auto",
           "type": "link_by_uid"
         },
@@ -1221,7 +1221,7 @@
         "notes": null,
         "origin": "specified",
         "template": {
-          "id": "3888a0fd-df18-4ae8-88dc-ef6575550004",
+          "id": "39ec51c8-8fd6-43f7-96b7-c44e75c530d0",
           "scope": "auto",
           "type": "link_by_uid"
         },
@@ -1238,7 +1238,7 @@
         "notes": null,
         "origin": "specified",
         "template": {
-          "id": "901f4454-6308-4845-a91e-184a3cdcb39c",
+          "id": "967d3663-6856-4d23-817b-34a4d658793c",
           "scope": "auto",
           "type": "link_by_uid"
         },
@@ -1252,13 +1252,13 @@
     ],
     "tags": [],
     "template": {
-      "id": "13d72b25-35a7-4f3d-9186-4ddfdad6a755",
+      "id": "fc715124-107b-4de2-94c8-2b9d757aac49",
       "scope": "auto",
       "type": "link_by_uid"
     },
     "type": "process_spec",
     "uids": {
-      "auto": "bd109b2e-3ca4-4015-b353-1e2bf81223a2"
+      "auto": "13425a7b-f1e7-4934-a106-5b590d90672a"
     }
   },
   {
@@ -1267,7 +1267,7 @@
     "labels": [],
     "mass_fraction": null,
     "material": {
-      "id": "92696c15-dff2-41fa-bf1f-5b0f83af758c",
+      "id": "2fcf5737-47b0-48b1-a57a-49b7cb5ca72f",
       "scope": "auto",
       "type": "link_by_uid"
     },
@@ -1275,14 +1275,14 @@
     "notes": null,
     "number_fraction": null,
     "process": {
-      "id": "bd109b2e-3ca4-4015-b353-1e2bf81223a2",
+      "id": "13425a7b-f1e7-4934-a106-5b590d90672a",
       "scope": "auto",
       "type": "link_by_uid"
     },
     "tags": [],
     "type": "ingredient_spec",
     "uids": {
-      "auto": "edb1a6fe-b8c4-4c4b-89bf-02bcf41ab9d9"
+      "auto": "232e07c7-55e1-4ec9-ab4e-e009c9195dfa"
     },
     "volume_fraction": null
   },
@@ -1291,7 +1291,7 @@
     "name": "50.4um (0.002\") Hard Al (AluFoil)",
     "notes": "",
     "process": {
-      "id": "73372bc5-c9a4-44c5-a0ff-3a0632475e7b",
+      "id": "4cbc4931-8eaa-4ec3-a52d-961eea16d87e",
       "scope": "auto",
       "type": "link_by_uid"
     },
@@ -1304,7 +1304,7 @@
           "notes": null,
           "origin": "specified",
           "template": {
-            "id": "a3a4f7dc-8c82-4cdb-a73c-1767f4b0dca4",
+            "id": "d87b2d4b-e34e-4d33-81cc-99a7b5f05aa0",
             "scope": "auto",
             "type": "link_by_uid"
           },
@@ -1325,7 +1325,7 @@
           "notes": null,
           "origin": "specified",
           "template": {
-            "id": "165f38f8-768d-4df2-af18-ad4ff90d2ee0",
+            "id": "b0ce8c57-aebc-4a76-b121-a7911c4a3107",
             "scope": "auto",
             "type": "link_by_uid"
           },
@@ -1346,7 +1346,7 @@
           "notes": null,
           "origin": "specified",
           "template": {
-            "id": "35bbe175-bd95-4b3c-ab8f-b088988a32c4",
+            "id": "c9e108fd-f216-49a3-85d9-74ec552425c6",
             "scope": "auto",
             "type": "link_by_uid"
           },
@@ -1367,7 +1367,7 @@
           "notes": null,
           "origin": "specified",
           "template": {
-            "id": "a2dd2a5c-c2bf-4428-8b09-052372e55e14",
+            "id": "d3465f37-f29f-4cc6-9d82-10c753c74660",
             "scope": "auto",
             "type": "link_by_uid"
           },
@@ -1387,7 +1387,7 @@
           "notes": null,
           "origin": "specified",
           "template": {
-            "id": "9e9e9ed6-73b5-43a6-bcd4-235ba2fc120d",
+            "id": "8b81f888-4472-4086-afa5-fa3eda6689c1",
             "scope": "auto",
             "type": "link_by_uid"
           },
@@ -1406,13 +1406,13 @@
       "modId::4"
     ],
     "template": {
-      "id": "535186a2-25ae-48cf-820b-6547883c17b0",
+      "id": "f4272cf7-9719-456b-853e-23882f70d443",
       "scope": "auto",
       "type": "link_by_uid"
     },
     "type": "material_spec",
     "uids": {
-      "auto": "92696c15-dff2-41fa-bf1f-5b0f83af758c"
+      "auto": "2fcf5737-47b0-48b1-a57a-49b7cb5ca72f"
     }
   },
   {
@@ -1427,7 +1427,7 @@
         "notes": null,
         "origin": "specified",
         "template": {
-          "id": "d0ba147c-528a-4bb0-9c6d-b7403486e902",
+          "id": "49e73b08-8e9f-4311-804a-e9bd792551fd",
           "scope": "auto",
           "type": "link_by_uid"
         },
@@ -1440,13 +1440,13 @@
     ],
     "tags": [],
     "template": {
-      "id": "2378388a-13af-4403-a113-9bb2b018eca0",
+      "id": "f72d9999-4bab-4e67-8c19-d023f73e73fe",
       "scope": "auto",
       "type": "link_by_uid"
     },
     "type": "process_spec",
     "uids": {
-      "auto": "73372bc5-c9a4-44c5-a0ff-3a0632475e7b"
+      "auto": "4cbc4931-8eaa-4ec3-a52d-961eea16d87e"
     }
   },
   {
@@ -1462,7 +1462,7 @@
     "tags": [],
     "type": "parameter_template",
     "uids": {
-      "auto": "d0ba147c-528a-4bb0-9c6d-b7403486e902"
+      "auto": "49e73b08-8e9f-4311-804a-e9bd792551fd"
     }
   },
   {
@@ -1474,7 +1474,7 @@
     "parameters": [
       [
         {
-          "id": "d0ba147c-528a-4bb0-9c6d-b7403486e902",
+          "id": "49e73b08-8e9f-4311-804a-e9bd792551fd",
           "scope": "auto",
           "type": "link_by_uid"
         },
@@ -1482,7 +1482,7 @@
       ],
       [
         {
-          "id": "6684a1bc-18ab-476c-bfa5-78b8c85230eb",
+          "id": "638c8234-17d3-4789-b9a2-074bad66445d",
           "scope": "auto",
           "type": "link_by_uid"
         },
@@ -1492,7 +1492,7 @@
     "tags": [],
     "type": "process_template",
     "uids": {
-      "auto": "2378388a-13af-4403-a113-9bb2b018eca0"
+      "auto": "f72d9999-4bab-4e67-8c19-d023f73e73fe"
     }
   },
   {
@@ -1507,7 +1507,7 @@
     "tags": [],
     "type": "parameter_template",
     "uids": {
-      "auto": "6684a1bc-18ab-476c-bfa5-78b8c85230eb"
+      "auto": "638c8234-17d3-4789-b9a2-074bad66445d"
     }
   },
   {
@@ -1523,7 +1523,7 @@
     "tags": [],
     "type": "property_template",
     "uids": {
-      "auto": "9e9e9ed6-73b5-43a6-bcd4-235ba2fc120d"
+      "auto": "8b81f888-4472-4086-afa5-fa3eda6689c1"
     }
   },
   {
@@ -1540,7 +1540,7 @@
     "tags": [],
     "type": "property_template",
     "uids": {
-      "auto": "a2dd2a5c-c2bf-4428-8b09-052372e55e14"
+      "auto": "d3465f37-f29f-4cc6-9d82-10c753c74660"
     }
   },
   {
@@ -1555,7 +1555,7 @@
     "tags": [],
     "type": "property_template",
     "uids": {
-      "auto": "35bbe175-bd95-4b3c-ab8f-b088988a32c4"
+      "auto": "c9e108fd-f216-49a3-85d9-74ec552425c6"
     }
   },
   {
@@ -1570,7 +1570,7 @@
     "tags": [],
     "type": "property_template",
     "uids": {
-      "auto": "165f38f8-768d-4df2-af18-ad4ff90d2ee0"
+      "auto": "b0ce8c57-aebc-4a76-b121-a7911c4a3107"
     }
   },
   {
@@ -1585,7 +1585,7 @@
     "tags": [],
     "type": "property_template",
     "uids": {
-      "auto": "a3a4f7dc-8c82-4cdb-a73c-1767f4b0dca4"
+      "auto": "d87b2d4b-e34e-4d33-81cc-99a7b5f05aa0"
     }
   },
   {
@@ -1594,7 +1594,7 @@
     "properties": [
       [
         {
-          "id": "a3a4f7dc-8c82-4cdb-a73c-1767f4b0dca4",
+          "id": "d87b2d4b-e34e-4d33-81cc-99a7b5f05aa0",
           "scope": "auto",
           "type": "link_by_uid"
         },
@@ -1602,7 +1602,7 @@
       ],
       [
         {
-          "id": "165f38f8-768d-4df2-af18-ad4ff90d2ee0",
+          "id": "b0ce8c57-aebc-4a76-b121-a7911c4a3107",
           "scope": "auto",
           "type": "link_by_uid"
         },
@@ -1610,7 +1610,7 @@
       ],
       [
         {
-          "id": "35bbe175-bd95-4b3c-ab8f-b088988a32c4",
+          "id": "c9e108fd-f216-49a3-85d9-74ec552425c6",
           "scope": "auto",
           "type": "link_by_uid"
         },
@@ -1618,7 +1618,7 @@
       ],
       [
         {
-          "id": "a2dd2a5c-c2bf-4428-8b09-052372e55e14",
+          "id": "d3465f37-f29f-4cc6-9d82-10c753c74660",
           "scope": "auto",
           "type": "link_by_uid"
         },
@@ -1626,7 +1626,7 @@
       ],
       [
         {
-          "id": "9e9e9ed6-73b5-43a6-bcd4-235ba2fc120d",
+          "id": "8b81f888-4472-4086-afa5-fa3eda6689c1",
           "scope": "auto",
           "type": "link_by_uid"
         },
@@ -1636,7 +1636,7 @@
     "tags": [],
     "type": "material_template",
     "uids": {
-      "auto": "535186a2-25ae-48cf-820b-6547883c17b0"
+      "auto": "f4272cf7-9719-456b-853e-23882f70d443"
     }
   },
   {
@@ -1645,7 +1645,7 @@
     "labels": [],
     "mass_fraction": null,
     "material": {
-      "id": "fdb2fe53-570c-4c7d-a067-d6daa9275e63",
+      "id": "4356f441-faeb-472d-b130-01a974b09ace",
       "scope": "auto",
       "type": "link_by_uid"
     },
@@ -1653,14 +1653,14 @@
     "notes": null,
     "number_fraction": null,
     "process": {
-      "id": "bd109b2e-3ca4-4015-b353-1e2bf81223a2",
+      "id": "13425a7b-f1e7-4934-a106-5b590d90672a",
       "scope": "auto",
       "type": "link_by_uid"
     },
     "tags": [],
     "type": "ingredient_spec",
     "uids": {
-      "auto": "6a30640b-63eb-44f9-a30f-cc20c1d037db"
+      "auto": "ba9609f2-7a4f-438a-b4f1-5320afd557ad"
     },
     "volume_fraction": null
   },
@@ -1669,7 +1669,7 @@
     "name": "Borosilicate, T=0.25\"",
     "notes": "",
     "process": {
-      "id": "4bd224d8-332c-4020-8b9e-fbac2a5c2bc4",
+      "id": "ba7deaac-b4ee-49a4-a3f2-d8de99103ff5",
       "scope": "auto",
       "type": "link_by_uid"
     },
@@ -1682,7 +1682,7 @@
           "notes": null,
           "origin": "specified",
           "template": {
-            "id": "18d6276e-d595-4028-b8de-2b0b35742906",
+            "id": "69f49b3d-a2d5-446e-8585-42398269c5ee",
             "scope": "auto",
             "type": "link_by_uid"
           },
@@ -1703,7 +1703,7 @@
           "notes": null,
           "origin": "specified",
           "template": {
-            "id": "eb08e586-ed49-4471-9232-909f25d3307e",
+            "id": "d0247729-a4b0-42bc-b836-b581beac2ffd",
             "scope": "auto",
             "type": "link_by_uid"
           },
@@ -1724,7 +1724,7 @@
           "notes": null,
           "origin": "specified",
           "template": {
-            "id": "4e8ad0f6-5495-4c55-8ab5-84001bda08cf",
+            "id": "00c3be95-2df4-4193-9fd9-0589983609af",
             "scope": "auto",
             "type": "link_by_uid"
           },
@@ -1744,13 +1744,13 @@
       "modId::13"
     ],
     "template": {
-      "id": "e1bc0030-aacd-4c5e-ac71-d7616642cc4f",
+      "id": "42813d62-10ac-4599-ac4e-a1b7adcc1a0e",
       "scope": "auto",
       "type": "link_by_uid"
     },
     "type": "material_spec",
     "uids": {
-      "auto": "fdb2fe53-570c-4c7d-a067-d6daa9275e63"
+      "auto": "4356f441-faeb-472d-b130-01a974b09ace"
     }
   },
   {
@@ -1765,7 +1765,7 @@
         "notes": null,
         "origin": "specified",
         "template": {
-          "id": "79de79f9-59d9-4ee2-81f7-0d70f5e1d1b1",
+          "id": "09bd2be3-d0bd-4f75-a7d5-64788298a34e",
           "scope": "auto",
           "type": "link_by_uid"
         },
@@ -1781,7 +1781,7 @@
         "notes": null,
         "origin": "specified",
         "template": {
-          "id": "0722db93-2a49-44d5-aa70-ea8c81ebc40b",
+          "id": "ef260825-d5dd-4d2d-ab2f-6b582f585774",
           "scope": "auto",
           "type": "link_by_uid"
         },
@@ -1794,13 +1794,13 @@
     ],
     "tags": [],
     "template": {
-      "id": "3ce4bd96-1937-471b-8a17-c96449e4d56f",
+      "id": "f0b1bcc9-2215-48d9-8bdc-d8b64303519a",
       "scope": "auto",
       "type": "link_by_uid"
     },
     "type": "process_spec",
     "uids": {
-      "auto": "4bd224d8-332c-4020-8b9e-fbac2a5c2bc4"
+      "auto": "ba7deaac-b4ee-49a4-a3f2-d8de99103ff5"
     }
   },
   {
@@ -1818,7 +1818,7 @@
     "tags": [],
     "type": "parameter_template",
     "uids": {
-      "auto": "0722db93-2a49-44d5-aa70-ea8c81ebc40b"
+      "auto": "ef260825-d5dd-4d2d-ab2f-6b582f585774"
     }
   },
   {
@@ -1833,7 +1833,7 @@
     "tags": [],
     "type": "parameter_template",
     "uids": {
-      "auto": "79de79f9-59d9-4ee2-81f7-0d70f5e1d1b1"
+      "auto": "09bd2be3-d0bd-4f75-a7d5-64788298a34e"
     }
   },
   {
@@ -1845,7 +1845,7 @@
     "parameters": [
       [
         {
-          "id": "79de79f9-59d9-4ee2-81f7-0d70f5e1d1b1",
+          "id": "09bd2be3-d0bd-4f75-a7d5-64788298a34e",
           "scope": "auto",
           "type": "link_by_uid"
         },
@@ -1853,7 +1853,7 @@
       ],
       [
         {
-          "id": "0722db93-2a49-44d5-aa70-ea8c81ebc40b",
+          "id": "ef260825-d5dd-4d2d-ab2f-6b582f585774",
           "scope": "auto",
           "type": "link_by_uid"
         },
@@ -1863,7 +1863,7 @@
     "tags": [],
     "type": "process_template",
     "uids": {
-      "auto": "3ce4bd96-1937-471b-8a17-c96449e4d56f"
+      "auto": "f0b1bcc9-2215-48d9-8bdc-d8b64303519a"
     }
   },
   {
@@ -1878,7 +1878,7 @@
     "tags": [],
     "type": "property_template",
     "uids": {
-      "auto": "4e8ad0f6-5495-4c55-8ab5-84001bda08cf"
+      "auto": "00c3be95-2df4-4193-9fd9-0589983609af"
     }
   },
   {
@@ -1893,7 +1893,7 @@
     "tags": [],
     "type": "property_template",
     "uids": {
-      "auto": "eb08e586-ed49-4471-9232-909f25d3307e"
+      "auto": "d0247729-a4b0-42bc-b836-b581beac2ffd"
     }
   },
   {
@@ -1908,7 +1908,7 @@
     "tags": [],
     "type": "property_template",
     "uids": {
-      "auto": "18d6276e-d595-4028-b8de-2b0b35742906"
+      "auto": "69f49b3d-a2d5-446e-8585-42398269c5ee"
     }
   },
   {
@@ -1917,7 +1917,7 @@
     "properties": [
       [
         {
-          "id": "18d6276e-d595-4028-b8de-2b0b35742906",
+          "id": "69f49b3d-a2d5-446e-8585-42398269c5ee",
           "scope": "auto",
           "type": "link_by_uid"
         },
@@ -1925,7 +1925,7 @@
       ],
       [
         {
-          "id": "eb08e586-ed49-4471-9232-909f25d3307e",
+          "id": "d0247729-a4b0-42bc-b836-b581beac2ffd",
           "scope": "auto",
           "type": "link_by_uid"
         },
@@ -1933,7 +1933,7 @@
       ],
       [
         {
-          "id": "4e8ad0f6-5495-4c55-8ab5-84001bda08cf",
+          "id": "00c3be95-2df4-4193-9fd9-0589983609af",
           "scope": "auto",
           "type": "link_by_uid"
         },
@@ -1943,7 +1943,7 @@
     "tags": [],
     "type": "material_template",
     "uids": {
-      "auto": "e1bc0030-aacd-4c5e-ac71-d7616642cc4f"
+      "auto": "42813d62-10ac-4599-ac4e-a1b7adcc1a0e"
     }
   },
   {
@@ -1951,7 +1951,7 @@
     "name": "Glass Epoxy Foil Stack",
     "notes": null,
     "process": {
-      "id": "bd109b2e-3ca4-4015-b353-1e2bf81223a2",
+      "id": "13425a7b-f1e7-4934-a106-5b590d90672a",
       "scope": "auto",
       "type": "link_by_uid"
     },
@@ -1960,7 +1960,7 @@
     "template": null,
     "type": "material_spec",
     "uids": {
-      "auto": "1ac44e3c-aa03-4a0f-9ed1-f592c498bb89"
+      "auto": "1dbb6ba0-e089-4b9f-9a75-abda57e9670e"
     }
   },
   {
@@ -1976,7 +1976,7 @@
     "tags": [],
     "type": "condition_template",
     "uids": {
-      "auto": "1e4d6551-2368-44e4-b4ea-4d1f602ec19a"
+      "auto": "c3a9fb93-ed19-4164-8612-526106a22ffc"
     }
   },
   {
@@ -1991,7 +1991,7 @@
     "tags": [],
     "type": "parameter_template",
     "uids": {
-      "auto": "901f4454-6308-4845-a91e-184a3cdcb39c"
+      "auto": "967d3663-6856-4d23-817b-34a4d658793c"
     }
   },
   {
@@ -2006,7 +2006,7 @@
     "tags": [],
     "type": "parameter_template",
     "uids": {
-      "auto": "3888a0fd-df18-4ae8-88dc-ef6575550004"
+      "auto": "39ec51c8-8fd6-43f7-96b7-c44e75c530d0"
     }
   },
   {
@@ -2015,7 +2015,7 @@
     "conditions": [
       [
         {
-          "id": "1e4d6551-2368-44e4-b4ea-4d1f602ec19a",
+          "id": "c3a9fb93-ed19-4164-8612-526106a22ffc",
           "scope": "auto",
           "type": "link_by_uid"
         },
@@ -2027,7 +2027,7 @@
     "parameters": [
       [
         {
-          "id": "3888a0fd-df18-4ae8-88dc-ef6575550004",
+          "id": "39ec51c8-8fd6-43f7-96b7-c44e75c530d0",
           "scope": "auto",
           "type": "link_by_uid"
         },
@@ -2035,7 +2035,7 @@
       ],
       [
         {
-          "id": "901f4454-6308-4845-a91e-184a3cdcb39c",
+          "id": "967d3663-6856-4d23-817b-34a4d658793c",
           "scope": "auto",
           "type": "link_by_uid"
         },
@@ -2045,7 +2045,7 @@
     "tags": [],
     "type": "process_template",
     "uids": {
-      "auto": "13d72b25-35a7-4f3d-9186-4ddfdad6a755"
+      "auto": "fc715124-107b-4de2-94c8-2b9d757aac49"
     }
   },
   {
@@ -2054,7 +2054,7 @@
     "labels": [],
     "mass_fraction": null,
     "material": {
-      "id": "65247939-e4a0-4610-a082-37c317d4fa39",
+      "id": "78a96ec5-72ea-424b-ad48-83b5e8086e73",
       "scope": "auto",
       "type": "link_by_uid"
     },
@@ -2062,19 +2062,19 @@
     "notes": null,
     "number_fraction": null,
     "process": {
-      "id": "b6c79c02-b66e-4619-861a-c9e05b664ca7",
+      "id": "29ae1a71-c83d-4ba6-a19a-6a685d0e897f",
       "scope": "auto",
       "type": "link_by_uid"
     },
     "spec": {
-      "id": "edb1a6fe-b8c4-4c4b-89bf-02bcf41ab9d9",
+      "id": "232e07c7-55e1-4ec9-ab4e-e009c9195dfa",
       "scope": "auto",
       "type": "link_by_uid"
     },
     "tags": [],
     "type": "ingredient_run",
     "uids": {
-      "auto": "dc19f529-f1b8-44ca-aef0-26033cbb37a1"
+      "auto": "8e238f1b-6490-4188-a0a2-15d420b984ec"
     },
     "volume_fraction": null
   },
@@ -2083,27 +2083,27 @@
     "name": "50.4um (0.002\") Hard Al (AluFoil)",
     "notes": null,
     "process": {
-      "id": "5efb7c2f-9286-401b-994a-c7d78ad4d862",
+      "id": "fba9be94-0d31-489d-ae3b-2dff05683370",
       "scope": "auto",
       "type": "link_by_uid"
     },
     "sample_type": "unknown",
     "spec": {
-      "id": "92696c15-dff2-41fa-bf1f-5b0f83af758c",
+      "id": "2fcf5737-47b0-48b1-a57a-49b7cb5ca72f",
       "scope": "auto",
       "type": "link_by_uid"
     },
     "tags": [],
     "type": "material_run",
     "uids": {
-      "auto": "65247939-e4a0-4610-a082-37c317d4fa39"
+      "auto": "78a96ec5-72ea-424b-ad48-83b5e8086e73"
     }
   },
   {
     "conditions": [],
     "file_links": [],
     "material": {
-      "id": "65247939-e4a0-4610-a082-37c317d4fa39",
+      "id": "78a96ec5-72ea-424b-ad48-83b5e8086e73",
       "scope": "auto",
       "type": "link_by_uid"
     },
@@ -2117,7 +2117,7 @@
         "notes": null,
         "origin": "measured",
         "template": {
-          "id": "a3a4f7dc-8c82-4cdb-a73c-1767f4b0dca4",
+          "id": "d87b2d4b-e34e-4d33-81cc-99a7b5f05aa0",
           "scope": "auto",
           "type": "link_by_uid"
         },
@@ -2135,14 +2135,14 @@
       "type": "performed_source"
     },
     "spec": {
-      "id": "333d5a1e-9e1f-42cd-a53d-c344f995c383",
+      "id": "2699e641-01e8-4b48-a893-6bb98eca1d1e",
       "scope": "auto",
       "type": "link_by_uid"
     },
     "tags": [],
     "type": "measurement_run",
     "uids": {
-      "auto": "f1645ad6-c2e1-43c4-83df-6e6b3421268a"
+      "auto": "4a789bfd-51f5-429b-a241-5dc1b9d5deb9"
     }
   },
   {
@@ -2155,14 +2155,14 @@
     "template": null,
     "type": "measurement_spec",
     "uids": {
-      "auto": "333d5a1e-9e1f-42cd-a53d-c344f995c383"
+      "auto": "2699e641-01e8-4b48-a893-6bb98eca1d1e"
     }
   },
   {
     "conditions": [],
     "file_links": [],
     "material": {
-      "id": "65247939-e4a0-4610-a082-37c317d4fa39",
+      "id": "78a96ec5-72ea-424b-ad48-83b5e8086e73",
       "scope": "auto",
       "type": "link_by_uid"
     },
@@ -2176,7 +2176,7 @@
         "notes": null,
         "origin": "measured",
         "template": {
-          "id": "a3a4f7dc-8c82-4cdb-a73c-1767f4b0dca4",
+          "id": "d87b2d4b-e34e-4d33-81cc-99a7b5f05aa0",
           "scope": "auto",
           "type": "link_by_uid"
         },
@@ -2194,14 +2194,14 @@
       "type": "performed_source"
     },
     "spec": {
-      "id": "633175ee-0e26-4076-b9d3-2e4587cc9b52",
+      "id": "839954df-025e-4ba0-86fc-aa62e67b6ebf",
       "scope": "auto",
       "type": "link_by_uid"
     },
     "tags": [],
     "type": "measurement_run",
     "uids": {
-      "auto": "be25d6ea-8de1-4fad-bd0f-40ea4480932a"
+      "auto": "0b18573e-08c3-4575-b100-1f738752579e"
     }
   },
   {
@@ -2214,14 +2214,14 @@
     "template": null,
     "type": "measurement_spec",
     "uids": {
-      "auto": "633175ee-0e26-4076-b9d3-2e4587cc9b52"
+      "auto": "839954df-025e-4ba0-86fc-aa62e67b6ebf"
     }
   },
   {
     "conditions": [],
     "file_links": [],
     "material": {
-      "id": "65247939-e4a0-4610-a082-37c317d4fa39",
+      "id": "78a96ec5-72ea-424b-ad48-83b5e8086e73",
       "scope": "auto",
       "type": "link_by_uid"
     },
@@ -2235,7 +2235,7 @@
         "notes": null,
         "origin": "measured",
         "template": {
-          "id": "a3a4f7dc-8c82-4cdb-a73c-1767f4b0dca4",
+          "id": "d87b2d4b-e34e-4d33-81cc-99a7b5f05aa0",
           "scope": "auto",
           "type": "link_by_uid"
         },
@@ -2253,14 +2253,14 @@
       "type": "performed_source"
     },
     "spec": {
-      "id": "c164d6c6-43e5-4e09-a306-cefce6b2fad5",
+      "id": "06b237cf-8e21-4497-b98e-d93b299fd9da",
       "scope": "auto",
       "type": "link_by_uid"
     },
     "tags": [],
     "type": "measurement_run",
     "uids": {
-      "auto": "7bbf3ccb-f1fb-4dd5-86f0-6ebeb62b148c"
+      "auto": "1f09d55a-9651-42d0-a8e3-02c9d139ee87"
     }
   },
   {
@@ -2273,14 +2273,14 @@
     "template": null,
     "type": "measurement_spec",
     "uids": {
-      "auto": "c164d6c6-43e5-4e09-a306-cefce6b2fad5"
+      "auto": "06b237cf-8e21-4497-b98e-d93b299fd9da"
     }
   },
   {
     "conditions": [],
     "file_links": [],
     "material": {
-      "id": "65247939-e4a0-4610-a082-37c317d4fa39",
+      "id": "78a96ec5-72ea-424b-ad48-83b5e8086e73",
       "scope": "auto",
       "type": "link_by_uid"
     },
@@ -2294,7 +2294,7 @@
         "notes": null,
         "origin": "measured",
         "template": {
-          "id": "a3a4f7dc-8c82-4cdb-a73c-1767f4b0dca4",
+          "id": "d87b2d4b-e34e-4d33-81cc-99a7b5f05aa0",
           "scope": "auto",
           "type": "link_by_uid"
         },
@@ -2312,14 +2312,14 @@
       "type": "performed_source"
     },
     "spec": {
-      "id": "7c6209b7-5329-4228-a92e-23eba31efd8d",
+      "id": "4ede790b-84d8-4bcf-b49c-6efe0b1205cb",
       "scope": "auto",
       "type": "link_by_uid"
     },
     "tags": [],
     "type": "measurement_run",
     "uids": {
-      "auto": "9586845e-8a48-4521-b7f8-86609882b7e1"
+      "auto": "13875685-dac9-4103-a98d-8422f63032d8"
     }
   },
   {
@@ -2332,7 +2332,7 @@
     "template": null,
     "type": "measurement_spec",
     "uids": {
-      "auto": "7c6209b7-5329-4228-a92e-23eba31efd8d"
+      "auto": "4ede790b-84d8-4bcf-b49c-6efe0b1205cb"
     }
   },
   {
@@ -2343,14 +2343,14 @@
     "parameters": [],
     "source": null,
     "spec": {
-      "id": "73372bc5-c9a4-44c5-a0ff-3a0632475e7b",
+      "id": "4cbc4931-8eaa-4ec3-a52d-961eea16d87e",
       "scope": "auto",
       "type": "link_by_uid"
     },
     "tags": [],
     "type": "process_run",
     "uids": {
-      "auto": "5efb7c2f-9286-401b-994a-c7d78ad4d862"
+      "auto": "fba9be94-0d31-489d-ae3b-2dff05683370"
     }
   },
   {
@@ -2359,7 +2359,7 @@
     "labels": [],
     "mass_fraction": null,
     "material": {
-      "id": "3868f3fd-4ccd-4a07-a2ef-1491ee3745b1",
+      "id": "c22739b8-836f-40d9-add2-be6c95ad6595",
       "scope": "auto",
       "type": "link_by_uid"
     },
@@ -2367,19 +2367,19 @@
     "notes": null,
     "number_fraction": null,
     "process": {
-      "id": "b6c79c02-b66e-4619-861a-c9e05b664ca7",
+      "id": "29ae1a71-c83d-4ba6-a19a-6a685d0e897f",
       "scope": "auto",
       "type": "link_by_uid"
     },
     "spec": {
-      "id": "6a30640b-63eb-44f9-a30f-cc20c1d037db",
+      "id": "ba9609f2-7a4f-438a-b4f1-5320afd557ad",
       "scope": "auto",
       "type": "link_by_uid"
     },
     "tags": [],
     "type": "ingredient_run",
     "uids": {
-      "auto": "eeb322c2-837b-47e7-bafb-b1a45440c771"
+      "auto": "c7480959-ec65-4088-846f-fa9b40516761"
     },
     "volume_fraction": null
   },
@@ -2388,27 +2388,27 @@
     "name": "Borosilicate, T=0.25\"",
     "notes": null,
     "process": {
-      "id": "a79d9bf0-83c9-4a1c-b68c-f9d2ec8e8eda",
+      "id": "660d046c-09b3-44bd-ac9c-6e58d594a38f",
       "scope": "auto",
       "type": "link_by_uid"
     },
     "sample_type": "unknown",
     "spec": {
-      "id": "fdb2fe53-570c-4c7d-a067-d6daa9275e63",
+      "id": "4356f441-faeb-472d-b130-01a974b09ace",
       "scope": "auto",
       "type": "link_by_uid"
     },
     "tags": [],
     "type": "material_run",
     "uids": {
-      "auto": "3868f3fd-4ccd-4a07-a2ef-1491ee3745b1"
+      "auto": "c22739b8-836f-40d9-add2-be6c95ad6595"
     }
   },
   {
     "conditions": [],
     "file_links": [],
     "material": {
-      "id": "3868f3fd-4ccd-4a07-a2ef-1491ee3745b1",
+      "id": "c22739b8-836f-40d9-add2-be6c95ad6595",
       "scope": "auto",
       "type": "link_by_uid"
     },
@@ -2422,7 +2422,7 @@
         "notes": null,
         "origin": "measured",
         "template": {
-          "id": "18d6276e-d595-4028-b8de-2b0b35742906",
+          "id": "69f49b3d-a2d5-446e-8585-42398269c5ee",
           "scope": "auto",
           "type": "link_by_uid"
         },
@@ -2440,14 +2440,14 @@
       "type": "performed_source"
     },
     "spec": {
-      "id": "0b38d130-772a-4fd2-9273-e5b187cedebd",
+      "id": "4a36d4b9-ef30-4ff4-9c08-c9ab0ddeabef",
       "scope": "auto",
       "type": "link_by_uid"
     },
     "tags": [],
     "type": "measurement_run",
     "uids": {
-      "auto": "634dd45d-1fb4-4683-9565-f0cd62fe9b59"
+      "auto": "5e567837-4ead-46cf-89a5-44509dde2f75"
     }
   },
   {
@@ -2460,14 +2460,14 @@
     "template": null,
     "type": "measurement_spec",
     "uids": {
-      "auto": "0b38d130-772a-4fd2-9273-e5b187cedebd"
+      "auto": "4a36d4b9-ef30-4ff4-9c08-c9ab0ddeabef"
     }
   },
   {
     "conditions": [],
     "file_links": [],
     "material": {
-      "id": "3868f3fd-4ccd-4a07-a2ef-1491ee3745b1",
+      "id": "c22739b8-836f-40d9-add2-be6c95ad6595",
       "scope": "auto",
       "type": "link_by_uid"
     },
@@ -2481,7 +2481,7 @@
         "notes": null,
         "origin": "measured",
         "template": {
-          "id": "18d6276e-d595-4028-b8de-2b0b35742906",
+          "id": "69f49b3d-a2d5-446e-8585-42398269c5ee",
           "scope": "auto",
           "type": "link_by_uid"
         },
@@ -2499,14 +2499,14 @@
       "type": "performed_source"
     },
     "spec": {
-      "id": "b5bed68d-2729-4c58-95ed-c15702beb40e",
+      "id": "0173e128-a209-4fbc-ade3-4b55febe1a2b",
       "scope": "auto",
       "type": "link_by_uid"
     },
     "tags": [],
     "type": "measurement_run",
     "uids": {
-      "auto": "d0e28640-d2ca-41cd-a93d-29dde70c4887"
+      "auto": "87a97a02-b448-4dca-acc8-f7af3b0b4a8e"
     }
   },
   {
@@ -2519,14 +2519,14 @@
     "template": null,
     "type": "measurement_spec",
     "uids": {
-      "auto": "b5bed68d-2729-4c58-95ed-c15702beb40e"
+      "auto": "0173e128-a209-4fbc-ade3-4b55febe1a2b"
     }
   },
   {
     "conditions": [],
     "file_links": [],
     "material": {
-      "id": "3868f3fd-4ccd-4a07-a2ef-1491ee3745b1",
+      "id": "c22739b8-836f-40d9-add2-be6c95ad6595",
       "scope": "auto",
       "type": "link_by_uid"
     },
@@ -2540,7 +2540,7 @@
         "notes": null,
         "origin": "measured",
         "template": {
-          "id": "18d6276e-d595-4028-b8de-2b0b35742906",
+          "id": "69f49b3d-a2d5-446e-8585-42398269c5ee",
           "scope": "auto",
           "type": "link_by_uid"
         },
@@ -2558,14 +2558,14 @@
       "type": "performed_source"
     },
     "spec": {
-      "id": "77618815-ce2e-438d-ba76-021a0c271bee",
+      "id": "2c5d9f5b-6b6a-424d-a56e-3ad8806f94d9",
       "scope": "auto",
       "type": "link_by_uid"
     },
     "tags": [],
     "type": "measurement_run",
     "uids": {
-      "auto": "65db5df0-c915-4f29-9ee4-9277da89c261"
+      "auto": "61eb3f3c-69f0-4f5c-bb2b-c1d367db867a"
     }
   },
   {
@@ -2578,14 +2578,14 @@
     "template": null,
     "type": "measurement_spec",
     "uids": {
-      "auto": "77618815-ce2e-438d-ba76-021a0c271bee"
+      "auto": "2c5d9f5b-6b6a-424d-a56e-3ad8806f94d9"
     }
   },
   {
     "conditions": [],
     "file_links": [],
     "material": {
-      "id": "3868f3fd-4ccd-4a07-a2ef-1491ee3745b1",
+      "id": "c22739b8-836f-40d9-add2-be6c95ad6595",
       "scope": "auto",
       "type": "link_by_uid"
     },
@@ -2599,7 +2599,7 @@
         "notes": null,
         "origin": "measured",
         "template": {
-          "id": "18d6276e-d595-4028-b8de-2b0b35742906",
+          "id": "69f49b3d-a2d5-446e-8585-42398269c5ee",
           "scope": "auto",
           "type": "link_by_uid"
         },
@@ -2617,14 +2617,14 @@
       "type": "performed_source"
     },
     "spec": {
-      "id": "4287bdca-0f8c-473d-9cf1-c44bde9d258e",
+      "id": "41e8a0ea-e086-4e9b-af79-8e291a366a3a",
       "scope": "auto",
       "type": "link_by_uid"
     },
     "tags": [],
     "type": "measurement_run",
     "uids": {
-      "auto": "531f7cdf-c924-4f5a-8870-83a8e1797c0d"
+      "auto": "29b816d5-a987-482f-af68-c64b3e91d4f3"
     }
   },
   {
@@ -2637,7 +2637,7 @@
     "template": null,
     "type": "measurement_spec",
     "uids": {
-      "auto": "4287bdca-0f8c-473d-9cf1-c44bde9d258e"
+      "auto": "41e8a0ea-e086-4e9b-af79-8e291a366a3a"
     }
   },
   {
@@ -2648,14 +2648,14 @@
     "parameters": [],
     "source": null,
     "spec": {
-      "id": "4bd224d8-332c-4020-8b9e-fbac2a5c2bc4",
+      "id": "ba7deaac-b4ee-49a4-a3f2-d8de99103ff5",
       "scope": "auto",
       "type": "link_by_uid"
     },
     "tags": [],
     "type": "process_run",
     "uids": {
-      "auto": "a79d9bf0-83c9-4a1c-b68c-f9d2ec8e8eda"
+      "auto": "660d046c-09b3-44bd-ac9c-6e58d594a38f"
     }
   },
   {
@@ -2664,7 +2664,7 @@
     "labels": [],
     "mass_fraction": null,
     "material": {
-      "id": "1ac44e3c-aa03-4a0f-9ed1-f592c498bb89",
+      "id": "1dbb6ba0-e089-4b9f-9a75-abda57e9670e",
       "scope": "auto",
       "type": "link_by_uid"
     },
@@ -2672,14 +2672,14 @@
     "notes": null,
     "number_fraction": null,
     "process": {
-      "id": "173d6c59-a27a-47fa-8db1-474d75ca1502",
+      "id": "e5502981-afa0-42ce-82ae-cac81d580774",
       "scope": "auto",
       "type": "link_by_uid"
     },
     "tags": [],
     "type": "ingredient_spec",
     "uids": {
-      "auto": "a5fb4d81-650c-473f-aba3-5448a7370014"
+      "auto": "65ab98d5-1075-481d-9192-ba7c54b49100"
     },
     "volume_fraction": null
   },
@@ -2691,7 +2691,7 @@
         "notes": null,
         "origin": "specified",
         "template": {
-          "id": "639e7152-4e96-44c3-89a3-dfbd8f311554",
+          "id": "07c232cc-65f1-42dd-8999-4144d1bc2b55",
           "scope": "auto",
           "type": "link_by_uid"
         },
@@ -2707,7 +2707,7 @@
         "notes": null,
         "origin": "specified",
         "template": {
-          "id": "a4da3b73-ccd8-429f-b0e1-a77decd5810d",
+          "id": "594e8a77-1cc9-4586-872c-5de815549bc3",
           "scope": "auto",
           "type": "link_by_uid"
         },
@@ -2724,7 +2724,7 @@
         "notes": null,
         "origin": "specified",
         "template": {
-          "id": "8607a2fe-b90b-446b-b1c7-23d3b335132b",
+          "id": "411e9b23-c7e0-4e2e-bb74-f43d7f9c6b6e",
           "scope": "auto",
           "type": "link_by_uid"
         },
@@ -2751,7 +2751,7 @@
         "notes": null,
         "origin": "specified",
         "template": {
-          "id": "d9a12995-6513-42c4-b9a2-c09ab08e7588",
+          "id": "ea0ffacf-d2ef-4fc6-8d8b-ef57f526d9c8",
           "scope": "auto",
           "type": "link_by_uid"
         },
@@ -2768,7 +2768,7 @@
         "notes": null,
         "origin": "specified",
         "template": {
-          "id": "e54a7063-4ad3-4258-b30c-f07be7628491",
+          "id": "b8b9ca08-5c60-427c-b4bd-d0723a3c3d30",
           "scope": "auto",
           "type": "link_by_uid"
         },
@@ -2784,7 +2784,7 @@
         "notes": null,
         "origin": "specified",
         "template": {
-          "id": "c3143d5b-c8d5-4540-b30c-ea55d27e2c99",
+          "id": "21e3d8ba-8401-498a-9898-1a86a505039e",
           "scope": "auto",
           "type": "link_by_uid"
         },
@@ -2800,7 +2800,7 @@
         "notes": null,
         "origin": "specified",
         "template": {
-          "id": "ad730e31-59ca-4648-b01f-8dd67f882cbd",
+          "id": "7028f251-4093-4b5e-8285-b8e2342c9582",
           "scope": "auto",
           "type": "link_by_uid"
         },
@@ -2816,7 +2816,7 @@
         "notes": null,
         "origin": "specified",
         "template": {
-          "id": "ccb220aa-8ba3-42b7-a4d8-2c5613346598",
+          "id": "8f9edda8-0b31-4f22-b209-a79254b2d278",
           "scope": "auto",
           "type": "link_by_uid"
         },
@@ -2833,7 +2833,7 @@
         "notes": null,
         "origin": "specified",
         "template": {
-          "id": "01809caf-6a57-4c3b-86f5-2b863f54a0dc",
+          "id": "e1542493-212d-463e-9420-925911265ada",
           "scope": "auto",
           "type": "link_by_uid"
         },
@@ -2850,7 +2850,7 @@
         "notes": null,
         "origin": "specified",
         "template": {
-          "id": "c62e3ba4-366a-4756-81a2-741a61b45de9",
+          "id": "40619073-655c-4b05-bb22-48016a43b825",
           "scope": "auto",
           "type": "link_by_uid"
         },
@@ -2868,13 +2868,13 @@
       "modId::7"
     ],
     "template": {
-      "id": "e63a9111-fd71-450e-a563-93256d460f12",
+      "id": "cebf0479-ed72-4351-9a5f-0b9d85757378",
       "scope": "auto",
       "type": "link_by_uid"
     },
     "type": "process_spec",
     "uids": {
-      "auto": "173d6c59-a27a-47fa-8db1-474d75ca1502"
+      "auto": "e5502981-afa0-42ce-82ae-cac81d580774"
     }
   },
   {
@@ -2882,20 +2882,20 @@
     "name": "Flyer Stack",
     "notes": "A spec for creating a set of flyer discs cut out from a glass/epoxy/foil stack",
     "process": {
-      "id": "173d6c59-a27a-47fa-8db1-474d75ca1502",
+      "id": "e5502981-afa0-42ce-82ae-cac81d580774",
       "scope": "auto",
       "type": "link_by_uid"
     },
     "properties": [],
     "tags": [],
     "template": {
-      "id": "cb1e046e-4e68-45c6-adb0-bcf509834904",
+      "id": "b9d1e5ce-5ee1-47a4-a969-2443ed208de6",
       "scope": "auto",
       "type": "link_by_uid"
     },
     "type": "material_spec",
     "uids": {
-      "auto": "38410019-d0fc-41fe-bb21-d34f2281cc63"
+      "auto": "fb63f2d1-0a36-42a1-8f9c-1f57c4a7c755"
     }
   },
   {
@@ -2904,7 +2904,7 @@
     "properties": [
       [
         {
-          "id": "3584c92c-58ed-4920-8d7c-115d4f0a1da9",
+          "id": "ece28d55-f3a4-4419-9636-d38cd49fc430",
           "scope": "auto",
           "type": "link_by_uid"
         },
@@ -2914,7 +2914,7 @@
     "tags": [],
     "type": "material_template",
     "uids": {
-      "auto": "cb1e046e-4e68-45c6-adb0-bcf509834904"
+      "auto": "b9d1e5ce-5ee1-47a4-a969-2443ed208de6"
     }
   },
   {
@@ -2930,7 +2930,7 @@
     "tags": [],
     "type": "condition_template",
     "uids": {
-      "auto": "8607a2fe-b90b-446b-b1c7-23d3b335132b"
+      "auto": "411e9b23-c7e0-4e2e-bb74-f43d7f9c6b6e"
     }
   },
   {
@@ -2945,7 +2945,7 @@
     "tags": [],
     "type": "condition_template",
     "uids": {
-      "auto": "a4da3b73-ccd8-429f-b0e1-a77decd5810d"
+      "auto": "594e8a77-1cc9-4586-872c-5de815549bc3"
     }
   },
   {
@@ -2961,7 +2961,7 @@
     "tags": [],
     "type": "condition_template",
     "uids": {
-      "auto": "639e7152-4e96-44c3-89a3-dfbd8f311554"
+      "auto": "07c232cc-65f1-42dd-8999-4144d1bc2b55"
     }
   },
   {
@@ -2975,7 +2975,7 @@
     "tags": [],
     "type": "parameter_template",
     "uids": {
-      "auto": "c62e3ba4-366a-4756-81a2-741a61b45de9"
+      "auto": "40619073-655c-4b05-bb22-48016a43b825"
     }
   },
   {
@@ -2990,7 +2990,7 @@
     "tags": [],
     "type": "parameter_template",
     "uids": {
-      "auto": "01809caf-6a57-4c3b-86f5-2b863f54a0dc"
+      "auto": "e1542493-212d-463e-9420-925911265ada"
     }
   },
   {
@@ -3005,7 +3005,7 @@
     "tags": [],
     "type": "parameter_template",
     "uids": {
-      "auto": "ccb220aa-8ba3-42b7-a4d8-2c5613346598"
+      "auto": "8f9edda8-0b31-4f22-b209-a79254b2d278"
     }
   },
   {
@@ -3021,7 +3021,7 @@
     "tags": [],
     "type": "parameter_template",
     "uids": {
-      "auto": "ad730e31-59ca-4648-b01f-8dd67f882cbd"
+      "auto": "7028f251-4093-4b5e-8285-b8e2342c9582"
     }
   },
   {
@@ -3037,7 +3037,7 @@
     "tags": [],
     "type": "parameter_template",
     "uids": {
-      "auto": "c3143d5b-c8d5-4540-b30c-ea55d27e2c99"
+      "auto": "21e3d8ba-8401-498a-9898-1a86a505039e"
     }
   },
   {
@@ -3051,7 +3051,7 @@
     "tags": [],
     "type": "parameter_template",
     "uids": {
-      "auto": "e54a7063-4ad3-4258-b30c-f07be7628491"
+      "auto": "b8b9ca08-5c60-427c-b4bd-d0723a3c3d30"
     }
   },
   {
@@ -3066,7 +3066,7 @@
     "tags": [],
     "type": "parameter_template",
     "uids": {
-      "auto": "d9a12995-6513-42c4-b9a2-c09ab08e7588"
+      "auto": "ea0ffacf-d2ef-4fc6-8d8b-ef57f526d9c8"
     }
   },
   {
@@ -3075,7 +3075,7 @@
     "conditions": [
       [
         {
-          "id": "639e7152-4e96-44c3-89a3-dfbd8f311554",
+          "id": "07c232cc-65f1-42dd-8999-4144d1bc2b55",
           "scope": "auto",
           "type": "link_by_uid"
         },
@@ -3083,7 +3083,7 @@
       ],
       [
         {
-          "id": "a4da3b73-ccd8-429f-b0e1-a77decd5810d",
+          "id": "594e8a77-1cc9-4586-872c-5de815549bc3",
           "scope": "auto",
           "type": "link_by_uid"
         },
@@ -3091,7 +3091,7 @@
       ],
       [
         {
-          "id": "8607a2fe-b90b-446b-b1c7-23d3b335132b",
+          "id": "411e9b23-c7e0-4e2e-bb74-f43d7f9c6b6e",
           "scope": "auto",
           "type": "link_by_uid"
         },
@@ -3103,7 +3103,7 @@
     "parameters": [
       [
         {
-          "id": "d9a12995-6513-42c4-b9a2-c09ab08e7588",
+          "id": "ea0ffacf-d2ef-4fc6-8d8b-ef57f526d9c8",
           "scope": "auto",
           "type": "link_by_uid"
         },
@@ -3111,7 +3111,7 @@
       ],
       [
         {
-          "id": "e54a7063-4ad3-4258-b30c-f07be7628491",
+          "id": "b8b9ca08-5c60-427c-b4bd-d0723a3c3d30",
           "scope": "auto",
           "type": "link_by_uid"
         },
@@ -3119,7 +3119,7 @@
       ],
       [
         {
-          "id": "c3143d5b-c8d5-4540-b30c-ea55d27e2c99",
+          "id": "21e3d8ba-8401-498a-9898-1a86a505039e",
           "scope": "auto",
           "type": "link_by_uid"
         },
@@ -3127,7 +3127,7 @@
       ],
       [
         {
-          "id": "ad730e31-59ca-4648-b01f-8dd67f882cbd",
+          "id": "7028f251-4093-4b5e-8285-b8e2342c9582",
           "scope": "auto",
           "type": "link_by_uid"
         },
@@ -3137,7 +3137,7 @@
     "tags": [],
     "type": "process_template",
     "uids": {
-      "auto": "e63a9111-fd71-450e-a563-93256d460f12"
+      "auto": "cebf0479-ed72-4351-9a5f-0b9d85757378"
     }
   }
 ]
