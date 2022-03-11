@@ -129,6 +129,11 @@ class GEMDSpecStore :
         dict_of_type = self.__types_to_dicts[type(specobj)]
         if new_spec_name in dict_of_type.keys() :
             dict_to_search = dict_of_type[new_spec_name]
+            if self.encoder.scope in specobj.uids.keys() :
+                if specobj.uids[self.encoder.scope] in dict_to_search.keys() :
+                    if debug :
+                        print(f'Returning an existing {type(specobj)} with name {new_spec_name}')
+                    return dict_to_search[specobj.uids[self.encoder.scope]]
             for existingspec in dict_to_search.values() :
                 if (existingspec.spec==specobj) or (existingspec.as_dict_no_uid==new_spec_as_dict_no_uid) :
                     if debug :
