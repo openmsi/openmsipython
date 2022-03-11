@@ -166,11 +166,11 @@ class LaserShockLab(DataFileDirectory) :
                                                              self.spacer_IDs,self.spacer_cutting_programs,self.samples,
                                                              **extra_kwargs)
         self.logger.debug(f'Created {len(self.launch_packages)} new Launch Package objects')
-        ##Experiments (Measurements)
-        #self.logger.debug('Creating Experiments...')
-        #self.experiments = self.get_objects_from_records(LaserShockExperiment,'Experiment',self.launch_packages,
-        #                                                 **extra_kwargs)
-        #self.logger.debug(f'Created {len(self.experiments)} new Experiment objects')
+        #Experiments (Measurements)
+        self.logger.debug('Creating Experiments...')
+        self.experiments = self.get_objects_from_records(LaserShockExperiment,'Experiment',self.launch_packages,
+                                                         **extra_kwargs)
+        self.logger.debug(f'Created {len(self.experiments)} new Experiment objects')
         ##Make sure that there is only one of each unique spec and run (dynamically-created specs may be duplicated)
         #self.__replace_duplicated_specs()
         self.logger.info('Done creating GEMD objects')
