@@ -1,5 +1,5 @@
 #imports
-import os, pathlib, methodtools, json, requests, getpass, fmrest
+import os, pathlib, json, requests, getpass, fmrest
 from itertools import chain
 from gemd.util.impl import recursive_foreach, substitute_objects
 from gemd.entity.util import complete_material_history
@@ -96,7 +96,7 @@ class LaserShockLab(DataFileDirectory) :
         try :
             self._spec_store = GEMDSpecStore(self.dirpath,self.encoder)
         except Exception as e :
-            self.logger.error(f'ERROR: failed to instantiate the spec store! Will reraise exception.',exc_obj=e)
+            self.logger.error('ERROR: failed to instantiate the spec store! Will reraise exception.',exc_obj=e)
         msg=f'Spec store initialized with {self._spec_store.n_specs} specs read from files in {self.dirpath}'
         self.logger.info(msg)
         #restore links in all of the templates and specs read from files

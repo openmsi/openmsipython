@@ -1,7 +1,6 @@
 #imports
 import functools
 from abc import ABC, abstractmethod
-from re import template
 from gemd.entity.file_link import FileLink
 from ..shared.logging import LogOwner
 from .utilities import get_tag_value_from_list

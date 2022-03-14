@@ -5,7 +5,6 @@ from dataclasses import dataclass
 from gemd.util.impl import set_uuids, recursive_foreach, substitute_objects
 from gemd.entity.object import MaterialSpec, ProcessSpec, IngredientSpec, MeasurementSpec
 from gemd.json import GEMDJson
-from pyparsing import RecursiveGrammarException
 from .cached_isinstance_functions import isinstance_spec
 
 @dataclass

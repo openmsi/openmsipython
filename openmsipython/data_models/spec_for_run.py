@@ -1,6 +1,5 @@
 #imports
 from abc import ABC,abstractmethod
-from gemd.entity.object import ProcessSpec
 from .has_template_and_spec_stores import HasTemplateAndSpecStores
 
 class SpecForRun(HasTemplateAndSpecStores,ABC) :

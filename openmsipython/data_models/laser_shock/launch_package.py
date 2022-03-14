@@ -5,7 +5,7 @@ from gemd.entity.util import make_instance
 from gemd.entity.source.performed_source import PerformedSource
 from gemd.entity.value import NominalCategorical, NominalInteger, NominalReal
 from gemd.entity.attribute import Property, Parameter, Condition
-from gemd.entity.object import ProcessSpec, MaterialSpec, MeasurementSpec, MeasurementRun, IngredientSpec, IngredientRun
+from gemd.entity.object import ProcessSpec, MaterialSpec, MeasurementSpec, MeasurementRun, IngredientSpec
 from ..utilities import search_for_single_name, search_for_single_tag
 from ..cached_isinstance_functions import isinstance_ingredient_run
 from ..spec_for_run import SpecForRun
@@ -396,7 +396,7 @@ class LaserShockLaunchPackage(MaterialRunFromFileMakerRecord) :
                                                                      template=templates.attr(tn),
                                                                      origin='specified'))
         #add the sample as an ingredient in the process
-        samplespec = IngredientSpec(name='Sample',material=self.sample.spec,process=impactsamplespec.process)
+        IngredientSpec(name='Sample',material=self.sample.spec,process=impactsamplespec.process)
         impactsamplespec = specs.unique_version_of(impactsamplespec)
         #create the Run from the Spec
         impactsample = make_instance(impactsamplespec)
