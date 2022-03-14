@@ -2,7 +2,7 @@
 import copy, methodtools
 from typing import Union
 from dataclasses import dataclass
-from gemd.util.impl import set_uuids, recursive_foreach
+from gemd.util.impl import set_uuids, recursive_foreach, substitute_objects
 from gemd.entity.object import MaterialSpec, ProcessSpec, IngredientSpec, MeasurementSpec
 from gemd.json import GEMDJson
 from pyparsing import RecursiveGrammarException
@@ -12,6 +12,7 @@ from .cached_isinstance_functions import isinstance_spec
 class GEMDSpec :
     spec : Union[MaterialSpec,ProcessSpec,IngredientSpec,MeasurementSpec]
     as_dict_no_uid : dict
+    from_file : bool
 
 class GEMDSpecStore :
     """
@@ -28,8 +29,15 @@ class GEMDSpecStore :
             for name in specdict.keys() :
                 for uid in specdict[name].keys() :
                     yield specdict[name][uid].spec
+    @property
+    def all_read_specs(self) :
+        for specdict in self.__types_to_dicts.values() :
+            for name in specdict.keys() :
+                for uid in specdict[name].keys() :
+                    if specdict[name][uid].from_file :
+                        yield specdict[name][uid].spec
 
-    def __init__(self,dirpath,encoder=GEMDJson()) :
+    def __init__(self,dirpath,encoder=GEMDJson(),debug=False) :
         self.dirpath = dirpath
         self.encoder = encoder
         self.__n_specs = 0
@@ -43,6 +51,17 @@ class GEMDSpecStore :
             IngredientSpec : self.__ing_specs,
             MeasurementSpec : self.__meas_specs,
         }
+        self.__debug=False
+
+    def substitute_objects(self,index_dict) :
+        """
+        Replace LinkByUID objects with pointers to the objects with that UID in the index_dict
+        """
+        for specdict in self.__types_to_dicts.values() :
+            for name,namedict in specdict.items() :
+                for uid,spec in namedict.items() :
+                    new_spec = substitute_objects(spec.spec,index_dict)
+                    specdict[name][uid].spec = new_spec
 
     def unique_version_of(self,specobj,debug=False,recursive_check=True,recursive_register=True) :
         """
@@ -77,6 +96,22 @@ class GEMDSpecStore :
         existingspec = self.__get_stored_version_of_spec(specobj,debug=debug)
         return existingspec.spec
 
+    def register_new_spec(self,item,from_file) :
+        if not isinstance_spec(item) :
+            return
+        if self.__get_stored_version_of_spec(item) is not None :
+            return
+        new_spec_name, new_spec_as_dict_no_uid = self.__get_name_and_dict_for_spec(item)
+        if self.__debug :
+            print(f'Creating a new {type(item)} with name {new_spec_name}')
+        dict_of_type = self.__types_to_dicts[type(item)]
+        if new_spec_name not in dict_of_type.keys() :
+            dict_of_type[new_spec_name] = {}
+        set_uuids(item,self.encoder.scope)
+        new_uid = item.uids[self.encoder.scope]
+        dict_of_type[new_spec_name][new_uid] = GEMDSpec(item,new_spec_as_dict_no_uid,from_file)
+        self.__n_specs+=1
+
     def __get_existing_specs_of_type(self,spec_type) :
         """
         Return a dictionary of spec objects of a certain type that exist in the directory
@@ -102,7 +137,7 @@ class GEMDSpecStore :
             if new_name not in new_spec_dict.keys() :
                 new_spec_dict[new_name] = {}
             new_uid = new_spec.uids[self.encoder.scope]
-            new_spec_dict[new_name][new_uid] = GEMDSpec(new_spec,new_spec_as_dict_no_uid)
+            new_spec_dict[new_name][new_uid] = GEMDSpec(new_spec,new_spec_as_dict_no_uid,True)
             self.__n_specs+=1
         return new_spec_dict
 
@@ -167,6 +202,6 @@ class GEMDSpecStore :
             dict_of_type[new_spec_name] = {}
         set_uuids(item,self.encoder.scope)
         new_uid = item.uids[self.encoder.scope]
-        dict_of_type[new_spec_name][new_uid] = GEMDSpec(item,new_spec_as_dict_no_uid)
+        dict_of_type[new_spec_name][new_uid] = GEMDSpec(item,new_spec_as_dict_no_uid,False)
         self.__n_specs+=1
     

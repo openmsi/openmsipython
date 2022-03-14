@@ -1,7 +1,17 @@
 #imports
-from gemd.util.impl import set_uuids
+from typing import Union
+from dataclasses import dataclass
+from gemd.util.impl import set_uuids, substitute_objects
 from gemd.json import GEMDJson
+from gemd.entity.template import PropertyTemplate, ParameterTemplate, ConditionTemplate
+from gemd.entity.template import MaterialTemplate, MeasurementTemplate, ProcessTemplate
 from .utilities import get_json_filename_for_gemd_object
+
+@dataclass
+class GEMDTemplate :
+    template : Union[PropertyTemplate,ParameterTemplate,ConditionTemplate,
+                     MaterialTemplate,MeasurementTemplate,ProcessTemplate]
+    from_file : bool
 
 class GEMDTemplateStore :
     """
@@ -20,7 +30,14 @@ class GEMDTemplateStore :
         both_dicts = [self.__attribute_templates,self.__object_templates]
         for tempdict in both_dicts :
             for name in tempdict.keys() :
-                yield tempdict[name]
+                yield tempdict[name].template
+    @property
+    def all_read_templates(self) :
+        both_dicts = [self.__attribute_templates,self.__object_templates]
+        for tempdict in both_dicts :
+            for name in tempdict.keys() :
+                if tempdict[name].from_file :
+                    yield tempdict[name].template
 
     def __init__(self,dirpath,attr_hardcoded,obj_hardcoded,encoder=GEMDJson()) :
         """
@@ -43,7 +60,7 @@ class GEMDTemplateStore :
         Return an attribute template given its name
         """
         try :
-            return self.__attribute_templates[template_name]
+            return self.__attribute_templates[template_name].template
         except KeyError :
             raise ValueError(f'ERROR: no stored attribute template called "{template_name}"')
 
@@ -52,9 +69,20 @@ class GEMDTemplateStore :
         Return an object template given its name
         """
         try :
-            return self.__object_templates[template_name]
+            return self.__object_templates[template_name].template
         except KeyError :
             raise ValueError(f'ERROR: no stored object template called "{template_name}"')
+
+    def substitute_objects(self,index_dict) :
+        """
+        Replace LinkByUID objects with pointers to the objects with that UID in the index_dict
+        """
+        for name,template in self.__attribute_templates.items() :
+            new_template = substitute_objects(template.template,index_dict)
+            self.__attribute_templates[name].template = new_template
+        for name,template in self.__object_templates.items() :
+            new_template = substitute_objects(template.template,index_dict)
+            self.__object_templates[name].template = new_template
 
     def __get_template_dict(self,dirpath,hardcoded) :
         new_templates_dict = {}
@@ -81,7 +109,7 @@ class GEMDTemplateStore :
                     errmsg = f'ERROR: hardcoded {template.__class__.__name__} template with name {name} is mismatched '
                     errmsg+= f'to template read from file at {fp}!'
                     raise RuntimeError(errmsg)
-                new_templates_dict[name] = new_template
+                new_templates_dict[name] = GEMDTemplate(new_template,True)
                 fps_found.append(fp)
             if len(fps_found)>1 :
                 errmsg = f'ERROR: found more than one filepath for template with name stem {filename_stem} '
@@ -92,7 +120,7 @@ class GEMDTemplateStore :
             if name not in new_templates_dict.keys() :
                 #print(f'No file found for {template.__class__.__name__} template with name {name}')
                 set_uuids(template,self.encoder.scope)
-                new_templates_dict[name] = template
+                new_templates_dict[name] = GEMDTemplate(template,False)
                 self.__n_hardcoded+=1
             else :
                 self.__n_from_files+=1

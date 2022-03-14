@@ -1,5 +1,4 @@
 #imports
-from typing import final
 from gemd.entity.value import NominalCategorical, NominalReal, NominalComposition
 from gemd.entity.attribute import PropertyAndConditions, Property, Parameter, Condition
 from gemd.entity.object import MaterialSpec, ProcessSpec, IngredientSpec
@@ -77,6 +76,7 @@ class LaserShockSampleSpec(SpecForRun) :
                                                template=self.templates.attr('Sample Material Type'),
                                                origin='specified')),
             )
+        raw_mat_spec = self.specs.unique_version_of(raw_mat_spec)
         #some variables to use while dynamically figuring out the process
         all_procs = []
         proc_to_take_raw_material = None

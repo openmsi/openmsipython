@@ -59,8 +59,6 @@ class SpecFromFileMakerRecord(FromFileMakerRecordBase) :
         self.__spec = self.spec_type(**self.init_spec_kwargs)
         #call the read_record with the Spec as the object to modify
         self.read_record(record,self.__spec)
-        #search through the spec store to make sure the underlying spec is unique
-        self.spec = self.specs.unique_version_of(self.spec)
 
 class HasTemplateFromFileMakerRecord(SpecFromFileMakerRecord) :
 
@@ -120,7 +118,8 @@ class MaterialSpecFromFileMakerRecord(HasTemplateFromFileMakerRecord) :
     def init_spec_kwargs(self) :
         rd = super().init_spec_kwargs
         if self.process_template is not None :
-            rd['process'] = ProcessSpec(name=self.process_template.name,template=self.process_template)
+            proc = ProcessSpec(name=self.process_template.name,template=self.process_template)
+            rd['process'] = proc
         return rd
 
     @property
@@ -129,6 +128,16 @@ class MaterialSpecFromFileMakerRecord(HasTemplateFromFileMakerRecord) :
                 *self.property_dict.keys(),
                 *self.process_parameter_dict.keys()
                ]
+
+    def __init__(self,*args,**kwargs) :
+        """
+        Create the Spec using the given FileMaker record
+        """
+        super().__init__(*args,**kwargs)
+        #make sure the process is unique
+        self.spec.process = self.specs.unique_version_of(self.spec.process)
+        #search through the spec store to make sure the underlying spec is unique
+        self.spec = self.specs.unique_version_of(self.spec)
 
     def add_other_key(self,key,value,record) :
         #add properties (if any of them are given) to this MaterialSpec
@@ -198,6 +207,14 @@ class ProcessSpecFromFileMakerRecord(HasTemplateFromFileMakerRecord) :
     @property
     def unique_values(self):
         return {**super().unique_values,f'{self.spec_type} name':self.spec.name}
+
+    def __init__(self,*args,**kwargs) :
+        """
+        Create the Spec using the given FileMaker record
+        """
+        super().__init__(*args,**kwargs)
+        #search through the spec store to make sure the underlying spec is unique
+        self.spec = self.specs.unique_version_of(self.spec)
 
     def add_other_key(self,key,value,record) :
         #add conditions (if any of them are given) to this ProcessSpec

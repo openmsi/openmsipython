@@ -225,12 +225,12 @@ class LaserShockLaunchPackage(MaterialRunFromFileMakerRecord) :
     
     def __init__(self,record,flyer_stacks,spacer_IDs,spacer_cutting_programs,samples,**kwargs) :
         # find the flyer stack, spacer ID, spacer cutting program, and sample that were used
-        self.flyerstack = search_for_single_tag([fs.run for fs in flyer_stacks],'FlyerID',record.pop('Flyer ID').replace(' ','_'))
-        self.spacerID = search_for_single_name([sid.spec for sid in spacer_IDs],
+        self.flyerstack = search_for_single_tag([fs for fs in flyer_stacks],'FlyerID',record.pop('Flyer ID').replace(' ','_'))
+        self.spacerID = search_for_single_name([sid for sid in spacer_IDs],
                                                record.pop('Spacer Type'),logger=kwargs.get('logger'))
-        self.spacercutting = search_for_single_name([scp.spec for scp in spacer_cutting_programs],
+        self.spacercutting = search_for_single_name([scp for scp in spacer_cutting_programs],
                                                     record.pop('Spacer Cutting Program'),logger=kwargs.get('logger'))
-        self.sample = search_for_single_name([s.run for s in samples],
+        self.sample = search_for_single_name([s for s in samples],
                                              record.pop('Sample Name'),logger=kwargs.get('logger'))
         # create Runs from Specs that were found
         self.spacer = make_instance(self.spacerID) if self.spacerID is not None else None

@@ -147,6 +147,8 @@ class LaserShockFlyerStackSpec(SpecForRun) :
         #process and ingredients for cutting flyer discs into the glass/epoxy/foil stack
         if self.cutting is not None :
             cutting = copy.deepcopy(self.cutting)
+            if self.specs.encoder.scope in cutting.uids.keys() :
+                _ = cutting.uids.pop(self.specs.encoder.scope)
         else :
             new_cutting_proc_name = self.cutting_proc_name if self.cutting_proc_name!='' else 'Generic Flyer Cutting'
             cutting = ProcessSpec(name=new_cutting_proc_name,template=self.templates.obj('Flyer Cutting Program'))
@@ -284,14 +286,14 @@ class LaserShockFlyerStack(MaterialRunFromFileMakerRecord) :
         #set the logger until it can be overwritten after everything else is initialized
         self.logger = kwargs.get('logger')
         #find the glass, foil, epoxy, and flyer cutting program that were used for this run
-        self.glassID = search_for_single_name([gid.spec for gid in glass_IDs],
+        self.glassID = search_for_single_name([gid for gid in glass_IDs],
                                               record.pop('Glass Name Reference'),logger=kwargs.get('logger'))
-        self.foilID = search_for_single_name([fid.spec for fid in foil_IDs],
+        self.foilID = search_for_single_name([fid for fid in foil_IDs],
                                              record.pop('Foil Name'),logger=kwargs.get('logger'))
-        self.epoxyID = search_for_single_name([eid.spec for eid in epoxy_IDs],
+        self.epoxyID = search_for_single_name([eid for eid in epoxy_IDs],
                                               record.pop('Epoxy Name'),logger=kwargs.get('logger'))
         self.cutting_procedure_name = record.pop('Cutting Procedure Name')
-        self.cutting = search_for_single_name([fcp.spec for fcp in flyer_cutting_programs],
+        self.cutting = search_for_single_name([fcp for fcp in flyer_cutting_programs],
                                               self.cutting_procedure_name,logger=kwargs.get('logger'))
         #create Runs from the Specs found
         self.glass = make_instance(self.glassID) if self.glassID is not None else None

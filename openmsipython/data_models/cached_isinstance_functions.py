@@ -13,4 +13,5 @@ isinstance_run = cached_isinstance_generator((MaterialRun,ProcessRun,IngredientR
 isinstance_process_spec = cached_isinstance_generator(ProcessSpec)
 isinstance_material_ingredient_spec = cached_isinstance_generator((MaterialSpec,IngredientSpec))
 isinstance_ingredient_spec = cached_isinstance_generator(IngredientSpec)
+isinstance_material_run = cached_isinstance_generator(MaterialRun)
 isinstance_ingredient_run = cached_isinstance_generator(IngredientRun)
