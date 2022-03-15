@@ -56,11 +56,13 @@ class GEMDSpecStore :
         """
         Replace LinkByUID objects with pointers to the objects with that UID in the index_dict
         """
-        for specdict in self.__types_to_dicts.values() :
+        for spectype,specdict in self.__types_to_dicts.items() :
             for name,namedict in specdict.items() :
                 for uid,spec in namedict.items() :
-                    new_spec = substitute_objects(spec.spec,index_dict)
-                    specdict[name][uid].spec = new_spec
+                    rep_spec = substitute_objects(spec.spec,index_dict)
+                    rep_spec_as_dict_no_uid = self.__get_spec_dict_no_uids(rep_spec)
+                    self.__types_to_dicts[spectype][name][uid].spec = rep_spec
+                    self.__types_to_dicts[spectype][name][uid].as_dict_no_uid = rep_spec_as_dict_no_uid
 
     def unique_version_of(self,specobj,debug=False,recursive_check=True,recursive_register=True) :
         """
@@ -124,8 +126,7 @@ class GEMDSpecStore :
             if new_spec.uids is None or self.encoder.scope not in new_spec.uids.keys() :
                 errmsg = f'ERROR: spec read from {fp} is missing a "{self.encoder.scope}" scope UID!'
                 raise RuntimeError(errmsg)
-            new_spec_as_dict_no_uid = new_spec.as_dict()
-            _ = new_spec_as_dict_no_uid.pop('uids')
+            new_spec_as_dict_no_uid = self.__get_spec_dict_no_uids(new_spec)
             for seen_dict,filepath in zip(dicts_no_uid_seen,filepaths_seen) :
                 if new_spec_as_dict_no_uid==seen_dict :
                     errmsg = f'ERROR: {spec_type} spec read from {fp} is identical to spec read from {filepath}!'
