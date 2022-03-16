@@ -75,6 +75,7 @@ class RunFromFileMakerRecord(FromFileMakerRecordBase) :
         """
         kwargs = self.get_spec_kwargs(record)
         new_spec = self.spec_type(templates=self.templates,specs=self.specs,**kwargs)
+        new_spec.spec = self.specs.unique_version_of(new_spec.spec)
         return new_spec.spec
 
 class HasSourceFromFileMakerRecord(RunFromFileMakerRecord) :

@@ -5,7 +5,7 @@ from dataclasses import dataclass
 from gemd.util.impl import set_uuids, recursive_foreach, substitute_objects
 from gemd.entity.object import MaterialSpec, ProcessSpec, IngredientSpec, MeasurementSpec
 from gemd.json import GEMDJson
-from .cached_isinstance_functions import isinstance_spec
+from .cached_isinstance_functions import isinstance_spec, isinstance_process_spec
 
 @dataclass
 class GEMDSpec :
@@ -40,10 +40,10 @@ class GEMDSpecStore :
         self.dirpath = dirpath
         self.encoder = encoder
         self.__n_specs = 0
-        self.__mat_specs = self.__get_existing_specs_of_type(MaterialSpec)
-        self.__proc_specs = self.__get_existing_specs_of_type(ProcessSpec)
-        self.__ing_specs = self.__get_existing_specs_of_type(IngredientSpec)
-        self.__meas_specs = self.__get_existing_specs_of_type(MeasurementSpec)
+        self.__mat_specs = self.__get_existing_specs_from_dir(MaterialSpec)
+        self.__proc_specs = self.__get_existing_specs_from_dir(ProcessSpec)
+        self.__ing_specs = self.__get_existing_specs_from_dir(IngredientSpec)
+        self.__meas_specs = self.__get_existing_specs_from_dir(MeasurementSpec)
         self.__types_to_dicts = {
             MaterialSpec : self.__mat_specs,
             ProcessSpec : self.__proc_specs,
@@ -75,45 +75,31 @@ class GEMDSpecStore :
         recursive_check = True is any Spec objects linked to this object should also be checked for uniqueness
         recursive_register = True if any Spec objects linked to this object should be registered in the store
         """
+        self.__debug = debug
         #check if an identical spec has been registered, and return it if so
         if recursive_check :
-            self.__n_objs_searched = 0
-            self.__n_objs_found = 0
-            recursive_foreach(specobj,self.__check_spec_exists_in_store,apply_first=True)
-            if self.__n_objs_searched==self.__n_objs_found :
-                self.__n_objs_searched = 0
-                self.__n_objs_found = 0
+            if self.__spec_and_children_exist_in_store(specobj) :
                 return (self.__get_stored_version_of_spec(specobj,debug=debug)).spec
         else :
             existingspec = self.__get_stored_version_of_spec(specobj,debug=debug)
             if existingspec is not None :
                 return existingspec.spec
         #if an existing spec wasn't returned, register this spec as a new one and then return it
-        self.__debug = debug
         if recursive_register :
-            recursive_foreach(specobj,self.__register_new_spec,apply_first=True)
+            recursive_foreach(specobj,self.__register_new_unique_specs)
         else :
-            self.__register_new_spec(specobj)
+            self.__register_new_unique_specs(specobj)
         existingspec = self.__get_stored_version_of_spec(specobj,debug=debug)
         return existingspec.spec
 
-    def register_new_spec(self,item,from_file) :
+    def register_new_unique_spec_from_file(self,item) :
         if not isinstance_spec(item) :
             return
         if self.__get_stored_version_of_spec(item) is not None :
             return
-        new_spec_name, new_spec_as_dict_no_uid = self.__get_name_and_dict_for_spec(item)
-        if self.__debug :
-            print(f'Creating a new {type(item)} with name {new_spec_name}')
-        dict_of_type = self.__types_to_dicts[type(item)]
-        if new_spec_name not in dict_of_type.keys() :
-            dict_of_type[new_spec_name] = {}
-        set_uuids(item,self.encoder.scope)
-        new_uid = item.uids[self.encoder.scope]
-        dict_of_type[new_spec_name][new_uid] = GEMDSpec(item,new_spec_as_dict_no_uid,from_file)
-        self.__n_specs+=1
+        self.__register_spec(item,from_file=True)
 
-    def __get_existing_specs_of_type(self,spec_type) :
+    def __get_existing_specs_from_dir(self,spec_type) :
         """
         Return a dictionary of spec objects of a certain type that exist in the directory
         """
@@ -129,8 +115,9 @@ class GEMDSpecStore :
             new_spec_as_dict_no_uid = self.__get_spec_dict_no_uids(new_spec)
             for seen_dict,filepath in zip(dicts_no_uid_seen,filepaths_seen) :
                 if new_spec_as_dict_no_uid==seen_dict :
-                    errmsg = f'ERROR: {spec_type} spec read from {fp} is identical to spec read from {filepath}!'
-                    raise RuntimeError(errmsg)
+                    errmsg = f'ERROR: {spec_type} spec read from {fp.name} is identical to spec read from {filepath.name}!'
+                    print(errmsg)
+                    #raise RuntimeError(errmsg)
             dicts_no_uid_seen.append(new_spec_as_dict_no_uid)
             filepaths_seen.append(fp)
             new_name = new_spec.name
@@ -146,27 +133,22 @@ class GEMDSpecStore :
         Return a version of a Spec object serialized to a dictionary where all 
         UIDs of the relevant encoder scope have been removed
         """
-        spec_as_dict = copy.deepcopy(specobj.as_dict())
-        self.__scrub_uids_from_dict(spec_as_dict)
-        return spec_as_dict
+        spec_copy = copy.deepcopy(specobj)
+        recursive_foreach(spec_copy,self.__scrub_uids)
+        return spec_copy.as_dict()
 
-    def __scrub_uids_from_dict(self,d) :
-        """
-        Recursively remove UIDs of the relevant scope from a given dictionary
-        """
-        for key,value in d.items() :
-            if key=='uids' and self.encoder.scope in value.keys() :
-                _ = value.pop(self.encoder.scope)
-            elif type(value)==dict :
-                self.__scrub_uids_from_dict(value)
+    def __scrub_uids(self,item) :
+        if not isinstance_spec(item) :
+            return
+        if self.encoder.scope in item.uids.keys() :
+            _ = item.uids.pop(self.encoder.scope)
 
-    @methodtools.lru_cache(maxsize=32)
+    @methodtools.lru_cache(maxsize=256)
     def __get_name_and_dict_for_spec(self,specobj) :
         return specobj.name, self.__get_spec_dict_no_uids(specobj)
 
     def __get_stored_version_of_spec(self,specobj,debug=False) :
         new_spec_name, new_spec_as_dict_no_uid = self.__get_name_and_dict_for_spec(specobj)
-        #new_spec_as_dict_no_uid = copy.deepcopy(specobj.as_dict())
         dict_of_type = self.__types_to_dicts[type(specobj)]
         if new_spec_name in dict_of_type.keys() :
             dict_to_search = dict_of_type[new_spec_name]
@@ -182,18 +164,32 @@ class GEMDSpecStore :
                     return existingspec
         return None
 
+    def __spec_and_children_exist_in_store(self,specobj) :
+        self.__n_objs_searched = 0
+        self.__n_objs_found = 0
+        recursive_foreach(specobj,self.__check_spec_exists_in_store,apply_first=True)
+        if self.__n_objs_searched==self.__n_objs_found :
+            return True
+        return False
+
     def __check_spec_exists_in_store(self,item) :
-        if not isinstance_spec(item) :
+        if self.__n_objs_found<self.__n_objs_searched :
+            return
+        elif not isinstance_spec(item) :
             return
         self.__n_objs_searched+=1
-        if self.__get_stored_version_of_spec(item) is not None :
+        stored_version = self.__get_stored_version_of_spec(item)
+        if stored_version is not None :
             self.__n_objs_found+=1
 
-    def __register_new_spec(self,item) :
+    def __register_new_unique_specs(self,item) :
         if not isinstance_spec(item) :
             return
-        if self.__get_stored_version_of_spec(item) is not None :
+        if self.__spec_and_children_exist_in_store(item) :
             return
+        self.__register_spec(item)
+
+    def __register_spec(self,item,from_file=False) :
         new_spec_name, new_spec_as_dict_no_uid = self.__get_name_and_dict_for_spec(item)
         if self.__debug :
             print(f'Creating a new {type(item)} with name {new_spec_name}')
@@ -202,6 +198,6 @@ class GEMDSpecStore :
             dict_of_type[new_spec_name] = {}
         set_uuids(item,self.encoder.scope)
         new_uid = item.uids[self.encoder.scope]
-        dict_of_type[new_spec_name][new_uid] = GEMDSpec(item,new_spec_as_dict_no_uid,False)
+        dict_of_type[new_spec_name][new_uid] = GEMDSpec(item,new_spec_as_dict_no_uid,from_file)
         self.__n_specs+=1
     

@@ -150,7 +150,7 @@ class LaserShockFlyerStackSpec(SpecForRun) :
             if self.specs.encoder.scope in cutting.uids.keys() :
                 _ = cutting.uids.pop(self.specs.encoder.scope)
         else :
-            new_cutting_proc_name = self.cutting_proc_name if self.cutting_proc_name!='' else 'Generic Flyer Cutting'
+            new_cutting_proc_name = self.cutting_proc_name if self.cutting_proc_name!='' else 'Unknown Flyer Cutting'
             cutting = ProcessSpec(name=new_cutting_proc_name,template=self.templates.obj('Flyer Cutting Program'))
         if self.s!='' :
             cutting.parameters.append(

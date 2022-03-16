@@ -7,6 +7,7 @@ from gemd.json import GEMDJson
 from ...data_file_io.data_file_directory import DataFileDirectory
 from ..utilities import cached_isinstance_generator, get_tag_value_from_list, get_json_filename_for_gemd_object
 from ..cached_isinstance_functions import isinstance_spec, isinstance_run, isinstance_material_run
+from ..cached_isinstance_functions import isinstance_link_by_uid, isinstance_list_or_tuple, isinstance_dict_serializable
 from ..gemd_template_store import GEMDTemplateStore
 from ..gemd_spec_store import GEMDSpecStore
 from ..spec_from_filemaker_record import SpecFromFileMakerRecord
@@ -84,6 +85,8 @@ class LaserShockLab(DataFileDirectory) :
         self.__username = None; self.__password = None
         #JSON encoder
         self.encoder = GEMDJson()
+        #read any json files in the directory and make sure there aren't any objects whose references are missing
+        self.__check_json_uids()
         #build the template store from what's in the directory already, plus what's hard coded
         try :
             self._template_store = GEMDTemplateStore(self.dirpath,ATTR_TEMPL,OBJ_TEMPL,self.encoder)
@@ -166,7 +169,7 @@ class LaserShockLab(DataFileDirectory) :
         self.logger.debug(f'{self._spec_store.n_specs} total unique Specs stored')
         self.logger.info('Done creating GEMD objects')
     
-    def get_objects_from_records(self,obj_type,layout_name,*args,n_max_records=100000,records_dict=None,**kwargs) :
+    def get_objects_from_records(self,obj_type,layout_name,*args,n_max_records=200,records_dict=None,**kwargs) :
         """
         Return a list of LaserShock/GEMD constructs based on FileMaker records 
         or records in a dictionary (useful for testing)
@@ -201,7 +204,7 @@ class LaserShockLab(DataFileDirectory) :
                 self._gemd_obj_index[(self.encoder.scope,read_obj.uids[self.encoder.scope])] = read_obj
                 self.__uids_written.append(read_obj.uids[self.encoder.scope])
                 if isinstance_spec(read_obj) :
-                    self._spec_store.register_new_spec(read_obj,True)
+                    self._spec_store.register_new_unique_spec_from_file(read_obj)
                 all_objs.append(read_obj)
             except Exception as e :
                 with open(fp,'r') as ofp :
@@ -276,6 +279,42 @@ class LaserShockLab(DataFileDirectory) :
         self.logger.info('Done.')
 
     #################### PRIVATE HELPER FUNCTIONS ####################
+
+    def __check_json_uids(self) :
+        uids_found = set()
+        uids_referenced = set()
+        for fp in self.dirpath.glob('*.json') :
+            with open(fp,'r') as ofp :
+                obj = self.encoder.raw_loads(ofp.read())
+            uids_found.add(obj.uids[self.encoder.scope])
+        for fp in self.dirpath.glob('*.json') :
+            with open(fp,'r') as ofp :
+                obj = self.encoder.raw_loads(ofp.read())
+            self.__add_referenced_uids(obj,uids_referenced)
+        msg = f'found {len(uids_found)} total objects with {len(uids_referenced)} '
+        msg+= f'UIDs referenced in {self.dirpath}'
+        self.logger.info(msg)
+        missing_uids = set()
+        for uid_referenced in uids_referenced :
+            if uid_referenced not in uids_found :
+                missing_uids.add(uid_referenced)
+        if len(missing_uids)>0 :
+            errmsg = f'ERROR: could not find objects corresponding to {len(missing_uids)} referenced UIDs in the json '
+            errmsg+= f'files in {self.dirpath}:\n'
+            for missing_uid in missing_uids :
+                errmsg+=f'\t{missing_uid}\n'
+            self.logger.error(errmsg,RuntimeError)
+
+    def __add_referenced_uids(self,item,uids_referenced) :
+        if isinstance_link_by_uid(item) :
+            if item.scope==self.encoder.scope :
+                uids_referenced.add(item.id)
+        elif isinstance_list_or_tuple(item):
+            for v in item :
+                self.__add_referenced_uids(v,uids_referenced)
+        elif isinstance_dict_serializable(item):
+            for k,v in item.as_dict().items() :
+                self.__add_referenced_uids(v,uids_referenced)
     
     def __get_filemaker_records(self,layout_name,n_max_records=1000) :
         #disable warnings

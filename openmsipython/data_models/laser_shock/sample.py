@@ -78,10 +78,7 @@ class LaserShockSampleSpec(SpecForRun) :
             )
         raw_mat_spec = self.specs.unique_version_of(raw_mat_spec)
         #some variables to use while dynamically figuring out the process
-        all_procs = []
-        proc_to_take_raw_material = None
         preprocessed=False
-        final_output_proc = None
         #Define sample preprocessing
         if ( (self.preproc is not None and self.preproc!='') or 
              (self.preproc_temp is not None and self.preproc_temp!='') ) :
@@ -111,11 +108,14 @@ class LaserShockSampleSpec(SpecForRun) :
                         origin='specified'
                     )
                 )
+            #add the raw material as an ingredient to the preprocessing
+            IngredientSpec(name='Raw Material',
+                    material=raw_mat_spec,
+                    process=preprocessing,
+            )
             #create a preprocessed sample
             MaterialSpec(name='Preprocessed Material',process=preprocessing)
-            all_procs.append(preprocessing)
-            proc_to_take_raw_material = preprocessing
-            final_output_proc = preprocessing
+            preprocessing = self.specs.unique_version_of(preprocessing)
         #Define sample processing
         sample_processing_conditions = []
         sample_processing_parameters = []
@@ -173,11 +173,10 @@ class LaserShockSampleSpec(SpecForRun) :
                            process=sample_processing,
             )
         else :
-            proc_to_take_raw_material = sample_processing
-        #add processing to the list of processes
-        all_procs.append(sample_processing)
-        #reset the output process
-        final_output_proc = sample_processing
+            IngredientSpec(name='Raw Material',
+                    material=raw_mat_spec,
+                    process=sample_processing,
+            )
         #Define the annealing process
         if (self.ann_temp is not None and self.ann_temp!='') and (self.ann_time is not None and self.ann_time!='') :
             annealing = ProcessSpec(
@@ -206,22 +205,14 @@ class LaserShockSampleSpec(SpecForRun) :
                 )
             #define the input to annealing
             MaterialSpec(name='Processed Material',process=sample_processing)
+            sample_processing = self.specs.unique_version_of(sample_processing)
             IngredientSpec(name='Processed Material',
                             material=sample_processing.output_material,
                             process=annealing,
             )
-            #reset the output process
-            all_procs.append(annealing)
-            final_output_proc = annealing
-        #add the raw material as the ingredient to the process that takes it
-        IngredientSpec(name='Raw Material',
-                    material=raw_mat_spec,
-                    process=proc_to_take_raw_material,
-            )
-        for proc in all_procs :
-            if proc!=final_output_proc :
-                _ = self.specs.unique_version_of(proc)
-        return self.specs.unique_version_of(final_output_proc)
+            return self.specs.unique_version_of(annealing)
+        else :
+            return self.specs.unique_version_of(sample_processing)
 
 class LaserShockSample(MaterialRunFromFileMakerRecord) :
     """
