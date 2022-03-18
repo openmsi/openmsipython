@@ -170,6 +170,8 @@ class FromFileMakerRecordBase(LogOwner,HasTemplateAndSpecStores,ABC) :
             for k in missing_keys :
                 errmsg+=f'{k}, '
             self.logger.error(errmsg[:-2],ValueError)
+        #add the special tag for the object type that it is
+        obj.tags.append(f'ObjectType::{self.__class__.__name__}')
 
     def ignore_key(self,key) :
         """

@@ -69,15 +69,6 @@ class RunFromFileMakerRecord(FromFileMakerRecordBase) :
         """
         pass
 
-    def get_spec(self,record) :
-        """
-        A function to return the Spec for this Run given a FileMaker record
-        """
-        kwargs = self.get_spec_kwargs(record)
-        new_spec = self.spec_type(templates=self.templates,specs=self.specs,**kwargs)
-        new_spec.spec = self.specs.unique_version_of(new_spec.spec)
-        return new_spec.spec
-
 class HasSourceFromFileMakerRecord(RunFromFileMakerRecord) :
     """
     Adds to the base class to process keys for sources 
@@ -134,6 +125,15 @@ class MaterialRunFromFileMakerRecord(HasSourceFromFileMakerRecord) :
         return [*super().other_keys,
                 *self.measured_property_dict.keys(),
                ]
+
+    def get_spec(self,record) :
+        """
+        A function to return the Spec for this Run given a FileMaker record
+        """
+        kwargs = self.get_spec_kwargs(record)
+        new_spec = self.spec_type(templates=self.templates,specs=self.specs,**kwargs)
+        new_spec.spec.process = self.specs.unique_version_of(new_spec.spec.process)
+        return self.specs.unique_version_of(new_spec.spec)
 
     def add_other_key(self,key,value,record) :
         #add a PerformedSource to the ProcessRun that created this material
@@ -202,6 +202,15 @@ class MeasurementRunFromFileMakerRecord(HasSourceFromFileMakerRecord) :
         """
         super().__init__(*args,**kwargs)
         self.run.material=material
+
+    def get_spec(self,record) :
+        """
+        A function to return the Spec for this Run given a FileMaker record
+        """
+        kwargs = self.get_spec_kwargs(record)
+        new_spec = self.spec_type(templates=self.templates,specs=self.specs,**kwargs)
+        new_spec.spec = self.specs.unique_version_of(new_spec.spec)
+        return new_spec.spec
 
     def add_other_key(self,key,value,record) :
         #add a PerformedSource for this measurement

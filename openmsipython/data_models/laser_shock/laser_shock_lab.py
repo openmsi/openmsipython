@@ -1,12 +1,12 @@
 #imports
 import os, pathlib, json, requests, getpass, fmrest
-from itertools import chain
-from gemd.util.impl import recursive_foreach, substitute_objects
+from gemd.util.impl import recursive_foreach
 from gemd.entity.util import complete_material_history
 from gemd.json import GEMDJson
 from ...data_file_io.data_file_directory import DataFileDirectory
-from ..utilities import cached_isinstance_generator, get_tag_value_from_list, get_json_filename_for_gemd_object
-from ..cached_isinstance_functions import isinstance_spec, isinstance_run, isinstance_material_run
+from ..utilities import get_tag_value_from_list, get_json_filename_for_gemd_object
+from ..cached_isinstance_functions import cached_isinstance_generator
+from ..cached_isinstance_functions import isinstance_template, isinstance_spec, isinstance_run, isinstance_material_run
 from ..cached_isinstance_functions import isinstance_link_by_uid, isinstance_list_or_tuple, isinstance_dict_serializable
 from ..gemd_template_store import GEMDTemplateStore
 from ..gemd_spec_store import GEMDSpecStore
@@ -30,6 +30,7 @@ from .experiment import LaserShockExperiment
 isinstance_spec_from_filemaker_record = cached_isinstance_generator(SpecFromFileMakerRecord)
 isinstance_run_from_filemaker_record = cached_isinstance_generator(RunFromFileMakerRecord)
 isinstance_material_run_from_filemaker_record = cached_isinstance_generator(MaterialRunFromFileMakerRecord)
+COMPLETE_MODEL_JSON_FILE_NAME = 'complete_data_model.json'
 
 class LaserShockLab(DataFileDirectory) :
     """
@@ -57,8 +58,8 @@ class LaserShockLab(DataFileDirectory) :
     @property
     def all_object_lists(self) :
         return {LaserShockGlassID :self.glass_IDs,
-                LaserShockEpoxyID :self.epoxy_IDs,
                 LaserShockFoilID : self.foil_IDs,
+                LaserShockEpoxyID :self.epoxy_IDs,
                 LaserShockSpacerID : self.spacer_IDs,
                 LaserShockFlyerCuttingProgram : self.flyer_cutting_programs,
                 LaserShockSpacerCuttingProgram : self.spacer_cutting_programs,
@@ -87,33 +88,30 @@ class LaserShockLab(DataFileDirectory) :
         self.encoder = GEMDJson()
         #read any json files in the directory and make sure there aren't any objects whose references are missing
         self.__check_json_uids()
-        #build the template store from what's in the directory already, plus what's hard coded
-        try :
-            self._template_store = GEMDTemplateStore(self.dirpath,ATTR_TEMPL,OBJ_TEMPL,self.encoder)
-        except Exception as e :
-            self.logger.error('ERROR: failed to instantiate the template store! Will reraise exception.',exc_obj=e)
+        #initialize empty object lists
+        self.glass_IDs = []
+        self.foil_IDs = []
+        self.epoxy_IDs = []
+        self.spacer_IDs = []
+        self.flyer_cutting_programs = []
+        self.spacer_cutting_programs = []
+        self.flyer_stacks = []
+        self.samples = []
+        self.launch_packages = []
+        self.experiments = []
+        #start up the template and spec stores
+        self._template_store = GEMDTemplateStore(self.encoder)
+        self._spec_store = GEMDSpecStore(self.encoder)
+        #deserialize the data model from the single file
+        self.__uids_written = []
+        self.__deserialize_existing_model()
+        #add any hardcoded templates that weren't deserialized to the template store
+        self._template_store.add_missing_hardcoded_templates(ATTR_TEMPL,OBJ_TEMPL)
         msg = f'Template store initialized with {self._template_store.n_hardcoded} hardcoded templates and '
         msg+= f'{self._template_store.n_from_files} templates read from files in {self.dirpath}'
         self.logger.info(msg)
-        #build the spec store from what's in the directory
-        try :
-            self._spec_store = GEMDSpecStore(self.dirpath,self.encoder)
-        except Exception as e :
-            self.logger.error('ERROR: failed to instantiate the spec store! Will reraise exception.',exc_obj=e)
-        msg=f'Spec store initialized with {self._spec_store.n_specs} specs read from files in {self.dirpath}'
+        msg=f'Spec store initialized with {self._spec_store.n_specs} specs read from an existing model'
         self.logger.info(msg)
-        #restore links in all of the templates and specs read from files
-        self._gemd_obj_index = {}
-        for obj in chain(self._template_store.all_templates,self._spec_store.all_specs) :
-            self._gemd_obj_index[(self.encoder.scope,obj.uids[self.encoder.scope])] = obj
-        self._template_store.substitute_objects(self._gemd_obj_index)
-        self._spec_store.substitute_objects(self._gemd_obj_index)
-        #register the UIDs in the template and spec stores as already written
-        self.__uids_written = []
-        for template in self._template_store.all_read_templates :
-            self.__uids_written.append(template.uids[self.encoder.scope])
-        for spec in self._spec_store.all_read_specs :
-            self.__uids_written.append(spec.uids[self.encoder.scope])
 
     def create_gemd_objects(self,records_dict=None) :
         """
@@ -131,45 +129,71 @@ class LaserShockLab(DataFileDirectory) :
         #add all the information to the lab object based on entries in the FileMaker DB
         #"Inventory" pages (create Specs)
         self.logger.debug('Creating Inventory objects...')
-        self.glass_IDs = self.get_objects_from_records(LaserShockGlassID,'Glass ID',**extra_kwargs)
+        self.get_objects_from_records(LaserShockGlassID,self.glass_IDs,'Glass ID',**extra_kwargs)
         self.logger.debug(f'There are {len(self.glass_IDs)} Glass ID objects')
-        self.foil_IDs = self.get_objects_from_records(LaserShockFoilID,'Foil ID',**extra_kwargs)
+        self.get_objects_from_records(LaserShockFoilID,self.foil_IDs,'Foil ID',**extra_kwargs)
         self.logger.debug(f'There are {len(self.foil_IDs)} Foil ID objects')
-        self.epoxy_IDs = self.get_objects_from_records(LaserShockEpoxyID,'Epoxy ID',**extra_kwargs)
+        self.get_objects_from_records(LaserShockEpoxyID,self.epoxy_IDs,'Epoxy ID',**extra_kwargs)
         self.logger.debug(f'There are {len(self.epoxy_IDs)} Epoxy ID objects')
-        self.spacer_IDs = self.get_objects_from_records(LaserShockSpacerID,'Spacer ID',**extra_kwargs)
+        self.get_objects_from_records(LaserShockSpacerID,self.spacer_IDs,'Spacer ID',**extra_kwargs)
         self.logger.debug(f'There are {len(self.spacer_IDs)} Spacer ID objects')
-        self.flyer_cutting_programs = self.get_objects_from_records(LaserShockFlyerCuttingProgram,
-                                                                    'Flyer Cutting Program',**extra_kwargs)
+        self.get_objects_from_records(LaserShockFlyerCuttingProgram,self.flyer_cutting_programs,
+                                      'Flyer Cutting Program',**extra_kwargs)
         self.logger.debug(f'There are {len(self.flyer_cutting_programs)} Flyer Cutting Program objects')
-        self.spacer_cutting_programs = self.get_objects_from_records(LaserShockSpacerCuttingProgram,
-                                                                     'Spacer Cutting Program',**extra_kwargs)
+        self.get_objects_from_records(LaserShockSpacerCuttingProgram,self.spacer_cutting_programs,
+                                      'Spacer Cutting Program',**extra_kwargs)
         self.logger.debug(f'There are {len(self.spacer_cutting_programs)} Spacer Cutting Program objects')
         #Flyer Stacks (Materials)
         self.logger.debug('Creating Flyer Stacks...')
-        self.flyer_stacks = self.get_objects_from_records(LaserShockFlyerStack,'Flyer Stack',self.glass_IDs,
-                                                          self.foil_IDs,self.epoxy_IDs,self.flyer_cutting_programs,
-                                                          **extra_kwargs)
+        self.get_objects_from_records(LaserShockFlyerStack,self.flyer_stacks,'Flyer Stack',
+                                      self.glass_IDs,self.foil_IDs,self.epoxy_IDs,self.flyer_cutting_programs,
+                                      **extra_kwargs)
         self.logger.debug(f'There are {len(self.flyer_stacks)} Flyer Stack objects')
         #Samples (Materials)
         self.logger.debug('Creating Samples...')
-        self.samples = self.get_objects_from_records(LaserShockSample,'Sample',**extra_kwargs)
+        self.get_objects_from_records(LaserShockSample,self.samples,'Sample',**extra_kwargs)
         self.logger.debug(f'There are {len(self.samples)} Sample objects')
         #Launch packages (Materials)
         self.logger.debug('Creating Launch Packages...')
-        self.launch_packages = self.get_objects_from_records(LaserShockLaunchPackage,'Launch Package',self.flyer_stacks,
-                                                             self.spacer_IDs,self.spacer_cutting_programs,self.samples,
-                                                             **extra_kwargs)
+        self.get_objects_from_records(LaserShockLaunchPackage,self.launch_packages,'Launch Package',
+                                      self.flyer_stacks,self.spacer_IDs,self.spacer_cutting_programs,self.samples,
+                                      **extra_kwargs)
         self.logger.debug(f'There are {len(self.launch_packages)} Launch Package objects')
         #Experiments (Measurements)
         self.logger.debug('Creating Experiments...')
-        self.experiments = self.get_objects_from_records(LaserShockExperiment,'Experiment',self.launch_packages,
-                                                         **extra_kwargs)
+        self.get_objects_from_records(LaserShockExperiment,self.experiments,'Experiment',self.launch_packages,
+                                      **extra_kwargs)
         self.logger.debug(f'There are {len(self.experiments)} Experiment objects')
+        #remove any abandoned specs from the store
+        n_specs_removed = 0
+        to_remove = []
+        self.__uids_needed = set()
+        for obj_list in self.all_object_lists.values() :
+            for obj in obj_list :
+                recursive_foreach(obj,self.find_needed_uids)
+        for spec in self._spec_store.all_specs :
+            if spec.uids[self.encoder.scope] not in self.__uids_needed :
+                to_remove.append(spec)
+                #print(f'UID not needed: {type(spec).__name__} with name {spec.name} ({spec.uids[self.encoder.scope]})')
+            #else :
+                #print(f'UID needed: {type(spec).__name__} with name {spec.name} ({spec.uids[self.encoder.scope]})')
+        for spec in to_remove :
+            self._spec_store.remove_unneeded_spec(spec)
+            n_specs_removed+=1
+        if n_specs_removed>0 :
+            self.logger.debug(f'Removed {n_specs_removed} unneeded Specs from the store')
         self.logger.debug(f'{self._spec_store.n_specs} total unique Specs stored')
         self.logger.info('Done creating GEMD objects')
+
+    def find_needed_uids(self,item) :
+        if isinstance_spec(item) :
+            if self.encoder.scope not in item.uids.keys() :
+                errmsg = f'Found a {type(item).__name__} with name {item.name} that has no UID set! object:\n{item}'
+                raise RuntimeError(errmsg)
+            else :
+                self.__uids_needed.add(item.uids[self.encoder.scope])
     
-    def get_objects_from_records(self,obj_type,layout_name,*args,n_max_records=200,records_dict=None,**kwargs) :
+    def get_objects_from_records(self,obj_type,obj_list,layout_name,*args,n_max_records=100000,records_dict=None,**kwargs) :
         """
         Return a list of LaserShock/GEMD constructs based on FileMaker records 
         or records in a dictionary (useful for testing)
@@ -183,8 +207,6 @@ class LaserShockLab(DataFileDirectory) :
 
         any other args/kwargs get sent to the constructor for obj_type objects
         """
-        all_objs = []
-        created_objs = []
         if records_dict is not None :
             #get records from the dictionary
             all_records = records_dict[layout_name]
@@ -194,22 +216,12 @@ class LaserShockLab(DataFileDirectory) :
         #get recordId/modId pairs for all existing objects of this type that are in the directory already
         #and register them to the object index to rebuild their links
         existing_rec_mod_ids = {}
-        for fp in self.dirpath.glob(f'{obj_type.__name__}_*.json') :
-            with open(fp,'r') as ofp :
-                read_obj = self.encoder.raw_loads(ofp.read())
+        for obj in obj_list :
             try :
-                rec_id = get_tag_value_from_list(read_obj.tags,'recordId')
-                mod_id = get_tag_value_from_list(read_obj.tags,'modId')
-                read_obj = substitute_objects(read_obj,self._gemd_obj_index)
-                self._gemd_obj_index[(self.encoder.scope,read_obj.uids[self.encoder.scope])] = read_obj
-                self.__uids_written.append(read_obj.uids[self.encoder.scope])
-                if isinstance_spec(read_obj) :
-                    self._spec_store.register_new_unique_spec_from_file(read_obj)
-                all_objs.append(read_obj)
+                rec_id = get_tag_value_from_list(obj.tags,'recordId')
+                mod_id = get_tag_value_from_list(obj.tags,'modId')
             except Exception as e :
-                with open(fp,'r') as ofp :
-                    errmsg = f'ERROR: failed to add a {obj_type} record from json file {fp.name}! '
-                    errmsg+= f'Will reraise exception. JSON contents: {ofp.read()}'
+                errmsg = f'ERROR: failed to get record/modIds for {obj_type} {obj.name}! Will reraise exception.'
                 self.logger.error(errmsg,exc_obj=e)
             existing_rec_mod_ids[rec_id]=mod_id
         #make the list of records that are new or have been modified from what's currently in the json
@@ -224,6 +236,7 @@ class LaserShockLab(DataFileDirectory) :
         if n_recs_skipped>0 :
             self.logger.info(f'Skipped {n_recs_skipped} {layout_name} records that already exist in {self.dirpath}')
         #create the new objects
+        created_objs = []
         for ir,record in enumerate(records_to_use) :
             if ir>0 and ir%25==0 :
                 self.logger.debug(f'\tCreating {obj_type.__name__} {ir} of {len(records_to_use)}...')
@@ -232,12 +245,12 @@ class LaserShockLab(DataFileDirectory) :
                                          specs=self._spec_store,
                                          logger=self.logger,**kwargs)
             created_objs.append(created_obj)
-            all_objs.append(created_obj.gemd_object)
         if len(created_objs)>0 :
             self.__check_unique_values(created_objs)
-        return all_objs
+        for obj in created_objs :
+            obj_list.append(obj.gemd_object)
 
-    def dump_to_json_files(self,n_max_objs=-1,complete_histories=False,indent=None,recursive=True) :
+    def dump_to_json_files(self,n_max_objs=-1,complete_histories=False,indent=None,recursive=True,whole_model=True) :
         """
         Write out GEMD object json files
         
@@ -248,6 +261,7 @@ class LaserShockLab(DataFileDirectory) :
         indent = the indent to use when the files are written out (argument to json.dump). 
             Default results in most compact representation
         recursive = if True, also write out json files for all objects linked to each chosen object
+        whole_model = if True, the entire model is written out to a single file that can be deserialized
         """
         self.logger.info('Dumping GEMD objects to JSON files...')
         #set a variable so the recursive function knows how to dump the files
@@ -276,6 +290,18 @@ class LaserShockLab(DataFileDirectory) :
         #dump the templates in the template store
         for template in self._template_store.all_templates :
             self.__dump_obj_to_json(template)
+        #dump the entire data model out to a single file so it can be deserialized
+        if whole_model :
+            all_objs = []
+            for template in self._template_store.all_templates :
+                all_objs.append(template)
+            for spec in self._spec_store.all_specs :
+                all_objs.append(spec)
+            for obj_list in self.all_object_lists.values() :
+                for obj in obj_list :
+                    all_objs.append(obj)
+            with open(self.dirpath/COMPLETE_MODEL_JSON_FILE_NAME,'w') as fp :
+                fp.write(self.encoder.dumps(all_objs,indent=indent))
         self.logger.info('Done.')
 
     #################### PRIVATE HELPER FUNCTIONS ####################
@@ -284,6 +310,8 @@ class LaserShockLab(DataFileDirectory) :
         uids_found = set()
         uids_referenced = set()
         for fp in self.dirpath.glob('*.json') :
+            if fp.name==COMPLETE_MODEL_JSON_FILE_NAME :
+                continue
             with open(fp,'r') as ofp :
                 obj = self.encoder.raw_loads(ofp.read())
             uids_found.add(obj.uids[self.encoder.scope])
@@ -315,6 +343,46 @@ class LaserShockLab(DataFileDirectory) :
         elif isinstance_dict_serializable(item):
             for k,v in item.as_dict().items() :
                 self.__add_referenced_uids(v,uids_referenced)
+
+    def __deserialize_existing_model(self) :
+        complete_model_fp = self.dirpath/COMPLETE_MODEL_JSON_FILE_NAME
+        if not complete_model_fp.is_file() :
+            warnmsg = 'WARNING: Deserialization of previously-created objects will be skipped '
+            warnmsg+= f'because {complete_model_fp} does not exist'
+            self.logger.warning(warnmsg)
+            return
+        #get absolutely all of the objects from the single data model file
+        with open(complete_model_fp,'r') as fp :
+            all_objs = self.encoder.load(fp)
+        self.logger.info(f'Read {len(all_objs)} objects from {complete_model_fp}')
+        uids_added = set()
+        for obj in all_objs :
+            #get the UID to only add each object one time
+            if self.encoder.scope not in obj.uids.keys() :
+                errmsg = f'ERROR: {type(obj).__name__} {obj.name} is missing a UID for scope "{self.encoder.scope}"!'
+                self.logger.error(errmsg,RuntimeError)
+            uid = obj.uids[self.encoder.scope]
+            if uid in uids_added :
+                continue
+            #if it's a special-type object, add it to the list for the lab
+            try :
+                object_type = get_tag_value_from_list(obj.tags,'ObjectType')
+            except ValueError :
+                object_type=None
+            if object_type is not None :
+                for obj_type,obj_list in self.all_object_lists.items() :
+                    if obj_type.__name__==object_type :
+                        #print(f'Adding a {type(obj).__name__} {obj.name} object with uid {uid} to the list of {obj_type.__name__} objects')
+                        obj_list.append(obj)
+            #register any templates
+            if isinstance_template(obj) :
+                self._template_store.register_new_template_from_file(obj)
+            #register any specs
+            elif isinstance_spec(obj) :
+                self._spec_store.register_new_unique_spec_from_file(obj)
+            #add the UID to make sure the file won't be written out again by accident
+            uids_added.add(uid)
+            self.__uids_written.append(uid)
     
     def __get_filemaker_records(self,layout_name,n_max_records=1000) :
         #disable warnings

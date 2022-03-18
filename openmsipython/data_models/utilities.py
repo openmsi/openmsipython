@@ -1,5 +1,4 @@
 #imports
-from typing import Callable, Union, Type, Tuple
 from gemd.json import GEMDJson
 from gemd.entity.value import NominalCategorical, NominalReal, NominalInteger
 
@@ -130,29 +129,3 @@ def get_json_filename_for_gemd_object(obj,encoder=GEMDJson()) :
         fn+=f'_{obj.uids[encoder.scope]}'
     fn+= '.json'
     return fn
-
-######### THE FUNCTION BELOW IS COPIED/PASTED FROM GEMD CODE #########
-def cached_isinstance_generator(class_or_tuple: Union[Type, Tuple[Type]]) -> Callable[[object], bool]:
-    """
-    Generate a function that checks and caches an isinstance(obj, class_or_tuple) call.
-
-    Parameters
-    ----------
-    class_or_tuple: Union[Type, Tuple[Type]]
-        A single type or a tuple of types
-
-    Returns
-    -------
-    Callable[[object], bool]
-        function with signature function(obj), returning isinstance(obj, class_or_tuple)
-
-    """
-    cache = dict()
-
-    def func(obj):
-        obj_type = type(obj)
-        if obj_type not in cache:
-            cache[obj_type] = isinstance(obj, class_or_tuple)
-        return cache[obj_type]
-
-    return func

@@ -5,7 +5,7 @@ from gemd.entity.util import make_instance
 from gemd.entity.source.performed_source import PerformedSource
 from gemd.entity.value import NominalCategorical, NominalInteger, NominalReal
 from gemd.entity.attribute import Property, Parameter, Condition
-from gemd.entity.object import ProcessSpec, MaterialSpec, MeasurementSpec, MeasurementRun, IngredientSpec
+from gemd.entity.object import ProcessSpec, MaterialSpec, MeasurementRun, IngredientSpec
 from ..utilities import search_for_single_name, search_for_single_tag
 from ..cached_isinstance_functions import isinstance_ingredient_run
 from ..spec_for_run import SpecForRun
@@ -137,6 +137,8 @@ class LaserShockLaunchPackageSpec(SpecForRun) :
                        process=cutting_spacer)
         MaterialSpec(name='Cut Spacer',process=cutting_spacer)
         cutting_spacer = self.specs.unique_version_of(cutting_spacer)
+        if cutting_spacer!=self.spacercutting and 'ObjectType::LaserShockSpacerCuttingProgram' in cutting_spacer.tags :
+            cutting_spacer.tags.remove('ObjectType::LaserShockSpacerCuttingProgram')
         # Attach Spacer to Flyer
         attaching_spacer = ProcessSpec(
             name='Attaching Spacer',
@@ -230,7 +232,8 @@ class LaserShockLaunchPackage(MaterialRunFromFileMakerRecord) :
     
     def __init__(self,record,flyer_stacks,spacer_IDs,spacer_cutting_programs,samples,**kwargs) :
         # find the flyer stack, spacer ID, spacer cutting program, and sample that were used
-        self.flyerstack = search_for_single_tag([fs for fs in flyer_stacks],'FlyerID',record.pop('Flyer ID').replace(' ','_'))
+        self.flyerstack = search_for_single_tag([fs for fs in flyer_stacks],'FlyerID',
+                                                record.pop('Flyer ID').replace(' ','_'))
         self.spacerID = search_for_single_name([sid for sid in spacer_IDs],
                                                record.pop('Spacer Type'),logger=kwargs.get('logger'))
         self.spacercuttingname = record.pop('Spacer Cutting Program')
@@ -312,7 +315,7 @@ class LaserShockLaunchPackage(MaterialRunFromFileMakerRecord) :
 
     def __get_impact_sample(self,record,templates,specs) :
         """
-        Return an ImpactSample (piece of Sample that is cut and polished) given a FileMaker record and a template store
+        Return an ImpactSample (piece of Sample that is cut and polished) given a FileMaker record
         """
         #pop all of the needed information from the record so it's used no matter what
         polish_pad = record.pop('Polishing Pad')
