@@ -3,8 +3,10 @@ import functools
 from abc import ABC, abstractmethod
 from gemd.entity.file_link import FileLink
 from ..shared.logging import LogOwner
+from .utilities import get_tag_value_from_list
+from .has_template_and_spec_stores import HasTemplateAndSpecStores
 
-class FromFileMakerRecordBase(LogOwner,ABC) :
+class FromFileMakerRecordBase(LogOwner,HasTemplateAndSpecStores,ABC) :
     """
     Base class for specs/runs that will be created from FileMaker Records
     """
@@ -82,15 +84,20 @@ class FromFileMakerRecordBase(LogOwner,ABC) :
 
     #################### PUBLIC FUNCTIONS ####################
 
-    def __init__(self,record,obj,**kwargs) :
+    def __init__(self,*args,**kwargs) :
         """
-        Use information in the given record to populate the given object
+        template and spec stores become accessible from this object
         kwargs get sent to the logger object
         """
         #init the Logger
-        super().__init__(**kwargs)
+        super().__init__(*args,**kwargs)
         #A list of keys whose values have been recognized and used in reading the record
         self.keys_used = []
+
+    def read_record(self,record,obj) :
+        """
+        Use information in the given record to populate the given object
+        """
         #loop over all the keys/values for the given record and process them one at a time
         for key, value in zip(record.keys(),record.values()) :
             #skip any keys that have already been used
@@ -163,6 +170,8 @@ class FromFileMakerRecordBase(LogOwner,ABC) :
             for k in missing_keys :
                 errmsg+=f'{k}, '
             self.logger.error(errmsg[:-2],ValueError)
+        #add the special tag for the object type that it is
+        obj.tags.append(f'ObjectType::{self.__class__.__name__}')
 
     def ignore_key(self,key) :
         """
@@ -198,14 +207,7 @@ class FromFileMakerRecordBase(LogOwner,ABC) :
         """
         Search through the tags for this Run and return the value of the tag with the specified name
         """
-        tag_value = None
-        for t in self.gemd_object.tags :
-            tsplit = t.split('::')
-            if len(tsplit)!=2 :
-                continue
-            if tsplit[0]==tag_name :
-                tag_value=tsplit[1]
-                break
-        if tag_value is None :
-            self.logger.error(f'ERROR: failed to find a tag with name {tag_name}!',ValueError)
-        return tag_value
+        try :
+            return get_tag_value_from_list(self.gemd_object.tags,tag_name)
+        except Exception as e :
+            self.logger.error(f'ERROR: failed to get a value for tag {tag_name}! Will reraise Exception.',exc_obj=e)

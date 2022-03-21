@@ -1,18 +1,22 @@
 #imports
 from gemd.entity.value import NominalCategorical
 from ..spec_from_filemaker_record import MaterialSpecFromFileMakerRecord
-from .attribute_templates import ATTR_TEMPL
-from .object_templates import OBJ_TEMPL
 
 class LaserShockEpoxyID(MaterialSpecFromFileMakerRecord) :
     """
     GEMD representation of a type of Spacer used in the Laser Shock Lab as a Material Spec
     """
-    
-    template = OBJ_TEMPL['Epoxy ID']
-    process_template = OBJ_TEMPL['Purchasing Epoxy']
+
     name_key = 'Epoxy Name'
     notes_key = 'Description'
+    
+    @property
+    def template(self) :
+        return self.templates.obj('Epoxy ID')
+
+    @property
+    def process_template(self) :
+        return self.templates.obj('Purchasing Epoxy')
     
     @property
     def tags_keys(self) :
@@ -21,7 +25,7 @@ class LaserShockEpoxyID(MaterialSpecFromFileMakerRecord) :
     @property
     def process_parameter_dict(self) :
         return {'Epoxy Supplier':{'valuetype':NominalCategorical,
-                                  'template':ATTR_TEMPL['Epoxy Supplier']},
+                                  'template':self.templates.attr('Epoxy Supplier')},
             }
 
     @property

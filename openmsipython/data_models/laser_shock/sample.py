@@ -4,8 +4,6 @@ from gemd.entity.attribute import PropertyAndConditions, Property, Parameter, Co
 from gemd.entity.object import MaterialSpec, ProcessSpec, IngredientSpec
 from ..spec_for_run import SpecForRun
 from ..run_from_filemaker_record import MaterialRunFromFileMakerRecord
-from .attribute_templates import ATTR_TEMPL
-from .object_templates import OBJ_TEMPL
 
 class LaserShockSampleSpec(SpecForRun) :
     """
@@ -41,7 +39,7 @@ class LaserShockSampleSpec(SpecForRun) :
         #process
         spec_kwargs['process'] = self.__get_process()
         #the template
-        spec_kwargs['template']=OBJ_TEMPL['Sample']
+        spec_kwargs['template']=self.templates.obj('Sample')
         return spec_kwargs
 
     def __get_process(self) :
@@ -58,50 +56,50 @@ class LaserShockSampleSpec(SpecForRun) :
             if self.pct_meas not in ('','N/A') :
                 condition = Condition(name='CompositionMeasure',
                                       value=NominalCategorical(str(self.pct_meas)),
-                                      template=ATTR_TEMPL['Composition Measure'],
+                                      template=self.templates.attr('Composition Measure'),
                                       origin='specified')
             raw_mat_properties.append(
                 PropertyAndConditions(Property(name='MaterialComposition',
                                                value=NominalComposition(comp_dict),
-                                               template=ATTR_TEMPL['Sample Raw Material Composition'],
+                                               template=self.templates.attr('Sample Raw Material Composition'),
                                                origin='specified'),condition)
                 )
         raw_mat_spec = MaterialSpec(
             name='Raw Material',
             properties=raw_mat_properties,
-            template=OBJ_TEMPL['Raw Sample Material'],
+            template=self.templates.obj('Raw Sample Material'),
             )
         if self.mat_type!='' :
             raw_mat_spec.properties.append(
                 PropertyAndConditions(Property(name='MaterialType',
                                                value=NominalCategorical(str(self.mat_type)),
-                                               template=ATTR_TEMPL['Sample Material Type'],
+                                               template=self.templates.attr('Sample Material Type'),
                                                origin='specified')),
             )
+        raw_mat_spec = self.specs.unique_version_of(raw_mat_spec)
         #some variables to use while dynamically figuring out the process
-        proc_to_take_raw_material = None
-        input_material_for_next = None
-        final_output_proc = None
+        preprocessed=False
         #Define sample preprocessing
         if ( (self.preproc is not None and self.preproc!='') or 
              (self.preproc_temp is not None and self.preproc_temp!='') ) :
+            preprocessed = True
             preprocessing = ProcessSpec(
                 name='Sample Preprocessing',
                 conditions=[],
                 parameters=[],
-                template=OBJ_TEMPL['Sample Preprocessing'],
+                template=self.templates.obj('Sample Preprocessing'),
             )
             if self.preproc is not None and self.preproc!='' :
                 preprocessing.conditions.append(
                     Condition(
                         name='Preprocessing',
                         value=NominalCategorical(str(self.preproc)),
-                        template=ATTR_TEMPL['Preprocessing'],
+                        template=self.templates.attr('Preprocessing'),
                         origin='specified'
                     )
                 )
             if self.preproc_temp is not None and self.preproc_temp!='' :
-                temp = ATTR_TEMPL['Preprocessing Temperature']
+                temp = self.templates.attr('Preprocessing Temperature')
                 preprocessing.parameters.append(
                     Parameter(
                         name='PreprocessingTemperature',
@@ -110,9 +108,14 @@ class LaserShockSampleSpec(SpecForRun) :
                         origin='specified'
                     )
                 )
-            proc_to_take_raw_material = preprocessing
-            input_material_for_next = preprocessing.output_material
-            final_output_proc = preprocessing
+            #add the raw material as an ingredient to the preprocessing
+            IngredientSpec(name='Raw Material',
+                    material=raw_mat_spec,
+                    process=preprocessing,
+            )
+            #create a preprocessed sample
+            MaterialSpec(name='Preprocessed Material',process=preprocessing)
+            preprocessing = self.specs.unique_version_of(preprocessing)
         #Define sample processing
         sample_processing_conditions = []
         sample_processing_parameters = []
@@ -120,21 +123,21 @@ class LaserShockSampleSpec(SpecForRun) :
             sample_processing_conditions.append(
                 Condition(name='ProcessingGeometry',
                           value=NominalCategorical(str(self.proc_geom)),
-                          template=ATTR_TEMPL['Processing Geometry'],
+                          template=self.templates.attr('Processing Geometry'),
                           origin='specified')
             )
         if self.proc_route!='' :
             sample_processing_parameters.append(
                 Parameter(name='ProcessingRoute',
                                   value=NominalCategorical(str(self.proc_route)),
-                                  template=ATTR_TEMPL['Processing Route'],
+                                  template=self.templates.attr('Processing Route'),
                                   origin='specified'),
             )
         sample_processing = ProcessSpec(
             name='Sample Processing',
             conditions=sample_processing_conditions,
             parameters=sample_processing_parameters,
-            template=OBJ_TEMPL['Sample Processing']
+            template=self.templates.obj('Sample Processing')
             )
         #add some optional conditions
         if self.mat_proc is not None and self.mat_proc!='' and len(self.mat_proc.split('\r'))>1 :
@@ -142,7 +145,7 @@ class LaserShockSampleSpec(SpecForRun) :
                 sample_processing.conditions.append(
                     Condition(name='MaterialProcessing',
                           value=NominalCategorical(str(mp)),
-                          template=ATTR_TEMPL['Material Processing'],
+                          template=self.templates.attr('Material Processing'),
                           origin='specified'),
                 )
         proc_temps = [self.proc_temp_1,self.proc_temp_2,self.proc_temp_3,self.proc_temp_4]
@@ -151,69 +154,65 @@ class LaserShockSampleSpec(SpecForRun) :
                 sample_processing.conditions.append(
                     Condition(name=f'ProcessingTemperature{ipt}',
                               value=NominalReal(float(pt),
-                                                ATTR_TEMPL['Processing Temperature'].bounds.default_units),
-                              template=ATTR_TEMPL['Processing Temperature'],
+                                                self.templates.attr('Processing Temperature').bounds.default_units),
+                              template=self.templates.attr('Processing Temperature'),
                               origin='specified')
                 )
         #add some optional parameters
         if self.proc_time!='' :
             sample_processing.parameters.append(Parameter(
                 name='ProcessingTime',
-                value=NominalReal(float(self.proc_time),ATTR_TEMPL['Processing Time'].bounds.default_units),
-                template=ATTR_TEMPL['Processing Time'],
+                value=NominalReal(float(self.proc_time),self.templates.attr('Processing Time').bounds.default_units),
+                template=self.templates.attr('Processing Time'),
                 origin='specified')
             )
-        #define the input to processing if preprocessing was performed
-        if input_material_for_next is not None :
+        #define the input to processing
+        if preprocessed :
             IngredientSpec(name='Preprocessed Material',
-                           material=input_material_for_next,
+                           material=preprocessing.output_material,
                            process=sample_processing,
             )
-        input_material_for_next = sample_processing.output_material
-        #if preprocessing wasn't performed, set processing to take the raw material
-        if proc_to_take_raw_material is None :
-            proc_to_take_raw_material = sample_processing
-        #reset the output process
-        final_output_proc = sample_processing
+        else :
+            IngredientSpec(name='Raw Material',
+                    material=raw_mat_spec,
+                    process=sample_processing,
+            )
         #Define the annealing process
         if (self.ann_temp is not None and self.ann_temp!='') and (self.ann_time is not None and self.ann_time!='') :
             annealing = ProcessSpec(
                 name='Sample Annealing',
                 conditions=[],
                 parameters=[],
-                template=OBJ_TEMPL['Sample Annealing'],
+                template=self.templates.obj('Sample Annealing'),
             )
             #optional conditions
             if self.ann_temp is not None and self.ann_temp!='' :
                 annealing.conditions.append(
                     Condition(name='AnnealingTemperature',
                               value=NominalReal(float(self.ann_temp),
-                                                ATTR_TEMPL['Annealing Temperature'].bounds.default_units),
-                              template=ATTR_TEMPL['Annealing Temperature'],
+                                                self.templates.attr('Annealing Temperature').bounds.default_units),
+                              template=self.templates.attr('Annealing Temperature'),
                               origin='specified')
                     )
             #optional parameters
             if self.ann_time is not None and self.ann_time!='' :
                 annealing.parameters.append(
                     Parameter(name='AnnealingTime',
-                              value=NominalReal(float(self.ann_time),ATTR_TEMPL['Annealing Time'].bounds.default_units),
-                              template=ATTR_TEMPL['Annealing Time'],
+                              value=NominalReal(float(self.ann_time),
+                                                self.templates.attr('Annealing Time').bounds.default_units),
+                              template=self.templates.attr('Annealing Time'),
                               origin='specified')
                 )
             #define the input to annealing
-            if input_material_for_next is not None :
-                IngredientSpec(name='Processed Material',
-                               material=input_material_for_next,
-                               process=annealing,
-                )
-            #reset the output process
-            final_output_proc = annealing
-        #add the raw material as the ingredient to the process that takes it
-        IngredientSpec(name='Raw Material',
-                       material=raw_mat_spec,
-                       process=proc_to_take_raw_material,
+            MaterialSpec(name='Processed Material',process=sample_processing)
+            sample_processing = self.specs.unique_version_of(sample_processing)
+            IngredientSpec(name='Processed Material',
+                            material=sample_processing.output_material,
+                            process=annealing,
             )
-        return final_output_proc
+            return self.specs.unique_version_of(annealing)
+        else :
+            return self.specs.unique_version_of(sample_processing)
 
 class LaserShockSample(MaterialRunFromFileMakerRecord) :
     """
@@ -236,11 +235,11 @@ class LaserShockSample(MaterialRunFromFileMakerRecord) :
     def measured_property_dict(self) :
         rd = {'Bulk Wave  Speed':{'valuetype':NominalReal,
                                   'datatype':float,
-                                  'template':ATTR_TEMPL['Bulk Wave Speed']}}
+                                  'template':self.templates.attr('Bulk Wave Speed')}}
         for name in ['Density','Bulk Modulus','Average Grain Size','Min Grain Size','Max Grain Size'] :
             rd[name] = {'valuetype':NominalReal,
                         'datatype':float,
-                        'template':ATTR_TEMPL[name]}
+                        'template':self.templates.attr(name)}
         return rd
 
     @property

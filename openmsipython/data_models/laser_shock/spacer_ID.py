@@ -1,18 +1,22 @@
 #imports
 from gemd.entity.value import NominalCategorical, NominalReal
 from ..spec_from_filemaker_record import MaterialSpecFromFileMakerRecord
-from .attribute_templates import ATTR_TEMPL
-from .object_templates import OBJ_TEMPL
 
 class LaserShockSpacerID(MaterialSpecFromFileMakerRecord) :
     """
     GEMD representation of a type of Spacer used in the Laser Shock Lab as a Material Spec
     """
 
-    template = OBJ_TEMPL['Spacer ID']
-    process_template = OBJ_TEMPL['Purchasing Spacer']
     name_key = 'Spacer Name'
     notes_key = 'Description'
+
+    @property
+    def template(self) :
+        return self.templates.obj('Spacer ID')
+    
+    @property
+    def process_template(self) :
+        return self.templates.obj('Purchasing Spacer')
     
     @property
     def tags_keys(self) :
@@ -22,24 +26,24 @@ class LaserShockSpacerID(MaterialSpecFromFileMakerRecord) :
     def property_dict(self) :
         return {'Spacer Thickness':{'valuetype':NominalReal,
                                    'datatype':float,
-                                   'template':ATTR_TEMPL['Spacer Thickness']},
+                                   'template':self.templates.attr('Spacer Thickness')},
                 'Spacer Material':{'valuetype':NominalCategorical,
                                    'datatype':str,
-                                   'template':ATTR_TEMPL['Spacer Material']},
+                                   'template':self.templates.attr('Spacer Material')},
                 'Spacer Adhesive':{'valuetype':NominalCategorical,
                                    'datatype':str,
-                                   'template':ATTR_TEMPL['Spacer Adhesive Sides']},
+                                   'template':self.templates.attr('Spacer Adhesive Sides')},
                 'Adhesive Type':{'valuetype':NominalCategorical,
                                    'datatype':str,
-                                   'template':ATTR_TEMPL['Adhesive Type']},
+                                   'template':self.templates.attr('Adhesive Type')},
             }
 
     @property
     def process_parameter_dict(self) :
         return {'Spacer Supplier':{'valuetype':NominalCategorical,
-                                  'template':ATTR_TEMPL['Spacer Supplier']},
+                                  'template':self.templates.attr('Spacer Supplier')},
                 'Spacer Part Number':{'valuetype':NominalCategorical,
-                                     'template':ATTR_TEMPL['Spacer Part Number']},
+                                     'template':self.templates.attr('Spacer Part Number')},
             }
 
     @property

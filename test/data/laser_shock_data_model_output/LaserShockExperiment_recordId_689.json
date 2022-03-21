@@ -18,7 +18,7 @@
     }
   ],
   "material": {
-    "id": "9742b719-5c11-461c-9051-5bc1ba118161",
+    "id": "6e7ada45-4212-4b4c-adf0-b16f68a21234",
     "scope": "auto",
     "type": "link_by_uid"
   },
@@ -32,7 +32,7 @@
       "notes": null,
       "origin": "measured",
       "template": {
-        "id": "2bb3c68f-f5f2-4df0-ac1e-48cadf70d6ce",
+        "id": "605a6ed1-8b86-48a1-8d2a-9a28e21e1c32",
         "scope": "auto",
         "type": "link_by_uid"
       },
@@ -49,7 +49,7 @@
       "notes": null,
       "origin": "measured",
       "template": {
-        "id": "9d42b217-8598-434e-8cd6-08990869dfc8",
+        "id": "07e3b2f5-cfe8-445a-b113-4fcb8fa7be26",
         "scope": "auto",
         "type": "link_by_uid"
       },
@@ -66,7 +66,7 @@
       "notes": null,
       "origin": "measured",
       "template": {
-        "id": "853a3744-40af-4185-96ed-148523dab199",
+        "id": "dc414795-7245-442b-af35-d6ca57f3da88",
         "scope": "auto",
         "type": "link_by_uid"
       },
@@ -82,7 +82,7 @@
       "notes": null,
       "origin": "measured",
       "template": {
-        "id": "c91ea0c2-7974-44d3-9bc9-5b3e64366d9c",
+        "id": "021beace-1278-4fd4-94ca-6d76ae9d21ad",
         "scope": "auto",
         "type": "link_by_uid"
       },
@@ -98,7 +98,7 @@
       "notes": null,
       "origin": "measured",
       "template": {
-        "id": "c9e9cf4d-18b1-4802-8067-a9800a647fba",
+        "id": "55e6701e-5aae-454a-8714-5a21c1667ca8",
         "scope": "auto",
         "type": "link_by_uid"
       },
@@ -115,7 +115,7 @@
     "type": "performed_source"
   },
   "spec": {
-    "id": "8d03894a-ab9c-463f-8112-aab16b2a9dfd",
+    "id": "bbf832ee-90df-4b74-98c9-74a5b79cc173",
     "scope": "auto",
     "type": "link_by_uid"
   },
@@ -126,10 +126,11 @@
     "RecoveryColumn::4",
     "GrantFunding::MEDE_Metals",
     "recordId::689",
-    "modId::9"
+    "modId::9",
+    "ObjectType::LaserShockExperiment"
   ],
   "type": "measurement_run",
   "uids": {
-    "auto": "2db58642-578e-4aa6-8344-ced1da1fc3b8"
+    "auto": "22633212-db9a-41d2-8d33-9179b3a1bf83"
   }
 }

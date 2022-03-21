@@ -1,9 +1,9 @@
 {
   "file_links": [],
-  "name": "240um Kapton (double adhesive)",
+  "name": "50.4um (0.002\") Hard Al (AluFoil)",
   "notes": "",
   "process": {
-    "id": "da8511ac-db0d-449c-a880-2b0348bb2238",
+    "id": "76b6f51e-dfd7-4e17-816f-21789021419d",
     "scope": "auto",
     "type": "link_by_uid"
   },
@@ -12,17 +12,17 @@
       "conditions": [],
       "property": {
         "file_links": [],
-        "name": "SpacerThickness",
+        "name": "FoilThickness",
         "notes": null,
         "origin": "specified",
         "template": {
-          "id": "7a2a0119-2ef6-4be5-9a77-70819d28d2f8",
+          "id": "8c502466-930b-4d80-9393-05f50eeaf517",
           "scope": "auto",
           "type": "link_by_uid"
         },
         "type": "property",
         "value": {
-          "nominal": 240.0,
+          "nominal": 0.002,
           "type": "nominal_real",
           "units": "micrometer"
         }
@@ -33,17 +33,59 @@
       "conditions": [],
       "property": {
         "file_links": [],
-        "name": "SpacerMaterial",
+        "name": "FoilLength",
         "notes": null,
         "origin": "specified",
         "template": {
-          "id": "e8ececc0-b2f6-4040-a1e1-5181c6bd7e96",
+          "id": "e9f0d9c4-1f81-460f-bb28-ef0a839ad5b3",
           "scope": "auto",
           "type": "link_by_uid"
         },
         "type": "property",
         "value": {
-          "category": "Kapton",
+          "nominal": 4.0,
+          "type": "nominal_real",
+          "units": "inch"
+        }
+      },
+      "type": "property_and_conditions"
+    },
+    {
+      "conditions": [],
+      "property": {
+        "file_links": [],
+        "name": "FoilWidth",
+        "notes": null,
+        "origin": "specified",
+        "template": {
+          "id": "382e95d3-6a2e-42ab-b60f-570ab670cd55",
+          "scope": "auto",
+          "type": "link_by_uid"
+        },
+        "type": "property",
+        "value": {
+          "nominal": 4.0,
+          "type": "nominal_real",
+          "units": "inch"
+        }
+      },
+      "type": "property_and_conditions"
+    },
+    {
+      "conditions": [],
+      "property": {
+        "file_links": [],
+        "name": "FoilHardness",
+        "notes": null,
+        "origin": "specified",
+        "template": {
+          "id": "8bb20392-05a0-4b41-8a02-a253b18ea7b6",
+          "scope": "auto",
+          "type": "link_by_uid"
+        },
+        "type": "property",
+        "value": {
+          "category": "Hard",
           "type": "nominal_categorical"
         }
       },
@@ -53,37 +95,17 @@
       "conditions": [],
       "property": {
         "file_links": [],
-        "name": "SpacerAdhesive",
+        "name": "FoilMaterial",
         "notes": null,
         "origin": "specified",
         "template": {
-          "id": "1ce95a48-379c-4be4-9b0b-3e27b5080868",
+          "id": "81c06e5f-d827-447b-a439-efb797440a0a",
           "scope": "auto",
           "type": "link_by_uid"
         },
         "type": "property",
         "value": {
-          "category": "Double",
-          "type": "nominal_categorical"
-        }
-      },
-      "type": "property_and_conditions"
-    },
-    {
-      "conditions": [],
-      "property": {
-        "file_links": [],
-        "name": "AdhesiveType",
-        "notes": null,
-        "origin": "specified",
-        "template": {
-          "id": "b7503185-a14e-4c5a-8bde-11f5bb5b317a",
-          "scope": "auto",
-          "type": "link_by_uid"
-        },
-        "type": "property",
-        "value": {
-          "category": "Silicone",
+          "category": "Aluminum",
           "type": "nominal_categorical"
         }
       },
@@ -91,17 +113,18 @@
     }
   ],
   "tags": [
-    "SpacerID::S002",
-    "recordId::2",
-    "modId::2"
+    "FoilID::M004",
+    "recordId::11",
+    "modId::4",
+    "ObjectType::LaserShockFoilID"
   ],
   "template": {
-    "id": "68ad154c-bc48-44f6-99d7-0f98f6bab159",
+    "id": "270ff7ef-ad63-40cb-bfdf-9633ebaf74a4",
     "scope": "auto",
     "type": "link_by_uid"
   },
   "type": "material_spec",
   "uids": {
-    "auto": "2fca3065-1d1a-4e1c-a304-d1be76e14a9c"
+    "auto": "823fff89-9e6d-4888-895f-511fa34cc4eb"
   }
 }
