@@ -204,7 +204,7 @@ class DataFileUploadDirectory(DataFileDirectory,ControlledProcessSingleThread,Ru
         parser = cls.get_argument_parser()
         args = parser.parse_args(args=args)
         #make the DataFileDirectory for the specified directory
-        upload_file_directory = cls(args.upload_dir,args.upload_regex,update_secs=args.update_seconds)
+        upload_file_directory = cls(args.upload_dir,upload_regex=args.upload_regex,update_secs=args.update_seconds)
         #listen for new files in the directory and run uploads as they come in until the process is shut down
         run_start = datetime.datetime.now()
         if args.new_files_only :
