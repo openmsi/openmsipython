@@ -18,7 +18,7 @@ class DataFileChunkProcessor(ControlledMessageProcessor,ABC) :
         progress_msg = 'The following files have been recognized so far:\n'
         for datafile in self.files_in_progress_by_path.values() :
             progress_msg+=f'\t{datafile.full_filepath} (in progress)\n'
-        for fp in self.completely_reconstructed_filepaths :
+        for fp in self.completely_processed_filepaths :
             progress_msg+=f'\t{fp} (completed)\n'
         return progress_msg
 
