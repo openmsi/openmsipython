@@ -18,7 +18,7 @@
     }
   ],
   "material": {
-    "id": "e2717155-b7c7-4a3a-8256-9bcabfb6d69f",
+    "id": "711ae2c6-2ebd-445d-af61-61f0c467d189",
     "scope": "auto",
     "type": "link_by_uid"
   },
@@ -32,7 +32,7 @@
       "notes": null,
       "origin": "measured",
       "template": {
-        "id": "a4e2c992-62b1-43c2-8834-1a545cc1a4eb",
+        "id": "b3cae362-3964-4c22-b529-73d3b5751b2a",
         "scope": "auto",
         "type": "link_by_uid"
       },
@@ -48,7 +48,7 @@
       "notes": null,
       "origin": "measured",
       "template": {
-        "id": "689ebaae-8dd6-4773-8d76-2da074274577",
+        "id": "ad314bcc-d679-41c0-a579-176870a16e38",
         "scope": "auto",
         "type": "link_by_uid"
       },
@@ -64,7 +64,7 @@
       "notes": null,
       "origin": "measured",
       "template": {
-        "id": "2bb3c68f-f5f2-4df0-ac1e-48cadf70d6ce",
+        "id": "605a6ed1-8b86-48a1-8d2a-9a28e21e1c32",
         "scope": "auto",
         "type": "link_by_uid"
       },
@@ -81,7 +81,7 @@
       "notes": null,
       "origin": "measured",
       "template": {
-        "id": "c91ea0c2-7974-44d3-9bc9-5b3e64366d9c",
+        "id": "021beace-1278-4fd4-94ca-6d76ae9d21ad",
         "scope": "auto",
         "type": "link_by_uid"
       },
@@ -98,7 +98,7 @@
     "type": "performed_source"
   },
   "spec": {
-    "id": "04b85517-adac-4e04-8302-424ab38f4a4b",
+    "id": "e0c8c31e-a195-4f56-bda1-63d494e87ff4",
     "scope": "auto",
     "type": "link_by_uid"
   },
@@ -106,10 +106,11 @@
     "NewEnergyMeasurement::Yes",
     "GrantFunding::MEDE_Metals",
     "recordId::407",
-    "modId::22"
+    "modId::22",
+    "ObjectType::LaserShockExperiment"
   ],
   "type": "measurement_run",
   "uids": {
-    "auto": "2cf392fd-ef9c-48a1-a16e-7d24be90d39c"
+    "auto": "72cfcb56-3032-4133-a4a0-44242d44eced"
   }
 }

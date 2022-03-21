@@ -3,23 +3,24 @@
   "name": "Flyer Stack",
   "notes": "",
   "process": {
-    "id": "0be74496-7448-442a-9f6f-1bdd0068a5c7",
+    "id": "93c9d437-23ca-4782-ba30-77dce3e445e3",
     "scope": "auto",
     "type": "link_by_uid"
   },
   "sample_type": "unknown",
   "spec": {
-    "id": "fb63f2d1-0a36-42a1-8f9c-1f57c4a7c755",
+    "id": "6e337096-f798-4f49-9e3c-e5aca8f6354c",
     "scope": "auto",
     "type": "link_by_uid"
   },
   "tags": [
-    "FlyerID::F054",
-    "recordId::74",
-    "modId::16"
+    "FlyerID::F071",
+    "recordId::91",
+    "modId::17",
+    "ObjectType::LaserShockFlyerStack"
   ],
   "type": "material_run",
   "uids": {
-    "auto": "3021c7f2-16f7-44a7-80f8-01e62d7800e9"
+    "auto": "2c3fde7c-6089-4a0b-8740-15c2e4358806"
   }
 }

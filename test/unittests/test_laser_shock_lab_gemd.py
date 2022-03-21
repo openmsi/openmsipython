@@ -16,14 +16,14 @@ class TestLaserShockLabGEMD(unittest.TestCase) :
     def test_laser_shock_lab_gemd(self) :
         #create the Laser Shock Lab object
         output_dir = pathlib.Path(__file__).parent/TEST_CONST.LASER_SHOCK_DATA_MODEL_OUTPUT_DIRNAME
-        lab = LaserShockLab(working_dir=output_dir,logger=LOGGER)
+        lab = LaserShockLab(dirpath=output_dir,logger=LOGGER)
         #read in the test record dictionary
         with open(TEST_CONST.TEST_DATA_DIR_PATH/TEST_CONST.FILEMAKER_RECORD_PICKLE_FILENAME,'rb') as fp :
             filemaker_record_dict = pickle.load(fp)
         #create GEMD objects from the dictionary
         lab.create_gemd_objects(records_dict=filemaker_record_dict)
         #dump the GEMD objects to JSON files
-        lab.dump_to_json_files(complete_histories=True)
+        lab.dump_to_json_files(complete_histories=True,recursive=False,indent=2)
         #compare the new files with those in the reference directory
         try :
             for fp in (TEST_CONST.TEST_DATA_DIR_PATH/TEST_CONST.LASER_SHOCK_DATA_MODEL_OUTPUT_DIRNAME).glob('*.json') :

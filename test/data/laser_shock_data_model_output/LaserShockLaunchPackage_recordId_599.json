@@ -3,22 +3,23 @@
   "name": "F054-R3C2-Spacer",
   "notes": null,
   "process": {
-    "id": "c90489a8-bfe8-497f-a698-4c9a93f94deb",
+    "id": "b8cb6406-0fb0-41bb-bfda-46ca011112be",
     "scope": "auto",
     "type": "link_by_uid"
   },
   "sample_type": "unknown",
   "spec": {
-    "id": "d1d028c0-25ac-485a-883e-0410758a8c4e",
+    "id": "59d37de8-11a8-4d49-8b3d-10d545fb60ff",
     "scope": "auto",
     "type": "link_by_uid"
   },
   "tags": [
     "recordId::599",
-    "modId::7"
+    "modId::7",
+    "ObjectType::LaserShockLaunchPackage"
   ],
   "type": "material_run",
   "uids": {
-    "auto": "e2717155-b7c7-4a3a-8256-9bcabfb6d69f"
+    "auto": "711ae2c6-2ebd-445d-af61-61f0c467d189"
   }
 }

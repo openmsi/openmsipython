@@ -21,7 +21,7 @@ class SpecFromFileMakerRecord(FromFileMakerRecordBase) :
         else :
             errmsg = f'ERROR: tried to overwrite specs with mistmatched types! Spec is of type {type(self.__spec)} '
             errmsg+= f'but new spec has type {type(s)}'
-            self.logger.error(errmsg)
+            self.logger.error(errmsg,TypeError)
 
     @property
     def gemd_object(self):
@@ -50,14 +50,15 @@ class SpecFromFileMakerRecord(FromFileMakerRecordBase) :
         """
         pass
 
-    def __init__(self,record,**kwargs) :
+    def __init__(self,record,*args,**kwargs) :
         """
         Create the Spec using the given FileMaker record
         """
+        super().__init__(*args,**kwargs)
         #create a placeholder Spec
         self.__spec = self.spec_type(**self.init_spec_kwargs)
-        #call the base class's __init__ with the Spec as the object to modify
-        super().__init__(record,self.__spec,**kwargs)
+        #call the read_record with the Spec as the object to modify
+        self.read_record(record,self.__spec)
 
 class HasTemplateFromFileMakerRecord(SpecFromFileMakerRecord) :
 
@@ -117,7 +118,8 @@ class MaterialSpecFromFileMakerRecord(HasTemplateFromFileMakerRecord) :
     def init_spec_kwargs(self) :
         rd = super().init_spec_kwargs
         if self.process_template is not None :
-            rd['process'] = ProcessSpec(name=self.process_template.name,template=self.process_template)
+            proc = ProcessSpec(name=self.process_template.name,template=self.process_template)
+            rd['process'] = proc
         return rd
 
     @property
@@ -126,6 +128,16 @@ class MaterialSpecFromFileMakerRecord(HasTemplateFromFileMakerRecord) :
                 *self.property_dict.keys(),
                 *self.process_parameter_dict.keys()
                ]
+
+    def __init__(self,*args,**kwargs) :
+        """
+        Create the Spec using the given FileMaker record
+        """
+        super().__init__(*args,**kwargs)
+        #make sure the process is unique
+        self.spec.process = self.specs.unique_version_of(self.spec.process)
+        #search through the spec store to make sure the underlying spec is unique
+        self.spec = self.specs.unique_version_of(self.spec)
 
     def add_other_key(self,key,value,record) :
         #add properties (if any of them are given) to this MaterialSpec
@@ -195,6 +207,14 @@ class ProcessSpecFromFileMakerRecord(HasTemplateFromFileMakerRecord) :
     @property
     def unique_values(self):
         return {**super().unique_values,f'{self.spec_type} name':self.spec.name}
+
+    def __init__(self,*args,**kwargs) :
+        """
+        Create the Spec using the given FileMaker record
+        """
+        super().__init__(*args,**kwargs)
+        #search through the spec store to make sure the underlying spec is unique
+        self.spec = self.specs.unique_version_of(self.spec)
 
     def add_other_key(self,key,value,record) :
         #add conditions (if any of them are given) to this ProcessSpec

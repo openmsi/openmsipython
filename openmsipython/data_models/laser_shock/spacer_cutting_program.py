@@ -2,17 +2,18 @@
 from gemd.entity.value import NominalCategorical, NominalReal
 from gemd.entity.value.nominal_integer import NominalInteger
 from ..spec_from_filemaker_record import ProcessSpecFromFileMakerRecord
-from .attribute_templates import ATTR_TEMPL
-from .object_templates import OBJ_TEMPL
 
 class LaserShockSpacerCuttingProgram(ProcessSpecFromFileMakerRecord) :
     """
     GEMD representation of the process of cutting spacers using a femtosecond laser or laser cutter
     """
 
-    template = OBJ_TEMPL['Spacer Cutting Program']
     name_key = 'Program Name'
     notes_key = 'Spacer Description'
+
+    @property
+    def template(self) :
+        return self.templates.obj('Spacer Cutting Program')
 
     @property
     def tags_keys(self) :
@@ -26,10 +27,10 @@ class LaserShockSpacerCuttingProgram(ProcessSpecFromFileMakerRecord) :
     def condition_dict(self) :
         return {
             'Cutting Method':{'valuetype':NominalCategorical,
-                              'template':ATTR_TEMPL['Cutting Method']},
+                              'template':self.templates.attr('Cutting Method')},
             'Typical Cutting Time':{'valuetype':NominalReal,
                                     'datatype':float,
-                                    'template':ATTR_TEMPL['Typical Cutting Time']},
+                                    'template':self.templates.attr('Typical Cutting Time')},
         }
 
     @property
@@ -37,20 +38,20 @@ class LaserShockSpacerCuttingProgram(ProcessSpecFromFileMakerRecord) :
         return {
             'Laser Cutting Energy':{'valuetype':NominalReal,
                                     'datatype':float,
-                                    'template':ATTR_TEMPL['Laser Cutting Energy']},
+                                    'template':self.templates.attr('Laser Cutting Energy')},
             'Number of Passes 1':{'valuetype':NominalInteger,
                                   'datatype':int,
-                                  'template':ATTR_TEMPL['Number of Passes']},
+                                  'template':self.templates.attr('Number of Passes')},
             'Number of Passes 2':{'valuetype':NominalInteger,
                                   'datatype':int,
-                                  'template':ATTR_TEMPL['Number of Passes']},
+                                  'template':self.templates.attr('Number of Passes')},
             'Number of Passes 3':{'valuetype':NominalInteger,
                                   'datatype':int,
-                                  'template':ATTR_TEMPL['Number of Passes']},
+                                  'template':self.templates.attr('Number of Passes')},
             'Aperture Setting':{'valuetype':NominalCategorical,
-                                'template':ATTR_TEMPL['Aperture Setting']},
+                                'template':self.templates.attr('Aperture Setting')},
             'Depth of Cut':{'valuetype':NominalCategorical,
-                            'template':ATTR_TEMPL['Depth of Cut']},
+                            'template':self.templates.attr('Depth of Cut')},
         }
 
     @property

@@ -1,7 +1,8 @@
 #imports
 from abc import ABC,abstractmethod
+from .has_template_and_spec_stores import HasTemplateAndSpecStores
 
-class SpecForRun(ABC) :
+class SpecForRun(HasTemplateAndSpecStores,ABC) :
     """
     A small base class for dynamically-created Specs
     """
@@ -15,10 +16,13 @@ class SpecForRun(ABC) :
         pass
 
     def __init__(self,*args,**kwargs) :
+        super().__init__(*args,**kwargs)
         #get the kwargs that will be used to create the GEMD Spec
         spec_kwargs = self.get_spec_kwargs()
         #create the GEMD spec
         self.spec = self.spec_type(**spec_kwargs)
+        #ensure it's the unique version of the spec
+        self.spec = self.specs.unique_version_of(self.spec)
 
     @abstractmethod
     def get_spec_kwargs(self) :

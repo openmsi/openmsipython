@@ -1,5 +1,5 @@
 #imports
-import logging
+import pathlib, logging
 
 class MyFormatter(logging.Formatter) :
     """
@@ -61,6 +61,8 @@ class Logger :
 
     #add a filehandler to the logger
     def add_file_handler(self,filepath,level=logging.INFO) :
+        if not isinstance(filepath,pathlib.PurePath) :
+            self.error(f'ERROR: {filepath} is a {type(filepath)} object, not a Path object!',TypeError)
         if not filepath.is_file() :
             if not filepath.parent.is_dir() :
                 filepath.parent.mkdir(parents=True)

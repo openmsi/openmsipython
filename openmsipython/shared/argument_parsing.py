@@ -8,25 +8,28 @@ from .config import UTIL_CONST
 
 #convert a string or path argument into a path to a file, checking if it exists
 def existing_file(argstring) :
-    if pathlib.Path.is_file(pathlib.Path(argstring)) :
-        return pathlib.Path(argstring).resolve()
+    filepath = pathlib.Path(argstring)
+    if filepath.is_file() :
+        return filepath.resolve()
     raise FileNotFoundError(f'ERROR: file {argstring} does not exist!')
 
 #convert a string or path argument into a directory path, checking if it exists
 def existing_dir(argstring) :
-    if pathlib.Path.is_dir(pathlib.Path(argstring)) :
-        return pathlib.Path(argstring).resolve()
+    dirpath = pathlib.Path(argstring)
+    if dirpath.is_dir() :
+        return dirpath.resolve()
     raise FileNotFoundError(f'ERROR: directory {argstring} does not exist!')
 
 #convert a string or path argument into a directory path, creating it if necessary
 def create_dir(argstring) :
     if argstring is None : #Then the argument wasn't given and nothing should be done
         return None
-    if pathlib.Path.is_dir(pathlib.Path(argstring)) :
-        return pathlib.Path(argstring).resolve()
+    dirpath = pathlib.Path(argstring)
+    if dirpath.is_dir() :
+        return dirpath.resolve()
     try :
-        pathlib.Path.mkdir(pathlib.Path(argstring),parents=True,exist_ok=True)
-        return pathlib.Path(argstring).resolve()
+        dirpath.mkdir(parents=True)
+        return dirpath.resolve()
     except Exception as e :
         raise RuntimeError(f'ERROR: failed to create directory with name {argstring}! error: {e}')
 
@@ -34,10 +37,11 @@ def create_dir(argstring) :
 def config_path(configarg) :
     if isinstance(configarg,str) and '.' not in configarg :
         configarg+=UTIL_CONST.CONFIG_FILE_EXT
-    if pathlib.Path.is_file(pathlib.Path(configarg)) :
-        return pathlib.Path(configarg).resolve()
-    if pathlib.Path.is_file(UTIL_CONST.CONFIG_FILE_DIR / configarg) :
-        return (UTIL_CONST.CONFIG_FILE_DIR / configarg).resolve()
+    configpath = pathlib.Path(configarg)
+    if configpath.is_file() :
+        return configpath.resolve()
+    if (UTIL_CONST.CONFIG_FILE_DIR/configpath).is_file() :
+        return (UTIL_CONST.CONFIG_FILE_DIR/configpath).resolve()
     raise ValueError(f'ERROR: config argument {configarg} is not a recognized config file!')
 
 #make sure a given value is a nonzero integer power of two (or can be converted to one)
@@ -123,6 +127,9 @@ class MyArgumentParser(ArgumentParser) :
             ['optional',{'action':'store_true',
                          'help':'''Add this flag to also remove username/password environment variables 
                                    when removing a Service'''}],
+        'gemd_json_dir':
+            ['positional',{'type':existing_dir,
+                           'help':'Directory containing all of the GEMD JSON dump files that should be uploaded'}]
     }
 
     #################### OVERLOADED FUNCTIONS ####################

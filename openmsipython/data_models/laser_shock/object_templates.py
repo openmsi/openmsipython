@@ -46,12 +46,6 @@ OBJ_TEMPL[name] = MaterialTemplate(
         ],
 )
 
-name = 'Glass Epoxy Foil Stack'
-OBJ_TEMPL[name] = MaterialTemplate(
-    name=name,
-    description='A foil adhered to a piece of glass using an epoxy',
-)
-
 name = 'Flyer Stack'
 OBJ_TEMPL[name] = MaterialTemplate(
     name=name,
@@ -202,6 +196,9 @@ OBJ_TEMPL[name] = ProcessTemplate(
                 ATTR_TEMPL['Number of Passes'],
                 ATTR_TEMPL['Aperture Setting'],
                 ATTR_TEMPL['Depth of Cut'],
+                ATTR_TEMPL['Flyer Spacing'],
+                ATTR_TEMPL['Flyer Diameter'],
+                ATTR_TEMPL['Rows X Columns'],
         ],
 )
 
@@ -236,17 +233,6 @@ OBJ_TEMPL[name] = ProcessTemplate(
     parameters=[ATTR_TEMPL['Compression Weight'],
                 ATTR_TEMPL['Compression Time'],
         ],
-)
-
-name = 'Cutting a Flyer Stack'
-OBJ_TEMPL[name] = ProcessTemplate(
-    name=name,
-    description='Cutting flyer discs out of a glass/epoxy/foil stack to make a Flyer Stack',
-    parameters=[ATTR_TEMPL['Cutting Procedure'],
-                ATTR_TEMPL['Flyer Spacing'],
-                ATTR_TEMPL['Flyer Diameter'],
-                ATTR_TEMPL['Rows X Columns']
-        ]
 )
 
 name = 'Sample Preprocessing'
