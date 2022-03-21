@@ -1,0 +1,116 @@
+{
+  "conditions": [],
+  "file_links": [
+    {
+      "filename": "10_56_18",
+      "type": "file_link",
+      "url": null
+    },
+    {
+      "filename": "F2--20211108--00000",
+      "type": "file_link",
+      "url": null
+    },
+    {
+      "filename": "BP--20211108--00000",
+      "type": "file_link",
+      "url": null
+    }
+  ],
+  "material": {
+    "id": "711ae2c6-2ebd-445d-af61-61f0c467d189",
+    "scope": "auto",
+    "type": "link_by_uid"
+  },
+  "name": "Flyer planarity analysis",
+  "notes": "video is zoomed out because no doubler was used",
+  "parameters": [],
+  "properties": [
+    {
+      "file_links": [],
+      "name": "FlyerTilt",
+      "notes": null,
+      "origin": "measured",
+      "template": {
+        "id": "b3cae362-3964-4c22-b529-73d3b5751b2a",
+        "scope": "auto",
+        "type": "link_by_uid"
+      },
+      "type": "property",
+      "value": {
+        "category": "None",
+        "type": "nominal_categorical"
+      }
+    },
+    {
+      "file_links": [],
+      "name": "FlyerCurvature",
+      "notes": null,
+      "origin": "measured",
+      "template": {
+        "id": "ad314bcc-d679-41c0-a579-176870a16e38",
+        "scope": "auto",
+        "type": "link_by_uid"
+      },
+      "type": "property",
+      "value": {
+        "category": "None",
+        "type": "nominal_categorical"
+      }
+    },
+    {
+      "file_links": [],
+      "name": "MaxVelocity",
+      "notes": null,
+      "origin": "measured",
+      "template": {
+        "id": "605a6ed1-8b86-48a1-8d2a-9a28e21e1c32",
+        "scope": "auto",
+        "type": "link_by_uid"
+      },
+      "type": "property",
+      "value": {
+        "nominal": 743.0,
+        "type": "nominal_real",
+        "units": "meter / second"
+      }
+    },
+    {
+      "file_links": [],
+      "name": "VideoQuality",
+      "notes": null,
+      "origin": "measured",
+      "template": {
+        "id": "021beace-1278-4fd4-94ca-6d76ae9d21ad",
+        "scope": "auto",
+        "type": "link_by_uid"
+      },
+      "type": "property",
+      "value": {
+        "category": "OK",
+        "type": "nominal_categorical"
+      }
+    }
+  ],
+  "source": {
+    "performed_by": "Lezcano",
+    "performed_date": "11/08/2021",
+    "type": "performed_source"
+  },
+  "spec": {
+    "id": "e0c8c31e-a195-4f56-bda1-63d494e87ff4",
+    "scope": "auto",
+    "type": "link_by_uid"
+  },
+  "tags": [
+    "NewEnergyMeasurement::Yes",
+    "GrantFunding::MEDE_Metals",
+    "recordId::407",
+    "modId::22",
+    "ObjectType::LaserShockExperiment"
+  ],
+  "type": "measurement_run",
+  "uids": {
+    "auto": "72cfcb56-3032-4133-a4a0-44242d44eced"
+  }
+}

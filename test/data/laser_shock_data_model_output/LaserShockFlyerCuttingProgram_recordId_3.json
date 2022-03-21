@@ -1,0 +1,145 @@
+{
+  "conditions": [
+    {
+      "file_links": [],
+      "name": "CuttingMethod",
+      "notes": null,
+      "origin": "specified",
+      "template": {
+        "id": "79eb51ad-1b66-4565-8589-d42d5d73c9a6",
+        "scope": "auto",
+        "type": "link_by_uid"
+      },
+      "type": "condition",
+      "value": {
+        "category": "Continuous",
+        "type": "nominal_categorical"
+      }
+    },
+    {
+      "file_links": [],
+      "name": "TypicalCuttingTime",
+      "notes": null,
+      "origin": "specified",
+      "template": {
+        "id": "3b108be5-67d0-4d2c-a3e1-f6193c59ddd6",
+        "scope": "auto",
+        "type": "link_by_uid"
+      },
+      "type": "condition",
+      "value": {
+        "nominal": 9.0,
+        "type": "nominal_real",
+        "units": "minute"
+      }
+    },
+    {
+      "file_links": [],
+      "name": "CuttingTool",
+      "notes": null,
+      "origin": "specified",
+      "template": {
+        "id": "15f40775-9cbd-4407-9418-d8a2e25894d9",
+        "scope": "auto",
+        "type": "link_by_uid"
+      },
+      "type": "condition",
+      "value": {
+        "category": "Femtosecond Laser",
+        "type": "nominal_categorical"
+      }
+    }
+  ],
+  "file_links": [
+    {
+      "filename": "REVISEDCIRCLEARRAY(BATCH4FLYERS)-2021-10-22.pgm",
+      "type": "file_link",
+      "url": null
+    }
+  ],
+  "name": "50um Al Optimized v2 (2021-10-22)",
+  "notes": "Femtosecond system fixed by Mike\nPower increased to 320\nBetter alignment",
+  "parameters": [
+    {
+      "file_links": [],
+      "name": "LaserCuttingEnergy",
+      "notes": null,
+      "origin": "specified",
+      "template": {
+        "id": "8acf41f9-dc2c-4dad-ad3a-3695e23c6bff",
+        "scope": "auto",
+        "type": "link_by_uid"
+      },
+      "type": "parameter",
+      "value": {
+        "nominal": 320.0,
+        "type": "nominal_real",
+        "units": "microjoule"
+      }
+    },
+    {
+      "file_links": [],
+      "name": "NumberofPasses",
+      "notes": null,
+      "origin": "specified",
+      "template": {
+        "id": "38e13a8d-39d8-4055-9d0f-29f516400f46",
+        "scope": "auto",
+        "type": "link_by_uid"
+      },
+      "type": "parameter",
+      "value": {
+        "nominal": 4,
+        "type": "nominal_integer"
+      }
+    },
+    {
+      "file_links": [],
+      "name": "ApertureSetting",
+      "notes": null,
+      "origin": "specified",
+      "template": {
+        "id": "62e738b4-a37d-4c82-aa4f-46d30fedda1c",
+        "scope": "auto",
+        "type": "link_by_uid"
+      },
+      "type": "parameter",
+      "value": {
+        "category": "Open",
+        "type": "nominal_categorical"
+      }
+    },
+    {
+      "file_links": [],
+      "name": "DepthofCut",
+      "notes": null,
+      "origin": "specified",
+      "template": {
+        "id": "655992ff-29da-4cfd-8ef7-642f302cbe1d",
+        "scope": "auto",
+        "type": "link_by_uid"
+      },
+      "type": "parameter",
+      "value": {
+        "category": "On",
+        "type": "nominal_categorical"
+      }
+    }
+  ],
+  "tags": [
+    "FlyerCuttingID::FP03",
+    "VersionDate::10/22/2021",
+    "recordId::3",
+    "modId::7",
+    "ObjectType::LaserShockFlyerCuttingProgram"
+  ],
+  "template": {
+    "id": "72a014e1-75dd-43e5-a821-903b66ed82b3",
+    "scope": "auto",
+    "type": "link_by_uid"
+  },
+  "type": "process_spec",
+  "uids": {
+    "auto": "d7dd7a0f-0be9-47c3-aa32-8b1e2e8dd9a0"
+  }
+}

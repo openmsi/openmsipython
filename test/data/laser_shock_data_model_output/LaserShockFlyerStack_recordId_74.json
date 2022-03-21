@@ -1,0 +1,26 @@
+{
+  "file_links": [],
+  "name": "Flyer Stack",
+  "notes": "",
+  "process": {
+    "id": "f05580b6-5bcb-4caf-98c2-ae6001168029",
+    "scope": "auto",
+    "type": "link_by_uid"
+  },
+  "sample_type": "unknown",
+  "spec": {
+    "id": "efa6eac2-4021-49e8-9739-990a796fc005",
+    "scope": "auto",
+    "type": "link_by_uid"
+  },
+  "tags": [
+    "FlyerID::F054",
+    "recordId::74",
+    "modId::16",
+    "ObjectType::LaserShockFlyerStack"
+  ],
+  "type": "material_run",
+  "uids": {
+    "auto": "c361be14-8c17-4c5f-ad5b-7bdfed0a1fc0"
+  }
+}

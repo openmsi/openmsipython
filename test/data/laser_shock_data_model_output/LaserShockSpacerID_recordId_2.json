@@ -1,0 +1,108 @@
+{
+  "file_links": [],
+  "name": "240um Kapton (double adhesive)",
+  "notes": "",
+  "process": {
+    "id": "8acc808e-6861-413c-a244-e6cfe5a29c77",
+    "scope": "auto",
+    "type": "link_by_uid"
+  },
+  "properties": [
+    {
+      "conditions": [],
+      "property": {
+        "file_links": [],
+        "name": "SpacerThickness",
+        "notes": null,
+        "origin": "specified",
+        "template": {
+          "id": "cfb11b26-8471-4d5c-9326-82129563cb7b",
+          "scope": "auto",
+          "type": "link_by_uid"
+        },
+        "type": "property",
+        "value": {
+          "nominal": 240.0,
+          "type": "nominal_real",
+          "units": "micrometer"
+        }
+      },
+      "type": "property_and_conditions"
+    },
+    {
+      "conditions": [],
+      "property": {
+        "file_links": [],
+        "name": "SpacerMaterial",
+        "notes": null,
+        "origin": "specified",
+        "template": {
+          "id": "3f36bfd0-b132-4f28-8883-99323e29c6a2",
+          "scope": "auto",
+          "type": "link_by_uid"
+        },
+        "type": "property",
+        "value": {
+          "category": "Kapton",
+          "type": "nominal_categorical"
+        }
+      },
+      "type": "property_and_conditions"
+    },
+    {
+      "conditions": [],
+      "property": {
+        "file_links": [],
+        "name": "SpacerAdhesive",
+        "notes": null,
+        "origin": "specified",
+        "template": {
+          "id": "2e9a7dd5-95ef-4409-ab1c-3b2ca33653dd",
+          "scope": "auto",
+          "type": "link_by_uid"
+        },
+        "type": "property",
+        "value": {
+          "category": "Double",
+          "type": "nominal_categorical"
+        }
+      },
+      "type": "property_and_conditions"
+    },
+    {
+      "conditions": [],
+      "property": {
+        "file_links": [],
+        "name": "AdhesiveType",
+        "notes": null,
+        "origin": "specified",
+        "template": {
+          "id": "91840b64-5b8d-4d3b-b135-84599e7b7c0a",
+          "scope": "auto",
+          "type": "link_by_uid"
+        },
+        "type": "property",
+        "value": {
+          "category": "Silicone",
+          "type": "nominal_categorical"
+        }
+      },
+      "type": "property_and_conditions"
+    }
+  ],
+  "tags": [
+    "SpacerID::S002",
+    "recordId::2",
+    "modId::2",
+    "ObjectType::LaserShockSpacerID"
+  ],
+  "template": {
+    "id": "1034d150-9e0e-49a2-8841-8a5776ecfaa3",
+    "scope": "auto",
+    "type": "link_by_uid"
+  },
+  "type": "material_spec",
+  "uids": {
+    "auto": "5ce9d675-2547-4ead-8718-78d11fdad94c"
+  }
+}

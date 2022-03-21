@@ -1,0 +1,29 @@
+{
+  "file_links": [],
+  "name": "23-17 Mg-9Al 1Bc+3Bc ECAE Plate",
+  "notes": "",
+  "process": {
+    "id": "cd633862-d914-404b-b719-fe53a9e1b4f6",
+    "scope": "auto",
+    "type": "link_by_uid"
+  },
+  "sample_type": "unknown",
+  "spec": {
+    "id": "28d655a9-723d-48fc-b184-112064bc1575",
+    "scope": "auto",
+    "type": "link_by_uid"
+  },
+  "tags": [
+    "SampleID::23-17",
+    "DateRecorded::11/22/2021",
+    "RecordedBy::Lezcano",
+    "GrantFunding::MEDE_Metals",
+    "recordId::16",
+    "modId::15",
+    "ObjectType::LaserShockSample"
+  ],
+  "type": "material_run",
+  "uids": {
+    "auto": "d3e874a2-d91d-46ff-9e92-c96cbe6d5f70"
+  }
+}

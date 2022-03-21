@@ -1,0 +1,25 @@
+{
+  "file_links": [],
+  "name": "F071-R2C2-Spacer-Sample",
+  "notes": null,
+  "process": {
+    "id": "e62c2515-5e8e-4d7b-9329-ef2bb24c57c6",
+    "scope": "auto",
+    "type": "link_by_uid"
+  },
+  "sample_type": "unknown",
+  "spec": {
+    "id": "6168332a-ff3e-4adf-a75e-cd87ffad365c",
+    "scope": "auto",
+    "type": "link_by_uid"
+  },
+  "tags": [
+    "recordId::690",
+    "modId::6",
+    "ObjectType::LaserShockLaunchPackage"
+  ],
+  "type": "material_run",
+  "uids": {
+    "auto": "6e7ada45-4212-4b4c-adf0-b16f68a21234"
+  }
+}

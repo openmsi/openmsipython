@@ -1,0 +1,591 @@
+[
+  {
+    "file_links": [],
+    "name": "23-17 Mg-9Al 1Bc+3Bc ECAE Plate",
+    "notes": "",
+    "process": {
+      "id": "cd633862-d914-404b-b719-fe53a9e1b4f6",
+      "scope": "auto",
+      "type": "link_by_uid"
+    },
+    "sample_type": "unknown",
+    "spec": {
+      "id": "28d655a9-723d-48fc-b184-112064bc1575",
+      "scope": "auto",
+      "type": "link_by_uid"
+    },
+    "tags": [
+      "SampleID::23-17",
+      "DateRecorded::11/22/2021",
+      "RecordedBy::Lezcano",
+      "GrantFunding::MEDE_Metals",
+      "recordId::16",
+      "modId::15",
+      "ObjectType::LaserShockSample"
+    ],
+    "type": "material_run",
+    "uids": {
+      "auto": "d3e874a2-d91d-46ff-9e92-c96cbe6d5f70"
+    }
+  },
+  {
+    "conditions": [],
+    "file_links": [],
+    "name": "Sample Processing",
+    "notes": null,
+    "parameters": [],
+    "source": {
+      "performed_by": "Laszlo Kecskes (HEMI)",
+      "performed_date": null,
+      "type": "performed_source"
+    },
+    "spec": {
+      "id": "04e7e16b-28aa-429e-90c6-e8859d08536f",
+      "scope": "auto",
+      "type": "link_by_uid"
+    },
+    "tags": [],
+    "type": "process_run",
+    "uids": {
+      "auto": "cd633862-d914-404b-b719-fe53a9e1b4f6"
+    }
+  },
+  {
+    "absolute_quantity": null,
+    "file_links": [],
+    "labels": [],
+    "mass_fraction": null,
+    "material": {
+      "id": "5cdece74-91cd-4873-a425-7993209b4940",
+      "scope": "auto",
+      "type": "link_by_uid"
+    },
+    "name": "Raw Material",
+    "notes": null,
+    "number_fraction": null,
+    "process": {
+      "id": "cd633862-d914-404b-b719-fe53a9e1b4f6",
+      "scope": "auto",
+      "type": "link_by_uid"
+    },
+    "spec": {
+      "id": "f449d68e-3f7b-4ecd-b016-038529b9aebf",
+      "scope": "auto",
+      "type": "link_by_uid"
+    },
+    "tags": [],
+    "type": "ingredient_run",
+    "uids": {
+      "auto": "c65ad025-2f05-4135-a890-8b6593d1b3aa"
+    },
+    "volume_fraction": null
+  },
+  {
+    "file_links": [],
+    "name": "Raw Material",
+    "notes": null,
+    "process": null,
+    "sample_type": "unknown",
+    "spec": {
+      "id": "a146fcaa-7c12-426b-a7be-d79f97be3bec",
+      "scope": "auto",
+      "type": "link_by_uid"
+    },
+    "tags": [],
+    "type": "material_run",
+    "uids": {
+      "auto": "5cdece74-91cd-4873-a425-7993209b4940"
+    }
+  },
+  {
+    "file_links": [],
+    "name": "Raw Material",
+    "notes": null,
+    "process": null,
+    "properties": [
+      {
+        "conditions": [
+          {
+            "file_links": [],
+            "name": "CompositionMeasure",
+            "notes": null,
+            "origin": "specified",
+            "template": {
+              "id": "68281f0f-358d-49e6-afaf-a5d52e21bb83",
+              "scope": "auto",
+              "type": "link_by_uid"
+            },
+            "type": "condition",
+            "value": {
+              "category": "Weight Percent",
+              "type": "nominal_categorical"
+            }
+          }
+        ],
+        "property": {
+          "file_links": [],
+          "name": "MaterialComposition",
+          "notes": null,
+          "origin": "specified",
+          "template": {
+            "id": "9d60fd9e-154c-444a-adcb-3c5a9872a788",
+            "scope": "auto",
+            "type": "link_by_uid"
+          },
+          "type": "property",
+          "value": {
+            "quantities": {
+              "Al": 9,
+              "Mg": 91
+            },
+            "type": "nominal_composition"
+          }
+        },
+        "type": "property_and_conditions"
+      }
+    ],
+    "tags": [],
+    "template": {
+      "id": "867d01d6-03b8-401a-9bae-5e06fcd4dcd5",
+      "scope": "auto",
+      "type": "link_by_uid"
+    },
+    "type": "material_spec",
+    "uids": {
+      "auto": "a146fcaa-7c12-426b-a7be-d79f97be3bec"
+    }
+  },
+  {
+    "bounds": {
+      "categories": [
+        "Atomic Percent",
+        "Weight Percent"
+      ],
+      "type": "categorical_bounds"
+    },
+    "description": "Possible values of the \"Percentage Measure\" radial button in the \"Sample\" layout",
+    "name": "Composition Measure",
+    "tags": [],
+    "type": "condition_template",
+    "uids": {
+      "auto": "68281f0f-358d-49e6-afaf-a5d52e21bb83"
+    }
+  },
+  {
+    "bounds": {
+      "components": [
+        "Al",
+        "Be",
+        "Ca",
+        "Cu",
+        "Mg",
+        "Ni",
+        "Ti",
+        "Zn",
+        "Zr"
+      ],
+      "type": "composition_bounds"
+    },
+    "description": "The composition of a raw material that's processed to produce a Laser Shock Sample",
+    "name": "Sample Raw Material Composition",
+    "tags": [],
+    "type": "property_template",
+    "uids": {
+      "auto": "9d60fd9e-154c-444a-adcb-3c5a9872a788"
+    }
+  },
+  {
+    "description": "A raw material that is processed to produced a Laser Shock Sample",
+    "name": "Raw Sample Material",
+    "properties": [
+      [
+        {
+          "id": "a34f0952-3dc7-4a25-9a23-fbd7e015a380",
+          "scope": "auto",
+          "type": "link_by_uid"
+        },
+        null
+      ],
+      [
+        {
+          "id": "9d60fd9e-154c-444a-adcb-3c5a9872a788",
+          "scope": "auto",
+          "type": "link_by_uid"
+        },
+        null
+      ]
+    ],
+    "tags": [],
+    "type": "material_template",
+    "uids": {
+      "auto": "867d01d6-03b8-401a-9bae-5e06fcd4dcd5"
+    }
+  },
+  {
+    "bounds": {
+      "categories": [
+        "BMG",
+        "Ceramic",
+        "Composite",
+        "HEA",
+        "Metal",
+        "Polymer"
+      ],
+      "type": "categorical_bounds"
+    },
+    "description": "Possible values in the \"Material\" menu buttons in the \"Sample\" layout",
+    "name": "Sample Material Type",
+    "tags": [],
+    "type": "property_template",
+    "uids": {
+      "auto": "a34f0952-3dc7-4a25-9a23-fbd7e015a380"
+    }
+  },
+  {
+    "absolute_quantity": null,
+    "file_links": [],
+    "labels": [],
+    "mass_fraction": null,
+    "material": {
+      "id": "a146fcaa-7c12-426b-a7be-d79f97be3bec",
+      "scope": "auto",
+      "type": "link_by_uid"
+    },
+    "name": "Raw Material",
+    "notes": null,
+    "number_fraction": null,
+    "process": {
+      "id": "04e7e16b-28aa-429e-90c6-e8859d08536f",
+      "scope": "auto",
+      "type": "link_by_uid"
+    },
+    "tags": [],
+    "type": "ingredient_spec",
+    "uids": {
+      "auto": "f449d68e-3f7b-4ecd-b016-038529b9aebf"
+    },
+    "volume_fraction": null
+  },
+  {
+    "conditions": [
+      {
+        "file_links": [],
+        "name": "ProcessingGeometry",
+        "notes": null,
+        "origin": "specified",
+        "template": {
+          "id": "fa4bad22-71fd-4959-84dd-df84122c9662",
+          "scope": "auto",
+          "type": "link_by_uid"
+        },
+        "type": "condition",
+        "value": {
+          "category": "Plate",
+          "type": "nominal_categorical"
+        }
+      },
+      {
+        "file_links": [],
+        "name": "ProcessingTemperature1",
+        "notes": null,
+        "origin": "specified",
+        "template": {
+          "id": "5707b66e-face-429e-ba12-c370f7cb6dd7",
+          "scope": "auto",
+          "type": "link_by_uid"
+        },
+        "type": "condition",
+        "value": {
+          "nominal": 300.0,
+          "type": "nominal_real",
+          "units": "degree_Celsius"
+        }
+      },
+      {
+        "file_links": [],
+        "name": "ProcessingTemperature2",
+        "notes": null,
+        "origin": "specified",
+        "template": {
+          "id": "5707b66e-face-429e-ba12-c370f7cb6dd7",
+          "scope": "auto",
+          "type": "link_by_uid"
+        },
+        "type": "condition",
+        "value": {
+          "nominal": 250.0,
+          "type": "nominal_real",
+          "units": "degree_Celsius"
+        }
+      }
+    ],
+    "file_links": [],
+    "name": "Sample Processing",
+    "notes": null,
+    "parameters": [
+      {
+        "file_links": [],
+        "name": "ProcessingRoute",
+        "notes": null,
+        "origin": "specified",
+        "template": {
+          "id": "baa8796a-fdd6-45fb-ba5c-abc8f76dc6ee",
+          "scope": "auto",
+          "type": "link_by_uid"
+        },
+        "type": "parameter",
+        "value": {
+          "category": "1Bc+3Bc",
+          "type": "nominal_categorical"
+        }
+      }
+    ],
+    "tags": [],
+    "template": {
+      "id": "d10530bf-bf54-41db-8f10-9bf6d931d7a4",
+      "scope": "auto",
+      "type": "link_by_uid"
+    },
+    "type": "process_spec",
+    "uids": {
+      "auto": "04e7e16b-28aa-429e-90c6-e8859d08536f"
+    }
+  },
+  {
+    "file_links": [],
+    "name": "Laser Shock Sample",
+    "notes": "One of the possible Specs for producing Samples for the Laser Shock Lab",
+    "process": {
+      "id": "04e7e16b-28aa-429e-90c6-e8859d08536f",
+      "scope": "auto",
+      "type": "link_by_uid"
+    },
+    "properties": [],
+    "tags": [],
+    "template": {
+      "id": "47469fb3-aff8-4bbe-8373-e6b4bcfc31d9",
+      "scope": "auto",
+      "type": "link_by_uid"
+    },
+    "type": "material_spec",
+    "uids": {
+      "auto": "28d655a9-723d-48fc-b184-112064bc1575"
+    }
+  },
+  {
+    "description": "A Sample used in various Laser Shock experiments",
+    "name": "Sample",
+    "properties": [
+      [
+        {
+          "id": "c90a129e-c692-452e-abf9-f38e74ba6501",
+          "scope": "auto",
+          "type": "link_by_uid"
+        },
+        null
+      ],
+      [
+        {
+          "id": "e34246c4-86c6-45e9-8832-7baab59da07a",
+          "scope": "auto",
+          "type": "link_by_uid"
+        },
+        null
+      ],
+      [
+        {
+          "id": "21f7695e-dfa7-4919-8297-8b9bf0048e21",
+          "scope": "auto",
+          "type": "link_by_uid"
+        },
+        null
+      ]
+    ],
+    "tags": [],
+    "type": "material_template",
+    "uids": {
+      "auto": "47469fb3-aff8-4bbe-8373-e6b4bcfc31d9"
+    }
+  },
+  {
+    "bounds": {
+      "default_units": "micrometer",
+      "lower_bound": 0,
+      "type": "real_bounds",
+      "upper_bound": 1000.0
+    },
+    "description": "The average size of grains in a material",
+    "name": "Average Grain Size",
+    "tags": [],
+    "type": "property_template",
+    "uids": {
+      "auto": "21f7695e-dfa7-4919-8297-8b9bf0048e21"
+    }
+  },
+  {
+    "bounds": {
+      "default_units": "meter / second",
+      "lower_bound": 0,
+      "type": "real_bounds",
+      "upper_bound": 36000.0
+    },
+    "description": "The speed at which waves propagate through a material",
+    "name": "Bulk Wave Speed",
+    "tags": [],
+    "type": "property_template",
+    "uids": {
+      "auto": "e34246c4-86c6-45e9-8832-7baab59da07a"
+    }
+  },
+  {
+    "bounds": {
+      "default_units": "kilogram / meter ** 3",
+      "lower_bound": 0,
+      "type": "real_bounds",
+      "upper_bound": 20000.0
+    },
+    "description": "The density of something",
+    "name": "Density",
+    "tags": [],
+    "type": "property_template",
+    "uids": {
+      "auto": "c90a129e-c692-452e-abf9-f38e74ba6501"
+    }
+  },
+  {
+    "bounds": {
+      "default_units": "degree_Celsius",
+      "lower_bound": 0,
+      "type": "real_bounds",
+      "upper_bound": 1000.0
+    },
+    "description": "Temperature at which a raw material is processed to produce a Laser Shock Sample",
+    "name": "Processing Temperature",
+    "tags": [],
+    "type": "condition_template",
+    "uids": {
+      "auto": "5707b66e-face-429e-ba12-c370f7cb6dd7"
+    }
+  },
+  {
+    "bounds": {
+      "categories": [
+        "Billet",
+        "Foil",
+        "Plate"
+      ],
+      "type": "categorical_bounds"
+    },
+    "description": "Possible values in the \"Processing Geometry\" menu buttons in the \"Sample\" layout",
+    "name": "Processing Geometry",
+    "tags": [],
+    "type": "condition_template",
+    "uids": {
+      "auto": "fa4bad22-71fd-4959-84dd-df84122c9662"
+    }
+  },
+  {
+    "bounds": {
+      "categories": [
+        "1Bc+3Bc",
+        "4Bc",
+        "Aged",
+        "Solutionized"
+      ],
+      "type": "categorical_bounds"
+    },
+    "description": "Possible values in the \"Processing Route\" dropdown menu in the \"Sample\" layout",
+    "name": "Processing Route",
+    "tags": [],
+    "type": "parameter_template",
+    "uids": {
+      "auto": "baa8796a-fdd6-45fb-ba5c-abc8f76dc6ee"
+    }
+  },
+  {
+    "allowed_labels": [],
+    "allowed_names": [],
+    "conditions": [
+      [
+        {
+          "id": "fa4bad22-71fd-4959-84dd-df84122c9662",
+          "scope": "auto",
+          "type": "link_by_uid"
+        },
+        null
+      ],
+      [
+        {
+          "id": "a935553d-f8c9-4279-8515-b36bb0ca5833",
+          "scope": "auto",
+          "type": "link_by_uid"
+        },
+        null
+      ],
+      [
+        {
+          "id": "5707b66e-face-429e-ba12-c370f7cb6dd7",
+          "scope": "auto",
+          "type": "link_by_uid"
+        },
+        null
+      ]
+    ],
+    "description": "Processing a raw material of some type in some geometry, at some temperature, and through some route toproduce a Sample for the Laser Shock Lab",
+    "name": "Sample Processing",
+    "parameters": [
+      [
+        {
+          "id": "baa8796a-fdd6-45fb-ba5c-abc8f76dc6ee",
+          "scope": "auto",
+          "type": "link_by_uid"
+        },
+        null
+      ],
+      [
+        {
+          "id": "c2f62423-220e-4e3f-b64c-2b800bf921d1",
+          "scope": "auto",
+          "type": "link_by_uid"
+        },
+        null
+      ]
+    ],
+    "tags": [],
+    "type": "process_template",
+    "uids": {
+      "auto": "d10530bf-bf54-41db-8f10-9bf6d931d7a4"
+    }
+  },
+  {
+    "bounds": {
+      "default_units": "hour",
+      "lower_bound": 0,
+      "type": "real_bounds",
+      "upper_bound": 1000.0
+    },
+    "description": "Amount of time a Raw Material is treated to produce a Sample",
+    "name": "Processing Time",
+    "tags": [],
+    "type": "parameter_template",
+    "uids": {
+      "auto": "c2f62423-220e-4e3f-b64c-2b800bf921d1"
+    }
+  },
+  {
+    "bounds": {
+      "categories": [
+        "ECAE",
+        "Rolling"
+      ],
+      "type": "categorical_bounds"
+    },
+    "description": "Possible values in the \"Processing\" check boxes in the \"Sample\" layout",
+    "name": "Material Processing",
+    "tags": [],
+    "type": "condition_template",
+    "uids": {
+      "auto": "a935553d-f8c9-4279-8515-b36bb0ca5833"
+    }
+  }
+]
