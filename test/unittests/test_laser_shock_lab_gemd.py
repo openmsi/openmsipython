@@ -16,7 +16,7 @@ class TestLaserShockLabGEMD(unittest.TestCase) :
     def test_laser_shock_lab_gemd(self) :
         #create the Laser Shock Lab object
         output_dir = pathlib.Path(__file__).parent/TEST_CONST.LASER_SHOCK_DATA_MODEL_OUTPUT_DIRNAME
-        lab = LaserShockLab(working_dir=output_dir,logger=LOGGER)
+        lab = LaserShockLab(dirpath=output_dir,logger=LOGGER)
         #read in the test record dictionary
         with open(TEST_CONST.TEST_DATA_DIR_PATH/TEST_CONST.FILEMAKER_RECORD_PICKLE_FILENAME,'rb') as fp :
             filemaker_record_dict = pickle.load(fp)

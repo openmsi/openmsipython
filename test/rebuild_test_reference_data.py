@@ -142,11 +142,14 @@ def rebuild_laser_shock_filemaker_refs() :
         pickle.dump(filemaker_records,fp,protocol=pickle.HIGHEST_PROTOCOL)
     compare_and_check_old_and_new_files((NEW_TEST_DATA_DIR/TEST_CONST.FILEMAKER_RECORD_PICKLE_FILENAME).name)
     #Run the LaserShockLab to create GEMD constructs and dump them as .json files
-    lsl = LaserShockLab(working_dir=NEW_TEST_DATA_DIR/TEST_CONST.LASER_SHOCK_DATA_MODEL_OUTPUT_DIRNAME)
+    lsl = LaserShockLab(dirpath=NEW_TEST_DATA_DIR/TEST_CONST.LASER_SHOCK_DATA_MODEL_OUTPUT_DIRNAME)
     lsl.create_gemd_objects(records_dict=filemaker_records)
     lsl.dump_to_json_files(complete_histories=True,recursive=False,indent=2)
     for fp in (NEW_TEST_DATA_DIR/TEST_CONST.LASER_SHOCK_DATA_MODEL_OUTPUT_DIRNAME).glob('*') :
-        compare_and_check_old_and_new_files(fp.name,fp.parent.name)
+        if fp.name.startswith('LaserShock') and not fp.name.endswith('.log') :
+            compare_and_check_old_and_new_files(fp.name,fp.parent.name)
+        else :
+            fp.unlink()
 
 def rebuild_binary_file_chunks_for_serialization_reference() :
     """
