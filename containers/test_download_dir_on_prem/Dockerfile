@@ -33,7 +33,7 @@ WORKDIR /
 
 #Run DataFileDownloadDirectory
 ENTRYPOINT [ "DataFileDownloadDirectory", "/output_dir", \
-             "--config", "/config/test_on_prem.config", \
+             "--config", "/config/test_on_prem_encrypted_online_provision.config", \
              "--topic_name", "testing", \
              "--consumer_group_ID", "testing_1", \
              "--n_threads", "1" \
