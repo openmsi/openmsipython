@@ -10,7 +10,7 @@ from .cached_isinstance_functions import isinstance_spec
 @dataclass
 class GEMDSpec :
     spec : Union[MaterialSpec,ProcessSpec,IngredientSpec,MeasurementSpec]
-    as_dict_no_uid : dict
+    as_dict_no_uid : str
     from_file : bool
 
 class GEMDSpecStore :
@@ -104,8 +104,8 @@ class GEMDSpecStore :
 
     def __get_spec_dict_no_uids(self,specobj) :
         """
-        Return a version of a Spec object serialized to a dictionary where all 
-        UIDs of the relevant encoder scope have been removed
+        Return a version of a Spec object serialized to a string representation of a 
+        dictionary where all UIDs of the relevant encoder scope have been removed
         """
         spec_copy = copy.deepcopy(specobj)
         recursive_foreach(spec_copy,self.__scrub_uids)
