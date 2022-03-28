@@ -15,13 +15,13 @@ class TestArgumentParsing(unittest.TestCase) :
     def test_my_argument_parser(self) :
         parser = MyArgumentParser()
         parser.add_arguments('filepath','output_dir','upload_dir','config','topic_name','queue_max_size',
-                             'new_files_only','consumer_group_ID','pdv_plot_type','optional_output_dir',
+                             'upload_existing','consumer_group_ID','pdv_plot_type','optional_output_dir',
                              n_threads=5,chunk_size=128,update_seconds=60)
-        args = [os.fspath(TEST_CONST.TEST_DATA_FILE_PATH),
+        args = [os.fspath(TEST_CONST.TEST_DATA_FILE_PATH), 
                 'TEST_OUTPUT',
                 os.fspath(TEST_CONST.TEST_DATA_FILE_ROOT_DIR_PATH),
-                '--n_threads','100',
-                '--new_files_only']
+                '--n_threads','100'
+            ]
         args = parser.parse_args(args=args)
         self.assertEqual(args.n_threads,100)
         self.assertTrue((pathlib.Path() / 'TEST_OUTPUT').is_dir())

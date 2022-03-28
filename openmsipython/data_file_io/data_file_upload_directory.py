@@ -63,7 +63,7 @@ class DataFileUploadDirectory(DataFileDirectory,ControlledProcessSingleThread,Ru
                               n_threads=RUN_OPT_CONST.N_DEFAULT_UPLOAD_THREADS,
                               chunk_size=RUN_OPT_CONST.DEFAULT_CHUNK_SIZE,
                               max_queue_size=RUN_OPT_CONST.DEFAULT_MAX_UPLOAD_QUEUE_SIZE,
-                              new_files_only=False) :
+                              upload_existing=False) :
         """
         Listen for new files to be added to the directory. Chunk and produce newly added files as messages to the topic.
 
@@ -72,19 +72,19 @@ class DataFileUploadDirectory(DataFileDirectory,ControlledProcessSingleThread,Ru
         n_threads        = the number of threads to use to produce from the shared queue
         chunk_size       = the size of each file chunk in bytes
         max_queue_size   = maximum number of items allowed to be placed in the upload queue at once
-        new_files_only   = set to True if any files that already exist in the directory should be ignored
-                           i.e., if False (the default) then even files that are already in the directory will be 
-                           enqueued to the producer
+        upload_existing  = set to True if any files that already exist in the directory should be uploaded
+                           i.e., if False (the default) then only files added to the directory after startup
+                           will be enqueued to the producer
         """
         self.__chunk_size = chunk_size
         #start the producer 
         self.__producer = MyProducer.from_file(config_path,logger=self.logger)
         #if we're only going to upload new files, exclude what's already in the directory
-        if new_files_only :
+        if not upload_existing :
             self.__find_new_files(to_upload=False)
         #start the upload queue and thread
         msg = 'Will upload '
-        if new_files_only :
+        if not upload_existing :
             msg+='new files added to '
         else :
             msg+='files in '
@@ -192,7 +192,7 @@ class DataFileUploadDirectory(DataFileDirectory,ControlledProcessSingleThread,Ru
     def get_command_line_arguments(cls) :
         superargs,superkwargs = super().get_command_line_arguments()
         args = [*superargs,'upload_dir','config','topic_name','upload_regex',
-                'chunk_size','queue_max_size','update_seconds','new_files_only']
+                'chunk_size','queue_max_size','update_seconds','upload_existing']
         kwargs = {**superkwargs,'n_threads':RUN_OPT_CONST.N_DEFAULT_UPLOAD_THREADS}
         return args, kwargs
 
@@ -207,7 +207,7 @@ class DataFileUploadDirectory(DataFileDirectory,ControlledProcessSingleThread,Ru
         upload_file_directory = cls(args.upload_dir,upload_regex=args.upload_regex,update_secs=args.update_seconds)
         #listen for new files in the directory and run uploads as they come in until the process is shut down
         run_start = datetime.datetime.now()
-        if args.new_files_only :
+        if not args.upload_existing :
             upload_file_directory.logger.info(f'Listening for files to be added to {args.upload_dir}...')
         else :
             upload_file_directory.logger.info(f'Uploading files in/added to {args.upload_dir}...')
@@ -215,7 +215,7 @@ class DataFileUploadDirectory(DataFileDirectory,ControlledProcessSingleThread,Ru
                                                                          n_threads=args.n_threads,
                                                                          chunk_size=args.chunk_size,
                                                                          max_queue_size=args.queue_max_size,
-                                                                         new_files_only=args.new_files_only)
+                                                                         upload_existing=args.upload_existing)
         run_stop = datetime.datetime.now()
         upload_file_directory.logger.info(f'Done listening to {args.upload_dir} for files to upload')
         final_msg = f'The following {len(uploaded_filepaths)} file'
