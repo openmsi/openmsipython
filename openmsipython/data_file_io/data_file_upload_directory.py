@@ -15,7 +15,10 @@ class DataFileUploadDirectory(DataFileDirectory,ControlledProcessSingleThread,Ru
     Class representing a directory being watched for new files to be added so they can be uploaded
     """
 
-    #################### PROPERTIES ####################
+    #################### CONSTANTS AND PROPERTIES ####################
+
+    MIN_WAIT_TIME = 0.05 # starting point for how long to wait between pinging the directory looking for new files
+    MAX_WAIT_TIME = 60 # never wait more than a minute to check again for new files
 
     @property
     def other_datafile_kwargs(self) :
@@ -57,8 +60,8 @@ class DataFileUploadDirectory(DataFileDirectory,ControlledProcessSingleThread,Ru
             self.logger.error(errmsg,ValueError)
         self.__upload_regex = upload_regex
         self.__datafile_type = datafile_type
+        self.__wait_time = self.MIN_WAIT_TIME
         
-
     def upload_files_as_added(self,config_path,topic_name,
                               n_threads=RUN_OPT_CONST.N_DEFAULT_UPLOAD_THREADS,
                               chunk_size=RUN_OPT_CONST.DEFAULT_CHUNK_SIZE,
@@ -118,7 +121,14 @@ class DataFileUploadDirectory(DataFileDirectory,ControlledProcessSingleThread,Ru
     def _run_iteration(self) :
         #check for new files in the directory if we haven't already found some to run
         if not self.have_file_to_upload :
+            # wait here with some slight backoff so that the watched directory isn't just constantly pinged
+            time.sleep(self.__wait_time) 
             self.__find_new_files()
+            if not self.have_file_to_upload :
+                if self.__wait_time<self.MAX_WAIT_TIME :
+                    self.__wait_time*=1.5
+            else :
+                self.__wait_time = self.MIN_WAIT_TIME
         #find the first file that's running and add some of its chunks to the upload queue 
         for datafile in self.data_files_by_path.values() :
             if datafile.upload_in_progress or datafile.waiting_to_upload :
@@ -165,10 +175,9 @@ class DataFileUploadDirectory(DataFileDirectory,ControlledProcessSingleThread,Ru
         #This is in a try/except in case a file is moved or a subdirectory is renamed while this method is running
         #it'll just return and try again if so
         try :
-            time.sleep(0.25) # wait just a little bit here so that the watched directory isn't just constantly pinged
             for filepath in self.dirpath.rglob('*') :
                 filepath = filepath.resolve()
-                if self.filepath_should_be_uploaded(filepath) and (filepath not in self.data_files_by_path.keys()):
+                if (filepath not in self.data_files_by_path.keys()) and self.filepath_should_be_uploaded(filepath) :
                     #wait until the file is actually available
                     file_ready = False
                     while not file_ready :
@@ -177,7 +186,7 @@ class DataFileUploadDirectory(DataFileDirectory,ControlledProcessSingleThread,Ru
                             fp.close()
                             file_ready = True
                         except PermissionError :
-                            time.sleep(0.5)
+                            time.sleep(5.0)
                     self.data_files_by_path[filepath]=self.__datafile_type(filepath,
                                                                           to_upload=to_upload,
                                                                           rootdir=self.dirpath,
