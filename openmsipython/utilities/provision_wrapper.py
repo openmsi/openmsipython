@@ -9,55 +9,67 @@ from .misc import cd
 LOGGER = Logger('ProvisionNode',logging.INFO)
 KC_PATH = kafkacrypto.__path__
 SP_NAME = 'simple-provision.py'
+OP_NAME = 'online-provision.py'
 GITHUB_URL = f'https://raw.githubusercontent.com/tmcqueen-materials/kafkacrypto/master/tools/{SP_NAME}'
 TEMP_DIR_PATH = pathlib.Path(__file__).parent.parent/'my_kafka'/'config_files'/'temp_kafkacrypto_dir'
 
 def main() :
     #command line arguments
     parser = ArgumentParser()
-    parser.add_argument('--script-path', type=pathlib.Path, default='.',
-                        help=f'Path to the {SP_NAME} script available from the KafkaCrypto Github')
+    group = parser.add_mutually_exclusive_group()
+    group.add_argument('--mode', choices=['simple','online'], default='simple',
+                       help='''Choice of which known type of provisioning to use. 
+                               Can also provide a path to the script to run instead.''')
+    group.add_argument('--script-path', type=pathlib.Path, default='.',
+                        help='Path to the provision script to run')
     args = parser.parse_args()
     #make sure the temp directory doesn't exist
     if TEMP_DIR_PATH.is_dir() :
         LOGGER.error(f'ERROR: the {TEMP_DIR_PATH} directory should not exist!',RuntimeError)
     #get the location of the simple-provision script
-    kcsp_code = None
-    kcsp_loc = None
+    p_code = None
+    p_loc = None
     if args.script_path is not None: 
         #path to the script itself was given
         if args.script_path.is_file() :
-            kcsp_loc = args.script_path
-            kcsp_code = open(args.script_path).read()
+            p_loc = args.script_path
+            p_code = open(args.script_path).read()
         #directory containing the script was given
         elif args.script_path.is_dir() :
             if (args.script_path/SP_NAME).is_file() :
-                kcsp_loc = args.script_path/SP_NAME
-                kcsp_code = open(args.script_path/SP_NAME).read()
-    if kcsp_code is None :
+                p_loc = args.script_path/SP_NAME
+                p_code = open(args.script_path/SP_NAME).read()
+            elif (args.script_path/OP_NAME).is_file() :
+                p_loc = args.script_path/OP_NAME
+                p_code = open(args.script_path/OP_NAME).read()
+    if p_code is None :
         #if not set yet, try getting from the kafkacrypto install location (works if installed with --editable)
         if len(KC_PATH)==1 :
-            to_try = pathlib.Path(KC_PATH[0]).parent/'tools'/SP_NAME
+            if args.mode=='simple' :
+                to_try = pathlib.Path(KC_PATH[0]).parent/'tools'/SP_NAME
+            elif args.mode=='online' :
+                to_try = pathlib.Path(KC_PATH[0]).parent/'tools'/OP_NAME
             if to_try.is_file() :
-                kcsp_loc = to_try
-                kcsp_code = open(to_try).read()
-    if kcsp_code is None :
-        #if all else fails, try getting from the Github webpage
-        try :
-            kcsp_code = urllib.request.urlopen(GITHUB_URL).read()
-            kcsp_loc = GITHUB_URL
-        except :
-            pass
-    if kcsp_loc is None or kcsp_code is None :
-        LOGGER.error(f'ERROR: failed to find the {SP_NAME} script!',RuntimeError)
-    #run simple-provision
+                p_loc = to_try
+                p_code = open(to_try).read()
+    if p_code is None :
+        #if all else fails, try getting from the Github webpage (only simple-provision can be fetched this way)
+        if args.mode=='simple' :
+            try :
+                p_code = urllib.request.urlopen(GITHUB_URL).read()
+                p_loc = GITHUB_URL
+            except :
+                pass
+    if p_loc is None or p_code is None :
+        LOGGER.error('ERROR: failed to find the provisioning script to use!',RuntimeError)
+    #run the script
     try :
         if not TEMP_DIR_PATH.is_dir() :
             TEMP_DIR_PATH.mkdir(parents=True)
         with cd(TEMP_DIR_PATH) :
-            exec(kcsp_code)
+            exec(p_code)
     except Exception as e :
-        LOGGER.error(f'ERROR: failed to run {SP_NAME} from {kcsp_loc}! Exception: {e}',RuntimeError)
+        LOGGER.error(f'ERROR: failed to run {SP_NAME} from {p_loc}! Exception: {e}',RuntimeError)
     #make sure required files exist and move them into a new directory named for the node_ID
     try :
         new_files = {}
@@ -89,7 +101,7 @@ def main() :
         TEMP_DIR_PATH.rename(new_dirpath)
         LOGGER.info(f'Successfuly set up new KafkaCrypto node called "{node_id}"')
     except Exception as e :
-        errmsg = f'ERROR: Running {kcsp_loc} did not produce the expected output! Temporary directories '
+        errmsg = f'ERROR: Running {p_loc} did not produce the expected output! Temporary directories '
         errmsg+= f'will be removed and you will need to try again. Exception: {e}'
         LOGGER.error(errmsg)
     finally :

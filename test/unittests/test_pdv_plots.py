@@ -32,7 +32,7 @@ class TestPDVPlots(unittest.TestCase) :
                                  kwargs={'n_threads':RUN_OPT_CONST.N_DEFAULT_UPLOAD_THREADS,
                                          'chunk_size':RUN_OPT_CONST.DEFAULT_CHUNK_SIZE,
                                          'max_queue_size':RUN_OPT_CONST.DEFAULT_MAX_UPLOAD_QUEUE_SIZE,
-                                         'new_files_only':True}
+                                         'upload_existing':False}
                                 )
         upload_thread.start()
         try :

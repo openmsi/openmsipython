@@ -15,7 +15,10 @@ class DataFileUploadDirectory(DataFileDirectory,ControlledProcessSingleThread,Ru
     Class representing a directory being watched for new files to be added so they can be uploaded
     """
 
-    #################### PROPERTIES ####################
+    #################### CONSTANTS AND PROPERTIES ####################
+
+    MIN_WAIT_TIME = 0.05 # starting point for how long to wait between pinging the directory looking for new files
+    MAX_WAIT_TIME = 60 # never wait more than a minute to check again for new files
 
     @property
     def other_datafile_kwargs(self) :
@@ -57,13 +60,13 @@ class DataFileUploadDirectory(DataFileDirectory,ControlledProcessSingleThread,Ru
             self.logger.error(errmsg,ValueError)
         self.__upload_regex = upload_regex
         self.__datafile_type = datafile_type
+        self.__wait_time = self.MIN_WAIT_TIME
         
-
     def upload_files_as_added(self,config_path,topic_name,
                               n_threads=RUN_OPT_CONST.N_DEFAULT_UPLOAD_THREADS,
                               chunk_size=RUN_OPT_CONST.DEFAULT_CHUNK_SIZE,
                               max_queue_size=RUN_OPT_CONST.DEFAULT_MAX_UPLOAD_QUEUE_SIZE,
-                              new_files_only=False) :
+                              upload_existing=False) :
         """
         Listen for new files to be added to the directory. Chunk and produce newly added files as messages to the topic.
 
@@ -72,19 +75,19 @@ class DataFileUploadDirectory(DataFileDirectory,ControlledProcessSingleThread,Ru
         n_threads        = the number of threads to use to produce from the shared queue
         chunk_size       = the size of each file chunk in bytes
         max_queue_size   = maximum number of items allowed to be placed in the upload queue at once
-        new_files_only   = set to True if any files that already exist in the directory should be ignored
-                           i.e., if False (the default) then even files that are already in the directory will be 
-                           enqueued to the producer
+        upload_existing  = set to True if any files that already exist in the directory should be uploaded
+                           i.e., if False (the default) then only files added to the directory after startup
+                           will be enqueued to the producer
         """
         self.__chunk_size = chunk_size
         #start the producer 
         self.__producer = MyProducer.from_file(config_path,logger=self.logger)
         #if we're only going to upload new files, exclude what's already in the directory
-        if new_files_only :
+        if not upload_existing :
             self.__find_new_files(to_upload=False)
         #start the upload queue and thread
         msg = 'Will upload '
-        if new_files_only :
+        if not upload_existing :
             msg+='new files added to '
         else :
             msg+='files in '
@@ -118,7 +121,14 @@ class DataFileUploadDirectory(DataFileDirectory,ControlledProcessSingleThread,Ru
     def _run_iteration(self) :
         #check for new files in the directory if we haven't already found some to run
         if not self.have_file_to_upload :
+            # wait here with some slight backoff so that the watched directory isn't just constantly pinged
+            time.sleep(self.__wait_time) 
             self.__find_new_files()
+            if not self.have_file_to_upload :
+                if self.__wait_time<self.MAX_WAIT_TIME :
+                    self.__wait_time*=1.5
+            else :
+                self.__wait_time = self.MIN_WAIT_TIME
         #find the first file that's running and add some of its chunks to the upload queue 
         for datafile in self.data_files_by_path.values() :
             if datafile.upload_in_progress or datafile.waiting_to_upload :
@@ -165,10 +175,9 @@ class DataFileUploadDirectory(DataFileDirectory,ControlledProcessSingleThread,Ru
         #This is in a try/except in case a file is moved or a subdirectory is renamed while this method is running
         #it'll just return and try again if so
         try :
-            time.sleep(0.25) # wait just a little bit here so that the watched directory isn't just constantly pinged
             for filepath in self.dirpath.rglob('*') :
                 filepath = filepath.resolve()
-                if self.filepath_should_be_uploaded(filepath) and (filepath not in self.data_files_by_path.keys()):
+                if (filepath not in self.data_files_by_path.keys()) and self.filepath_should_be_uploaded(filepath) :
                     #wait until the file is actually available
                     file_ready = False
                     while not file_ready :
@@ -177,7 +186,7 @@ class DataFileUploadDirectory(DataFileDirectory,ControlledProcessSingleThread,Ru
                             fp.close()
                             file_ready = True
                         except PermissionError :
-                            time.sleep(0.5)
+                            time.sleep(5.0)
                     self.data_files_by_path[filepath]=self.__datafile_type(filepath,
                                                                           to_upload=to_upload,
                                                                           rootdir=self.dirpath,
@@ -192,7 +201,7 @@ class DataFileUploadDirectory(DataFileDirectory,ControlledProcessSingleThread,Ru
     def get_command_line_arguments(cls) :
         superargs,superkwargs = super().get_command_line_arguments()
         args = [*superargs,'upload_dir','config','topic_name','upload_regex',
-                'chunk_size','queue_max_size','update_seconds','new_files_only']
+                'chunk_size','queue_max_size','update_seconds','upload_existing']
         kwargs = {**superkwargs,'n_threads':RUN_OPT_CONST.N_DEFAULT_UPLOAD_THREADS}
         return args, kwargs
 
@@ -204,10 +213,10 @@ class DataFileUploadDirectory(DataFileDirectory,ControlledProcessSingleThread,Ru
         parser = cls.get_argument_parser()
         args = parser.parse_args(args=args)
         #make the DataFileDirectory for the specified directory
-        upload_file_directory = cls(args.upload_dir,args.upload_regex,update_secs=args.update_seconds)
+        upload_file_directory = cls(args.upload_dir,upload_regex=args.upload_regex,update_secs=args.update_seconds)
         #listen for new files in the directory and run uploads as they come in until the process is shut down
         run_start = datetime.datetime.now()
-        if args.new_files_only :
+        if not args.upload_existing :
             upload_file_directory.logger.info(f'Listening for files to be added to {args.upload_dir}...')
         else :
             upload_file_directory.logger.info(f'Uploading files in/added to {args.upload_dir}...')
@@ -215,7 +224,7 @@ class DataFileUploadDirectory(DataFileDirectory,ControlledProcessSingleThread,Ru
                                                                          n_threads=args.n_threads,
                                                                          chunk_size=args.chunk_size,
                                                                          max_queue_size=args.queue_max_size,
-                                                                         new_files_only=args.new_files_only)
+                                                                         upload_existing=args.upload_existing)
         run_stop = datetime.datetime.now()
         upload_file_directory.logger.info(f'Done listening to {args.upload_dir} for files to upload')
         final_msg = f'The following {len(uploaded_filepaths)} file'

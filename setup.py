@@ -5,7 +5,7 @@ site.ENABLE_USER_SITE = True #https://www.scivision.dev/python-pip-devel-user-in
 
 setupkwargs = dict(
     name='openmsipython',
-    version='0.7.1',
+    version='0.7.2',
     packages=setuptools.find_packages(include=['openmsipython*']),
     include_package_data=True,
     entry_points = {
@@ -16,7 +16,7 @@ setupkwargs = dict(
                              'ManageService=openmsipython.services.manage_service:main',
                              'LecroyFileUploadDirectory=openmsipython.pdv.lecroy_file_upload_directory:main',
                              'PDVPlotMaker=openmsipython.pdv.pdv_plot_maker:main',
-                             'ProvisionNode=openmsipython.utilities.simple_provision_wrapper:main',
+                             'ProvisionNode=openmsipython.utilities.provision_wrapper:main',
                             ],
     },
     python_requires='>=3.7,<3.10',

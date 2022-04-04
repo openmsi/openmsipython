@@ -104,11 +104,11 @@ class MyArgumentParser(ArgumentParser) :
             ['optional',{'default':UTIL_CONST.DEFAULT_UPDATE_SECONDS,'type':int,
                          'help':'''Number of seconds between printing a "." to the console 
                                    to indicate the program is alive'''}],
-        'new_files_only':
+        'upload_existing':
             ['optional',{'action':'store_true',
-                         'help':'''Add this flag to only upload files added to the directory after 
-                                   this code is already running (by default files already existing 
-                                   in the directory at startup will be uploaded as well)'''}],
+                         'help':'''Add this flag to upload files already existing in addition to those 
+                                   added to the directory after this code starts running (by default 
+                                   only files added after startup will be uploaded)'''}],
         'consumer_group_ID':
             ['optional',{'default':str(uuid.uuid1()),
                          'help':'ID to use for all consumers in the group'}],

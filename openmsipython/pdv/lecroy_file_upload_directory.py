@@ -61,7 +61,7 @@ class LecroyFileUploadDirectory(DataFileUploadDirectory) :
                                                                          n_threads=args.n_threads,
                                                                          chunk_size=args.chunk_size,
                                                                          max_queue_size=args.queue_max_size,
-                                                                         new_files_only=args.new_files_only)
+                                                                         upload_existing=args.upload_existing)
         run_stop = datetime.datetime.now()
         upload_file_directory.logger.info(f'Done listening to {args.upload_dir} for Lecroy files to skim and upload')
         final_msg = f'The following {len(uploaded_filepaths)} file'
