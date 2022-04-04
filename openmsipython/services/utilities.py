@@ -45,7 +45,7 @@ def find_install_NSSM() :
     else :
         SERVICE_CONST.LOGGER.info(f'Installing NSSM from {SERVICE_CONST.NSSM_DOWNLOAD_URL}...')
         nssm_zip_file_name = SERVICE_CONST.NSSM_DOWNLOAD_URL.split('/')[-1]
-        #run_cmd_in_subprocess(['powershell.exe','[Net.ServicePointManager]::SecurityProtocol = "tls12, tls11, tls"'])
+        run_cmd_in_subprocess(['powershell.exe','[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12'])
         cmd_tuples = [
             (f'curl {SERVICE_CONST.NSSM_DOWNLOAD_URL} -O',
              f'Invoke-WebRequest -Uri {SERVICE_CONST.NSSM_DOWNLOAD_URL} -OutFile {nssm_zip_file_name}'),
