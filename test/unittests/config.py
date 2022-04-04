@@ -15,6 +15,9 @@ class TestRoutineConstants :
     def TEST_CONFIG_FILE_PATH_ENCRYPTED(self) : # Same as above except it includes a node_id to test encryption
         return (UTIL_CONST.CONFIG_FILE_DIR / f'test_encrypted{UTIL_CONST.CONFIG_FILE_EXT}').resolve()
     @property
+    def TEST_CONFIG_FILE_PATH_ENCRYPTED_2(self) : # Same as above except it includes a node_id to test encryption
+        return (UTIL_CONST.CONFIG_FILE_DIR / f'test_encrypted_2{UTIL_CONST.CONFIG_FILE_EXT}').resolve()
+    @property
     def PROD_CONFIG_FILE_PATH(self) : # The path to the "prod" Kafka config file to use in making sure that the prod environment variables are not set
         return (UTIL_CONST.CONFIG_FILE_DIR / f'prod{UTIL_CONST.CONFIG_FILE_EXT}').resolve()
     @property

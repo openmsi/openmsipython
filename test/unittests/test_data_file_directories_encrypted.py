@@ -38,7 +38,7 @@ class TestDataFileDirectories(unittest.TestCase) :
         upload_thread.start()
         #start up the DataFileDownloadDirectory
         dfdd = DataFileDownloadDirectory(TEST_CONST.TEST_RECO_DIR_PATH_ENCRYPTED,
-                                         TEST_CONST.TEST_CONFIG_FILE_PATH_ENCRYPTED,
+                                         TEST_CONST.TEST_CONFIG_FILE_PATH_ENCRYPTED_2,
                                          TOPIC_NAME,
                                          n_threads=RUN_OPT_CONST.N_DEFAULT_DOWNLOAD_THREADS,
                                          update_secs=UPDATE_SECS,

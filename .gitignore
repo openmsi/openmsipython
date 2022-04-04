@@ -10,10 +10,14 @@
 /openmsipython/my_kafka/config_files/*/*.crypto
 !/openmsipython/my_kafka/config_files/test.config
 !/openmsipython/my_kafka/config_files/test_encrypted.config
+!/openmsipython/my_kafka/config_files/test_encrypted_2.config
 !/openmsipython/my_kafka/config_files/prod.config
 !/openmsipython/my_kafka/config_files/testing_node/testing_node.config
 !/openmsipython/my_kafka/config_files/testing_node/testing_node.seed
 !/openmsipython/my_kafka/config_files/testing_node/testing_node.crypto
+!/openmsipython/my_kafka/config_files/testing_node_2/testing_node_2.config
+!/openmsipython/my_kafka/config_files/testing_node_2/testing_node_2.seed
+!/openmsipython/my_kafka/config_files/testing_node_2/testing_node_2.crypto
 
 # Misc. other stuff I don't like
 __pycache__/

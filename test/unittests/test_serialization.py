@@ -66,12 +66,14 @@ class TestSerialization(unittest.TestCase) :
             self.assertEqual(self.test_dl_chunk_objects[chunk_i],dfcds(self.test_chunk_binaries[chunk_i]))
 
     def test_encrypted_compound_serdes_kafka(self) :
-        parser = MyKafkaConfigFileParser(TEST_CONST.TEST_CONFIG_FILE_PATH_ENCRYPTED,logger=LOGGER)
-        kc = MyKafkaCrypto(parser.cluster_configs,parser.kc_config_file_str)
+        parser1 = MyKafkaConfigFileParser(TEST_CONST.TEST_CONFIG_FILE_PATH_ENCRYPTED,logger=LOGGER)
+        kc1 = MyKafkaCrypto(parser1.cluster_configs,parser1.kc_config_file_str)
+        parser2 = MyKafkaConfigFileParser(TEST_CONST.TEST_CONFIG_FILE_PATH_ENCRYPTED_2,logger=LOGGER)
+        kc2 = MyKafkaCrypto(parser2.cluster_configs,parser2.kc_config_file_str)
         dfcs = DataFileChunkSerializer()
         dfcds = DataFileChunkDeserializer()
-        comp_ser = CompoundSerializer(dfcs,kc.value_serializer)
-        comp_des = CompoundDeserializer(kc.value_deserializer,dfcds)
+        comp_ser = CompoundSerializer(dfcs,kc1.value_serializer)
+        comp_des = CompoundDeserializer(kc2.value_deserializer,dfcds)
         self.assertIsNone(comp_ser.serialize(TOPIC_NAME,None))
         self.assertIsNone(comp_des.deserialize(TOPIC_NAME,None))
         with self.assertRaises(SerializationError) :
