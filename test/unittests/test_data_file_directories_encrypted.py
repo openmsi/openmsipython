@@ -12,7 +12,7 @@ LOGGER = Logger(pathlib.Path(__file__).name.split('.')[0],logging.ERROR)
 UPDATE_SECS = 5
 TIMEOUT_SECS = 90
 JOIN_TIMEOUT_SECS = 60
-TOPIC_NAME = 'test_encryption'
+TOPIC_NAME = 'test_encrypted'
 
 class TestDataFileDirectories(unittest.TestCase) :
     """
