@@ -12,7 +12,7 @@ LOGGER = Logger(pathlib.Path(__file__).name.split('.')[0],logging.ERROR)
 UPDATE_SECS = 5
 TIMEOUT_SECS = 90
 JOIN_TIMEOUT_SECS = 60
-TOPIC_NAME = 'test_encryption'
+TOPIC_NAME = 'test_encrypted'
 
 class TestDataFileDirectories(unittest.TestCase) :
     """
@@ -36,9 +36,15 @@ class TestDataFileDirectories(unittest.TestCase) :
                                          'upload_existing':True}
                                 )
         upload_thread.start()
+        #wait a second, copy the test file into the watched directory, and wait another second
+        time.sleep(1)
+        fp = TEST_CONST.TEST_WATCHED_DIR_PATH_ENCRYPTED/TEST_CONST.TEST_DATA_FILE_SUB_DIR_NAME
+        fp = fp/TEST_CONST.TEST_DATA_FILE_NAME
+        fp.write_bytes(TEST_CONST.TEST_DATA_FILE_PATH.read_bytes())
+        time.sleep(1)
         #start up the DataFileDownloadDirectory
         dfdd = DataFileDownloadDirectory(TEST_CONST.TEST_RECO_DIR_PATH_ENCRYPTED,
-                                         TEST_CONST.TEST_CONFIG_FILE_PATH_ENCRYPTED,
+                                         TEST_CONST.TEST_CONFIG_FILE_PATH_ENCRYPTED_2,
                                          TOPIC_NAME,
                                          n_threads=RUN_OPT_CONST.N_DEFAULT_DOWNLOAD_THREADS,
                                          update_secs=UPDATE_SECS,
@@ -49,12 +55,6 @@ class TestDataFileDirectories(unittest.TestCase) :
         download_thread = MyThread(target=dfdd.reconstruct)
         download_thread.start()
         try :
-            #wait a second, copy the test file into the watched directory, and wait another second
-            time.sleep(1)
-            fp = TEST_CONST.TEST_WATCHED_DIR_PATH_ENCRYPTED/TEST_CONST.TEST_DATA_FILE_SUB_DIR_NAME
-            fp = fp/TEST_CONST.TEST_DATA_FILE_NAME
-            fp.write_bytes(TEST_CONST.TEST_DATA_FILE_PATH.read_bytes())
-            time.sleep(1)
             #put the "check" command into the input queues a couple times to test them
             dfud.control_command_queue.put('c')
             dfdd.control_command_queue.put('c')
@@ -91,6 +91,7 @@ class TestDataFileDirectories(unittest.TestCase) :
                 errmsg = 'ERROR: download thread in test_encrypted_upload_and_download timed out after '
                 errmsg+= f'{JOIN_TIMEOUT_SECS} seconds!'
                 raise TimeoutError(errmsg)
+            dfdd.close()
             #put the quit command in the upload directory's command queue to stop the process running
             LOGGER.set_stream_level(logging.INFO)
             msg = '\nQuitting upload thread in test_encrypted_upload_and_download; '

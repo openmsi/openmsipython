@@ -34,3 +34,11 @@ class ConsumerGroup :
         consumer = MyConsumer(*self.__c_args,**self.__c_kwargs)
         consumer.subscribe([self.__topic_name])
         return consumer
+
+    def close(self) :
+        try :
+            self.__c_kwargs['kafkacrypto'].close()
+        except :
+            pass
+        finally :
+            self.__c_kwargs['kafkacrypto'] = None

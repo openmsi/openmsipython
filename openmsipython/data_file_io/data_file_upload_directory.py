@@ -164,6 +164,7 @@ class DataFileUploadDirectory(DataFileDirectory,ControlledProcessSingleThread,Ru
             ut.join()
         self.logger.info('Waiting for all enqueued messages to be delivered (this may take a moment)....')
         self.__producer.flush(timeout=-1) #don't move on until all enqueued messages have been sent/received
+        self.__producer.close()
 
     def __find_new_files(self,to_upload=True) :
         """
