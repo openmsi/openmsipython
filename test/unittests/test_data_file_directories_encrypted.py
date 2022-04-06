@@ -105,7 +105,6 @@ class TestDataFileDirectories(unittest.TestCase) :
                 errmsg = 'ERROR: upload thread in test_encrypted_upload_and_download '
                 errmsg+= f'timed out after {TIMEOUT_SECS} seconds!'
                 raise TimeoutError(errmsg)
-            dfud.close()
             #make sure the reconstructed file exists with the same name and content as the original
             fp = TEST_CONST.TEST_RECO_DIR_PATH_ENCRYPTED/TEST_CONST.TEST_DATA_FILE_SUB_DIR_NAME
             fp = fp/TEST_CONST.TEST_DATA_FILE_NAME

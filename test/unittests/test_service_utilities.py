@@ -38,7 +38,7 @@ class TestServiceUtilities(unittest.TestCase) :
         self.assertTrue(filecmp.cmp(test_exec_fp,ref_exec_fp,shallow=False))
 
     #@unittest.skipIf(os.name!='nt','test requires Powershell and so only runs on Windows')
-    @unittest("Skipping NSSM download test because it's finicky")
+    @unittest.skip("Skipping NSSM download test because it's finicky")
     def test_download_NSSM(self) :
         """
         Make sure NSSM can be downloaded to the expected location
