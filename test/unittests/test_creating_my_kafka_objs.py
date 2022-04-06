@@ -19,14 +19,17 @@ class TestCreateMyKafkaObjects(unittest.TestCase) :
     def test_create_my_producer(self) :
         myproducer = MyProducer.from_file(TEST_CONST.TEST_CONFIG_FILE_PATH,logger=LOGGER)
         self.assertTrue(myproducer is not None)
+        myproducer.close()
 
     def test_create_my_producer_encrypted(self) :
         myproducer = MyProducer.from_file(TEST_CONST.TEST_CONFIG_FILE_PATH_ENCRYPTED,logger=LOGGER)
         self.assertTrue(myproducer is not None)
+        myproducer.close()
 
     def test_create_my_consumer(self) :
         myconsumer = MyConsumer.from_file(TEST_CONST.TEST_CONFIG_FILE_PATH,logger=LOGGER)
         self.assertTrue(myconsumer is not None)
+        myconsumer.close()
     
     def test_create_my_consumer_encrypted(self) :
         myconsumer = MyConsumer.from_file(TEST_CONST.TEST_CONFIG_FILE_PATH_ENCRYPTED,logger=LOGGER)
