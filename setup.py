@@ -22,7 +22,7 @@ setupkwargs = dict(
     python_requires='>=3.7,<3.10',
     install_requires=['confluent-kafka>=1.8.2',
                       'gemd>=1.8.1',
-                      'kafkacrypto>=0.9.9.11a1',
+                      'kafkacrypto>=0.9.9.12',
                       'matplotlib',
                       'methodtools',
                       'msgpack',
