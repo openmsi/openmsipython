@@ -112,7 +112,18 @@ class MyProducer(LogOwner) :
             key = self.__producer.ks(topic,key)
             value = self.__producer.vs(topic,value)
         self.__producer.produce(*args,topic=topic,key=key,value=value,**kwargs)
+    
     def poll(self,*args,**kwargs) :
         self.__producer.poll(*args,**kwargs)
+    
     def flush(self,*args,**kwargs) :
         self.__producer.flush(*args,**kwargs)
+
+    def close(self) :
+        try :
+            if self.__kafkacrypto :
+                self.__kafkacrypto.close()
+        except :
+            pass
+        finally :
+            self.__kafkacrypto = None

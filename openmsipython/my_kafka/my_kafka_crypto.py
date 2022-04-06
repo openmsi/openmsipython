@@ -38,3 +38,13 @@ class MyKafkaCrypto :
             self._kcc = KafkaConsumer(**consumer_configs)
             #initialize the KafkaCrypto object 
             self._kc = KafkaCrypto(None,self._kcp,self._kcc,config_file)
+
+    def close(self) :
+        try :
+            self._kc.close()
+        except :
+            pass
+        finally :
+            self._kc = None
+            self._kcp = None
+            self._kcc = None

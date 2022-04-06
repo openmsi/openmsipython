@@ -98,6 +98,7 @@ class DataFileDownloadDirectory(DataFileChunkProcessor,DataFileDirectory,Runnabl
         run_start = datetime.datetime.now()
         reconstructor_directory.logger.info(f'Listening for files to reconstruct in {args.output_dir}')
         n_read,n_processed,complete_filenames = reconstructor_directory.reconstruct()
+        reconstructor_directory.close()
         run_stop = datetime.datetime.now()
         #shut down when that function returns
         reconstructor_directory.logger.info(f'File reconstructor writing to {args.output_dir} shut down')

@@ -83,6 +83,7 @@ class TestDataFileStreamProcessor(unittest.TestCase) :
             LOGGER.info(msg)
             LOGGER.set_stream_level(logging.ERROR)
             dfsp.control_command_queue.put('q')
+            dfsp.close()
             stream_thread.join(timeout=JOIN_TIMEOUT_SECS)
             if stream_thread.is_alive() :
                 errmsg = 'ERROR: download thread in test_data_file_stream_processor timed out after '

@@ -114,5 +114,13 @@ class MyConsumer(LogOwner) :
 
     def subscribe(self,*args,**kwargs) :
         self.__consumer.subscribe(*args,**kwargs)
+    
     def close(self,*args,**kwargs) :
         self.__consumer.close(*args,**kwargs)
+        try :
+            if self.__kafkacrypto :
+                self.__kafkacrypto.close()
+        except :
+            pass
+        finally :
+            self.__kafkacrypto = None

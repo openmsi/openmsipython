@@ -109,6 +109,7 @@ class PDVPlotMaker(DataFileStreamProcessor,Runnable) :
         msg+= f'{args.pdv_plot_type} plots'
         plot_maker.logger.info(msg)
         n_read,n_processed,plot_filepaths = plot_maker.make_plots_as_available()
+        plot_maker.close()
         run_stop = datetime.datetime.now()
         #shut down when that function returns
         msg = 'PDV plot maker '
