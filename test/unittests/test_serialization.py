@@ -84,3 +84,5 @@ class TestSerialization(unittest.TestCase) :
             serialized = comp_ser.serialize(TOPIC_NAME,self.test_ul_chunk_objects[chunk_i])
             deserialized = comp_des.deserialize(TOPIC_NAME,serialized)
             self.assertEqual(deserialized,self.test_ul_chunk_objects[chunk_i])
+        kc1.close()
+        kc2.close()
