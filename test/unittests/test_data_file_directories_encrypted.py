@@ -91,6 +91,7 @@ class TestDataFileDirectories(unittest.TestCase) :
                 errmsg = 'ERROR: download thread in test_encrypted_upload_and_download timed out after '
                 errmsg+= f'{JOIN_TIMEOUT_SECS} seconds!'
                 raise TimeoutError(errmsg)
+            dfdd.close()
             #put the quit command in the upload directory's command queue to stop the process running
             LOGGER.set_stream_level(logging.INFO)
             msg = '\nQuitting upload thread in test_encrypted_upload_and_download; '
@@ -104,6 +105,7 @@ class TestDataFileDirectories(unittest.TestCase) :
                 errmsg = 'ERROR: upload thread in test_encrypted_upload_and_download '
                 errmsg+= f'timed out after {TIMEOUT_SECS} seconds!'
                 raise TimeoutError(errmsg)
+            dfud.close()
             #make sure the reconstructed file exists with the same name and content as the original
             fp = TEST_CONST.TEST_RECO_DIR_PATH_ENCRYPTED/TEST_CONST.TEST_DATA_FILE_SUB_DIR_NAME
             fp = fp/TEST_CONST.TEST_DATA_FILE_NAME

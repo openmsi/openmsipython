@@ -31,15 +31,18 @@ class TestCreateMyKafkaObjects(unittest.TestCase) :
     def test_create_my_consumer_encrypted(self) :
         myconsumer = MyConsumer.from_file(TEST_CONST.TEST_CONFIG_FILE_PATH_ENCRYPTED,logger=LOGGER)
         self.assertTrue(myconsumer is not None)
+        myconsumer.close()
 
     def test_create_consumer_group(self) :
         cg = ConsumerGroup(TEST_CONST.TEST_CONFIG_FILE_PATH,RUN_OPT_CONST.DEFAULT_TOPIC_NAME,
                            consumer_group_ID='test_create_consumer_group',
                            n_consumers=RUN_OPT_CONST.N_DEFAULT_DOWNLOAD_THREADS)
         self.assertTrue(cg is not None)
+        cg.close()
     
     def test_create_consumer_group_encrypted(self) :
         cg = ConsumerGroup(TEST_CONST.TEST_CONFIG_FILE_PATH_ENCRYPTED,RUN_OPT_CONST.DEFAULT_TOPIC_NAME,
                            consumer_group_ID='test_create_consumer_group_encrypted',
                            n_consumers=RUN_OPT_CONST.N_DEFAULT_DOWNLOAD_THREADS)
         self.assertTrue(cg is not None)
+        cg.close()
