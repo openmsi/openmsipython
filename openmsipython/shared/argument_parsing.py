@@ -139,6 +139,7 @@ class MyArgumentParser(ArgumentParser) :
         self.__argnames_added = []
         self.__subparsers_action_obj = None
         self.__subparsers = {}
+        self.__subparser_argnames_added = {}
 
     def add_subparsers(self,*args,**kwargs) :
         """
@@ -214,17 +215,18 @@ class MyArgumentParser(ArgumentParser) :
             errmsg = f'ERROR: subparser arguments for {class_name} have already been added to this argument parser!'
             raise RuntimeError(errmsg)
         self.__subparsers[class_name] = self.__subparsers_action_obj.add_parser(class_name,**kwargs)
+        self.__subparser_argnames_added[class_name] = []
         argnames, argnames_with_defaults = class_to_add.get_command_line_arguments()
         for argname in argnames :
             argname_to_add, kwargs_for_arg = self.__get_argname_and_kwargs(argname)
-            if argname_to_add not in self.__argnames_added :
+            if argname_to_add not in self.__subparser_argnames_added[class_name] :
                 self.__subparsers[class_name].add_argument(argname_to_add,**kwargs_for_arg)
-                self.__argnames_added.append(argname_to_add)
+                self.__subparser_argnames_added[class_name].append(argname_to_add)
         for argname,argdefault in argnames_with_defaults.items() :
-            argname,kwargs = self.__get_argname_and_kwargs(argname,argdefault)
-            if argname_to_add not in self.__argnames_added :
-                self.__subparsers[class_name].add_argument(argname,**kwargs)
-                self.__argnames_added.append(argname_to_add)
+            argname_to_add,kwargs_for_arg = self.__get_argname_and_kwargs(argname,argdefault)
+            if argname_to_add not in self.__subparser_argnames_added[class_name] :
+                self.__subparsers[class_name].add_argument(argname_to_add,**kwargs_for_arg)
+                self.__subparser_argnames_added[class_name].append(argname_to_add)
 
     def __get_argname_and_kwargs(self,argname,new_default=None) :
         """
