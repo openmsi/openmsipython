@@ -71,8 +71,8 @@ def write_executable_file(service_name,argslist,filepath=None) :
         exec_fp = filepath
     else :
         exec_fp = pathlib.Path(__file__).parent/'working_dir'/f'{service_name}{SERVICE_CONST.SERVICE_EXECUTABLE_NAME_STEM}'
-    with open(exec_fp,'w') as fp :
-        fp.write(textwrap.dedent(code))
+    #with open(exec_fp,'w') as fp :
+    #    fp.write(textwrap.dedent(code))
     return exec_fp
 
 def install_service(service_name,argslist) :
@@ -80,12 +80,12 @@ def install_service(service_name,argslist) :
     install the Service using NSSM
     """
     #set the environment variables
-    must_rerun = set_env_vars()
-    if must_rerun :
-        msg = 'New values for environment variables have been set. '
-        msg+= 'Please close this window and rerun InstallService so that their values get picked up.'
-        SERVICE_CONST.LOGGER.info(msg)
-        sys.exit(0)
+    #must_rerun = set_env_vars()
+    #if must_rerun :
+    #    msg = 'New values for environment variables have been set. '
+    #    msg+= 'Please close this window and rerun InstallService so that their values get picked up.'
+    #    SERVICE_CONST.LOGGER.info(msg)
+    #    sys.exit(0)
     #find or install NSSM in the current directory
     find_install_NSSM()
     #write out the executable file
