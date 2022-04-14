@@ -38,13 +38,13 @@ This code ensures conda will function correctly in the zinc20 environment.
 
 ### file_chunking_test.py
 Usage: `python file_chunking_test.py /path/to/file`
-This program breaks a file up into chunks (currently set to 4mb as defined by the `chunk_size` variable at the top of the code) and sends it to the kafka cluster according to the `producer` object. 
+This program breaks a file up into chunks (currently set to 4mb as defined by the `chunk_size` variable at the top of the code) and sends it to the kafka broker according to the `producer` object. 
 It is currently set to print the chunk number of each chunk it successfully processes. 
 If it doesn't print any errors it has run successfully. Currently the only way to shut it down is to close the terminal, still working on that one.
 
 ### file_writing_test.py
 Usage: `python file_writing_test.py`
-This program consumes data sent by file_chunking_test.py and reconstructs the files on a home directory. As long as it is running it will process any data sent to its kafka cluster as defined by the `consumer` object. 
+This program consumes data sent by file_chunking_test.py and reconstructs the files on a home directory. As long as it is running it will process any data sent to its kafka broker as defined by the `consumer` object. 
 It checks to make sure the data format is correct so it won't write anything that isn't a file sent byfile_chunking_test so don't worry about sending other data down the pipeline while it is running.
 It prints the text of each file chunk it processes so you can check that and theresulting file against the input file to see if it is working correctly.
 

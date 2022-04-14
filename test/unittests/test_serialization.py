@@ -67,9 +67,9 @@ class TestSerialization(unittest.TestCase) :
 
     def test_encrypted_compound_serdes_kafka(self) :
         parser1 = MyKafkaConfigFileParser(TEST_CONST.TEST_CONFIG_FILE_PATH_ENCRYPTED,logger=LOGGER)
-        kc1 = MyKafkaCrypto(parser1.cluster_configs,parser1.kc_config_file_str)
+        kc1 = MyKafkaCrypto(parser1.broker_configs,parser1.kc_config_file_str)
         parser2 = MyKafkaConfigFileParser(TEST_CONST.TEST_CONFIG_FILE_PATH_ENCRYPTED_2,logger=LOGGER)
-        kc2 = MyKafkaCrypto(parser2.cluster_configs,parser2.kc_config_file_str)
+        kc2 = MyKafkaCrypto(parser2.broker_configs,parser2.kc_config_file_str)
         dfcs = DataFileChunkSerializer()
         dfcds = DataFileChunkDeserializer()
         comp_ser = CompoundSerializer(dfcs,kc1.value_serializer)

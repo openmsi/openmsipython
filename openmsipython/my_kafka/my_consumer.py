@@ -42,15 +42,15 @@ class MyConsumer(LogOwner) :
         """
         parser = MyKafkaConfigFileParser(config_file_path,logger=logger)
         ret_kwargs = {}
-        #get the cluster and consumer configurations
-        all_configs = {**parser.cluster_configs,**parser.consumer_configs}
+        #get the broker and consumer configurations
+        all_configs = {**parser.broker_configs,**parser.consumer_configs}
         all_configs = add_kwargs_to_configs(all_configs,**kwargs)
         #all_configs['debug']='broker,topic,msg'
         #if there are configs for KafkaCrypto, use a KafkaConsumer
         if parser.kc_config_file_str is not None :
             if logger is not None :
                 logger.debug(f'Consumed messages will be decrypted using configs at {parser.kc_config_file_str}')
-            kc = MyKafkaCrypto(parser.cluster_configs,parser.kc_config_file_str)
+            kc = MyKafkaCrypto(parser.broker_configs,parser.kc_config_file_str)
             if 'key.deserializer' in all_configs.keys() :
                 keydes = CompoundDeserializer(kc.key_deserializer,all_configs.pop('key.deserializer'))
             else :

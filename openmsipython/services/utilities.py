@@ -1,5 +1,5 @@
 #imports
-import pathlib, os
+import pathlib, os, shutil, ctypes.util
 from subprocess import check_output, CalledProcessError
 from .config import SERVICE_CONST
 
@@ -38,11 +38,18 @@ def set_env_var_from_user_input(var_name,var_desc) :
     var_val = input(f'Please enter the {var_desc}: ')
     set_machine_env_var(var_name,var_val)
 
-#if NSSM doesn't exist in the current directory, install it from the web
-def find_install_NSSM() :
+def find_install_NSSM(move_local=True) :
+    """
+    Ensure the NSSM executable exists in the expected location.
+    If it exists in the current directory, move it to the expected location.
+    If it doesn't exist anywhere, try to download it from the web, but that's finicky in powershell.
+    """
     if SERVICE_CONST.NSSM_EXECUTABLE_PATH.is_file() :
         return
     else :
+        if (pathlib.Path()/SERVICE_CONST.NSSM_EXECUTABLE_PATH.name).is_file() and move_local :
+            (pathlib.Path()/SERVICE_CONST.NSSM_EXECUTABLE_PATH.name).replace(SERVICE_CONST.NSSM_EXECUTABLE_PATH)
+            return find_install_NSSM(move_local=False)
         SERVICE_CONST.LOGGER.info(f'Installing NSSM from {SERVICE_CONST.NSSM_DOWNLOAD_URL}...')
         nssm_zip_file_name = SERVICE_CONST.NSSM_DOWNLOAD_URL.split('/')[-1]
         run_cmd_in_subprocess(['powershell.exe','[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12'])
@@ -65,3 +72,17 @@ def find_install_NSSM() :
             except CalledProcessError :
                 run_cmd_in_subprocess(cmd[0],shell=True)
         SERVICE_CONST.LOGGER.debug('Done installing NSSM')
+
+def copy_libsodium_dll_to_system32() :
+    """
+    Ensure that the libsodium.dll file exists in C:\Windows\system32
+    (Needed to properly load it when running as a service)
+    """
+    system32_path = pathlib.Path(r'C:\Windows\system32')/'libsodium.dll'
+    if system32_path.is_file() :
+        return
+    current_env_dll = ctypes.util.find_library('libsodium')
+    if current_env_dll is not None :
+        shutil.copy(pathlib.Path(current_env_dll),system32_path)
+    else :
+        raise ValueError('ERROR: could not locate libsodium DLL to copy to system32 folder for Service!')

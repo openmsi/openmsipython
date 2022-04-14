@@ -13,7 +13,7 @@ LOGGER = Logger(pathlib.Path(__file__).name.split('.')[0],logging.ERROR)
 
 class TestDownloadDataFile(unittest.TestCase) :
     """
-    Class for testing DownloadDataFile functions (without interacting with the Kafka cluster)
+    Class for testing DownloadDataFile functions (without interacting with the Kafka broker)
     """
 
     def setUp(self) :

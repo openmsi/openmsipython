@@ -1,18 +1,18 @@
 ## More details on configuration files
 
-All available programs depend on configuration files to define which kafka clusters they should connect to and how they should produce to/consume from topics in those clusters. This section gives a few more details about how these files can be formatted, the recognized sections they can contain, and options you can change using them.
+All available programs depend on configuration files to define which kafka brokers they should connect to and how they should produce to/consume from topics known to those brokers. This section gives a few more details about how these files can be formatted, the recognized sections they can contain, and options you can change using them.
 
 In general, a configuration file is a text file with one or more distinct and named sections. Comments can be added by using lines starting with "`#`", and other whitespace in general is ignored. Each section begins with a heading line like "`[section_name]`" (with square brackets included), and beneath that heading different parameters are supplied using lines like "`key = value`". If any parameter `value`s begin with the "`$`" character, the configuration file parser will attempt to expand those values as environment variables (this is useful to, for example, store usernames or passwords as environment variables instead of plain text in the repository).
 
 The different sections recognized by the `openmsipython` code are:
-1. `[cluster]` to configure which Kafka cluster should be used by a program and how to connect to it. Common parameters here include:
-    - `bootstrap.servers` to detail the server on which the cluster is hosted
-    - `sasl.mechanism` and `security.protocol` to describe how programs are authenticated to interact with the cluster
-    - `sasl.username` and `sasl.password` to provide the key and secret of an API key created for the cluster
+1. `[broker]` to configure which Kafka broker should be used by a program and how to connect to it. Common parameters here include:
+    - `bootstrap.servers` to detail the server on which the broker is hosted
+    - `sasl.mechanism` and `security.protocol` to describe how programs are authenticated to interact with the broker
+    - `sasl.username` and `sasl.password` to provide the key and secret of an API key created for the broker
 1. `[producer]` to configure a Producer used by a program. You can add here any [parameters recognized by Kafka Producers](https://docs.confluent.io/platform/current/installation/configuration/producer-configs.html) in general, but some of the most useful are:
-    - `batch.size` to control the maximum number of messages in each batch sent to the cluster
+    - `batch.size` to control the maximum number of messages in each batch sent to the broker
     - `retries` to control how many times a failed message should be retried before throwing a fatal error and moving on
-    - `linger.ms` to change how long a batch of messages should wait to become as full as possible before being sent to the cluster 
+    - `linger.ms` to change how long a batch of messages should wait to become as full as possible before being sent to the broker 
     - `compression.type` to add or change how batches of messages are compressed before being produced (and decompressed afterward)
     - `key.serializer` and `value.serializer` to change methods used to convert message keys and values (respectively) to byte arrays. The `openmsipython` code provides an additional option called [`DataFileChunkSerializer`](./serialization.py#L91-#L116) as a message value serializer to pack chunks of data files.
 1. `[consumer]` to configure a Consumer used by a program. Again here any [parameters recognized by Kafka Consumers](https://docs.confluent.io/platform/current/installation/configuration/consumer-configs.html) in general are valid, but some of the most useful are:

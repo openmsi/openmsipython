@@ -30,10 +30,10 @@ class MyKafkaConfigFileParser(ConfigFileParser) :
     #################### PROPERTIES ####################
 
     @property
-    def cluster_configs(self) :
-        if self.__cluster_configs is None :
-            self.__cluster_configs = self.__get_config_dict('cluster')
-        return self.__cluster_configs
+    def broker_configs(self) :
+        if self.__broker_configs is None :
+            self.__broker_configs = self.__get_config_dict('broker')
+        return self.__broker_configs
     @property
     def producer_configs(self) :
         if self.__producer_configs is None :
@@ -57,7 +57,7 @@ class MyKafkaConfigFileParser(ConfigFileParser) :
 
     def __init__(self,*args,**kwargs) :
         super().__init__(*args,**kwargs)
-        self.__cluster_configs = None
+        self.__broker_configs = None
         self.__producer_configs = None
         self.__consumer_configs = None
         self.kc_config_file_str = self.__get_kc_config_file_str()

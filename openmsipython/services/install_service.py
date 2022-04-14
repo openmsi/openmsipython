@@ -3,7 +3,8 @@ import sys, pathlib, os, textwrap
 from subprocess import Popen, PIPE, STDOUT
 from ..shared.argument_parsing import MyArgumentParser
 from .config import SERVICE_CONST
-from .utilities import set_env_var_from_user_input, find_install_NSSM, run_cmd_in_subprocess
+from .utilities import set_env_var_from_user_input, find_install_NSSM
+from .utilities import run_cmd_in_subprocess, copy_libsodium_dll_to_system32
 
 #################### HELPER FUNCTIONS ####################
 
@@ -61,11 +62,18 @@ def write_executable_file(service_name,argslist,filepath=None) :
         raise RuntimeError(errmsg)
     service_dict = service_dict[0]
     code = f'''\
-        from {service_dict['filepath']} import {service_dict['func_name']}
-
         if __name__=='__main__' :
-            {service_dict['func_name']}({argslist})
-
+            try :
+                from {service_dict['filepath']} import {service_dict['func_name']}
+                {service_dict['func_name']}({argslist})
+            except Exception :
+                import pathlib, traceback, datetime
+                output_filepath = pathlib.Path(r"{pathlib.Path().resolve()/'SERVICES_ERROR_LOG.txt'}")
+                with open(output_filepath,'a') as fp :'''
+    code+=r'''
+                    fp.write(f'{(datetime.datetime.now()).strftime("Error on %Y-%m-%d at %H:%M:%S")}. Exception:\n{traceback.format_exc()}')
+                import sys
+                sys.exit(1)
     '''
     if filepath is not None :
         exec_fp = filepath
@@ -86,7 +94,9 @@ def install_service(service_name,argslist) :
         msg+= 'Please close this window and rerun InstallService so that their values get picked up.'
         SERVICE_CONST.LOGGER.info(msg)
         sys.exit(0)
-    #find or install NSSM in the current directory
+    #if it doesn't exist there yet, copy the libsodium.dll file to C:\Windows\system32
+    copy_libsodium_dll_to_system32()
+    #find or install NSSM to run the executable
     find_install_NSSM()
     #write out the executable file
     exec_filepath = write_executable_file(service_name,argslist)

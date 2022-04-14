@@ -1,5 +1,5 @@
 #imports
-import unittest, pathlib, importlib, filecmp#, os
+import unittest, pathlib, importlib#, os
 from openmsipython.services.config import SERVICE_CONST
 from openmsipython.services.utilities import find_install_NSSM
 from openmsipython.services.install_service import write_executable_file
@@ -33,9 +33,17 @@ class TestServiceUtilities(unittest.TestCase) :
         test_exec_fp = test_exec_fp/'working_dir'/f'{TEST_SERVICE_NAME}{SERVICE_CONST.SERVICE_EXECUTABLE_NAME_STEM}'
         write_executable_file(TEST_SERVICE_NAME,TEST_SERVICE_EXECUTABLE_ARGSLIST,test_exec_fp)
         self.assertTrue(test_exec_fp.is_file())
+        with open(test_exec_fp,'r') as test_fp :
+            test_lines = test_fp.readlines()
         ref_exec_fp = TEST_CONST.TEST_DATA_DIR_PATH/test_exec_fp.name
         self.assertTrue(ref_exec_fp.is_file())
-        self.assertTrue(filecmp.cmp(test_exec_fp,ref_exec_fp,shallow=False))
+        with open(ref_exec_fp,'r') as ref_fp :
+            ref_lines = ref_fp.readlines()
+        for test_line,ref_line in zip(test_lines,ref_lines) :
+            if ref_line.lstrip().startswith('output_filepath = ') :
+                continue
+            else :
+                self.assertTrue(test_line==ref_line)
 
     #@unittest.skipIf(os.name!='nt','test requires Powershell and so only runs on Windows')
     @unittest.skip("Skipping NSSM download test because it's finicky")

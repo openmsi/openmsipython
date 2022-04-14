@@ -38,15 +38,15 @@ class MyProducer(LogOwner) :
         any keyword arguments will be added to the final producer configs (with underscores replaced with dots)
         """
         parser = MyKafkaConfigFileParser(config_file_path,logger=logger)
-        #get the cluster and producer configurations
-        all_configs = {**parser.cluster_configs,**parser.producer_configs}
+        #get the broker and producer configurations
+        all_configs = {**parser.broker_configs,**parser.producer_configs}
         all_configs = add_kwargs_to_configs(all_configs,**kwargs)
         #all_configs['debug']='broker,topic,msg'
         #if there are configs for KafkaCrypto, use a KafkaProducer
         if parser.kc_config_file_str is not None :
             if logger is not None :
                 logger.debug(f'Produced messages will be encrypted using configs at {parser.kc_config_file_str}')
-            kc = MyKafkaCrypto(parser.cluster_configs,parser.kc_config_file_str)
+            kc = MyKafkaCrypto(parser.broker_configs,parser.kc_config_file_str)
             if 'key.serializer' in all_configs.keys() :
                 keyser = CompoundSerializer(all_configs.pop('key.serializer'),kc.key_serializer)
             else :

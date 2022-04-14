@@ -130,7 +130,7 @@ class UploadDataFile(DataFile,Runnable) :
                           n_threads=RUN_OPT_CONST.N_DEFAULT_UPLOAD_THREADS,
                           chunk_size=RUN_OPT_CONST.DEFAULT_CHUNK_SIZE) :
         """
-        Chunk and upload an entire file on disk to a cluster's topic.
+        Chunk and upload an entire file on disk to a broker's topic.
 
         config_path = path to the config file to use in defining the producer
         topic_name  = name of the topic to produce messages to

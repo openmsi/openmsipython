@@ -1,5 +1,5 @@
 # <div align="center"> Open MSI Python Code </div>
-#### <div align="center">***v0.7.3***</div>
+#### <div align="center">***v0.8.0***</div>
 
 #### <div align="center">Maggie Eminizer<sup>2</sup>, Sam Tabrisky<sup>3</sup>, Alakarthika Ulaganathan<sup>4</sup>, David Elbert<sup>1</sup></div>
 
@@ -32,7 +32,7 @@ conda create -n openmsi python=3.9
 conda activate openmsi
 ```
 
-(Python 3.9 is the most recent minor release of Python supported by confluent-kafka on Windows 10.)
+Python 3.9 is the most recent minor release of Python supported by confluent-kafka on Windows 10, and is recommended for most deployments. 
 
 You'll need to use that second "activate" command every time you open a Terminal window or Anaconda Prompt to switch to the `openmsi` environment. 
 
@@ -50,17 +50,34 @@ This step is required to use the [`pysodium` package](https://pypi.org/project/p
 
 #### Extra setup on Windows
 
-This environment needs a special variable set to allow the Kafka Python code to find its dependencies on Windows (see [here](https://github.com/ContinuumIO/anaconda-issues/issues/12475) for more details), so after you've done the above, type the following commands to set the variable and then refresh the environment:
+##### Older versions of Windows
+
+Python 3.9 is not supported on Windows 7 or earlier. Therefor, installations on earlier Windows systems should use Python 3.7 instead of Python 3.9, in which case, the above commands are:
 
 ```
-conda env config vars set CONDA_DLL_SEARCH_MODIFICATION_ENABLE=1
-conda deactivate #this command will give a warning, that's normal
+conda create -n openmsi python=3.7
 conda activate openmsi
 ```
 
+`OpenMSIPython` code is transparent to the difference between Python 3.7 and 3.9 in principle, but it is recommended to use newer Windows systems that can support Python 3.9
+
+##### Issues with DLL files
+
+This environment needs a special variable set to allow the Kafka Python code to find its dependencies on Windows (see [here](https://github.com/ContinuumIO/anaconda-issues/issues/12475) for more details), so after you've activated your Conda environment as above, type the following commands to set the variable and then refresh the environment:
+
+```
+conda env config vars set CONDA_DLL_SEARCH_MODIFICATION_ENABLE=1
+conda deactivate 
+conda activate openmsi
+```
+
+Due to the wide variety of Windows builds, setting this environment variable may not solve issues stemming from the `librdkafka.dll` file seemingly missing. See [here](https://github.com/confluentinc/confluent-kafka-python/issues/1221) for more context on this problem. A fix for the most common cases is built into `OpenMSIPython` and can be found [here](./openmsipython/my_kafka/__init__.py); referencing that code may be helpful in resolving any remaining `librdkafka`/`confluent-kafka-python` issues.
+
+Another common issue with Windows builds is a seemingly "missing" `libsodium.dll` file. If you have trouble importing `pysodium`, make sure the directory containing your `libsodium.dll` is added to your `PATH`, or that the `libsodium.dll` file is properly registered on your system.
+
 #### Extra setup on Mac OS
 
-Mac OS is not officially supported for `openmsipython`, but if you would like to work with it you will need to install `librdkafka` using homebrew to do so. This may also require installing Xcode command line tools. You can install both of these using the commands below:
+Mac OS is not officially supported for `OpenMSIPython`, but if you would like to work with it you will need to install `librdkafka` using homebrew to do so. This may also require installing Xcode command line tools. You can install both of these using the commands below:
 
 ```
 xcode-select --install
@@ -86,7 +103,7 @@ pip install .
 cd ..
 ```
 
-This will give you access to several new console commands to run openmsipython applications, as well as any of the other modules in the `openmsipython` package. If you'd like to be able to make changes to the `openmsipython` code without reinstalling, you can include the `--editable` flag in the `pip install` command.
+This will give you access to several new console commands to run openmsipython applications, as well as any of the other modules in the `openmsipython` package. If you'd like to be able to make changes to the `openmsipython` code without reinstalling, you can include the `--editable` flag in the `pip install` command. If you'd like to run the automatic code tests, you can install the optional dependencies needed with `pip install .[all]` with or without the `--editable` flag.
 
 If you like, you can check your installation with:
 
@@ -100,9 +117,9 @@ and if that line runs without any problems then the package was installed correc
 
 ### Environment variables
 
-Interacting with the Kafka Cluster, including running code tests as described [here](./test), requires that some environment variables are set on your system. If you're installing any software to run as a Windows Service (as described [here](./openmsipython/services)) then you'll be prompted to enter these variables' values, but you may find it more convenient to set them once. The environment variables are called `KAFKA_TEST_CLUSTER_USERNAME`, `KAFKA_TEST_CLUSTER_PASSWORD`, `KAFKA_PROD_CLUSTER_USERNAME`, and `KAFKA_PROD_CLUSTER_PASSWORD`. The "`TEST`" variables are used to connect to the test cluster, and must be set to successfully run the automatic code tests. The "`PROD`" variables are used to connect to the full production cluster and are only needed for fully deployed code.
+Interacting with the Kafka broker, including running code tests as described [here](./test), requires that some environment variables are set on your system. If you're installing any software to run as a Windows Service (as described [here](./openmsipython/services)) then you'll be prompted to enter these variables' values, but you may find it more convenient to set them once. The environment variables are called `KAFKA_TEST_CLUSTER_USERNAME`, `KAFKA_TEST_CLUSTER_PASSWORD`, `KAFKA_PROD_CLUSTER_USERNAME`, and `KAFKA_PROD_CLUSTER_PASSWORD`. The "`TEST`" variables are used to connect to the test cluster, and must be set to successfully run the automatic code tests. The "`PROD`" variables are used to connect to the full production cluster and are only needed for fully deployed code.
 
-You can set these environment variables in a shell `.rc` or `.profile` file if running on Linux or Mac OS. On Windows you can set them as machine environment variables using commands like `[Environment]::SetEnvironmentVariable("NAME","VALUE",[EnvironmentVariableTarget]::Machine)`. You can also set them as "User" environment variables on Windows if you don't have the necessary permissions to set them for the "Machine". 
+You can set these environment variables in a shell `.rc` or `.profile` file if running on Linux or Mac OS. On Windows you can set them as machine environment variables using commands like `[Environment]::SetEnvironmentVariable("NAME","VALUE",[EnvironmentVariableTarget]::Machine)`. You can also set them as "User" or "Process" environment variables on Windows if you don't have the necessary permissions to set them for the "Machine". 
 
 ### Other documentation
 
@@ -118,13 +135,13 @@ The documentation for specific programs can be found in a few locations within t
 
 The [readme file here](./openmsipython/data_file_io/) explains programs used to upload entire arbitrary files by breaking them into chunks/producing those chunks as messages to a Kafka topic or download entire files by reading messages from the topic and writing data to disk.
 
-The [readme file here](./openmsipython/pdv) explains programs used to upload specific portions of data in Lecroy Oscilloscope files and produce sheets of plots for PDV spall or velocity analyses.
-
 The [readme file here](./openmsipython/my_kafka) explains how to enable message-layer encryption through [KafkaCrypto](https://github.com/tmcqueen-materials/kafkacrypto), and gives more details about options for configuration files used to define which kafka cluster(s) the programs interact with and how data are produced to/consumed from topics within them.
 
 The [readme file here](./openmsipython/services) details procedures for installing any available command-line program as a Windows Service and working with it.
 
 The [readme file here](./openmsipython/data_models) describes how GEMD data structures are used to model data across the different projects in the Open MSI / DMREF project.
+
+The [readme file here](./openmsipython/pdv) explains programs used to upload specific portions of data in Lecroy Oscilloscope files and produce sheets of plots for PDV spall or velocity analyses.
 
 The [readme file here](./test) describes the automatic testing and CI/CD setup for the project, including how to run tests interactively and add additional tests.
 
