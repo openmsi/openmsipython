@@ -53,9 +53,9 @@ class TestConfigFileParser(unittest.TestCase) :
             other_cfp = ConfigFileParser(TEST_CONST.PROD_CONFIG_FILE_PATH,logger=LOGGER)
         else :
             other_cfp = ConfigFileParser(TEST_CONST.FAKE_PROD_CONFIG_FILE_PATH,logger=LOGGER)
-        self.assertTrue('cluster' in other_cfp.available_group_names)
+        self.assertTrue('broker' in other_cfp.available_group_names)
         LOGGER.set_stream_level(logging.INFO)
         LOGGER.info('\nExpecting one error below:')
         LOGGER.set_stream_level(logging.ERROR)
         with self.assertRaises(ValueError) :
-            _ = other_cfp.get_config_dict_for_groups('cluster')
+            _ = other_cfp.get_config_dict_for_groups('broker')

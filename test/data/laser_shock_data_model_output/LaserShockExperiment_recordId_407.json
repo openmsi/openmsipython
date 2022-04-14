@@ -18,7 +18,7 @@
     }
   ],
   "material": {
-    "id": "711ae2c6-2ebd-445d-af61-61f0c467d189",
+    "id": "ceaf44c0-0386-4599-901f-6cdb12514dc2",
     "scope": "auto",
     "type": "link_by_uid"
   },
@@ -32,7 +32,7 @@
       "notes": null,
       "origin": "measured",
       "template": {
-        "id": "b3cae362-3964-4c22-b529-73d3b5751b2a",
+        "id": "e43339ab-6dd2-4e47-a7c0-7dc8881ab4e8",
         "scope": "auto",
         "type": "link_by_uid"
       },
@@ -48,7 +48,7 @@
       "notes": null,
       "origin": "measured",
       "template": {
-        "id": "ad314bcc-d679-41c0-a579-176870a16e38",
+        "id": "15666c8c-39a2-47c2-8ece-5e0520597199",
         "scope": "auto",
         "type": "link_by_uid"
       },
@@ -64,7 +64,7 @@
       "notes": null,
       "origin": "measured",
       "template": {
-        "id": "605a6ed1-8b86-48a1-8d2a-9a28e21e1c32",
+        "id": "f854609d-4d90-4cf9-9409-83c8e7d1070c",
         "scope": "auto",
         "type": "link_by_uid"
       },
@@ -81,7 +81,7 @@
       "notes": null,
       "origin": "measured",
       "template": {
-        "id": "021beace-1278-4fd4-94ca-6d76ae9d21ad",
+        "id": "49da2fc7-4f54-4939-8dc2-cd3096cc609b",
         "scope": "auto",
         "type": "link_by_uid"
       },
@@ -98,7 +98,7 @@
     "type": "performed_source"
   },
   "spec": {
-    "id": "e0c8c31e-a195-4f56-bda1-63d494e87ff4",
+    "id": "7c34ca6b-022b-4b09-9afe-78fa426d9454",
     "scope": "auto",
     "type": "link_by_uid"
   },
@@ -111,6 +111,6 @@
   ],
   "type": "measurement_run",
   "uids": {
-    "auto": "72cfcb56-3032-4133-a4a0-44242d44eced"
+    "auto": "d0d0bec0-14ae-4d3d-a0bb-baa9ed881f05"
   }
 }

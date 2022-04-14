@@ -28,3 +28,4 @@ if os.name=='nt' :
             errmsg = f'{errmsg[:-2]}) did not allow confluent_kafka to be imported! Exception: '
             errmsg+= f'{traceback.format_exc()}'
             raise ImportError(errmsg)
+    _ = confluent_kafka.Producer #appease pyflakes

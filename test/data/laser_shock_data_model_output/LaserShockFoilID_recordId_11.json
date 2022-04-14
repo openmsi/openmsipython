@@ -3,7 +3,7 @@
   "name": "50.4um (0.002\") Hard Al (AluFoil)",
   "notes": "",
   "process": {
-    "id": "76b6f51e-dfd7-4e17-816f-21789021419d",
+    "id": "3c0a6984-51b9-4917-b88a-66bc5c051e89",
     "scope": "auto",
     "type": "link_by_uid"
   },
@@ -16,7 +16,7 @@
         "notes": null,
         "origin": "specified",
         "template": {
-          "id": "8c502466-930b-4d80-9393-05f50eeaf517",
+          "id": "e50c850b-b0bc-44e7-a30b-282419a17276",
           "scope": "auto",
           "type": "link_by_uid"
         },
@@ -37,7 +37,7 @@
         "notes": null,
         "origin": "specified",
         "template": {
-          "id": "e9f0d9c4-1f81-460f-bb28-ef0a839ad5b3",
+          "id": "30d16931-5735-4c4d-99e1-6ff66c2bce81",
           "scope": "auto",
           "type": "link_by_uid"
         },
@@ -58,7 +58,7 @@
         "notes": null,
         "origin": "specified",
         "template": {
-          "id": "382e95d3-6a2e-42ab-b60f-570ab670cd55",
+          "id": "fb37c2b6-71c0-4e7e-a828-1a5d472f2078",
           "scope": "auto",
           "type": "link_by_uid"
         },
@@ -79,7 +79,7 @@
         "notes": null,
         "origin": "specified",
         "template": {
-          "id": "8bb20392-05a0-4b41-8a02-a253b18ea7b6",
+          "id": "62005583-9131-446f-9a5f-043915ff9d8a",
           "scope": "auto",
           "type": "link_by_uid"
         },
@@ -99,7 +99,7 @@
         "notes": null,
         "origin": "specified",
         "template": {
-          "id": "81c06e5f-d827-447b-a439-efb797440a0a",
+          "id": "0d68fd90-fc06-4606-92f5-0ee842298af9",
           "scope": "auto",
           "type": "link_by_uid"
         },
@@ -119,12 +119,12 @@
     "ObjectType::LaserShockFoilID"
   ],
   "template": {
-    "id": "270ff7ef-ad63-40cb-bfdf-9633ebaf74a4",
+    "id": "356e57cd-34b0-41eb-8518-4a8cfe77df6f",
     "scope": "auto",
     "type": "link_by_uid"
   },
   "type": "material_spec",
   "uids": {
-    "auto": "823fff89-9e6d-4888-895f-511fa34cc4eb"
+    "auto": "1e994c7e-8dd6-4f19-ba41-83ee7ccb4e61"
   }
 }

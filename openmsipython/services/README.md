@@ -2,9 +2,13 @@
 
 **Any** of the available top-level programs can be run from the command line or, alternatively, installed as Windows Services on machines running Windows. Services can be installed for all users of a particular machine and, once installed, they will run automatically from when the machine boots until it is stopped and/or removed. Programs running as Windows Services cannot be interacted with from the command line after they've been installed, but they will still produce output to log files.
 
+### Preparing the Windows environment
+
+Issues with loading `.dll` files manifest differently when running `OpenMSIPython` code as Windows Services because Services run in `%WinDir%\System32` and don't read the same `PATH` locations as running interactively. Some workarounds are built into `OpenMSIPython` to mitigate these problems, but if you run into trouble with missing `.dll` files they can typically be resolved by copying those files into the `%WinDir%\System32` directory.
+
 ### Setup and installation
 
-To install a Service, type the following command in the `py37` environment in your Terminal or Admin mode Anaconda Prompt:
+To install a Service, type the following command in the `openmsi` environment in your Terminal or Anaconda Prompt (you will need to be in admin mode):
 
 `InstallService [program_name] [command_line_options]`
 
@@ -23,6 +27,10 @@ After installing a Service, you can use the `ManageService [program_name]` comma
 1. **check the Service status** with `ManageService [program_name] status` to make sure it's running properly
 1. **stop the Service running** with `ManageService [program_name] stop`. If you temporarily stop the Service using this command, you can restart it afterward with `ManageService [program_name] start`.
 1. **uninstall the Service completely** with `ManageService [program_name] stop_and_remove` (or, if the Service is already stopped, simply `ManageService [program_name] remove`). If it was the only Service running on the machine, you can also add the `--remove_env_vars` flag to un-set the Machine-level username/password environment variables.
+
+### Debugging problems
+
+If something goes wrong while the program is running as a Service, a file called `SERVICES_ERROR_LOG.txt` should be created in the directory that you ran the installation command from. That file should contain a traceback for the error that killed the Service. If that file doesn't exist, then there was likely an issue with installing the Service in the first place, and not with the `OpenMSIPython` code that was run.
 
 ### Output in the "working directory"
 

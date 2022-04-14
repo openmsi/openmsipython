@@ -52,7 +52,7 @@ def main(args=None) :
                     for test in test_group :
                         if (test._testMethodName).endswith('kafka') :
                             test_name = test._testMethodName
-                            msg = 'tests that interact with the kafka cluster are being skipped'
+                            msg = 'tests that interact with the kafka broker are being skipped'
                             setattr(test, test_name, 
                                     unittest.skip(msg)(getattr(test, test_name)))
         runner_kwargs = {'verbosity':3}
