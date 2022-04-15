@@ -34,7 +34,7 @@ class s3_data_transfer(osn_service):
                 local_path = os.path.join(my_root, file).replace('/', '\\')
                 print(local_path)
                 try:
-                    response = self.s3_client.upload_file(local_path, BUCKET_NAME, '%s/%s' % (str(s3_dir), str(file)))
+                    _ = self.s3_client.upload_file(local_path, BUCKET_NAME, '%s/%s' % (str(s3_dir), str(file)))
                 except ClientError as e:
                     print(e.response)
 
