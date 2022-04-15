@@ -5,7 +5,7 @@ site.ENABLE_USER_SITE = True #https://www.scivision.dev/python-pip-devel-user-in
 
 setupkwargs = dict(
     name='openmsipython',
-    version='0.8.0',
+    version='0.7.3',
     packages=setuptools.find_packages(include=['openmsipython*']),
     include_package_data=True,
     entry_points = {
@@ -29,9 +29,9 @@ setupkwargs = dict(
                       'pandas',
                       'pymssql',
                       'python-fmrest>=1.4.0',
-                      'scipy; python_version>="3.8"',
-                      'scipy==1.4.1; python_version=="3.7"',
+                      'scipy',
                       'sqlalchemy',
+                      'boto3>=1.21.40'
                      ],
     extras_require = {'test': ['beautifulsoup4',
                                'gitpython',
