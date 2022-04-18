@@ -69,7 +69,7 @@ def main() :
         with cd(TEMP_DIR_PATH) :
             exec(p_code)
     except Exception as e :
-        LOGGER.error(f'ERROR: failed to run {SP_NAME} from {p_loc}! Exception: {e}',RuntimeError)
+        LOGGER.error(f'ERROR: failed to run provisioning using {p_loc}! Exception: {e}',RuntimeError)
     #make sure required files exist and move them into a new directory named for the node_ID
     try :
         new_files = {}
