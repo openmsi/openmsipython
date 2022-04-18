@@ -47,6 +47,8 @@ and following the prompts (the defaults are sensible). If, for any reason, the `
 
 (But OpenMSIPython should be able to do this on its own in most installation contexts.)
 
+Some applications of OpenMSIPython will need to use a different or unique script for provisioning nodes; in those cases you can download the script and provide the path to it as an argument to the `ProvisionNode` command as shown above.
+
 For any other issues with provisioning please refer to KafkaCrypto's documentation.
 
 ### Additional configurations needed
