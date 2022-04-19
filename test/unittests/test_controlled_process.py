@@ -74,6 +74,7 @@ class TestControlledProcess(unittest.TestCase) :
             time.sleep(1.0)
             self.assertTrue(cpst.on_shutdown_called)
             run_thread.join(timeout=TIMEOUT_SECS)
+            time.sleep(1.0)
             if run_thread.is_alive() :
                 errmsg = 'ERROR: running thread in test_controlled_process_single_thread '
                 errmsg+= f'timed out after {TIMEOUT_SECS} seconds!'

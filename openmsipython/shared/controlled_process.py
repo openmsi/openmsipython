@@ -1,6 +1,6 @@
 #imports
 import time
-from queue import Queue
+from queue import Queue, Empty
 from threading import Thread, Lock
 from abc import ABC, abstractmethod
 from ..utilities.misc import add_user_input
@@ -58,8 +58,11 @@ class ControlledProcess(LogOwner,ABC) :
 
     def _check_control_command_queue(self) :
         #if anything exists in the control command queue
-        if not self.__control_command_queue.empty() :
-            cmd = self.__control_command_queue.get()
+        try :
+            cmd = self.__control_command_queue.get(block=True,timeout=0.5)
+        except Empty :
+            cmd = None
+        if cmd is not None :
             if cmd.lower() in ('q','quit') : # shut down the process
                 self.shutdown()
             elif cmd.lower() in ('c','check') : # run the on_check function
@@ -112,8 +115,7 @@ class ControlledProcessSingleThread(ControlledProcess,ABC) :
     def _run_iteration(self) :
         """
         The function that is run in an infinite loop while the process is alive
-        Not implemented in the base class, except to print the "still alive" character 
-        and check the control command queue
+        Not implemented in the base class.
         """
         pass
 
