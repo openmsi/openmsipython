@@ -21,6 +21,6 @@ class UtilityConstants :
     @property
     def DEFAULT_UPDATE_SECONDS(self) :
         #how many seconds to wait by default between printing the "still alive" character/message for a running process
-        return 30     
+        return 300     
 
 UTIL_CONST = UtilityConstants()
