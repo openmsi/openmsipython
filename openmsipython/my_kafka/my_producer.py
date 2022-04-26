@@ -29,6 +29,11 @@ class MyProducer(LogOwner) :
             self.__producer = producer_type(configs)
         else :
             self.logger.error(f'ERROR: Unrecognized producer type {producer_type} for MyProducer!',ValueError)
+        # set the interval at which to call poll() to 100 * linger.ms
+        self.__poll_interval = 100*0.005 
+        if 'linger.ms' in configs.keys() :
+            self.__poll_interval = 100*0.001*float(configs['linger.ms'])
+        self.__last_poll_time = time.perf_counter()
 
     @classmethod
     def from_file(cls,config_file_path,logger=None,**kwargs) :
@@ -98,7 +103,9 @@ class MyProducer(LogOwner) :
                     warnmsg = f'WARNING: message with key {obj.msg_key} failed to buffer for more than '
                     warnmsg+= f'{total_wait_secs}s and was dropped!'
                     self.logger.warning(warnmsg)
-                self.poll(0.025)
+                if (time.perf_counter()-self.__last_poll_time)>self.__poll_interval :
+                    self.poll(self.__poll_interval/100.)
+                    self.__last_poll_time = time.perf_counter()
             else :
                 warnmsg = f'WARNING: found an object of type {type(obj)} in a Producer queue that should only contain '
                 warnmsg+= 'Producible objects. This object will be skipped!'
