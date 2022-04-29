@@ -14,6 +14,8 @@ class MyProducer(LogOwner) :
     Convenience class for working with a Producer of some type
     """
 
+    POLL_EVERY = 5 # poll the producer at least every 5 calls to produce
+
     def __init__(self,producer_type,configs,kafkacrypto=None,**kwargs) :
         """
         producer_type = the type of Producer underlying this object
@@ -29,11 +31,8 @@ class MyProducer(LogOwner) :
             self.__producer = producer_type(configs)
         else :
             self.logger.error(f'ERROR: Unrecognized producer type {producer_type} for MyProducer!',ValueError)
-        # set the interval at which to call poll() to 100 * linger.ms
-        self.__poll_interval = 100*0.005 
-        if 'linger.ms' in configs.keys() :
-            self.__poll_interval = 100*0.001*float(configs['linger.ms'])
-        self.__last_poll_time = time.perf_counter()
+        # poll the producer at least every 5 calls to produce
+        self.__poll_counter = 0
 
     @classmethod
     def from_file(cls,config_file_path,logger=None,**kwargs) :
@@ -97,15 +96,17 @@ class MyProducer(LogOwner) :
                         self.produce(topic=topic_name,key=obj.msg_key,value=obj.msg_value,on_delivery=producer_callback)
                         success=True
                     except BufferError :
+                        self.poll(0)
                         time.sleep(retry_sleep)
                         total_wait_secs+=retry_sleep
                 if not success :
                     warnmsg = f'WARNING: message with key {obj.msg_key} failed to buffer for more than '
                     warnmsg+= f'{total_wait_secs}s and was dropped!'
                     self.logger.warning(warnmsg)
-                if (time.perf_counter()-self.__last_poll_time)>self.__poll_interval :
-                    self.poll(self.__poll_interval/100.)
-                    self.__last_poll_time = time.perf_counter()
+                self.__poll_counter+=1
+                if self.__poll_counter%self.POLL_EVERY==0 :
+                    self.poll(0)
+                    self.__poll_counter = 0
             else :
                 warnmsg = f'WARNING: found an object of type {type(obj)} in a Producer queue that should only contain '
                 warnmsg+= 'Producible objects. This object will be skipped!'
