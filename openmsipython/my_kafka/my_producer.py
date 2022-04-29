@@ -91,7 +91,7 @@ class MyProducer(LogOwner) :
                     self.logger.info(logmsg)
                 #produce the message to the topic
                 success=False; total_wait_secs=0 
-                if (not success) and total_wait_secs<timeout :
+                while (not success) and total_wait_secs<timeout :
                     try :
                         self.produce(topic=topic_name,key=obj.msg_key,value=obj.msg_value,on_delivery=producer_callback)
                         success=True
