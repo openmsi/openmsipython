@@ -1,5 +1,6 @@
 #imports
 import time
+from threading import Lock
 from confluent_kafka import SerializingProducer
 from kafkacrypto import KafkaProducer
 from ..shared.logging import LogOwner
@@ -15,6 +16,17 @@ class MyProducer(LogOwner) :
     """
 
     POLL_EVERY = 5 # poll the producer at least every 5 calls to produce
+    N_CALLBACKS_SERVED = 0
+    THREAD_LOCK = Lock()
+
+    @property
+    def n_callbacks_served(self) :
+        n_new_callbacks = self.poll(0)
+        if (n_new_callbacks is not None) and (n_new_callbacks!=0) :
+            with MyProducer.THREAD_LOCK :
+                MyProducer.N_CALLBACKS_SERVED+=n_new_callbacks
+        with MyProducer.THREAD_LOCK :
+            return MyProducer.N_CALLBACKS_SERVED
 
     def __init__(self,producer_type,configs,kafkacrypto=None,**kwargs) :
         """
@@ -91,21 +103,30 @@ class MyProducer(LogOwner) :
                     self.logger.info(logmsg)
                 #produce the message to the topic
                 success=False; total_wait_secs=0 
-                if (not success) and total_wait_secs<timeout :
+                while (not success) and total_wait_secs<timeout :
                     try :
                         self.produce(topic=topic_name,key=obj.msg_key,value=obj.msg_value,on_delivery=producer_callback)
                         success=True
                     except BufferError :
-                        self.poll(0)
+                        n_new_callbacks = self.poll(0)
                         time.sleep(retry_sleep)
-                        total_wait_secs+=retry_sleep
+                        if n_new_callbacks is None or n_new_callbacks==0 :
+                            total_wait_secs+=retry_sleep
+                        else :
+                            total_wait_secs = 0
+                            with MyProducer.THREAD_LOCK :
+                                MyProducer.N_CALLBACKS_SERVED+=n_new_callbacks
                 if not success :
                     warnmsg = f'WARNING: message with key {obj.msg_key} failed to buffer for more than '
-                    warnmsg+= f'{total_wait_secs}s and was dropped!'
+                    warnmsg+= f'{total_wait_secs}s with no new callbacks served. This message will be re-enqueued.'
                     self.logger.warning(warnmsg)
+                    queue.put(obj)
                 self.__poll_counter+=1
                 if self.__poll_counter%self.POLL_EVERY==0 :
-                    self.poll(0)
+                    n_new_callbacks = self.poll(0)
+                    if (n_new_callbacks is not None) and (n_new_callbacks!=0) :
+                        with MyProducer.THREAD_LOCK :
+                            MyProducer.N_CALLBACKS_SERVED+=n_new_callbacks
                     self.__poll_counter = 0
             else :
                 warnmsg = f'WARNING: found an object of type {type(obj)} in a Producer queue that should only contain '
@@ -119,13 +140,13 @@ class MyProducer(LogOwner) :
         if isinstance(self.__producer,KafkaProducer) :
             key = self.__producer.ks(topic,key)
             value = self.__producer.vs(topic,value)
-        self.__producer.produce(*args,topic=topic,key=key,value=value,**kwargs)
+        return self.__producer.produce(*args,topic=topic,key=key,value=value,**kwargs)
     
     def poll(self,*args,**kwargs) :
-        self.__producer.poll(*args,**kwargs)
+        return self.__producer.poll(*args,**kwargs)
     
     def flush(self,*args,**kwargs) :
-        self.__producer.flush(*args,**kwargs)
+        return self.__producer.flush(*args,**kwargs)
 
     def close(self) :
         try :

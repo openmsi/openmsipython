@@ -1,5 +1,5 @@
 #imports
-import traceback
+import traceback, time
 from threading import Thread
 from queue import Queue
 from hashlib import sha512
@@ -55,11 +55,15 @@ class UploadDataFile(DataFile,Runnable) :
         if not self.__to_upload :
             msg+='(will not be uploaded)'
         elif self.__fully_enqueued :
-            msg+='(fully enqueued)'
+            msg+=f'({self.__n_total_chunks} message'
+            if self.__n_total_chunks!=1 :
+                msg+='s'
+            msg+=' fully enqueued)'
         elif self.upload_in_progress :
-            msg+='(in progress)'
+            msg+=f'(in progress with {self.__n_total_chunks-len(self.__chunks_to_upload)}'
+            msg+=f'/{self.__n_total_chunks} messages enqueued)'
         elif self.waiting_to_upload :
-            msg+='(waiting to be enqueued)'
+            msg+=f'({self.__n_total_chunks} messages waiting to be enqueued)'
         else :
             msg+='(status unknown)'
         return msg
@@ -83,19 +87,22 @@ class UploadDataFile(DataFile,Runnable) :
         self.__filename_append = filename_append
         self.__fully_enqueued = False
         self.__chunks_to_upload = []
+        self.__n_total_chunks = 0
 
-    def add_chunks_to_upload_queue(self,queue,n_threads=None,chunk_size=RUN_OPT_CONST.DEFAULT_CHUNK_SIZE) :
+    def add_chunks_to_upload_queue(self,queue,n_threads=None,chunk_size=RUN_OPT_CONST.DEFAULT_CHUNK_SIZE,
+                                   queue_full_timeout=0.5) :
         """
         Add chunks of this file to a given upload queue. 
         If the file runs out of chunks it will be marked as fully enqueued.
         If the given queue is full this function will do absolutely nothing and will just return.
 
         Possible keyword arguments:
-        n_threads  = the number of threads running during uploading; at most 5*this number of chunks will be added 
-                     per call to this function if this argument isn't given, every chunk will be added
-        chunk_size = the size of each file chunk in bytes 
-                     (used to create the list of file chunks if it doesn't already exist)
-                     the default value will be used if this argument isn't given
+        n_threads          = the number of threads running during uploading; at most 5*this number of chunks will be 
+                             added per call to this function if this argument isn't given, every chunk will be added
+        chunk_size         = the size of each file chunk in bytes 
+                             (used to create the list of file chunks if it doesn't already exist)
+                             the default value will be used if this argument isn't given
+        queue_full_timeout = amount of time to wait if the queue is full and new messages can't be added
         """
         if self.__fully_enqueued :
             warnmsg = f'WARNING: add_chunks_to_upload_queue called for fully enqueued file {self.filepath}, '
@@ -103,6 +110,7 @@ class UploadDataFile(DataFile,Runnable) :
             self.logger.warning(warnmsg)
             return
         if queue.full() :
+            time.sleep(queue_full_timeout)
             return
         if len(self.__chunks_to_upload)==0 :
             try :
@@ -121,6 +129,9 @@ class UploadDataFile(DataFile,Runnable) :
             n_chunks_to_add = len(self.__chunks_to_upload)
         ic = 0
         while len(self.__chunks_to_upload)>0 and ic<n_chunks_to_add :
+            if queue.full() :
+                time.sleep(queue_full_timeout)
+                return
             queue.put(self.__chunks_to_upload.pop(0))
             ic+=1
         if len(self.__chunks_to_upload)==0 :
@@ -213,10 +224,12 @@ class UploadDataFile(DataFile,Runnable) :
                 chunk = fp.read(n_bytes_to_read)
         file_hash = file_hash.digest()
         self.logger.info(f'File {self.filepath} has a total of {len(chunks)} chunks')
+        #set the total number of chunks for this file
+        self.__n_total_chunks = len(chunks)
         #add all the chunks to the final list as DataFileChunk objects
         for ic,c in enumerate(chunks,start=1) :
             self.__chunks_to_upload.append(DataFileChunk(self.filepath,self.filename,file_hash,
-                                                         c[0],c[1],c[2],c[3],ic,len(chunks),
+                                                         c[0],c[1],c[2],c[3],ic,self.__n_total_chunks,
                                                          rootdir=self.__rootdir,filename_append=self.__filename_append))
 
     #################### CLASS METHODS ####################

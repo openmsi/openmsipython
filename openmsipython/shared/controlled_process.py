@@ -67,6 +67,8 @@ class ControlledProcess(LogOwner,ABC) :
                 self.shutdown()
             elif cmd.lower() in ('c','check') : # run the on_check function
                 self._on_check()
+            else : # otherwise just skip this unrecognized command
+                self._check_control_command_queue()
 
     #################### ABSTRACT METHODS ####################
 

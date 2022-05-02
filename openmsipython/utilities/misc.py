@@ -7,7 +7,7 @@ def add_user_input(input_queue) :
     """
     while True :
         time.sleep(1)
-        input_queue.put(sys.stdin.read(1))
+        input_queue.put((sys.stdin.read(1)).strip())
 
 def populated_kwargs(given_kwargs,defaults,logger=None) :
     """
