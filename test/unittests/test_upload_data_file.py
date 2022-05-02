@@ -30,7 +30,6 @@ class TestUploadDataFile(unittest.TestCase) :
         self.assertFalse(self.datafile.fully_enqueued)
         self.assertTrue(self.datafile.waiting_to_upload)
         self.assertFalse(self.datafile.upload_in_progress)
-        self.assertEqual(self.datafile.upload_status_msg,f'{TEST_CONST.TEST_DATA_FILE_PATH.relative_to(self.datafile.rootdir)} (waiting to be enqueued)')
 
     def test_add_chunks_to_upload_queue(self) :
         #adding to a full Queue should do nothing
@@ -49,7 +48,6 @@ class TestUploadDataFile(unittest.TestCase) :
         n_total_chunks = len(self.datafile.chunks_to_upload)
         self.assertFalse(self.datafile.waiting_to_upload)
         self.assertTrue(self.datafile.upload_in_progress)
-        self.assertEqual(self.datafile.upload_status_msg,f'{TEST_CONST.TEST_DATA_FILE_PATH.relative_to(self.datafile.rootdir)} (in progress)')
         self.assertFalse(self.datafile.fully_enqueued)
         self.datafile.add_chunks_to_upload_queue(real_queue,n_threads=RUN_OPT_CONST.N_DEFAULT_UPLOAD_THREADS)
         self.datafile.add_chunks_to_upload_queue(real_queue,n_threads=RUN_OPT_CONST.N_DEFAULT_UPLOAD_THREADS)
@@ -58,7 +56,6 @@ class TestUploadDataFile(unittest.TestCase) :
         self.assertEqual(real_queue.qsize(),n_total_chunks)
         self.assertFalse(self.datafile.waiting_to_upload)
         self.assertFalse(self.datafile.upload_in_progress)
-        self.assertEqual(self.datafile.upload_status_msg,f'{TEST_CONST.TEST_DATA_FILE_PATH.relative_to(self.datafile.rootdir)} (fully enqueued)')
         self.assertTrue(self.datafile.fully_enqueued)
         #and try one more time to add more chunks; this should just return without doing anything
         self.datafile.add_chunks_to_upload_queue(real_queue)
