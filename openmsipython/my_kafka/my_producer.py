@@ -21,6 +21,10 @@ class MyProducer(LogOwner) :
 
     @property
     def n_callbacks_served(self) :
+        n_new_callbacks = self.poll(0)
+        if (n_new_callbacks is not None) and (n_new_callbacks!=0) :
+            with MyProducer.THREAD_LOCK :
+                MyProducer.N_CALLBACKS_SERVED+=n_new_callbacks
         with MyProducer.THREAD_LOCK :
             return MyProducer.N_CALLBACKS_SERVED
 
@@ -114,7 +118,7 @@ class MyProducer(LogOwner) :
                                 MyProducer.N_CALLBACKS_SERVED+=n_new_callbacks
                 if not success :
                     warnmsg = f'WARNING: message with key {obj.msg_key} failed to buffer for more than '
-                    warnmsg+= f'{total_wait_secs}s. This message will be re-enqueued.'
+                    warnmsg+= f'{total_wait_secs}s with no new callbacks served. This message will be re-enqueued.'
                     self.logger.warning(warnmsg)
                     queue.put(obj)
                 self.__poll_counter+=1
@@ -136,13 +140,13 @@ class MyProducer(LogOwner) :
         if isinstance(self.__producer,KafkaProducer) :
             key = self.__producer.ks(topic,key)
             value = self.__producer.vs(topic,value)
-        self.__producer.produce(*args,topic=topic,key=key,value=value,**kwargs)
+        return self.__producer.produce(*args,topic=topic,key=key,value=value,**kwargs)
     
     def poll(self,*args,**kwargs) :
-        self.__producer.poll(*args,**kwargs)
+        return self.__producer.poll(*args,**kwargs)
     
     def flush(self,*args,**kwargs) :
-        self.__producer.flush(*args,**kwargs)
+        return self.__producer.flush(*args,**kwargs)
 
     def close(self) :
         try :

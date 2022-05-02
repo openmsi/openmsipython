@@ -127,7 +127,7 @@ class DataFileUploadDirectory(DataFileDirectory,ControlledProcessSingleThread,Ru
             self.__find_new_files()
             if not self.have_file_to_upload :
                 if self.__wait_time<self.MAX_WAIT_TIME :
-                    self.__wait_time*=1.5
+                    self.__wait_time*=1.1
             else :
                 self.__wait_time = self.MIN_WAIT_TIME
         #find the first file that's running and add some of its chunks to the upload queue 
@@ -141,6 +141,8 @@ class DataFileUploadDirectory(DataFileDirectory,ControlledProcessSingleThread,Ru
     def _on_check(self) :
         #log progress so far
         self.logger.debug(self.progress_msg)
+        #reset the wait time
+        self.__wait_time = self.MIN_WAIT_TIME
 
     def _on_shutdown(self) :
         self.logger.info('Will quit after all currently enqueued files are done being transferred.')
