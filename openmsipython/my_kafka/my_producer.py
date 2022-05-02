@@ -16,6 +16,10 @@ class MyProducer(LogOwner) :
 
     POLL_EVERY = 5 # poll the producer at least every 5 calls to produce
 
+    @property
+    def n_callbacks_served(self) :
+        return self.__n_callbacks_served
+
     def __init__(self,producer_type,configs,kafkacrypto=None,**kwargs) :
         """
         producer_type = the type of Producer underlying this object
@@ -33,6 +37,8 @@ class MyProducer(LogOwner) :
             self.logger.error(f'ERROR: Unrecognized producer type {producer_type} for MyProducer!',ValueError)
         # poll the producer at least every 5 calls to produce
         self.__poll_counter = 0
+        # keep track of how many message callbacks have been served
+        self.__n_callbacks_served = 0
 
     @classmethod
     def from_file(cls,config_file_path,logger=None,**kwargs) :
@@ -96,16 +102,22 @@ class MyProducer(LogOwner) :
                         self.produce(topic=topic_name,key=obj.msg_key,value=obj.msg_value,on_delivery=producer_callback)
                         success=True
                     except BufferError :
-                        self.poll(0)
+                        n_new_callbacks = self.poll(0)
                         time.sleep(retry_sleep)
-                        total_wait_secs+=retry_sleep
+                        if n_new_callbacks==0 :
+                            total_wait_secs+=retry_sleep
+                        else :
+                            total_wait_secs = 0
+                            self.__n_callbacks_served+=n_new_callbacks
                 if not success :
                     warnmsg = f'WARNING: message with key {obj.msg_key} failed to buffer for more than '
-                    warnmsg+= f'{total_wait_secs}s and was dropped!'
+                    warnmsg+= f'{total_wait_secs}s. This message will be re-enqueued.'
                     self.logger.warning(warnmsg)
+                    queue.put(obj)
                 self.__poll_counter+=1
                 if self.__poll_counter%self.POLL_EVERY==0 :
-                    self.poll(0)
+                    n_new_callbacks = self.poll(0)
+                    self.__n_callbacks_served+=n_new_callbacks
                     self.__poll_counter = 0
             else :
                 warnmsg = f'WARNING: found an object of type {type(obj)} in a Producer queue that should only contain '

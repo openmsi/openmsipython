@@ -55,11 +55,12 @@ class UploadDataFile(DataFile,Runnable) :
         if not self.__to_upload :
             msg+='(will not be uploaded)'
         elif self.__fully_enqueued :
-            msg+='(fully enqueued)'
+            msg+=f'({self.__n_total_chunks} messages fully enqueued)'
         elif self.upload_in_progress :
-            msg+='(in progress)'
+            msg+=f'(in progress with {self.__n_total_chunks-len(self.__chunks_to_upload)}'
+            msg+=f'/{self.__n_total_chunks} messages enqueued)'
         elif self.waiting_to_upload :
-            msg+='(waiting to be enqueued)'
+            msg+=f'({self.__n_total_chunks} messages waiting to be enqueued)'
         else :
             msg+='(status unknown)'
         return msg
@@ -83,6 +84,7 @@ class UploadDataFile(DataFile,Runnable) :
         self.__filename_append = filename_append
         self.__fully_enqueued = False
         self.__chunks_to_upload = []
+        self.__n_total_chunks = 0
 
     def add_chunks_to_upload_queue(self,queue,n_threads=None,chunk_size=RUN_OPT_CONST.DEFAULT_CHUNK_SIZE) :
         """
@@ -213,10 +215,12 @@ class UploadDataFile(DataFile,Runnable) :
                 chunk = fp.read(n_bytes_to_read)
         file_hash = file_hash.digest()
         self.logger.info(f'File {self.filepath} has a total of {len(chunks)} chunks')
+        #set the total number of chunks for this file
+        self.__n_total_chunks = len(chunks)
         #add all the chunks to the final list as DataFileChunk objects
         for ic,c in enumerate(chunks,start=1) :
             self.__chunks_to_upload.append(DataFileChunk(self.filepath,self.filename,file_hash,
-                                                         c[0],c[1],c[2],c[3],ic,len(chunks),
+                                                         c[0],c[1],c[2],c[3],ic,self.__n_total_chunks,
                                                          rootdir=self.__rootdir,filename_append=self.__filename_append))
 
     #################### CLASS METHODS ####################

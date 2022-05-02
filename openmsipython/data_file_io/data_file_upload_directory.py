@@ -26,6 +26,7 @@ class DataFileUploadDirectory(DataFileDirectory,ControlledProcessSingleThread,Ru
     @property
     def progress_msg(self) :
         self.__find_new_files()
+        progress_msg = f'Producer has successfully served {self.__producer.n_callbacks_served} message callbacks. '
         progress_msg = 'The following files have been recognized so far:\n'
         for datafile in self.data_files_by_path.values() :
             if not datafile.to_upload :
