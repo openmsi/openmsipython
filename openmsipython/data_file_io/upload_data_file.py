@@ -55,7 +55,10 @@ class UploadDataFile(DataFile,Runnable) :
         if not self.__to_upload :
             msg+='(will not be uploaded)'
         elif self.__fully_enqueued :
-            msg+=f'({self.__n_total_chunks} messages fully enqueued)'
+            msg+=f'({self.__n_total_chunks} message'
+            if self.__n_total_chunks!=1 :
+                msg+='s'
+            msg+=' fully enqueued)'
         elif self.upload_in_progress :
             msg+=f'(in progress with {self.__n_total_chunks-len(self.__chunks_to_upload)}'
             msg+=f'/{self.__n_total_chunks} messages enqueued)'

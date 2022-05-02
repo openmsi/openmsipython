@@ -104,7 +104,7 @@ class MyProducer(LogOwner) :
                     except BufferError :
                         n_new_callbacks = self.poll(0)
                         time.sleep(retry_sleep)
-                        if n_new_callbacks==0 :
+                        if n_new_callbacks is None or n_new_callbacks==0 :
                             total_wait_secs+=retry_sleep
                         else :
                             total_wait_secs = 0
@@ -117,7 +117,8 @@ class MyProducer(LogOwner) :
                 self.__poll_counter+=1
                 if self.__poll_counter%self.POLL_EVERY==0 :
                     n_new_callbacks = self.poll(0)
-                    self.__n_callbacks_served+=n_new_callbacks
+                    if n_new_callbacks is not None :
+                        self.__n_callbacks_served+=n_new_callbacks
                     self.__poll_counter = 0
             else :
                 warnmsg = f'WARNING: found an object of type {type(obj)} in a Producer queue that should only contain '
