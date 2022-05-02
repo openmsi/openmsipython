@@ -1,5 +1,5 @@
 #imports
-import traceback
+import traceback, time
 from threading import Thread
 from queue import Queue
 from hashlib import sha512
@@ -89,18 +89,20 @@ class UploadDataFile(DataFile,Runnable) :
         self.__chunks_to_upload = []
         self.__n_total_chunks = 0
 
-    def add_chunks_to_upload_queue(self,queue,n_threads=None,chunk_size=RUN_OPT_CONST.DEFAULT_CHUNK_SIZE) :
+    def add_chunks_to_upload_queue(self,queue,n_threads=None,chunk_size=RUN_OPT_CONST.DEFAULT_CHUNK_SIZE,
+                                   queue_full_timeout=0.5) :
         """
         Add chunks of this file to a given upload queue. 
         If the file runs out of chunks it will be marked as fully enqueued.
         If the given queue is full this function will do absolutely nothing and will just return.
 
         Possible keyword arguments:
-        n_threads  = the number of threads running during uploading; at most 5*this number of chunks will be added 
-                     per call to this function if this argument isn't given, every chunk will be added
-        chunk_size = the size of each file chunk in bytes 
-                     (used to create the list of file chunks if it doesn't already exist)
-                     the default value will be used if this argument isn't given
+        n_threads          = the number of threads running during uploading; at most 5*this number of chunks will be 
+                             added per call to this function if this argument isn't given, every chunk will be added
+        chunk_size         = the size of each file chunk in bytes 
+                             (used to create the list of file chunks if it doesn't already exist)
+                             the default value will be used if this argument isn't given
+        queue_full_timeout = amount of time to wait if the queue is full and new messages can't be added
         """
         if self.__fully_enqueued :
             warnmsg = f'WARNING: add_chunks_to_upload_queue called for fully enqueued file {self.filepath}, '
@@ -108,6 +110,7 @@ class UploadDataFile(DataFile,Runnable) :
             self.logger.warning(warnmsg)
             return
         if queue.full() :
+            time.sleep(queue_full_timeout)
             return
         if len(self.__chunks_to_upload)==0 :
             try :
@@ -126,6 +129,9 @@ class UploadDataFile(DataFile,Runnable) :
             n_chunks_to_add = len(self.__chunks_to_upload)
         ic = 0
         while len(self.__chunks_to_upload)>0 and ic<n_chunks_to_add :
+            if queue.full() :
+                time.sleep(queue_full_timeout)
+                return
             queue.put(self.__chunks_to_upload.pop(0))
             ic+=1
         if len(self.__chunks_to_upload)==0 :
