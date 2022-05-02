@@ -1,5 +1,6 @@
 #imports
 import time
+from threading import Lock
 from confluent_kafka import SerializingProducer
 from kafkacrypto import KafkaProducer
 from ..shared.logging import LogOwner
@@ -15,10 +16,13 @@ class MyProducer(LogOwner) :
     """
 
     POLL_EVERY = 5 # poll the producer at least every 5 calls to produce
+    N_CALLBACKS_SERVED = 0
+    THREAD_LOCK = Lock()
 
     @property
     def n_callbacks_served(self) :
-        return self.__n_callbacks_served
+        with MyProducer.THREAD_LOCK :
+            return MyProducer.N_CALLBACKS_SERVED
 
     def __init__(self,producer_type,configs,kafkacrypto=None,**kwargs) :
         """
@@ -37,8 +41,6 @@ class MyProducer(LogOwner) :
             self.logger.error(f'ERROR: Unrecognized producer type {producer_type} for MyProducer!',ValueError)
         # poll the producer at least every 5 calls to produce
         self.__poll_counter = 0
-        # keep track of how many message callbacks have been served
-        self.__n_callbacks_served = 0
 
     @classmethod
     def from_file(cls,config_file_path,logger=None,**kwargs) :
@@ -108,7 +110,8 @@ class MyProducer(LogOwner) :
                             total_wait_secs+=retry_sleep
                         else :
                             total_wait_secs = 0
-                            self.__n_callbacks_served+=n_new_callbacks
+                            with MyProducer.THREAD_LOCK :
+                                MyProducer.N_CALLBACKS_SERVED+=n_new_callbacks
                 if not success :
                     warnmsg = f'WARNING: message with key {obj.msg_key} failed to buffer for more than '
                     warnmsg+= f'{total_wait_secs}s. This message will be re-enqueued.'
@@ -117,8 +120,9 @@ class MyProducer(LogOwner) :
                 self.__poll_counter+=1
                 if self.__poll_counter%self.POLL_EVERY==0 :
                     n_new_callbacks = self.poll(0)
-                    if n_new_callbacks is not None :
-                        self.__n_callbacks_served+=n_new_callbacks
+                    if (n_new_callbacks is not None) and (n_new_callbacks!=0) :
+                        with MyProducer.THREAD_LOCK :
+                            MyProducer.N_CALLBACKS_SERVED+=n_new_callbacks
                     self.__poll_counter = 0
             else :
                 warnmsg = f'WARNING: found an object of type {type(obj)} in a Producer queue that should only contain '
