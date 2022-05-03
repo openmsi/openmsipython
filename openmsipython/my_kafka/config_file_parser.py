@@ -136,6 +136,6 @@ class MyKafkaConfigFileParser(ConfigFileParser) :
             try :
                 v_as_float = float(v)
                 rd[k] = v_as_float
-            except ValueError :
+            except Exception :
                 rd[k]=v
         return rd
