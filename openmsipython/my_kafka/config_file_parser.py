@@ -33,13 +33,13 @@ class MyKafkaConfigFileParser(ConfigFileParser) :
     def broker_configs(self) :
         if self.__broker_configs is None :
             self.__broker_configs = self.__get_config_dict('broker')
-        return self.__broker_configs
+        return self.__convert_floats(self.__broker_configs)
     @property
     def producer_configs(self) :
         if self.__producer_configs is None :
             pcs = self.__get_config_dict('producer')
             self.__producer_configs = MyKafkaConfigFileParser.get_replaced_configs(pcs,'serialization')
-        return self.__producer_configs
+        return self.__convert_floats(self.__producer_configs)
     @property
     def consumer_configs(self) :
         if self.__consumer_configs is None :
@@ -51,7 +51,7 @@ class MyKafkaConfigFileParser(ConfigFileParser) :
             if 'auto.offset.reset' in ccs.keys() and ccs['auto.offset.reset']=='none' :
                 del ccs['auto.offset.reset']
             self.__consumer_configs = MyKafkaConfigFileParser.get_replaced_configs(ccs,'deserialization')
-        return self.__consumer_configs
+        return self.__convert_floats(self.__consumer_configs)
 
     #################### PUBLIC FUNCTIONS ####################
 
@@ -125,3 +125,17 @@ class MyKafkaConfigFileParser(ConfigFileParser) :
                 return str(filepath)
         #no config file found
         return None
+
+    def __convert_floats(self,d) :
+        """
+        Return a version of the dictionary "d" where any values that can be converted to floats are converted to floats
+        (Some KafkaCrypto code assumes configs will be floats)
+        """
+        rd = {}
+        for k,v in d.items() :
+            try :
+                v_as_float = float(v)
+                rd[k] = v_as_float
+            except ValueError :
+                rd[k]=v
+        return rd
