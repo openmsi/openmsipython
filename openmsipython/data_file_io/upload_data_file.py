@@ -90,7 +90,7 @@ class UploadDataFile(DataFile,Runnable) :
         self.__n_total_chunks = 0
 
     def add_chunks_to_upload_queue(self,queue,n_threads=None,chunk_size=RUN_OPT_CONST.DEFAULT_CHUNK_SIZE,
-                                   queue_full_timeout=0.5) :
+                                   queue_full_timeout=0.001) :
         """
         Add chunks of this file to a given upload queue. 
         If the file runs out of chunks it will be marked as fully enqueued.
@@ -129,9 +129,8 @@ class UploadDataFile(DataFile,Runnable) :
             n_chunks_to_add = len(self.__chunks_to_upload)
         ic = 0
         while len(self.__chunks_to_upload)>0 and ic<n_chunks_to_add :
-            if queue.full() :
+            while queue.full() :
                 time.sleep(queue_full_timeout)
-                return
             queue.put(self.__chunks_to_upload.pop(0))
             ic+=1
         if len(self.__chunks_to_upload)==0 :
