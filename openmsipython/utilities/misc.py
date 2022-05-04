@@ -1,5 +1,6 @@
 #imports
 import os, sys, inspect, time, contextlib
+from dataclasses import fields
 
 def add_user_input(input_queue) :
     """
@@ -94,12 +95,22 @@ def populated_kwargs(given_kwargs,defaults,logger=None) :
 
 @contextlib.contextmanager
 def cd(dir):
-  """
-  Change the current working directory to a different directory,
-  and go back when leaving the context manager.
-  """
-  cdminus = os.getcwd()
-  try:
-    yield os.chdir(dir)
-  finally:
-    os.chdir(cdminus)
+    """
+    Change the current working directory to a different directory,
+    and go back when leaving the context manager.
+    """
+    cdminus = os.getcwd()
+    try:
+        yield os.chdir(dir)
+    finally:
+        os.chdir(cdminus)
+
+def csv_header_line_from_dataclass(cl) :
+    """
+    Return a string that listing the attribute names for a dataclass
+    to use as the header line of a csv file with entries of that dataclass type
+    """
+    rs = ''
+    for field in fields(cl) :
+        rs.append(f'{field.name},')
+    return rs

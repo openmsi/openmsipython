@@ -7,6 +7,7 @@ from ..shared.runnable import Runnable
 from ..shared.controlled_process import ControlledProcessSingleThread
 from ..my_kafka.my_producer import MyProducer
 from .config import RUN_OPT_CONST
+from .producer_file_registry import ProducerFileRegistry
 from .data_file_directory import DataFileDirectory
 from .upload_data_file import UploadDataFile
 
@@ -80,6 +81,9 @@ class DataFileUploadDirectory(DataFileDirectory,ControlledProcessSingleThread,Ru
                            i.e., if False (the default) then only files added to the directory after startup
                            will be enqueued to the producer
         """
+        #start up a file registry in the watched directory
+        self.__file_registry = ProducerFileRegistry(dirpath=self.dirpath,topic_name=topic_name,logger=self.logger)
+        #set the chunk size
         self.__chunk_size = chunk_size
         #start the producer 
         self.__producer = MyProducer.from_file(config_path,logger=self.logger)
