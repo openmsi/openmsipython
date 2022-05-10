@@ -1,5 +1,6 @@
 #imports
-import pathlib, methodtools, datetime, typing
+import pathlib, methodtools, datetime, typing, copy
+from time import process_time
 from threading import Lock
 from dataclasses import fields, is_dataclass
 from atomicwrites import atomic_write
@@ -14,6 +15,8 @@ class DataclassTable(LogOwner) :
 
     DELIMETER = ';' #can't use a comma or containers would display incorrectly
     DATETIME_FORMAT = '%m/%d/%Y at %H:%M:%S'
+    THREAD_LOCK = Lock()
+    UPDATE_FILE_EVERY = 5 #only update the .csv file at most every 5 seconds to make updates less expensive
 
     @methodtools.lru_cache
     @property
@@ -61,7 +64,6 @@ class DataclassTable(LogOwner) :
         #figure out where the csv file should go
         self.__filepath = filepath if filepath is not None else pathlib.Path() / f'{self.__dataclass_type.__name__}.csv'
         #set some other variables
-        self.__lock = Lock()
         self.__entry_objs = {}
         self.__entry_lines = {}
         #read or create the file to finish setting up the table
@@ -72,35 +74,91 @@ class DataclassTable(LogOwner) :
             msg+= f'to hold {self.__dataclass_type.__name__} entries'
             self.logger.info(msg)
             self.__write_lines(self.csv_header_line)
+        self.__file_last_updated = process_time()
+
+    def __del__(self) :
+        self.dump_to_file()
 
     def add_entries(self,new_entries) :
         """
         Add a new set of entries to the table
+        Clears obj_addresses_by_key_attr cache
 
-        new_entry_obj = the new entry to add to the table
+        new_entries = the new entry or entries to add to the table
         """
-        pass
+        if is_dataclass(new_entries) :
+            new_entries = [new_entries]
+        for entry in new_entries :
+            entry_addr = hex(id(entry))
+            if entry_addr in self.__entry_objs.keys() or entry_addr in self.__entry_lines.keys() :
+                self.logger.error('ERROR: address of object sent to add_entries is already registered!',ValueError)
+            self.__entry_objs[entry_addr] = entry
+            self.__entry_lines[entry_addr] = self.__line_from_obj(entry)
+            self.obj_addresses_by_key_attr.cache_clear()
+        if (process_time()-self.__file_last_updated)>DataclassTable.UPDATE_FILE_EVERY :
+            self.dump_to_file()
 
-    def get_entry_attrs(self,entry_obj_address,*args,**kwargs) :
+    def remove_entries(self,entry_obj_addresses) :
         """
-        Return a dictionary of all or some of the current attributes of am entry in the table
-        Use args/kwargs to get either a list or a dictionary returned, 
-        where args/kwargs are names of attribute values to return.
+        Remove an entry or entries from the table
+        Clears obj_addresses_by_key_attr cache
 
-        entry_obj_address = the address in memory of the object to return attributes for
+        entry_obj_addresses = a single value or container of entry addresses to remove from the table
         """
-        pass
+        for entry_addr in entry_obj_addresses :
+            if (entry_addr not in self.__entry_objs.keys()) or (entry_addr not in self.__entry_lines.keys()) :
+                self.logger.error(f'ERROR: address {entry_addr} sent to remove_entries is not registered!',ValueError)
+            self.__entry_objs.pop(entry_addr)
+            self.__entry_lines.pop(entry_addr)
+            self.obj_addresses_by_key_attr.cache_clear()
+        if (process_time()-self.__file_last_updated)>DataclassTable.UPDATE_FILE_EVERY :
+            self.dump_to_file()
 
-    def set_entry_attrs(self,entry_obj_address,attr_names_values) :
+    def get_entry_attrs(self,entry_obj_address,*args) :
+        """
+        Return copies of all or some of the current attributes of an entry in the table
+        Use args to get a dictionary of desired attribute values returned 
+        (if only one arg is given the return value is just that single attribute)
+        Returning copies ensures the original objects cannot be modified
+
+        entry_obj_address = the address in memory of the object to return copies of attributes for
+        """
+        if entry_obj_address not in self.__entry_objs.keys() :
+            errmsg = f'ERROR: address {entry_obj_address} sent to get_entry_attrs is not registered!'
+            self.logger.error(errmsg,ValueError)
+        obj = self.__entry_objs[entry_obj_address]
+        if len(args)==1 :
+            return copy.deepcopy(getattr(obj,args[0]))
+        to_return = {}
+        for fname in self.__field_names :
+            if args==() or fname in args :
+                to_return[fname] = copy.deepcopy(getattr(obj,fname))
+        if args!=() :
+            for arg in args :
+                if arg not in to_return.keys() :
+                    errmsg = f'WARNING: attribute name {arg} is not a name of a {self.__dataclass_type} '
+                    errmsg+= 'Field and will not be returned from get_entry_attrs!'
+                    self.logger.warning(errmsg)
+        return to_return
+
+    def set_entry_attrs(self,entry_obj_address,**kwargs) :
         """
         Modify attributes of an entry that already exists in the table
 
         entry_obj_address = The address in memory of the entry object to modify 
-        attr_names_values = A dictionary of attributes to set (keys are names, values are values for those named attrs)
+        kwargs = A dictionary of attributes to set (keys are names, values are values for those named attrs)
         """
-        pass
+        if entry_obj_address not in self.__entry_objs.keys() :
+            errmsg = f'ERROR: address {entry_obj_address} sent to set_entry_attrs is not registered!'
+            self.logger.error(errmsg,ValueError)
+        obj = self.__entry_objs[entry_obj_address]
+        for fname,fval in kwargs.items() :
+            setattr(obj,fname,fval)
+        self.__entry_lines[entry_obj_address] = self.__line_from_obj(obj)
+        if (process_time()-self.__file_last_updated)>DataclassTable.UPDATE_FILE_EVERY :
+            self.dump_to_file()
 
-    @methodtools.lru_cache(maxsize=3)
+    @methodtools.lru_cache(maxsize=5)
     def obj_addresses_by_key_attr(self,key_attr_name) :
         """
         Return a dictionary whose keys are the values of some given attribute for each object 
@@ -109,12 +167,28 @@ class DataclassTable(LogOwner) :
         
         Useful to find objects in the table by attribute values so they can be efficiently updated 
         without compromising the integrity of the objects in the table and their attributes
-        
-        Up to 3 return values are cached so you can work with more than one view of the objects in the table at a time
 
+        Up to five calls are cached so if nothing changes this happens a little faster
+        
         key_attr_name = the name of the attribute whose values should be used as keys in the returned dictionary
         """
-        pass
+        if key_attr_name not in self.__field_names :
+            errmsg = f'ERROR: {key_attr_name} is not a name of a Field for {self.__dataclass_type} objects!'
+            self.logger.error(errmsg,ValueError)
+        to_return = {}
+        for addr,obj in self.__entry_objs.items() :
+            rkey = getattr(obj,key_attr_name)
+            if rkey not in to_return.keys() :
+                to_return[rkey] = []
+            to_return[rkey].append(addr)
+        return to_return
+
+    def dump_to_file(self) :
+        """
+        Dump the contents of the table to a csv file
+        Call this to force the file to update and reflect the current state of objects
+        """
+        self.__write_lines([self.csv_header_line,*self.__entry_lines.values()])
 
     #################### PRIVATE HELPER FUNCTIONS ####################
 
@@ -152,13 +226,14 @@ class DataclassTable(LogOwner) :
         for line in lines :
             lines_string+=f'{line.strip()}\n'
         try :
-            with self.__lock :
+            with DataclassTable.THREAD_LOCK :
                 with atomic_write(self.__filepath,overwrite=overwrite) as fp :
                     fp.write(lines_string)
         except Exception as e :
             errmsg = f'ERROR: failed to write to {self.__class__.__name__} csv file at {self.__filepath}! '
             errmsg+=  'Will reraise exception.'
             self.logger.error(errmsg,exc_obj=e)
+        self.__file_last_updated = process_time()
 
     def __line_from_obj(self,obj) :
         """
@@ -168,7 +243,7 @@ class DataclassTable(LogOwner) :
             self.logger.error(f'ERROR: "{obj}" is mismatched to type {self.__dataclass_type}!',TypeError)
         s = ''
         for fname,ftype in zip(self.__field_names,self.__field_types) :
-            s+=f'{self.__get_str_from_attribute(getattr(obj,fname),ftype)}{self.DELIMETER}'
+            s+=f'{self.__get_str_from_attribute(getattr(obj,fname),ftype)}{DataclassTable.DELIMETER}'
         return s[:-1]
 
     def __obj_from_line(self,line) :
@@ -186,7 +261,7 @@ class DataclassTable(LogOwner) :
         return the string representation of it that should go in the file
         """
         if attrtype==datetime.datetime :
-            return repr(attrobj.strftime(self.DATETIME_FORMAT))
+            return repr(attrobj.strftime(DataclassTable.DATETIME_FORMAT))
         else :
             return repr(attrobj)
 
@@ -196,7 +271,7 @@ class DataclassTable(LogOwner) :
         """
         #datetime objects are handled in a custom way
         if attrtype==datetime.datetime :
-            return datetime.datetime.strptime(attrstr[1:-1],self.DATETIME_FORMAT)
+            return datetime.datetime.strptime(attrstr[1:-1],DataclassTable.DATETIME_FORMAT)
         #strings have extra quotes on either end
         elif attrtype==str :
             return attrtype(attrstr[1:-1])
