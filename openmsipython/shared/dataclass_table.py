@@ -1,5 +1,5 @@
 #imports
-import pathlib, methodtools, datetime, typing, copy
+import pathlib, methodtools, datetime, typing, copy, os
 from time import process_time
 from threading import Lock
 from dataclasses import fields, is_dataclass
@@ -33,6 +33,9 @@ class DataclassTable(LogOwner) :
     @property
     def csv_header_line(self) :
         s = ''
+        #add an extra line when running on Windows to seamlessly open the file in Excel
+        if os.name=='nt' :
+            s+=f'sep={DataclassTable.DELIMETER}\n'
         for fieldname in self.__field_names :
             s+=f'{fieldname}{DataclassTable.DELIMETER}'
         return s[:-1]
