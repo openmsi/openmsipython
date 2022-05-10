@@ -5,7 +5,7 @@ from confluent_kafka import SerializingProducer
 from kafkacrypto import KafkaProducer
 from ..shared.logging import LogOwner
 from ..shared.producible import Producible
-from .utilities import add_kwargs_to_configs, default_producer_callback
+from .utilities import add_kwargs_to_configs, default_producer_callback, make_callback
 from .config_file_parser import MyKafkaConfigFileParser
 from .my_kafka_crypto import MyKafkaCrypto
 from .serialization import CompoundSerializer
@@ -16,17 +16,6 @@ class MyProducer(LogOwner) :
     """
 
     POLL_EVERY = 5 # poll the producer at least every 5 calls to produce
-    N_CALLBACKS_SERVED = 0
-    THREAD_LOCK = Lock()
-
-    @property
-    def n_callbacks_served(self) :
-        n_new_callbacks = self.poll(0)
-        if (n_new_callbacks is not None) and (n_new_callbacks!=0) :
-            with MyProducer.THREAD_LOCK :
-                MyProducer.N_CALLBACKS_SERVED+=n_new_callbacks
-        with MyProducer.THREAD_LOCK :
-            return MyProducer.N_CALLBACKS_SERVED
 
     def __init__(self,producer_type,configs,kafkacrypto=None,**kwargs) :
         """
@@ -91,9 +80,6 @@ class MyProducer(LogOwner) :
         timeout     = max time (s) to wait for the message to be produced in the event of (repeated) BufferError(s)
         retry_sleep = how long (s) to wait between produce attempts if one fails with a BufferError
         """
-        #set the default callback if one hasn't been given
-        if callback is None :
-            callback = lambda err,msg : default_producer_callback(err,msg,logger=self.logger)
         #get the next object from the Queue
         obj = queue.get()
         #loop until "None" is pulled from the Queue
@@ -105,10 +91,9 @@ class MyProducer(LogOwner) :
                     self.logger.info(logmsg)
                 #get the Producible's callback arguments and set the callback to use
                 if callback is None :
-                    callback_to_use = lambda err,msg : default_producer_callback(err,msg,logger=self.logger,
-                                                                                 **obj.callback_kwargs)
+                    callback_to_use = make_callback(default_producer_callback,logger=self.logger,**obj.callback_kwargs)
                 else :
-                    callback_to_use = lambda err,msg : callback(err,msg,**obj.callback_kwargs)
+                    callback_to_use = make_callback(callback,**obj.callback_kwargs)
                 #produce the message to the topic
                 success=False; total_wait_secs=0 
                 while (not success) and total_wait_secs<timeout :
@@ -122,8 +107,6 @@ class MyProducer(LogOwner) :
                             total_wait_secs+=retry_sleep
                         else :
                             total_wait_secs = 0
-                            with MyProducer.THREAD_LOCK :
-                                MyProducer.N_CALLBACKS_SERVED+=n_new_callbacks
                 if not success :
                     warnmsg = f'WARNING: message with key {obj.msg_key} failed to buffer for more than '
                     warnmsg+= f'{total_wait_secs}s with no new callbacks served. This message will be re-enqueued.'
@@ -132,9 +115,6 @@ class MyProducer(LogOwner) :
                 self.__poll_counter+=1
                 if self.__poll_counter%self.POLL_EVERY==0 :
                     n_new_callbacks = self.poll(0)
-                    if (n_new_callbacks is not None) and (n_new_callbacks!=0) :
-                        with MyProducer.THREAD_LOCK :
-                            MyProducer.N_CALLBACKS_SERVED+=n_new_callbacks
                     self.__poll_counter = 0
             else :
                 warnmsg = f'WARNING: found an object of type {type(obj)} in a Producer queue that should only contain '

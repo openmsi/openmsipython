@@ -18,15 +18,15 @@ class DataclassTable(LogOwner) :
     THREAD_LOCK = Lock()
     UPDATE_FILE_EVERY = 5 #only update the .csv file at most every 5 seconds to make updates less expensive
 
-    @methodtools.lru_cache
+    @methodtools.lru_cache()
     @property
     def NESTED_TYPES(self) :
         simple_types = [str,int,float,complex,bool]
-        container_types = [(typing.List,list),(typing.Tuple,tuple),(typing.Set,set)]
+        container_types = [(typing.List,list,'[]'),(typing.Tuple,tuple,'()'),(typing.Set,set,'set()')]
         rd = {}
         for c_t in container_types :
             for s_t in simple_types :
-                rd[c_t[s_t]] = (c_t,s_t)
+                rd[c_t[0][s_t]] = (c_t[1],s_t,c_t[2])
         return rd
 
     @methodtools.lru_cache()
@@ -34,12 +34,16 @@ class DataclassTable(LogOwner) :
     def csv_header_line(self) :
         s = ''
         for fieldname in self.__field_names :
-            s+=f'{fieldname},'
+            s+=f'{fieldname}{DataclassTable.DELIMETER}'
         return s[:-1]
 
     @property
     def obj_addresses(self) :
         return self.__entry_objs.keys()
+
+    @property
+    def lock(self) :
+        return DataclassTable.THREAD_LOCK
 
     #################### PUBLIC FUNCTIONS ####################
 
@@ -67,14 +71,14 @@ class DataclassTable(LogOwner) :
         self.__entry_objs = {}
         self.__entry_lines = {}
         #read or create the file to finish setting up the table
+        self.__file_last_updated = process_time()
         if self.__filepath.is_file() :
             self.__read_csv_file()
         else :
             msg = f'Creating new {self.__class__.__name__} csv file at {self.__filepath} '
             msg+= f'to hold {self.__dataclass_type.__name__} entries'
             self.logger.info(msg)
-            self.__write_lines(self.csv_header_line)
-        self.__file_last_updated = process_time()
+            self.dump_to_file()
 
     def __del__(self) :
         self.dump_to_file()
@@ -92,9 +96,10 @@ class DataclassTable(LogOwner) :
             entry_addr = hex(id(entry))
             if entry_addr in self.__entry_objs.keys() or entry_addr in self.__entry_lines.keys() :
                 self.logger.error('ERROR: address of object sent to add_entries is already registered!',ValueError)
-            self.__entry_objs[entry_addr] = entry
-            self.__entry_lines[entry_addr] = self.__line_from_obj(entry)
-            self.obj_addresses_by_key_attr.cache_clear()
+            with DataclassTable.THREAD_LOCK :
+                self.__entry_objs[entry_addr] = entry
+                self.__entry_lines[entry_addr] = self.__line_from_obj(entry)
+                self.obj_addresses_by_key_attr.cache_clear()
         if (process_time()-self.__file_last_updated)>DataclassTable.UPDATE_FILE_EVERY :
             self.dump_to_file()
 
@@ -105,12 +110,15 @@ class DataclassTable(LogOwner) :
 
         entry_obj_addresses = a single value or container of entry addresses to remove from the table
         """
+        if type(entry_obj_addresses)==str :
+            entry_obj_addresses = [entry_obj_addresses]
         for entry_addr in entry_obj_addresses :
             if (entry_addr not in self.__entry_objs.keys()) or (entry_addr not in self.__entry_lines.keys()) :
                 self.logger.error(f'ERROR: address {entry_addr} sent to remove_entries is not registered!',ValueError)
-            self.__entry_objs.pop(entry_addr)
-            self.__entry_lines.pop(entry_addr)
-            self.obj_addresses_by_key_attr.cache_clear()
+            with DataclassTable.THREAD_LOCK :
+                self.__entry_objs.pop(entry_addr)
+                self.__entry_lines.pop(entry_addr)
+                self.obj_addresses_by_key_attr.cache_clear()
         if (process_time()-self.__file_last_updated)>DataclassTable.UPDATE_FILE_EVERY :
             self.dump_to_file()
 
@@ -151,10 +159,11 @@ class DataclassTable(LogOwner) :
         if entry_obj_address not in self.__entry_objs.keys() :
             errmsg = f'ERROR: address {entry_obj_address} sent to set_entry_attrs is not registered!'
             self.logger.error(errmsg,ValueError)
-        obj = self.__entry_objs[entry_obj_address]
-        for fname,fval in kwargs.items() :
-            setattr(obj,fname,fval)
-        self.__entry_lines[entry_obj_address] = self.__line_from_obj(obj)
+        with DataclassTable.THREAD_LOCK :
+            obj = self.__entry_objs[entry_obj_address]
+            for fname,fval in kwargs.items() :
+                setattr(obj,fname,fval)
+            self.__entry_lines[entry_obj_address] = self.__line_from_obj(obj)
         if (process_time()-self.__file_last_updated)>DataclassTable.UPDATE_FILE_EVERY :
             self.dump_to_file()
 
@@ -172,23 +181,25 @@ class DataclassTable(LogOwner) :
         
         key_attr_name = the name of the attribute whose values should be used as keys in the returned dictionary
         """
-        if key_attr_name not in self.__field_names :
-            errmsg = f'ERROR: {key_attr_name} is not a name of a Field for {self.__dataclass_type} objects!'
-            self.logger.error(errmsg,ValueError)
-        to_return = {}
-        for addr,obj in self.__entry_objs.items() :
-            rkey = getattr(obj,key_attr_name)
-            if rkey not in to_return.keys() :
-                to_return[rkey] = []
-            to_return[rkey].append(addr)
-        return to_return
+        with DataclassTable.THREAD_LOCK :
+            if key_attr_name not in self.__field_names :
+                errmsg = f'ERROR: {key_attr_name} is not a name of a Field for {self.__dataclass_type} objects!'
+                self.logger.error(errmsg,ValueError)
+            to_return = {}
+            for addr,obj in self.__entry_objs.items() :
+                rkey = getattr(obj,key_attr_name)
+                if rkey not in to_return.keys() :
+                    to_return[rkey] = []
+                to_return[rkey].append(addr)
+            return to_return
 
     def dump_to_file(self) :
         """
         Dump the contents of the table to a csv file
         Call this to force the file to update and reflect the current state of objects
         """
-        self.__write_lines([self.csv_header_line,*self.__entry_lines.values()])
+        with DataclassTable.THREAD_LOCK :
+            self.__write_lines([self.csv_header_line,*self.__entry_lines.values()])
 
     #################### PRIVATE HELPER FUNCTIONS ####################
 
@@ -196,9 +207,6 @@ class DataclassTable(LogOwner) :
         """
         Read in a csv file with lines of the expected dataclass type
         """
-        msg = f'Reading {self.__class__.__name__} csv file at {self.__filepath} '
-        msg+= f'to get {self.__dataclass_type} entries...'
-        self.logger.info(msg)
         #read the file
         with open(self.__filepath,'r') as fp :
             lines_as_read = fp.readlines()
@@ -226,9 +234,8 @@ class DataclassTable(LogOwner) :
         for line in lines :
             lines_string+=f'{line.strip()}\n'
         try :
-            with DataclassTable.THREAD_LOCK :
-                with atomic_write(self.__filepath,overwrite=overwrite) as fp :
-                    fp.write(lines_string)
+            with atomic_write(self.__filepath,overwrite=overwrite) as fp :
+                fp.write(lines_string)
         except Exception as e :
             errmsg = f'ERROR: failed to write to {self.__class__.__name__} csv file at {self.__filepath}! '
             errmsg+=  'Will reraise exception.'
@@ -251,9 +258,9 @@ class DataclassTable(LogOwner) :
         Return the dataclass instance for a given csv file line string
         """
         args = []
-        for attrtype,attrstr in zip(self.__field_types,(line.strip().split(','))) :
+        for attrtype,attrstr in zip(self.__field_types,(line.strip().split(DataclassTable.DELIMETER))) :
             args.append(self.__get_attribute_from_str(attrstr,attrtype))
-            return self.__dataclass_type(*args)
+        return self.__dataclass_type(*args)
 
     def __get_str_from_attribute(self,attrobj,attrtype) :
         """
@@ -262,6 +269,8 @@ class DataclassTable(LogOwner) :
         """
         if attrtype==datetime.datetime :
             return repr(attrobj.strftime(DataclassTable.DATETIME_FORMAT))
+        elif attrtype==pathlib.Path :
+            return repr(str(attrobj))
         else :
             return repr(attrobj)
 
@@ -272,6 +281,9 @@ class DataclassTable(LogOwner) :
         #datetime objects are handled in a custom way
         if attrtype==datetime.datetime :
             return datetime.datetime.strptime(attrstr[1:-1],DataclassTable.DATETIME_FORMAT)
+        #so are path objects
+        elif attrtype==pathlib.Path :
+            return pathlib.Path(attrstr[1:-1])
         #strings have extra quotes on either end
         elif attrtype==str :
             return attrtype(attrstr[1:-1])
@@ -280,6 +292,9 @@ class DataclassTable(LogOwner) :
             return attrtype(attrstr)
         #some simply-nested container types can be casted in two steps
         elif attrtype in self.NESTED_TYPES.keys() :
+            #empty collections
+            if attrstr==self.NESTED_TYPES[attrtype][2] :
+                return self.NESTED_TYPES[attrtype][0]()
             to_cast = []
             for vstr in attrstr[1:-1].split(',') :
                 to_cast.append(self.NESTED_TYPES[attrtype][1](vstr))

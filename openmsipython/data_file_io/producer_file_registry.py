@@ -30,11 +30,6 @@ class ProducerFileRegistry(LogOwner) :
     of which files have been uploaded to a particular topic
     """
 
-    @property
-    def REGISTRY_EXCLUDE_REGEX(self) :
-        #matches everything except a few specific files that are part of this ProducerFileRegistry
-        return re.compile(r'^((?!(REGISTRY_(files_to_upload_to_|files_fully_uploaded_to_).*.csv))).*$')
-
     def __init__(self,dirpath,topic_name,*args,**kwargs) :
         """
         dirpath    = path to the directory that should contain the csv file
@@ -42,11 +37,11 @@ class ProducerFileRegistry(LogOwner) :
         """
         super().__init__(*args,**kwargs)
         #A table to list the files currently in progress
-        in_prog_filepath = dirpath / f'REGISTRY_files_to_upload_to_{topic_name}.csv'
+        in_prog_filepath = dirpath / f'files_to_upload_to_{topic_name}.csv'
         self.__in_prog = DataclassTable(dataclass_type=RegistryLineInProgress,filepath=in_prog_filepath,
                                         logger=self.logger)
         #A table to list the files that have been completely produced
-        completed_filepath = dirpath / f'REGISTRY_files_fully_uploaded_to_{topic_name}.csv'
+        completed_filepath = dirpath / f'files_fully_uploaded_to_{topic_name}.csv'
         self.__completed = DataclassTable(dataclass_type=RegistryLineCompleted,filepath=completed_filepath,
                                           logger=self.logger)
 
@@ -80,46 +75,48 @@ class ProducerFileRegistry(LogOwner) :
                 errmsg = f'ERROR: found {len(existing_obj_addresses[filepath])} files in the producer registry '
                 errmsg+= f'for filepath {filepath}'
                 self.logger.error(errmsg,RuntimeError)
-            #get its current state
-            current_attrs = self.__in_prog.get_entry_attrs(existing_obj_addresses[filepath],
-                                                           'n_chunks','n_chunks_delivered','n_chunks_to_send',
-                                                           'chunks_delivered','chunks_to_send')
+            existing_addr = existing_obj_addresses[filepath][0]
             #make sure the total numbers of chunks match
-            if current_attrs['n_chunks']!=n_total_chunks :
+            existing_n_chunks = self.__in_prog.get_entry_attrs(existing_addr,'n_chunks')
+            if existing_n_chunks!=n_total_chunks :
                 errmsg = f'ERROR: {filepath} in {self.__class__.__name__} is listed as having '
-                errmsg+= f'{current_attrs["n_chunks"]} total chunks, but a callback for this file '
-                errmsg+= f'lists {n_total_chunks} chunks!'
+                errmsg+= f'{existing_n_chunks} total chunks, but the producer callback for this file '
+                errmsg+= f'lists {n_total_chunks} chunks! Did the chunk size change?'
                 self.logger.error(errmsg,RuntimeError)
-            #add this chunk index to the set of delivered chunk indices
-            new_chunks_delivered = current_attrs['chunks_delivered']
-            new_chunks_delivered.add(chunk_i)
-            #remove this chunk index from the set of chunk indices to send
-            new_chunks_to_send = current_attrs['chunks_to_send']
-            #because of "at least once" the chunk index might not be listed
-            try :
-                new_chunks_to_send.remove(chunk_i)
-            except KeyError :
-                pass
+            #editing the object's attributes has to be done in one thread at a time
+            with self.__in_prog.lock :
+                #get its current state
+                attrs = self.__in_prog.get_entry_attrs(existing_addr,'chunks_delivered','chunks_to_send')
+                #if the chunk is already registered, just return
+                if chunk_i in attrs['chunks_delivered'] :
+                    return False
+                #otherwise add/remove it from the sets
+                attrs['chunks_delivered'].add(chunk_i)
+                try :
+                    attrs['chunks_to_send'].remove(chunk_i)
+                except KeyError :
+                    pass
+                #reset the attributes for the object
+                new_attrs = {
+                    'n_chunks_delivered':len(attrs['chunks_delivered']),
+                    'n_chunks_to_send':len(attrs['chunks_to_send']),
+                    'chunks_delivered':attrs['chunks_delivered'],
+                    'chunks_to_send':attrs['chunks_to_send'],
+                    }
+            self.__in_prog.set_entry_attrs(existing_addr,**new_attrs)
             # if there are no more chunks to send and all chunks have been delivered, 
             # move this file from "in progress" to "completed" and force-dump the files
-            if len(new_chunks_to_send)==0 and len(new_chunks_delivered)==n_total_chunks :
-                started = self.__in_prog.get_entry_attrs(existing_obj_addresses[filepath],'started')
+            if ( self.__in_prog.get_entry_attrs(existing_addr,'n_chunks_delivered')==n_total_chunks and 
+                 self.__in_prog.get_entry_attrs(existing_addr,'n_chunks_to_send')==0 ) :
+                started = self.__in_prog.get_entry_attrs(existing_addr,'started')
                 completed_entry = RegistryLineCompleted(filename,filepath,n_total_chunks,
                                                         started,datetime.datetime.now())
                 self.__completed.add_entries(completed_entry)
                 self.__completed.dump_to_file()
-                self.__in_prog.remove_entries(existing_obj_addresses[filepath])
+                self.__in_prog.remove_entries(existing_addr)
                 self.__in_prog.dump_to_file()
                 return True
-            #otherwise just update the object in the "in progress" table
             else :
-                new_attrs = {
-                    'n_chunks_delivered':len(new_chunks_delivered),
-                    'n_chunks_to_send':len(new_chunks_to_send),
-                    'chunks_delivered':new_chunks_delivered,
-                    'chunks_to_send':new_chunks_to_send,
-                    }
-                self.__in_prog.set_entry_attrs(existing_obj_addresses[filepath],**new_attrs)
                 return False
         #otherwise it's a new file to add to "in_progress"
         else :
@@ -131,4 +128,5 @@ class ProducerFileRegistry(LogOwner) :
                                                    1,n_total_chunks-1,datetime.datetime.now(),
                                                    set([chunk_i]),to_deliver)
             self.__in_prog.add_entries(in_prog_entry)
+            self.__in_prog.dump_to_file()
             return False

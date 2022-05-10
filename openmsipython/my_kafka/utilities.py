@@ -37,3 +37,6 @@ def default_producer_callback(err,msg,logger=None,**other_kwargs) :
                 logger.error(logmsg)
             else :
                 raise RuntimeError(logmsg)
+
+def make_callback(func,*args,**kwargs) :
+    return lambda err,msg : func(err,msg,*args,**kwargs)

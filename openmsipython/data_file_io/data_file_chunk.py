@@ -61,7 +61,7 @@ class DataFileChunk(Producible) :
     def callback_kwargs(self):
         return {
             'filepath' : self.__filepath,
-            'filename' : self.__filename,
+            'filename' : self.filename,
             'n_total_chunks' : self.n_total_chunks,
             'chunk_i' : self.chunk_i,
             }
