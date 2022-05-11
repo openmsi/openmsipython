@@ -20,6 +20,7 @@ class TestDownloadDataFile(unittest.TestCase) :
         self.ul_datafile = UploadDataFile(TEST_CONST.TEST_DATA_FILE_PATH,
                                           rootdir=TEST_CONST.TEST_DATA_FILE_ROOT_DIR_PATH,logger=LOGGER)
         self.ul_datafile._build_list_of_file_chunks(RUN_OPT_CONST.DEFAULT_CHUNK_SIZE)
+        self.ul_datafile.add_chunks_to_upload()
 
     def run_download_chunks(self,disk_or_memory) :
         """

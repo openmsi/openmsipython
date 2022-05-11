@@ -1,5 +1,5 @@
 #imports
-import pathlib, re, datetime
+import pathlib, datetime
 from typing import Set
 from dataclasses import dataclass
 from ..shared.dataclass_table import DataclassTable

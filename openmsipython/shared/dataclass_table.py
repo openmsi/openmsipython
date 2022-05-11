@@ -84,7 +84,8 @@ class DataclassTable(LogOwner) :
             self.dump_to_file()
 
     def __del__(self) :
-        self.dump_to_file()
+        self.dump_to_file(reraise_exc=False)
+
 
     def add_entries(self,new_entries) :
         """
@@ -167,6 +168,7 @@ class DataclassTable(LogOwner) :
             for fname,fval in kwargs.items() :
                 setattr(obj,fname,fval)
             self.__entry_lines[entry_obj_address] = self.__line_from_obj(obj)
+            self.obj_addresses_by_key_attr.cache_clear()
         if (process_time()-self.__file_last_updated)>DataclassTable.UPDATE_FILE_EVERY :
             self.dump_to_file()
 
@@ -184,25 +186,25 @@ class DataclassTable(LogOwner) :
         
         key_attr_name = the name of the attribute whose values should be used as keys in the returned dictionary
         """
+        if key_attr_name not in self.__field_names :
+            errmsg = f'ERROR: {key_attr_name} is not a name of a Field for {self.__dataclass_type} objects!'
+            self.logger.error(errmsg,ValueError)
+        to_return = {}
         with DataclassTable.THREAD_LOCK :
-            if key_attr_name not in self.__field_names :
-                errmsg = f'ERROR: {key_attr_name} is not a name of a Field for {self.__dataclass_type} objects!'
-                self.logger.error(errmsg,ValueError)
-            to_return = {}
             for addr,obj in self.__entry_objs.items() :
                 rkey = getattr(obj,key_attr_name)
                 if rkey not in to_return.keys() :
                     to_return[rkey] = []
                 to_return[rkey].append(addr)
-            return to_return
+        return to_return
 
-    def dump_to_file(self) :
+    def dump_to_file(self,reraise_exc=True) :
         """
         Dump the contents of the table to a csv file
         Call this to force the file to update and reflect the current state of objects
         """
         with DataclassTable.THREAD_LOCK :
-            self.__write_lines([self.csv_header_line,*self.__entry_lines.values()])
+            self.__write_lines([self.csv_header_line,*self.__entry_lines.values()],reraise_exc=reraise_exc)
 
     #################### PRIVATE HELPER FUNCTIONS ####################
 
@@ -227,7 +229,7 @@ class DataclassTable(LogOwner) :
             self.__entry_lines[dkey] = line
         self.logger.info(f'Found {len(self.__entry_objs)} {self.__dataclass_type.__name__} entries in {self.__filepath}')
     
-    def __write_lines(self,lines,overwrite=True) :
+    def __write_lines(self,lines,overwrite=True,reraise_exc=True) :
         """
         Write a line or container of lines to the csv file, in a thread-safe and atomic way
         """
@@ -240,9 +242,13 @@ class DataclassTable(LogOwner) :
             with atomic_write(self.__filepath,overwrite=overwrite) as fp :
                 fp.write(lines_string)
         except Exception as e :
-            errmsg = f'ERROR: failed to write to {self.__class__.__name__} csv file at {self.__filepath}! '
-            errmsg+=  'Will reraise exception.'
-            self.logger.error(errmsg,exc_obj=e)
+            if reraise_exc :
+                errmsg = f'ERROR: failed to write to {self.__class__.__name__} csv file at {self.__filepath}! '
+                errmsg+=  'Will reraise exception.'
+                self.logger.error(errmsg,exc_obj=e)
+            else :
+                msg = f'WARNING: failed an attempt to write to {self.__class__.__name__} csv file at {self.__filepath}!'
+                self.logger.warning(msg)
         self.__file_last_updated = process_time()
 
     def __line_from_obj(self,obj) :

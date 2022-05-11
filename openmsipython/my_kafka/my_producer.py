@@ -1,6 +1,5 @@
 #imports
 import time
-from threading import Lock
 from confluent_kafka import SerializingProducer
 from kafkacrypto import KafkaProducer
 from ..shared.logging import LogOwner
