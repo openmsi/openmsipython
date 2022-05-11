@@ -67,16 +67,16 @@ class UploadDataFile(DataFile,Runnable) :
             msg = f'{self.filepath.relative_to(self.__rootdir)} '
         if not self.__to_upload :
             msg+='(will not be uploaded)'
-        elif self.__fully_enqueued :
-            msg+=f'({self.__n_total_chunks} message'
-            if self.__n_total_chunks!=1 :
-                msg+='s'
-            msg+=' fully enqueued)'
         elif self.__fully_produced :
             msg+=f'({self.__n_total_chunks} message'
             if self.__n_total_chunks!=1 :
                 msg+='s'
             msg+=' fully produced to broker)'
+        elif self.__fully_enqueued :
+            msg+=f'({self.__n_total_chunks} message'
+            if self.__n_total_chunks!=1 :
+                msg+='s'
+            msg+=' fully enqueued)'
         elif self.upload_in_progress :
             msg+=f'(in progress with {self.__n_total_chunks-len(self.__chunks_to_upload)}'
             msg+=f'/{self.__n_total_chunks} messages enqueued)'

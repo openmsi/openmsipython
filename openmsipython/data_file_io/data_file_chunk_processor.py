@@ -1,6 +1,7 @@
 #imports
 from abc import ABC, abstractmethod
 from threading import Lock
+from kafkacrypto.message import KafkaCryptoMessage
 from ..my_kafka.controlled_message_processor import ControlledMessageProcessor
 from .config import DATA_FILE_HANDLING_CONST
 from .data_file_chunk import DataFileChunk
@@ -56,12 +57,19 @@ class DataFileChunkProcessor(ControlledMessageProcessor,ABC) :
         add the chunk to the data file object. If the file is in progress this function returns True.
         Otherwise the code from DownloadDataFile.add_chunk will be returned.
 
+        If instead the message was encrypted and could not be successfully decrypted, this will return 
+        the raw Message object with KafkaCryptoMessages as its key and/or value
+
         rootdir_to_set = root directory for the new DataFileChunk
         logger = the logger object to use
         
         Child classes should call super()._process_message() before doing anything else with
         the message to perform these checks
         """
+        #if the message is a KafkaCryptoMessage, then decryption failed. Return the message object instead of a code.
+        if ( hasattr(dfc,'key') and hasattr(dfc,'value') and 
+             (isinstance(dfc.key,KafkaCryptoMessage) or isinstance(dfc.value,KafkaCryptoMessage)) ) :
+            return dfc
         #make sure the chunk is of the right type
         if not isinstance(dfc,DataFileChunk) :
             errmsg = f'ERROR: expected DataFileChunk messages but received a message of type {type(dfc)}!'

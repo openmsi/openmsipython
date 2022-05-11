@@ -14,9 +14,9 @@ class DataclassTable(LogOwner) :
     #################### PROPERTIES AND CONSTANTS ####################
 
     DELIMETER = ';' #can't use a comma or containers would display incorrectly
-    DATETIME_FORMAT = '%m/%d/%Y at %H:%M:%S'
+    DATETIME_FORMAT = '%a %b %d, %Y at %H:%M:%S'
     THREAD_LOCK = Lock()
-    UPDATE_FILE_EVERY = 5 #only update the .csv file at most every 5 seconds to make updates less expensive
+    UPDATE_FILE_EVERY = 5 #only update the .csv file automatically every 5 seconds to make updates less expensive
 
     @methodtools.lru_cache()
     @property

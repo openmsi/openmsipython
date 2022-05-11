@@ -1,5 +1,6 @@
 #imports
 from confluent_kafka import DeserializingConsumer
+from kafkacrypto.message import KafkaCryptoMessage
 from kafkacrypto import KafkaConsumer
 from ..shared.logging import LogOwner
 from .utilities import add_kwargs_to_configs
@@ -77,13 +78,22 @@ class MyConsumer(LogOwner) :
     def get_next_message_value(self,*poll_args,**poll_kwargs) :
         """
         Call "poll" for this consumer and return any successfully consumed message's value
-        otherwise log a warning if there's an error
+        otherwise log a warning if there's an error while calling poll
+
+        For the case of encrypted messages, this may return a Message object with 
+        KafkaCryptoMessages for its key and/or value if the message fails 
+        to be decrypted within a certain amount of time
         """ 
         #There's one version for the result of a KafkaConsumer.poll() call
         if isinstance(self.__consumer,KafkaConsumer) :
             #check if there are any messages still waiting to be processed from a recent KafkaCrypto poll call
             if isinstance(self.__consumer,KafkaConsumer) and len(self.__messages)>0 :
                 consumed_msg = self.__messages.pop(0)
+                # if the message key and value are still KafkaCryptoMessage objects, 
+                # then return the entire message that couldn't be decrypted
+                if ( isinstance(consumed_msg.key,KafkaCryptoMessage) or 
+                     isinstance(consumed_msg.value,KafkaCryptoMessage) ) :
+                    return consumed_msg
                 return consumed_msg.value
             msg_dict = self.__consumer.poll(*poll_args,**poll_kwargs)
             if msg_dict=={} :
