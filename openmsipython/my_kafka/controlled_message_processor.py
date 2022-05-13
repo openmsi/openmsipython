@@ -1,5 +1,5 @@
 #imports
-import time
+import time, traceback
 from abc import ABC, abstractmethod
 from ..shared.controlled_process import ControlledProcessMultiThreaded
 from .consumer_group import ConsumerGroup
@@ -30,19 +30,41 @@ class ControlledMessageProcessor(ControlledProcessMultiThreaded,ConsumerGroup,AB
         if self.alive :
             consumer = self.get_new_subscribed_consumer()
         #start the loop for while the controlled process is alive
+        last_message = None
         while self.alive :
             #consume a message from the topic
-            msg = consumer.get_next_message_value(ControlledMessageProcessor.CONSUMER_POLL_TIMEOUT)
+            msg = consumer.get_next_message(ControlledMessageProcessor.CONSUMER_POLL_TIMEOUT)
             if msg is None :
                 time.sleep(ControlledMessageProcessor.NO_MESSAGE_WAIT) #wait just a bit to not over-tax things
                 continue
             with lock :
                 self.n_msgs_read+=1
+            last_message = msg
             #send the message to the _process_message function
             retval = self._process_message(lock,msg)
+            #count and (asynchronously) commit the message as processed
             if retval :
+                consumer.commit(msg)
                 with lock :
                     self.n_msgs_processed+=1
+        #commit the offset of the last message received (block until done)
+        if last_message is not None :
+            try :
+                tps = consumer.commit(last_message,asynchronous=False)
+                for tp in tps :
+                    if tp.error is not None :
+                        warnmsg = 'WARNING: failed to synchronously commit offset of last message received on '
+                        warnmsg+= f'"{tp.topic}" partition {tp.partition}. Duplicate messages may result when this '
+                        warnmsg+= f'Consumer is restarted. Error reason: {tp.error.str()}'
+                        self.logger.warning(warnmsg)
+            except Exception as e :
+                warnmsg = 'WARNING: failed to synchronously commit offset of last message received. '
+                warnmsg+= 'Duplicate messages may be read the next time this Consumer is started.'
+                try :
+                    raise e
+                except Exception :
+                    warnmsg+= f' Error traceback: {traceback.format_exc()}'
+                self.logger.warning(warnmsg)
         #shut down the Consumer that was created once the process isn't alive anymore
         consumer.close()
 

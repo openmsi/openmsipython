@@ -1,6 +1,5 @@
 #imports
-from confluent_kafka import DeserializingConsumer
-from kafkacrypto.message import KafkaCryptoMessage
+from confluent_kafka import DeserializingConsumer, Message, TopicPartition
 from kafkacrypto import KafkaConsumer
 from ..shared.logging import LogOwner
 from .utilities import add_kwargs_to_configs
@@ -75,7 +74,7 @@ class MyConsumer(LogOwner) :
         args_to_use, kwargs_to_use = MyConsumer.get_consumer_args_kwargs(*args,**kwargs)
         return cls(*args_to_use,**kwargs_to_use)
 
-    def get_next_message_value(self,*poll_args,**poll_kwargs) :
+    def get_next_message(self,*poll_args,**poll_kwargs) :
         """
         Call "poll" for this consumer and return any successfully consumed message's value
         otherwise log a warning if there's an error while calling poll
@@ -89,19 +88,14 @@ class MyConsumer(LogOwner) :
             #check if there are any messages still waiting to be processed from a recent KafkaCrypto poll call
             if isinstance(self.__consumer,KafkaConsumer) and len(self.__messages)>0 :
                 consumed_msg = self.__messages.pop(0)
-                # if the message key and value are still KafkaCryptoMessage objects, 
-                # then return the entire message that couldn't be decrypted
-                if ( isinstance(consumed_msg.key,KafkaCryptoMessage) or 
-                     isinstance(consumed_msg.value,KafkaCryptoMessage) ) :
-                    return consumed_msg
-                return consumed_msg.value
+                return consumed_msg
             msg_dict = self.__consumer.poll(*poll_args,**poll_kwargs)
             if msg_dict=={} :
                 return
             for pk in msg_dict.keys() :
                 for m in msg_dict[pk] :
                     self.__messages.append(m)
-            return self.get_next_message_value(*poll_args,**poll_kwargs)
+            return self.get_next_message(*poll_args,**poll_kwargs)
         #And another version for a regular Consumer
         else :
             consumed_msg = None
@@ -118,12 +112,21 @@ class MyConsumer(LogOwner) :
                     warnmsg = f'WARNING: unexpected consumed message, consumed_msg = {consumed_msg}'
                     warnmsg+= f', consumed_msg.error() = {consumed_msg.error()}, consumed_msg.value() = {consumed_msg.value()}'
                     self.logger.warning(warnmsg)
-                return consumed_msg.value()
+                return consumed_msg
             else :
                 return
 
     def subscribe(self,*args,**kwargs) :
         self.__consumer.subscribe(*args,**kwargs)
+
+    def commit(self,message=None,offsets=None,asynchronous=True) :
+        if (message is not None) and (not isinstance(message,Message)) :
+            try :
+                tpo = TopicPartition(message.topic,message.partition,message.offset)
+                return self.__consumer.commit(message=None,offsets=[tpo],asynchronous=asynchronous)
+            except :
+                pass
+        return self.__consumer.commit(message=message,offsets=offsets,asynchronous=asynchronous)
     
     def close(self,*args,**kwargs) :
         self.__consumer.close(*args,**kwargs)

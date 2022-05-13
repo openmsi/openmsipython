@@ -113,7 +113,7 @@ class DataFileStreamProcessor(DataFileChunkProcessor,LogOwner,ABC) :
                 del self.locks_by_fp[dfc.filepath]
             return False
         else :
-            self.logger.error(f'ERROR: unrecognized add_chunk return code ({retval})!',NotImplementedError)
+            self.logger.error(f'ERROR: unrecognized add_chunk return value ({retval})!',NotImplementedError)
             return False
 
     def _on_check(self) :
