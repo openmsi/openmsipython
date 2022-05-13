@@ -1,5 +1,5 @@
 #imports
-import pathlib, logging
+import pathlib, logging, traceback
 
 class MyFormatter(logging.Formatter) :
     """
@@ -86,13 +86,22 @@ class Logger :
         self._logger_obj.warning(msg,*args,**kwargs)
 
     #log an error message and optionally raise an exception with the same message, or raise a different exception
-    def error(self,msg,exception_type=None,exc_obj=None,*args,**kwargs) :
+    def error(self,msg,exception_type=None,exc_obj=None,reraise=True,*args,**kwargs) :
         if not msg.startswith('ERROR:') :
             msg = f'ERROR: {msg}'
         self._logger_obj.error(msg,*args,**kwargs)
         if exc_obj is not None :
-            raise exc_obj
-        if exception_type is not None :
+            try :
+                raise exc_obj
+            except Exception :
+                exc_to_log = 'ERROR: Exception: ['
+                for line in (traceback.format_exc()).split('\n') :
+                    exc_to_log+=f'{line},'
+                exc_to_log+=']'
+                self._logger_obj.error(exc_to_log)
+                if reraise :
+                    raise exc_obj
+        if exception_type is not None : 
             raise exception_type(msg)
 
 class LogOwner :

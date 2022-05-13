@@ -57,6 +57,16 @@ class DataFileChunk(Producible) :
     def msg_value(self) :
         return self
 
+    @property
+    def callback_kwargs(self):
+        return {
+            'filepath' : self.__filepath,
+            'filename' : self.filename,
+            'n_total_chunks' : self.n_total_chunks,
+            'chunk_i' : self.chunk_i,
+            }
+        
+
     #################### PUBLIC FUNCTIONS ####################
 
     def __init__(self,filepath,filename,file_hash,chunk_hash,chunk_offset_read,chunk_offset_write,chunk_size,chunk_i,

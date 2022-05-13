@@ -1,7 +1,9 @@
 #imports
 import datetime
+from kafkacrypto.message import KafkaCryptoMessage
 from ..shared.runnable import Runnable
 from .config import DATA_FILE_HANDLING_CONST, RUN_OPT_CONST
+from .utilities import get_encrypted_message_key_and_value_filenames
 from .download_data_file import DownloadDataFileToDisk
 from .data_file_directory import DataFileDirectory
 from .data_file_chunk_processor import DataFileChunkProcessor
@@ -23,6 +25,7 @@ class DataFileDownloadDirectory(DataFileChunkProcessor,DataFileDirectory,Runnabl
             errmsg = 'ERROR: DataFileDownloadDirectory requires a datafile_type that is a subclass of '
             errmsg+= f'DownloadDataFileToDisk but {self.datafile_type} was given!'
             self.logger.error(errmsg,ValueError)
+        self.__encrypted_messages_subdir = self.dirpath/'ENCRYPTED_MESSAGES'
 
     def reconstruct(self) :
         """
@@ -38,15 +41,37 @@ class DataFileDownloadDirectory(DataFileChunkProcessor,DataFileDirectory,Runnabl
 
     #################### PRIVATE HELPER FUNCTIONS ####################
 
-    def _process_message(self, lock, dfc):
-        retval = super()._process_message(lock,dfc,self.dirpath,self.logger)
+    def _process_message(self, lock, msg):
+        retval = super()._process_message(lock,msg,self.dirpath,self.logger)
+        #if the message was returned because it couldn't be decrypted, write it to the encrypted messages directory
+        if ( hasattr(retval,'key') and hasattr(retval,'value') and 
+             (isinstance(retval.key,KafkaCryptoMessage) or isinstance(retval.value,KafkaCryptoMessage)) ) :
+            if not self.__encrypted_messages_subdir.is_dir() :
+                self.__encrypted_messages_subdir.mkdir(parents=True)
+            key_fn, value_fn = get_encrypted_message_key_and_value_filenames(retval,self.topic_name)
+            key_fp = self.__encrypted_messages_subdir/key_fn
+            value_fp = self.__encrypted_messages_subdir/value_fn
+            warnmsg = 'WARNING: encountered a message that failed to be decrypted. Key bytes will be written to '
+            warnmsg+= f'{key_fp.relative_to(self.dirpath)} and value bytes will be written to '
+            warnmsg+= f'{value_fp.relative_to(self.dirpath)}'
+            self.logger.warning(warnmsg)
+            with open(key_fp,'wb') as f :
+                f.write(bytes(retval.key))
+            with open(value_fp,'wb') as f :
+                f.write(bytes(retval.value))
+            return False #because the message wasn't processed successfully
         if retval==True :
             return retval
+        #get the DataFileChunk from the message value
+        try :
+            dfc = msg.value() #from a regular Kafka Consumer
+        except :
+            dfc = msg.value #from KafkaCrypto
         #If the file was successfully reconstructed, return True
         if retval==DATA_FILE_HANDLING_CONST.FILE_SUCCESSFULLY_RECONSTRUCTED_CODE :
-            msg = f'File {self.files_in_progress_by_path[dfc.filepath].full_filepath.relative_to(dfc.rootdir)} '
-            msg+= 'successfully reconstructed from stream'
-            self.logger.info(msg)
+            infomsg = f'File {self.files_in_progress_by_path[dfc.filepath].full_filepath.relative_to(dfc.rootdir)} '
+            infomsg+= 'successfully reconstructed from stream'
+            self.logger.info(infomsg)
             self.completely_processed_filepaths.append(dfc.filepath)
             with lock :
                 del self.files_in_progress_by_path[dfc.filepath]
@@ -62,7 +87,7 @@ class DataFileDownloadDirectory(DataFileChunkProcessor,DataFileDirectory,Runnabl
                 del self.locks_by_fp[dfc.filepath]
             return False
         else :
-            self.logger.error(f'ERROR: unrecognized add_chunk return code ({retval})!',NotImplementedError)
+            self.logger.error(f'ERROR: unrecognized add_chunk return value ({retval})!',NotImplementedError)
             return False
 
     def _on_check(self) :

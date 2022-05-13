@@ -29,31 +29,49 @@ class UploadDataFile(DataFile,Runnable) :
     @property
     def to_upload(self):
         return self.__to_upload #whether or not this file will be considered when uploading some group of data files
+    @to_upload.setter
+    def to_upload(self,tu) :
+        if tu and (not self.__to_upload) :
+            self.logger.debug(f'Setting {self.filepath} to be uploaded')
+        elif (not tu) and self.__to_upload :
+            self.logger.debug(f'Setting {self.filepath} to NOT be uploaded')
+        self.__to_upload = tu
     @property
-    def fully_enqueued(self): #whether or not this file has had all of its chunks added to an upload queue somewhere
+    def fully_produced(self) : #whether or not this file has had all of its chunks successfully sent to the broker
+        return self.__fully_produced
+    @fully_produced.setter
+    def fully_produced(self,fp) :
+        self.__fully_produced = fp
+    @property
+    def fully_enqueued(self) : #whether or not this file has had all of its chunks added to an upload queue somewhere
         return self.__fully_enqueued
     @property
-    def waiting_to_upload(self): #whether or not this file is waiting for its upload to begin
+    def waiting_to_upload(self) : #whether or not this file is waiting for its upload to begin
         if (not self.__to_upload) or self.__fully_enqueued :
             return False
         if len(self.__chunks_to_upload)>0 :
             return False
         return True
     @property
-    def upload_in_progress(self): #whether this file is in the process of being enqueued to be uploaded
+    def upload_in_progress(self) : #whether this file is in the process of being enqueued to be uploaded
         if (not self.__to_upload) or self.__fully_enqueued :
             return False
         if len(self.__chunks_to_upload)==0 :
             return False
         return True
     @property
-    def upload_status_msg(self): #a message stating the file's name and status w.r.t. being enqueued to be uploaded 
+    def upload_status_msg(self) : #a message stating the file's name and status w.r.t. being enqueued to be uploaded 
         if self.__rootdir is None :
             msg = f'{self.filepath} '
         else :
             msg = f'{self.filepath.relative_to(self.__rootdir)} '
         if not self.__to_upload :
             msg+='(will not be uploaded)'
+        elif self.__fully_produced :
+            msg+=f'({self.__n_total_chunks} message'
+            if self.__n_total_chunks!=1 :
+                msg+='s'
+            msg+=' fully produced to broker)'
         elif self.__fully_enqueued :
             msg+=f'({self.__n_total_chunks} message'
             if self.__n_total_chunks!=1 :
@@ -86,10 +104,40 @@ class UploadDataFile(DataFile,Runnable) :
             self.__rootdir = rootdir
         self.__filename_append = filename_append
         self.__fully_enqueued = False
+        self.__fully_produced = False
         self.__chunks_to_upload = []
         self.__n_total_chunks = 0
+        self.__chunk_infos = None
 
-    def add_chunks_to_upload_queue(self,queue,n_threads=None,chunk_size=RUN_OPT_CONST.DEFAULT_CHUNK_SIZE,
+    def add_chunks_to_upload(self,chunks_to_add=None,chunk_size=RUN_OPT_CONST.DEFAULT_CHUNK_SIZE) :
+        """
+        Add chunks from this file to the list of chunks to upload, possibly with some selection
+
+        chunks_to_add = a list of chunk indices to add to the list to be uploaded
+                        (Default=None adds all chunks)
+        """
+        if self.__chunk_infos is None :
+            try :
+                self._build_list_of_file_chunks(chunk_size)
+            except Exception :
+                self.logger.info(traceback.format_exc())
+                fp = self.filepath.relative_to(self.__rootdir) if self.__rootdir is not None else self.filepath
+                errmsg = f'ERROR: was not able to break {fp} into chunks for uploading. '
+                errmsg+= 'Check log lines above for details on what went wrong. File will not be uploaded.'
+                self.logger.error(errmsg)
+                self.__to_upload = False
+                return
+        #add the chunks to the final list as DataFileChunk objects
+        for ic,c in enumerate(self.__chunk_infos,start=1) :
+            if chunks_to_add is None or ic in chunks_to_add :
+                self.__chunks_to_upload.append(DataFileChunk(self.filepath,self.filename,self.__file_hash,
+                                                            c[0],c[1],c[2],c[3],ic,self.__n_total_chunks,
+                                                            rootdir=self.__rootdir,
+                                                            filename_append=self.__filename_append))
+        if len(self.__chunks_to_upload)>0 and self.__fully_enqueued :
+            self.__fully_enqueued = False
+
+    def enqueue_chunks_for_upload(self,queue,n_threads=None,chunk_size=RUN_OPT_CONST.DEFAULT_CHUNK_SIZE,
                                    queue_full_timeout=0.001) :
         """
         Add chunks of this file to a given upload queue. 
@@ -105,7 +153,7 @@ class UploadDataFile(DataFile,Runnable) :
         queue_full_timeout = amount of time to wait if the queue is full and new messages can't be added
         """
         if self.__fully_enqueued :
-            warnmsg = f'WARNING: add_chunks_to_upload_queue called for fully enqueued file {self.filepath}, '
+            warnmsg = f'WARNING: enqueue_chunks_for_upload called for fully enqueued file {self.filepath}, '
             warnmsg+= 'nothing else will be added.'
             self.logger.warning(warnmsg)
             return
@@ -113,16 +161,7 @@ class UploadDataFile(DataFile,Runnable) :
             time.sleep(queue_full_timeout)
             return
         if len(self.__chunks_to_upload)==0 :
-            try :
-                self._build_list_of_file_chunks(chunk_size)
-            except Exception :
-                self.logger.info(traceback.format_exc())
-                fp = self.filepath.relative_to(self.__rootdir) if self.__rootdir is not None else self.filepath
-                errmsg = f'ERROR: was not able to break {fp} into chunks for uploading. '
-                errmsg+= 'Check log lines above for details on what went wrong. File will not be uploaded.'
-                self.logger.error(errmsg)
-                self.__to_upload = False
-                return
+            self.add_chunks_to_upload(chunk_size=chunk_size)
         if n_threads is not None :
             n_chunks_to_add = 5*n_threads
         else :
@@ -154,7 +193,7 @@ class UploadDataFile(DataFile,Runnable) :
         self.logger.info(startup_msg)
         #add all the chunks to the upload queue
         upload_queue = Queue()
-        self.add_chunks_to_upload_queue(upload_queue,chunk_size=chunk_size)
+        self.enqueue_chunks_for_upload(upload_queue,chunk_size=chunk_size)
         #add "None" to the queue for each thread as the final values
         for ti in range(n_threads) :
             upload_queue.put(None)
@@ -172,10 +211,12 @@ class UploadDataFile(DataFile,Runnable) :
         self.logger.info('Done!')
 
     #################### PRIVATE HELPER FUNCTIONS ####################
-
+    
     def _build_list_of_file_chunks(self,chunk_size) :
         """
-        Build the full list of DataFileChunks for this file given a chunk size (in bytes)
+        Build the list of DataFileChunks for this file
+
+        chunk_size = the size of each chunk in bytes
         """
         #first make sure the choices of select_bytes are valid if necessary 
         #and sort them by their start byte to keep the file hash in order
@@ -223,13 +264,14 @@ class UploadDataFile(DataFile,Runnable) :
                 chunk = fp.read(n_bytes_to_read)
         file_hash = file_hash.digest()
         self.logger.info(f'File {self.filepath} has a total of {len(chunks)} chunks')
+        #set the hash for the file
+        self.__file_hash = file_hash
         #set the total number of chunks for this file
         self.__n_total_chunks = len(chunks)
-        #add all the chunks to the final list as DataFileChunk objects
-        for ic,c in enumerate(chunks,start=1) :
-            self.__chunks_to_upload.append(DataFileChunk(self.filepath,self.filename,file_hash,
-                                                         c[0],c[1],c[2],c[3],ic,self.__n_total_chunks,
-                                                         rootdir=self.__rootdir,filename_append=self.__filename_append))
+        #build the list of all of the chunk infos for the file
+        self.__chunk_infos = []
+        for c in chunks :
+            self.__chunk_infos.append(c)
 
     #################### CLASS METHODS ####################
 

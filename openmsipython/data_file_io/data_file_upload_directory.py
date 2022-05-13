@@ -2,11 +2,13 @@
 import pathlib, datetime, time
 from threading import Thread
 from queue import Queue
+from ..utilities.misc import populated_kwargs
 from ..shared.config import UTIL_CONST
 from ..shared.runnable import Runnable
 from ..shared.controlled_process import ControlledProcessSingleThread
 from ..my_kafka.my_producer import MyProducer
 from .config import RUN_OPT_CONST
+from .producer_file_registry import ProducerFileRegistry
 from .data_file_directory import DataFileDirectory
 from .upload_data_file import UploadDataFile
 
@@ -17,8 +19,9 @@ class DataFileUploadDirectory(DataFileDirectory,ControlledProcessSingleThread,Ru
 
     #################### CONSTANTS AND PROPERTIES ####################
 
-    MIN_WAIT_TIME = 0.05 # starting point for how long to wait between pinging the directory looking for new files
+    MIN_WAIT_TIME = 0.005 # starting point for how long to wait between pinging the directory looking for new files
     MAX_WAIT_TIME = 60 # never wait more than a minute to check again for new files
+    LOG_SUBDIR_NAME = 'LOGS'
 
     @property
     def other_datafile_kwargs(self) :
@@ -26,8 +29,7 @@ class DataFileUploadDirectory(DataFileDirectory,ControlledProcessSingleThread,Ru
     @property
     def progress_msg(self) :
         self.__find_new_files()
-        progress_msg = f'Producer has served {self.__producer.n_callbacks_served} message callbacks. '
-        progress_msg += 'The following files have been recognized so far:\n'
+        progress_msg = 'The following files have been recognized so far:\n'
         for datafile in self.data_files_by_path.values() :
             if not datafile.to_upload :
                 continue
@@ -54,6 +56,12 @@ class DataFileUploadDirectory(DataFileDirectory,ControlledProcessSingleThread,Ru
         datafile_type = the type of data file that recognized files should be uploaded as 
             (must be a subclass of UploadDataFile)
         """
+        #create a subdirectory for the logs
+        self.__logs_subdir = args[0]/self.LOG_SUBDIR_NAME
+        if not self.__logs_subdir.is_dir() :
+            self.__logs_subdir.mkdir(parents=True)
+        #put the log file in the subdirectory
+        kwargs = populated_kwargs(kwargs,{'logger_file':self.__logs_subdir})
         super().__init__(*args,**kwargs)
         if not issubclass(datafile_type,UploadDataFile) :
             errmsg = 'ERROR: DataFileUploadDirectory requires a datafile_type that is a subclass of '
@@ -80,12 +88,18 @@ class DataFileUploadDirectory(DataFileDirectory,ControlledProcessSingleThread,Ru
                            i.e., if False (the default) then only files added to the directory after startup
                            will be enqueued to the producer
         """
+        #start up a file registry in the watched directory
+        self.__file_registry = ProducerFileRegistry(dirpath=self.__logs_subdir,topic_name=topic_name,logger=self.logger)
+        #set the chunk size and topic name
         self.__chunk_size = chunk_size
+        self.__topic_name = topic_name
         #start the producer 
         self.__producer = MyProducer.from_file(config_path,logger=self.logger)
         #if we're only going to upload new files, exclude what's already in the directory
         if not upload_existing :
             self.__find_new_files(to_upload=False)
+        #add or modify datafiles to upload based on the contents of the file registry
+        self.__startup_from_file_registry()
         #start the upload queue and thread
         msg = 'Will upload '
         if not upload_existing :
@@ -97,13 +111,16 @@ class DataFileUploadDirectory(DataFileDirectory,ControlledProcessSingleThread,Ru
         self.__upload_queue = Queue(max_queue_size)
         self.__upload_threads = []
         for _ in range(n_threads) :
-            t = Thread(target=self.__producer.produce_from_queue,args=(self.__upload_queue,topic_name))
+            t = Thread(target=self.__producer.produce_from_queue,
+                       args=(self.__upload_queue,self.__topic_name),
+                       kwargs={'callback': self.producer_callback},
+                    )
             t.start()
             self.__upload_threads.append(t)
         #loop until the user inputs a command to stop
         self.run()
         #return a list of filepaths that have been uploaded
-        return [fp for fp,datafile in self.data_files_by_path.items() if datafile.fully_enqueued]
+        return [fp for fp,datafile in self.data_files_by_path.items() if datafile.fully_produced]
 
     def filepath_should_be_uploaded(self,filepath) :
         """
@@ -113,9 +130,49 @@ class DataFileUploadDirectory(DataFileDirectory,ControlledProcessSingleThread,Ru
             self.logger.error(f'ERROR: {filepath} passed to filepath_should_be_uploaded is not a Path!',TypeError)
         if not filepath.is_file() :
             return False
+        if filepath.parent == self.__logs_subdir :
+            return False
         if self.__upload_regex.match(filepath.name) :
             return True
         return False
+
+    def producer_callback(self,err,msg,filename,filepath,n_total_chunks,chunk_i) :
+        """
+        This function is called for every message that is acknowledged by the broker, and it uses the file registries
+        to keep the information about what has and hasn't been uploaded current to what's on the broker
+
+        err = The KafkaError object for the message
+        msg = The Message object
+        filename = the name of the file the message is coming from
+        filepath = the full path to the file the message is coming from
+        n_total_chunks = the total number of chunks in the message
+        chunk_i = the index of the file chunk in the message
+        """
+        # If any error occured, re-enqueue the message's file chunk 
+        if err is None and msg.error() is not None :
+            err = msg.error()
+        if err is not None : 
+            if err.fatal() :
+                msg =f'WARNING: fatally failed to deliver message for chunk {chunk_i} of {filepath}. '
+                msg+=f'This message will be re-enqeued. Error reason: {err.str()}'
+            elif not err.retriable() :
+                msg =f'WARNING: Failed to deliver message for chunk {chunk_i} of {filepath} and cannot retry. '
+                msg+= f'This message will be re-enqueued. Error reason: {err.str()}'
+            self.logger.warning(msg)
+            self.__add_chunks_for_filepath(filepath,[chunk_i])
+        # Otherwise, register the chunk as successfully sent to the broker
+        else :
+            fully_produced = self.__file_registry.register_chunk(filename,filepath,n_total_chunks,chunk_i)
+            #If the file has now been fully produced to the topic, set the variable for the file and log a line
+            if fully_produced :
+                self.data_files_by_path[filepath].fully_produced = True
+                msg = f'{filepath.relative_to(self.dirpath)} has been fully produced to the '
+                msg+= f'"{self.__topic_name}" topic as '
+                if n_total_chunks==1 :
+                    msg+=f'{n_total_chunks} message'
+                else :
+                    msg+=f'a set of {n_total_chunks} messages'
+                self.logger.info(msg)
 
     #################### PRIVATE HELPER FUNCTIONS ####################
 
@@ -125,20 +182,25 @@ class DataFileUploadDirectory(DataFileDirectory,ControlledProcessSingleThread,Ru
             # wait here with some slight backoff so that the watched directory isn't just constantly pinged
             time.sleep(self.__wait_time) 
             self.__find_new_files()
-            if not self.have_file_to_upload :
+            n_new_callbacks = self.__producer.poll(0)
+            if (not self.have_file_to_upload) and (n_new_callbacks is None or n_new_callbacks==0) :
                 if self.__wait_time<self.MAX_WAIT_TIME :
                     self.__wait_time*=1.1
             else :
                 self.__wait_time = self.MIN_WAIT_TIME
+            return
         #find the first file that's running and add some of its chunks to the upload queue 
         for datafile in self.data_files_by_path.values() :
             if datafile.upload_in_progress or datafile.waiting_to_upload :
-                datafile.add_chunks_to_upload_queue(self.__upload_queue,
+                datafile.enqueue_chunks_for_upload(self.__upload_queue,
                                                     n_threads=len(self.__upload_threads),
                                                     chunk_size=self.__chunk_size)
-                return
+        #check for new files again 
+        self.__find_new_files()
 
     def _on_check(self) :
+        #poll the producer
+        self.__producer.poll(0)
         #log progress so far
         self.logger.debug(self.progress_msg)
         #reset the wait time
@@ -156,7 +218,7 @@ class DataFileUploadDirectory(DataFileDirectory,ControlledProcessSingleThread,Ru
         while self.n_partially_done_files>0 :
             for datafile in self.data_files_by_path.values() :
                 if datafile.upload_in_progress :
-                    datafile.add_chunks_to_upload_queue(self.__upload_queue,
+                    datafile.enqueue_chunks_for_upload(self.__upload_queue,
                                                         n_threads=len(self.__upload_threads),
                                                         chunk_size=self.__chunk_size)
                     break
@@ -199,6 +261,47 @@ class DataFileUploadDirectory(DataFileDirectory,ControlledProcessSingleThread,Ru
         except FileNotFoundError :
             return
 
+    def __startup_from_file_registry(self) :
+        """
+        Look through the file registry to find and prepare to enqueue any files 
+        that were in progress the last time the code was shut down and ignore 
+        any files that have previously been fuly uploaded
+        """
+        #make sure any files listed as "in progress" have their remaining chunks enqueued
+        for filepath,chunks in self.__file_registry.get_incomplete_filepaths_and_chunks() :
+            self.logger.info(f'Found {filepath} in progress from a previous run. Will re-enqueue {len(chunks)} chunks.')
+            self.__add_chunks_for_filepath(filepath,chunks)
+        #make sure any files listed as "completed" will not be uploaded again
+        for filepath in self.__file_registry.get_completed_filepaths() :
+            if filepath in self.data_files_by_path.keys() :
+                if self.data_files_by_path[filepath].to_upload :
+                    msg = f'Found {filepath} listed as fully uploaded during a previous run. Will not produce it again.'
+                    self.logger.info(msg)
+                self.data_files_by_path[filepath].to_upload=False
+            elif filepath.is_file() :
+                msg = f'Found {filepath} listed as fully uploaded during a previous run. Will not produce it again.'
+                self.logger.info(msg)
+                self.data_files_by_path[filepath]=self.__datafile_type(filepath,
+                                                                       to_upload=False,
+                                                                       rootdir=self.dirpath,
+                                                                       logger=self.logger,
+                                                                       **self.other_datafile_kwargs)    
+
+    def __add_chunks_for_filepath(self,filepath,chunks) :
+        """
+        Add the given chunks to the list of chunks to upload for a given file
+        Creates the file if it doesn't already exist in the dictionary of recognized files
+        """
+        if filepath in self.data_files_by_path.keys() :
+            self.data_files_by_path[filepath].to_upload=True
+        else :
+            self.data_files_by_path[filepath]=self.__datafile_type(filepath,
+                                                                    to_upload=True,
+                                                                    rootdir=self.dirpath,
+                                                                    logger=self.logger,
+                                                                    **self.other_datafile_kwargs)
+        self.data_files_by_path[filepath].add_chunks_to_upload(chunks,chunk_size=self.__chunk_size)
+
     #################### CLASS METHODS ####################
 
     @classmethod
@@ -238,7 +341,7 @@ class DataFileUploadDirectory(DataFileDirectory,ControlledProcessSingleThread,Ru
             final_msg+='s were'
         final_msg+=f' uploaded between {run_start} and {run_stop}:\n'
         for fp in uploaded_filepaths :
-            final_msg+=f'\t{fp}\n'
+            final_msg+=f'\t{fp.relative_to(args.upload_dir)}\n'
         upload_file_directory.logger.info(final_msg)
 
 #################### MAIN METHOD TO RUN FROM COMMAND LINE ####################

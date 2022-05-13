@@ -1,7 +1,9 @@
 #imports
 import unittest, pathlib, time, logging, shutil, filecmp
 from openmsipython.shared.logging import Logger
+from openmsipython.shared.dataclass_table import DataclassTable
 from openmsipython.data_file_io.config import RUN_OPT_CONST
+from openmsipython.data_file_io.producer_file_registry import RegistryLineInProgress, RegistryLineCompleted
 from openmsipython.data_file_io.data_file_upload_directory import DataFileUploadDirectory
 from openmsipython.data_file_io.data_file_download_directory import DataFileDownloadDirectory
 from config import TEST_CONST
@@ -56,6 +58,19 @@ class TestDataFileDirectories(unittest.TestCase) :
                 errmsg = 'ERROR: upload thread in run_data_file_upload_directory '
                 errmsg+= f'timed out after {TIMEOUT_SECS} seconds!'
                 raise TimeoutError(errmsg)
+            #make sure that the ProducerFileRegistry files were created and list the file as completely uploaded
+            log_subdir = TEST_CONST.TEST_WATCHED_DIR_PATH/DataFileUploadDirectory.LOG_SUBDIR_NAME
+            in_prog_filepath = log_subdir / f'files_to_upload_to_{TOPIC_NAME}.csv'
+            completed_filepath = log_subdir / f'files_fully_uploaded_to_{TOPIC_NAME}.csv'
+            self.assertTrue(in_prog_filepath.is_file())
+            in_prog_table = DataclassTable(RegistryLineInProgress,filepath=in_prog_filepath,logger=LOGGER)
+            self.assertTrue(in_prog_table.obj_addresses_by_key_attr('filename')=={})
+            del in_prog_table
+            self.assertTrue(completed_filepath.is_file())
+            completed_table = DataclassTable(RegistryLineCompleted,filepath=completed_filepath,logger=LOGGER)
+            addrs_by_fp = completed_table.obj_addresses_by_key_attr('filepath')
+            self.assertTrue(fp in addrs_by_fp.keys())
+            del completed_table
         except Exception as e :
             raise e
         finally :

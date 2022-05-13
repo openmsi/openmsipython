@@ -94,12 +94,12 @@ def populated_kwargs(given_kwargs,defaults,logger=None) :
 
 @contextlib.contextmanager
 def cd(dir):
-  """
-  Change the current working directory to a different directory,
-  and go back when leaving the context manager.
-  """
-  cdminus = os.getcwd()
-  try:
-    yield os.chdir(dir)
-  finally:
-    os.chdir(cdminus)
+    """
+    Change the current working directory to a different directory,
+    and go back when leaving the context manager.
+    """
+    cdminus = os.getcwd()
+    try:
+        yield os.chdir(dir)
+    finally:
+        os.chdir(cdminus)

@@ -3,7 +3,7 @@ import pathlib, re
 
 class UtilityConstants :
     """
-    Constants for routines in utilities
+    Constants for routines in shared
     """
     @property
     def CONFIG_FILE_EXT(self) :

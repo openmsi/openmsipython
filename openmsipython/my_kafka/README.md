@@ -18,6 +18,7 @@ The different sections recognized by the `openmsipython` code are:
 1. `[consumer]` to configure a Consumer used by a program. Again here any [parameters recognized by Kafka Consumers](https://docs.confluent.io/platform/current/installation/configuration/consumer-configs.html) in general are valid, but some of the most useful are:
     - `group.id` to group Consumers amongst one another. Giving "`new`" for this parameter will create a new group ID every time the code is run.
     - `auto.offset.reset` to tell the Consumer where in the log to start consuming messages if no previously-committed offset for the consumer group can be found. "`earliest`" will start at the beginning of the topic and "`latest`" will start at the end. Giving "`none`" for this parameter will remove it from the configs, and an error will be thrown if no previously-committed offset for the consumer group can be found.
+    - `enable.auto.commit` to tell the Consumer whether or not to automatically commit offsets. Some portions of the code manually commit offsets, and if this config is left as its default value (True) a Warning will be logged stating that the "at least once" guarantee is not valid unless you set `enable.auto.commit = False`.
     - `fetch.min.bytes` to change how many bytes must accumulate before a batch of messages is consumed from the topic (consuming batches of messages is also subject to a timeout, so changing this parameter will only ever adjust the tradeoff between throughput and latency, but will not prevent any messages from being consumed in general)
     - `key.deserializer` and `value.deserializer` to change methods used to convert message keys and values (respectively) from byte arrays to objects. The `openmsipython` code provides an additional option called [`DataFileChunkDeserializer`](./serialization.py#L118-#L160) to convert a chunk of a data file as a byte array to a [`DataFileChunk` object](../data_file_io/data_file_chunk.py).
 
@@ -63,3 +64,6 @@ If provisioning has been performed without using the `ProvisionNode` command, or
 
 An example of a config file used to set up producers/consumers passing encrypted messages can be found [here](./config_files/test_encrypted.config).
 
+### Undecryptable messages for DataFileDownloadDirectory
+
+If any messages cannot be successfully decrypted by a `DataFileDownloadDirectory` for any reason, the binary contents of their encrypted keys and values will be written out to timestamped files in a subdirectory called "`ENCRYPTED_MESSAGES`" inside the reconstruction directory. One file will be written for the encrypted key and another will be written for the encrypted value. These files can be decrypted later if necessary.

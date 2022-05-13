@@ -26,6 +26,15 @@ class Producible(ABC) :
         """
         raise NotImplementedError
 
+    @property
+    def callback_kwargs(self) :
+        """
+        A dictionary of keyword arguments that should be sent to the callback function 
+        for Producers producing messages of this Producible
+        Empty for the base class
+        """
+        return {}
+
     @abstractmethod
     def get_log_msg(self,print_every=None) :
         """

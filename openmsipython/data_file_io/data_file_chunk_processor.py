@@ -1,6 +1,7 @@
 #imports
 from abc import ABC, abstractmethod
 from threading import Lock
+from kafkacrypto.message import KafkaCryptoMessage
 from ..my_kafka.controlled_message_processor import ControlledMessageProcessor
 from .config import DATA_FILE_HANDLING_CONST
 from .data_file_chunk import DataFileChunk
@@ -50,18 +51,33 @@ class DataFileChunkProcessor(ControlledMessageProcessor,ABC) :
     #################### PRIVATE HELPER FUNCTIONS ####################
 
     @abstractmethod
-    def _process_message(self, lock, dfc, rootdir_to_set, logger):
+    def _process_message(self, lock, msg, rootdir_to_set, logger):
         """
-        Make sure messages are of the expected DataFileChunk type with no root directory set, and then 
+        Make sure message values are of the expected DataFileChunk type with no root directory set, and then 
         add the chunk to the data file object. If the file is in progress this function returns True.
         Otherwise the code from DownloadDataFile.add_chunk will be returned.
 
+        If instead the message was encrypted and could not be successfully decrypted, this will return 
+        the raw Message object with KafkaCryptoMessages as its key and/or value
+
+        lock = the Thread Lock object to use when processing the file this message comes from
+        msg = the actual message object from a call to consumer.poll
         rootdir_to_set = root directory for the new DataFileChunk
         logger = the logger object to use
         
         Child classes should call super()._process_message() before doing anything else with
         the message to perform these checks
         """
+        # If the message has KafkaCryptoMessages as its key and/or value, then decryption failed. 
+        # Return the message object instead of a code.
+        if ( hasattr(msg,'key') and hasattr(msg,'value') and 
+             (isinstance(msg.key,KafkaCryptoMessage) or isinstance(msg.value,KafkaCryptoMessage)) ) :
+            return msg
+        #get the DataFileChunk from the message value
+        try :
+            dfc = msg.value() #from a regular Kafka Consumer
+        except :
+            dfc = msg.value #from KafkaCrypto
         #make sure the chunk is of the right type
         if not isinstance(dfc,DataFileChunk) :
             errmsg = f'ERROR: expected DataFileChunk messages but received a message of type {type(dfc)}!'
