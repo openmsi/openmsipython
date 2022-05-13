@@ -123,10 +123,16 @@ class MyConsumer(LogOwner) :
         if (message is not None) and (not isinstance(message,Message)) :
             try :
                 tpo = TopicPartition(message.topic,message.partition,message.offset)
-                return self.__consumer.commit(message=None,offsets=[tpo],asynchronous=asynchronous)
+                return self.__consumer.commit(offsets=[tpo],asynchronous=asynchronous)
             except :
                 pass
-        return self.__consumer.commit(message=message,offsets=offsets,asynchronous=asynchronous)
+        if message is None :
+            return self.__consumer.commit(offsets=offsets,asynchronous=asynchronous)
+        elif offsets is None :
+            return self.__consumer.commit(message=message,asynchronous=asynchronous)
+        else :
+            errmsg = 'ERROR: "message" and "offset" arguments are exclusive for Consumer.commit. Nothing commited.'
+            self.logger.error(errmsg)
     
     def close(self,*args,**kwargs) :
         self.__consumer.close(*args,**kwargs)

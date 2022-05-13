@@ -41,8 +41,8 @@ class DataFileDownloadDirectory(DataFileChunkProcessor,DataFileDirectory,Runnabl
 
     #################### PRIVATE HELPER FUNCTIONS ####################
 
-    def _process_message(self, lock, dfc):
-        retval = super()._process_message(lock,dfc,self.dirpath,self.logger)
+    def _process_message(self, lock, msg):
+        retval = super()._process_message(lock,msg,self.dirpath,self.logger)
         #if the message was returned because it couldn't be decrypted, write it to the encrypted messages directory
         if ( hasattr(retval,'key') and hasattr(retval,'value') and 
              (isinstance(retval.key,KafkaCryptoMessage) or isinstance(retval.value,KafkaCryptoMessage)) ) :
@@ -62,11 +62,16 @@ class DataFileDownloadDirectory(DataFileChunkProcessor,DataFileDirectory,Runnabl
             return False #because the message wasn't processed successfully
         if retval==True :
             return retval
+        #get the DataFileChunk from the message value
+        try :
+            dfc = msg.value() #from a regular Kafka Consumer
+        except :
+            dfc = msg.value #from KafkaCrypto
         #If the file was successfully reconstructed, return True
         if retval==DATA_FILE_HANDLING_CONST.FILE_SUCCESSFULLY_RECONSTRUCTED_CODE :
-            msg = f'File {self.files_in_progress_by_path[dfc.filepath].full_filepath.relative_to(dfc.rootdir)} '
-            msg+= 'successfully reconstructed from stream'
-            self.logger.info(msg)
+            infomsg = f'File {self.files_in_progress_by_path[dfc.filepath].full_filepath.relative_to(dfc.rootdir)} '
+            infomsg+= 'successfully reconstructed from stream'
+            self.logger.info(infomsg)
             self.completely_processed_filepaths.append(dfc.filepath)
             with lock :
                 del self.files_in_progress_by_path[dfc.filepath]

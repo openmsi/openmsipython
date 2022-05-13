@@ -67,14 +67,19 @@ class DataFileStreamProcessor(DataFileChunkProcessor,LogOwner,ABC) :
         self.logger.warning(warnmsg)
         return False
 
-    def _process_message(self,lock,dfc):
-        retval = super()._process_message(lock, dfc, (pathlib.Path()).resolve(), self.logger)
+    def _process_message(self,lock,msg):
+        retval = super()._process_message(lock, msg, (pathlib.Path()).resolve(), self.logger)
         #if the message was returned because it couldn't be decrypted, write it to the encrypted messages directory
         if ( hasattr(retval,'key') and hasattr(retval,'value') and 
              (isinstance(retval.key,KafkaCryptoMessage) or isinstance(retval.value,KafkaCryptoMessage)) ) :
             return self._undecryptable_message_callback(retval)
         if retval==True :
             return retval
+        #get the DataFileChunk from the message value
+        try :
+            dfc = msg.value() #from a regular Kafka Consumer
+        except :
+            dfc = msg.value #from KafkaCrypto
         #if the file has had all of its messages read successfully, send it to the processing function
         if retval==DATA_FILE_HANDLING_CONST.FILE_SUCCESSFULLY_RECONSTRUCTED_CODE :
             short_filepath = self.files_in_progress_by_path[dfc.filepath].full_filepath.relative_to(dfc.rootdir)

@@ -75,9 +75,9 @@ class DataFileChunkProcessor(ControlledMessageProcessor,ABC) :
             return msg
         #get the DataFileChunk from the message value
         try :
-            dfc = msg.value #from KafkaCrypto
-        except :
             dfc = msg.value() #from a regular Kafka Consumer
+        except :
+            dfc = msg.value #from KafkaCrypto
         #make sure the chunk is of the right type
         if not isinstance(dfc,DataFileChunk) :
             errmsg = f'ERROR: expected DataFileChunk messages but received a message of type {type(dfc)}!'
