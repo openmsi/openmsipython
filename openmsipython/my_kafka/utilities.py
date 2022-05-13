@@ -1,3 +1,6 @@
+#imports
+from collections import namedtuple
+
 def add_kwargs_to_configs(configs,**kwargs) :
     """
     Add any kwargs with underscores replaced with dots to a given config dictionary
@@ -40,3 +43,7 @@ def default_producer_callback(err,msg,logger=None,**other_kwargs) :
 
 def make_callback(func,*args,**kwargs) :
     return lambda err,msg : func(err,msg,*args,**kwargs)
+
+
+KCCommitOffsetDictKey = namedtuple('KCCommitOffsetDictKey',['topic','partition'])
+KCCommitOffset = namedtuple('KCCommitOffset',['offset'])

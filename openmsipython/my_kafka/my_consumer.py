@@ -1,8 +1,8 @@
 #imports
-from confluent_kafka import DeserializingConsumer, Message, TopicPartition
+from confluent_kafka import DeserializingConsumer, Message
 from kafkacrypto import KafkaConsumer
 from ..shared.logging import LogOwner
-from .utilities import add_kwargs_to_configs
+from .utilities import add_kwargs_to_configs, KCCommitOffsetDictKey, KCCommitOffset
 from .config_file_parser import MyKafkaConfigFileParser
 from .my_kafka_crypto import MyKafkaCrypto
 from .serialization import CompoundDeserializer
@@ -106,7 +106,7 @@ class MyConsumer(LogOwner) :
                 warnmsg+= f'Exception: {e}'
                 self.logger.warning(warnmsg)
                 #raise e
-                return
+                return None
             if consumed_msg is not None and consumed_msg!={} :
                 if consumed_msg.error() is not None or consumed_msg.value() is None :
                     warnmsg = f'WARNING: unexpected consumed message, consumed_msg = {consumed_msg}'
@@ -114,7 +114,7 @@ class MyConsumer(LogOwner) :
                     self.logger.warning(warnmsg)
                 return consumed_msg
             else :
-                return
+                return None
 
     def subscribe(self,*args,**kwargs) :
         self.__consumer.subscribe(*args,**kwargs)
@@ -122,10 +122,13 @@ class MyConsumer(LogOwner) :
     def commit(self,message=None,offsets=None,asynchronous=True) :
         if (message is not None) and (not isinstance(message,Message)) :
             try :
-                tpo = TopicPartition(message.topic,message.partition,message.offset)
-                return self.__consumer.commit(offsets=[tpo],asynchronous=asynchronous)
+                offset_dict = {KCCommitOffsetDictKey(message.topic,message.partition):KCCommitOffset(message.offset)}
+                return self.__consumer.commit(offsets=offset_dict)#,asynchronous=asynchronous) #will add this back in
             except :
-                pass
+                warnmsg = 'WARNING: failed to commit an offset for an encrypted message. '
+                warnmsg = 'Duplicates may result if the Consumer is restarted.'
+                self.logger.warning(warnmsg)
+                return None
         if message is None :
             return self.__consumer.commit(offsets=offsets,asynchronous=asynchronous)
         elif offsets is None :
