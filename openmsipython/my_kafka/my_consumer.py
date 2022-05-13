@@ -28,6 +28,7 @@ class MyConsumer(LogOwner) :
             self.__consumer = consumer_type(configs)
         else :
             self.logger.error(f'ERROR: Unrecognized consumer type {consumer_type} for MyConsumer!',ValueError)
+        self.configs = configs
 
     @staticmethod
     def get_consumer_args_kwargs(config_file_path,logger=None,**kwargs) :
