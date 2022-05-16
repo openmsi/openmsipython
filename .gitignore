@@ -58,6 +58,7 @@ __pycache__/
 .DS_Store
 .DS_Store?
 ._*
+.bak
 .Spotlight-V100
 .Trashes
 ehthumbs.db
