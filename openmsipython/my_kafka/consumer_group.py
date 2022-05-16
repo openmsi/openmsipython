@@ -11,6 +11,9 @@ class ConsumerGroup :
     def topic_name(self) :
         return self.__topic_name
 
+    def get_osn_config(self):
+        return self.__osn_config
+
     def __init__(self,config_path,topic_name,*,consumer_group_ID=str(uuid.uuid1()),**other_kwargs) :
         """
         arguments:
@@ -21,8 +24,8 @@ class ConsumerGroup :
         consumer_group_ID = ID to use for all consumers in the group (a new & unique ID is created by default)
         """
         self.__topic_name = topic_name
-        self.__c_args, self.__c_kwargs = MyConsumer.get_consumer_args_kwargs(config_path,
-                                                                             group_id=consumer_group_ID,**other_kwargs)   
+        self.__c_args, self.__c_kwargs, self.__osn_config = MyConsumer.get_consumer_args_kwargs(config_path,
+                                                                             group_id=consumer_group_ID,**other_kwargs)
 
     def get_new_subscribed_consumer(self) :
         """
