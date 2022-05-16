@@ -89,6 +89,10 @@ class MyArgumentParser(ArgumentParser) :
             ['positional',{'type':create_dir,'help':'Path to the directory to put output in'}],
         'upload_dir':
             ['positional',{'type':existing_dir,'help':'Path to the directory to watch for files to upload'}],
+        'bucket_name':
+            ['positional', {'type': detect_bucket_name, 
+                            'help': '''Name of the object store bucket to which consumed files should be transferred.
+                                       Name should only contain valid characters'''}],
         'config':
             ['optional',{'default':RUN_OPT_CONST.DEFAULT_CONFIG_FILE,'type':config_path,
                          'help':f'''Name of config file to use in {UTIL_CONST.CONFIG_FILE_DIR.resolve()}, 
@@ -96,11 +100,9 @@ class MyArgumentParser(ArgumentParser) :
         'topic_name':
             ['optional',{'default':RUN_OPT_CONST.DEFAULT_TOPIC_NAME,
                          'help':'Name of the topic to produce to or consume from'}],
-        'bucket_name':
-            ['positional', {'type': detect_bucket_name, 'help': 'the bucket name only should contain valid characters'}],
         'logger_file':
             ['optional', {'default': pathlib.Path(), 'type': pathlib.Path,
-                          'help': f'''Path to the log file (or directory to hold the auto-named logfile)'''}],        
+                          'help': '''Path to the log file (or directory to hold the auto-named logfile)'''}],        
         'n_threads':
             ['optional',{'default':UTIL_CONST.DEFAULT_N_THREADS,'type':positive_int,
                          'help':'Maximum number of threads to use'}],
