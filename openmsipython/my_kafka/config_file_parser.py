@@ -30,6 +30,11 @@ class MyKafkaConfigFileParser(ConfigFileParser) :
     #################### PROPERTIES ####################
 
     @property
+    def osn_configs(self) :
+        if self.__osn_configs is None :
+            self.__osn_configs = self.__get_config_dict('osn')
+        return self.__osn_configs
+    @property
     def broker_configs(self) :
         if self.__broker_configs is None :
             self.__broker_configs = self.__get_config_dict('broker')
@@ -57,6 +62,7 @@ class MyKafkaConfigFileParser(ConfigFileParser) :
 
     def __init__(self,*args,**kwargs) :
         super().__init__(*args,**kwargs)
+        self.__osn_configs = None
         self.__broker_configs = None
         self.__producer_configs = None
         self.__consumer_configs = None
