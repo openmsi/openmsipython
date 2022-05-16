@@ -44,6 +44,15 @@ def config_path(configarg) :
         return (UTIL_CONST.CONFIG_FILE_DIR/configpath).resolve()
     raise ValueError(f'ERROR: config argument {configarg} is not a recognized config file!')
 
+#detects if the bucket name contains the valid characters
+def detect_bucket_name(argstring) :
+    if argstring is None : #Then the argument wasn't given and nothing should be done
+        return None
+    illegel_charcters = ['#', '%', '&' ,'{', '}', '\\', '/', '<', '>', '*', '?', ' ', '$', '!', '\'', '\"', ':', '@', '+', '`', '|', '=']
+    if argstring in illegel_charcters:
+        raise RuntimeError(f'ERROR: Illegal characters in bucket_name {argstring}')
+    return argstring
+
 #make sure a given value is a nonzero integer power of two (or can be converted to one)
 def int_power_of_two(argval) :
     if not isinstance(argval,int) :
@@ -86,6 +95,11 @@ class MyArgumentParser(ArgumentParser) :
         'topic_name':
             ['optional',{'default':RUN_OPT_CONST.DEFAULT_TOPIC_NAME,
                          'help':'Name of the topic to produce to or consume from'}],
+        'bucket_name':
+            ['positional', {'type': detect_bucket_name, 'help': 'the bucket name only should contain valid characters'}],
+        'logger_file':
+            ['optional', {'default': pathlib.Path(), 'type': pathlib.Path,
+                          'help': f'''Path to the log file (or directory to hold the auto-named logfile)'''}],        
         'n_threads':
             ['optional',{'default':UTIL_CONST.DEFAULT_N_THREADS,'type':positive_int,
                          'help':'Maximum number of threads to use'}],
