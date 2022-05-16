@@ -44,12 +44,13 @@ def config_path(configarg) :
         return (UTIL_CONST.CONFIG_FILE_DIR/configpath).resolve()
     raise ValueError(f'ERROR: config argument {configarg} is not a recognized config file!')
 
-#detects if the bucket name contains the valid characters
+#detects if the bucket name contains invalid characters
 def detect_bucket_name(argstring) :
     if argstring is None : #Then the argument wasn't given and nothing should be done
         return None
-    illegel_charcters = ['#', '%', '&' ,'{', '}', '\\', '/', '<', '>', '*', '?', ' ', '$', '!', '\'', '\"', ':', '@', '+', '`', '|', '=']
-    if argstring in illegel_charcters:
+    illegal_charcters = ['#', '%', '&' ,'{', '}', '\\', '/', '<', '>', '*', '?', ' ', 
+                         '$', '!', '\'', '\"', ':', '@', '+', '`', '|', '=']
+    if argstring in illegal_charcters:
         raise RuntimeError(f'ERROR: Illegal characters in bucket_name {argstring}')
     return argstring
 
