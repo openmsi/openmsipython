@@ -84,12 +84,10 @@ class osn_stream_processor(DataFileStreamProcessor, Runnable):
 
 def main(args=None):
     args = [
-        # 'C:\\osn_data',
-            'phy210127-bucket01', '--config',
-            'C:\\Users\Amir\\PycharmProjects\\OpenMSIProject\\openmsipython\\my_kafka\\config_files\\test.config',
+        #  ' ',
+            ' ', '--config',
+            ' ',
             '--topic_name', 'laser_topic']
-    # args = ['C:\\ttt', '--config', 'C:\\Users\Amir\\PycharmProjects\\OpenMSIProject\\openmsipython\\my_kafka\\config_files\\test.config', '--topic_name', 'new_dir_test']
-
     #
 
     osn_stream_processor.run_from_command_line(args)
