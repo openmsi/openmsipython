@@ -6,7 +6,8 @@
 
 import boto3
 
-class osn_service(object):
+class OSNService(object) :
+    
     def __init__(self, osn_config):
         self.session = boto3.session.Session()
         self.bucket_name = osn_config['bucket_name']
