@@ -10,8 +10,8 @@ from .osn_service import OSNService
 
 class S3DataTransfer(OSNService,LogOwner) :
 
-    def __init__(self, osn_config):
-        super().__init__(osn_config)
+    def __init__(self, osn_config, *args, **kwargs):
+        super().__init__(osn_config,*args,**kwargs)
 
     def transfer_object_stream(self, datafile):
         file_name = str(datafile.filename)
@@ -21,9 +21,9 @@ class S3DataTransfer(OSNService,LogOwner) :
         try:
             self.s3_client.put_object(Body=datafile.bytestring, Bucket=self.bucket_name,
                                       Key=osn_full_path, GrantRead=self.grant_read)
-            logging.info(file_name + ' successfully transferred into /' + sub_dir)
+            self.logger.info(file_name + ' successfully transferred into /' + sub_dir)
         except ClientError as e:
-            logging.error(e.response + ': failed to transfer ' + file_name + ' into /'
+            self.logger.error(e.response + ': failed to transfer ' + file_name + ' into /'
                           + sub_dir)
 
 #    def transfer_object_file(self):

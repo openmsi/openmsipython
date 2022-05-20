@@ -1,6 +1,5 @@
 #imports
-import os
-import unittest, pathlib, time, logging, shutil, filecmp
+import unittest, pathlib, time, logging, shutil
 
 from openmsipython.osn.osn_stream_processor import osn_stream_processor
 from openmsipython.shared.logging import Logger
