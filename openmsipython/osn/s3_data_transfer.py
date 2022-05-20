@@ -15,17 +15,16 @@ class S3DataTransfer(OSNService,LogOwner) :
 
     def transfer_object_stream(self, datafile):
         file_name = str(datafile.filename)
-        full_path = str(datafile.filepath).replace('\\', '/')
-        msi_path = '/openmsipython/osn/'
-        l = len(msi_path)
-        osn_full_path = full_path[full_path.rindex(msi_path) + l:]
-        osn_dir_path = osn_full_path[: osn_full_path.index(file_name)]
+        sub_dir=datafile.get_subdir_str
+        osn_full_path = sub_dir + '/' + file_name
+
         try:
             self.s3_client.put_object(Body=datafile.bytestring, Bucket=self.bucket_name,
                                       Key=osn_full_path, GrantRead=self.grant_read)
-            self.logger.info(file_name + ' successfully transferred into /' + osn_dir_path)
+            logging.info(file_name + ' successfully transferred into /' + sub_dir)
         except ClientError as e:
-            self.logger.error(e.response + ': failed to transfer ' + file_name + ' into /' + osn_dir_path)
+            logging.error(e.response + ': failed to transfer ' + file_name + ' into /'
+                          + sub_dir)
 
 #    def transfer_object_file(self):
 #        local_path_list = []
