@@ -13,47 +13,37 @@ class S3DataTransfer(OSNService,LogOwner) :
     def __init__(self, osn_config, *args, **kwargs):
         super().__init__(osn_config,*args,**kwargs)
 
-    def transfer_object_stream(self, datafile):
+    def transfer_object_stream(self, topic_name,datafile):
         file_name = str(datafile.filename)
         sub_dir=datafile.get_subdir_str
-        osn_full_path = sub_dir + '/' + file_name
+        osn_full_path = topic_name + '/' + sub_dir + '/' + file_name
+
 
         try:
             self.s3_client.put_object(Body=datafile.bytestring, Bucket=self.bucket_name,
-                                      Key=osn_full_path, GrantRead=self.grant_read)
-            self.logger.info(file_name + ' successfully transferred into /' + sub_dir)
+                                      Key=osn_full_path
+                                      # , GrantRead=self.grant_read
+                                      )
+            msg = file_name + ' successfully transferred into /' + sub_dir
+            logging.info(msg)
         except ClientError as e:
             self.logger.error(e.response + ': failed to transfer ' + file_name + ' into /'
                           + sub_dir)
 
-#    def transfer_object_file(self):
-#        local_path_list = []
-#        for root, subdirectories, files in os.walk(OSN_DOWNLOAD):
-#            for file in files:
-#                if file == 'DataFileDownloadDirectory.log':
-#                    continue
-#
-#                my_root = str(root)
-#
-#                s3_path = os.path.join(my_root, file).replace(OSN_DOWNLOAD, '').replace('\\', '/')
-#                if '/' in s3_path:
-#                    m = s3_path.rindex('/')
-#                    s3_dir = s3_path[0:m]
-#                else:
-#                    s3_dir = ''
-#
-#                print(s3_dir)
-#                if len(s3_dir) > 0 and s3_dir not in local_path_list:
-#                    local_path_list.append(s3_dir)
-#                    self.s3_client.put_object(Bucket=BUCKET_NAME, Key=(s3_dir + '/'))
-#
-#                local_path = os.path.join(my_root, file).replace('/', '\\')
-#                print(local_path)
-#                try:
-#                    if len(s3_dir) == 0:
-#                        self.s3_client.upload_file(local_path, BUCKET_NAME, str(file))
-#                    else:
-#                        self.s3_client.upload_file(local_path, BUCKET_NAME, '%s/%s' % (str(s3_dir), str(file)))
-#                    os.remove(local_path)
-#                except ClientError as e:
-#                    print(e.response)
+    def find_by_object_key(self, key):
+        return super().find_by_object_key(key)
+
+    def get_object_stream_by_osn_datafile(self, topic_name, bucket_name, datafile):
+        return super().get_object_stream_by_osn_datafile(topic_name, bucket_name, datafile)
+
+    def get_object_stream_by_object_key(self, bucket_name, object_key):
+        return super().get_object_stream_by_object_key(bucket_name, object_key)
+
+    def compare_consumer_datafile_with_osn_object_stream(self, topic_name, bucket_name, datafile):
+        return super().compare_consumer_datafile_with_osn_object_stream(topic_name, bucket_name, datafile)
+
+    def compare_producer_datafile_with_osn_object_stream(self, bucket_name, object_key, hashed_datafile_stream):
+        return super().compare_producer_datafile_with_osn_object_stream(bucket_name, object_key, hashed_datafile_stream)
+
+    def delete_object_from_osn(self, bucket_name, object_key):
+        return super().delete_object_from_osn(bucket_name, object_key)

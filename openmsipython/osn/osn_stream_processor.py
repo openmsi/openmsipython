@@ -11,14 +11,23 @@ class OSNStreamProcessor(DataFileStreamProcessor, Runnable) :
         parser = OSNConfigFileParser(config_path,logger=self.logger)
         self.__osn_config = parser.osn_configs
         self.__osn_config['bucket_name'] = bucket_name
+        self.bucket_name = bucket_name
+        self.s3d = s3_data_transfer(self.__osn_config)
 
     def make_stream(self):
         _, _, _ = self.process_files_as_read()
         return self.n_msgs_read
 
     def _process_downloaded_data_file(self, datafile, lock):
-        s3d = S3DataTransfer(self.__osn_config)
-        s3d.transfer_object_stream(datafile)
+
+        self.s3d.transfer_object_stream(self.topic_name, datafile)
+
+        if self.s3d.compare_consumer_datafile_with_osn_object_stream(self.topic_name, self.bucket_name, datafile):
+            file_name = str(datafile.filename)
+            sub_dir = datafile.get_subdir_str
+            object_key = sub_dir + '/' + file_name
+            logging.info(object_key + ' matched with consumer datafile')
+            # self.s3d.delete_object_from_osn(self.bucket_name, object_key)
         return None
 
     @classmethod

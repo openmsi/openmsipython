@@ -7,7 +7,26 @@ class TestRoutineConstants :
     """
     constants used in running tests
     """
+    @property
+    def TEST_ENDPOINT_URL(self):  # the endpoint_url for osn connection
+        return os.environ['ENDPOINT_URL']
 
+    @property
+    def TEST_BUCKET_NAME(self):  # the bucket name to upload data to OSN (S3Client)
+        return os.environ['BUCKET_NAME']
+
+    @property
+    def TEST_ASSCESS_KEY_ID(self):  # the access_key_id for OSN Authentication
+        return os.environ['ACCESS_SECRET_KEY_ID']
+
+    @property
+    def TEST_SECRET_KEY_ID(self):  # the secret_key_id for OSN Authentication
+        return os.environ['SECRET_KEY_ID']
+
+    @property
+    def TEST_REGION(self):  # the region for osn
+        return os.environ['REGION']
+        
     @property
     def TEST_CONFIG_FILE_PATH(self) : # The path to the Kafka config file to use
         return (UTIL_CONST.CONFIG_FILE_DIR / f'{RUN_OPT_CONST.DEFAULT_CONFIG_FILE}{UTIL_CONST.CONFIG_FILE_EXT}').resolve()
