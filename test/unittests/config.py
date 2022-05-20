@@ -1,5 +1,5 @@
 #imports
-import pathlib
+import os, pathlib
 from openmsipython.shared.config import UTIL_CONST
 from openmsipython.data_file_io.config import RUN_OPT_CONST
 

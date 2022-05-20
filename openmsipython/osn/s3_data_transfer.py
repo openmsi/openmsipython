@@ -17,15 +17,13 @@ class S3DataTransfer(OSNService,LogOwner) :
         file_name = str(datafile.filename)
         sub_dir=datafile.get_subdir_str
         osn_full_path = topic_name + '/' + sub_dir + '/' + file_name
-
-
         try:
             self.s3_client.put_object(Body=datafile.bytestring, Bucket=self.bucket_name,
                                       Key=osn_full_path
                                       # , GrantRead=self.grant_read
                                       )
             msg = file_name + ' successfully transferred into /' + sub_dir
-            logging.info(msg)
+            self.logger.info(msg)
         except ClientError as e:
             self.logger.error(e.response + ': failed to transfer ' + file_name + ' into /'
                           + sub_dir)

@@ -1,9 +1,6 @@
 # imports
-import os, sys
+import os
 import unittest, pathlib, time, logging, shutil, hashlib
-
-import numpy as np
-
 from openmsipython.osn.osn_stream_processor import OSNStreamProcessor
 from openmsipython.osn.s3_data_transfer import s3_data_transfer
 from openmsipython.shared.logging import Logger
