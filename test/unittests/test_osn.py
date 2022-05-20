@@ -107,6 +107,6 @@ class TestOSN(unittest.TestCase) :
         # osn_stream_proc.logger.info(msg)
 
     #below we test both upload_files_as_added and then reconstruct, in that order
-    def test_upload_kafka_and_trasnfer_into_osn(self) :
+    def test_upload_kafka_and_trasnfer_into_osn_kafka(self) :
         self.run_data_file_upload_directory()
         self.upload_data_into_osn()
