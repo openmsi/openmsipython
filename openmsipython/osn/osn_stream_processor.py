@@ -1,13 +1,15 @@
 from ..shared.runnable import Runnable
 from ..data_file_io.config import RUN_OPT_CONST
 from ..data_file_io.data_file_stream_processor import DataFileStreamProcessor
-from ..osn.s3_data_transfer import S3DataTransfer
+from .config_file_parser import OSNConfigFileParser
+from .s3_data_transfer import S3DataTransfer
 
 class OSNStreamProcessor(DataFileStreamProcessor, Runnable) :
 
     def __init__(self, bucket_name, config_path, topic_name, **otherkwargs) :
         super().__init__(config_path, topic_name, **otherkwargs)
-        self.__osn_config = super().get_osn_config()
+        parser = OSNConfigFileParser(config_path,logger=self.logger)
+        self.__osn_config = parser.osn_configs
         self.__osn_config['bucket_name'] = bucket_name
 
     def make_stream(self):

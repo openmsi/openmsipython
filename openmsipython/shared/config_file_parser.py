@@ -59,3 +59,11 @@ class ConfigFileParser(LogOwner) :
                         value = exp_value
                 config_dict[key] = value
         return config_dict
+
+    #################### PRIVATE HELPER FUNCTIONS ####################
+
+    def _get_config_dict(self,group_name) :
+        to_return = {}
+        if group_name in self.available_group_names :
+            to_return = self.get_config_dict_for_groups(group_name)
+        return to_return

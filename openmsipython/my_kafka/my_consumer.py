@@ -47,7 +47,6 @@ class MyConsumer(LogOwner) :
         all_configs = {**parser.broker_configs,**parser.consumer_configs}
         all_configs = add_kwargs_to_configs(all_configs,**kwargs)
         #all_configs['debug']='broker,topic,msg'
-        _osn_config = {**parser.osn_configs}
         #if there are configs for KafkaCrypto, use a KafkaConsumer
         if parser.kc_config_file_str is not None :
             if logger is not None :
@@ -69,7 +68,7 @@ class MyConsumer(LogOwner) :
         else :
             ret_args = [DeserializingConsumer,all_configs]
         ret_kwargs['logger'] = logger
-        return ret_args, ret_kwargs, _osn_config
+        return ret_args, ret_kwargs
 
     @classmethod
     def from_file(cls,*args,**kwargs) :

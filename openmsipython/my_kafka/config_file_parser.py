@@ -8,7 +8,7 @@ from .serialization import DataFileChunkSerializer, DataFileChunkDeserializer
 
 class MyKafkaConfigFileParser(ConfigFileParser) :
     """
-    A class to parse configurations from files
+    A class to parse Kafka configurations from files
     """
 
     #################### CONSTANTS ####################
@@ -30,25 +30,20 @@ class MyKafkaConfigFileParser(ConfigFileParser) :
     #################### PROPERTIES ####################
 
     @property
-    def osn_configs(self) :
-        if self.__osn_configs is None :
-            self.__osn_configs = self.__get_config_dict('osn')
-        return self.__osn_configs
-    @property
     def broker_configs(self) :
         if self.__broker_configs is None :
-            self.__broker_configs = self.__get_config_dict('broker')
+            self.__broker_configs = self._get_config_dict('broker')
         return self.__convert_floats(self.__broker_configs)
     @property
     def producer_configs(self) :
         if self.__producer_configs is None :
-            pcs = self.__get_config_dict('producer')
+            pcs = self._get_config_dict('producer')
             self.__producer_configs = MyKafkaConfigFileParser.get_replaced_configs(pcs,'serialization')
         return self.__convert_floats(self.__producer_configs)
     @property
     def consumer_configs(self) :
         if self.__consumer_configs is None :
-            ccs = self.__get_config_dict('consumer')
+            ccs = self._get_config_dict('consumer')
             #if the group.id has been set as "new" generate a new group ID
             if 'group.id' in ccs.keys() and ccs['group.id'].lower()=='create_new' :
                 ccs['group.id']=str(uuid.uuid1())
@@ -62,7 +57,6 @@ class MyKafkaConfigFileParser(ConfigFileParser) :
 
     def __init__(self,*args,**kwargs) :
         super().__init__(*args,**kwargs)
-        self.__osn_configs = None
         self.__broker_configs = None
         self.__producer_configs = None
         self.__consumer_configs = None
@@ -90,12 +84,6 @@ class MyKafkaConfigFileParser(ConfigFileParser) :
         return configs
 
     #################### PRIVATE HELPER FUNCTIONS ####################
-
-    def __get_config_dict(self,group_name) :
-        to_return = {}
-        if group_name in self.available_group_names :
-            to_return = self.get_config_dict_for_groups(group_name)
-        return to_return
 
     def __get_kc_config_file_str(self) :
         """
