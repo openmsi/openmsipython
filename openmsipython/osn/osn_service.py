@@ -4,8 +4,8 @@
 # @owner: The Institute of Data Intensive Engineering and Science, https://idies.jhu.edu/
 # Johns Hopkins University http://www.jhu.edu/
 import hashlib
-from openmsipython.shared.logging import Logger
-
+# from openmsipython.shared.logging import Logger
+import logging
 import boto3
 
 
@@ -43,18 +43,22 @@ class osn_service(object):
             # make sure object exits before deleting the object from osn
             s3_response_object = self.s3_client.get_object(Bucket=bucket_name, Key=object_key)
             if s3_response_object == None:
-                Logger.error('The object ' + object_key + ' not exists in this bucket: ' + bucket_name)
+                msg = 'The object ' + object_key + ' not exists in this bucket: ' + bucket_name
+                logging.error(msg)
                 return
         except Exception:
-            Logger.error('A problem occurred while reading ' + object_key + ' from bucket: ' + bucket_name)
+            msg  = 'A problem occurred while reading ' + object_key + ' from bucket: ' + bucket_name
+            logging.error(msg)
             return
 
         # delete the object from the bucket safely
         try:
             self.s3_client.delete_object(Bucket=bucket_name, Key=object_key)
-            Logger.info(object_key + ' was deleted successfully from bucket: ' + bucket_name)
+            msg = object_key + ' was deleted successfully from bucket: ' + bucket_name
+            logging.info(msg)
         except Exception:
-            Logger.error('Could not delete ' + object_key + ' from bucket: ' + bucket_name)
+            msg = 'Could not delete ' + object_key + ' from bucket: ' + bucket_name
+            logging.error(msg)
             return
 
     def find_by_object_key(self, key):
