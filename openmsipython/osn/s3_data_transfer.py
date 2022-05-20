@@ -3,10 +3,10 @@
 # @date: 04/12/2022
 # @owner: The Institute of Data Intensive Engineering and Science, https://idies.jhu.edu/
 # Johns Hopkins University http://www.jhu.edu
-from openmsipython.shared.logging import Logger
+# from openmsipython.shared.logging import Logger
 from botocore.exceptions import ClientError
 from openmsipython.osn.osn_service import osn_service
-
+import logging
 
 class s3_data_transfer(osn_service):
     def __init__(self, osn_config):
@@ -17,14 +17,16 @@ class s3_data_transfer(osn_service):
         sub_dir=datafile.get_subdir_str
         osn_full_path = topic_name + '/' + sub_dir + '/' + file_name
 
+
         try:
             self.s3_client.put_object(Body=datafile.bytestring, Bucket=self.bucket_name,
                                       Key=osn_full_path
                                       # , GrantRead=self.grant_read
                                       )
-            Logger.info(file_name + ' successfully transferred into /' + sub_dir)
+            msg = file_name + ' successfully transferred into /' + sub_dir
+            logging.info(msg)
         except ClientError as e:
-            Logger.error(e.response + ': failed to transfer ' + file_name + ' into /'
+            logging.error(e.response + ': failed to transfer ' + file_name + ' into /'
                           + sub_dir)
 
     def find_by_object_key(self, key):
