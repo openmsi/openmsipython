@@ -3,7 +3,7 @@
 # @date: 04/12/2022
 # @owner: The Institute of Data Intensive Engineering and Science, https://idies.jhu.edu/
 # Johns Hopkins University http://www.jhu.edu
-import logging
+from openmsipython.shared.logging import Logger
 from botocore.exceptions import ClientError
 from openmsipython.osn.osn_service import osn_service
 
@@ -22,9 +22,9 @@ class s3_data_transfer(osn_service):
                                       Key=osn_full_path
                                       # , GrantRead=self.grant_read
                                       )
-            logging.info(file_name + ' successfully transferred into /' + sub_dir)
+            Logger.info(file_name + ' successfully transferred into /' + sub_dir)
         except ClientError as e:
-            logging.error(e.response + ': failed to transfer ' + file_name + ' into /'
+            Logger.error(e.response + ': failed to transfer ' + file_name + ' into /'
                           + sub_dir)
 
     def find_by_object_key(self, key):
