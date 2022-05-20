@@ -124,7 +124,10 @@ class MyConsumer(LogOwner) :
         if (message is not None) and (not isinstance(message,Message)) :
             try :
                 offset_dict = {KCCommitOffsetDictKey(message.topic,message.partition):KCCommitOffset(message.offset)}
-                return self.__consumer.commit(offsets=offset_dict)#,asynchronous=asynchronous) #will add this back in
+                if asynchronous :
+                    return self.__consumer.commit_async(offsets=offset_dict)
+                else :
+                    return self.__consumer.commit(offsets=offset_dict)
             except :
                 warnmsg = 'WARNING: failed to commit an offset for an encrypted message. '
                 warnmsg = 'Duplicates may result if the Consumer is restarted.'

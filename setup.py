@@ -5,7 +5,7 @@ site.ENABLE_USER_SITE = True #https://www.scivision.dev/python-pip-devel-user-in
 
 setupkwargs = dict(
     name='openmsipython',
-    version='0.9.0',
+    version='0.9.1',
     packages=setuptools.find_packages(include=['openmsipython*']),
     include_package_data=True,
     entry_points = {
@@ -23,7 +23,7 @@ setupkwargs = dict(
     install_requires=['atomicwrites>=1.4.0',
                       'confluent-kafka>=1.8.2',
                       'gemd>=1.8.1',
-                      'kafkacrypto>=0.9.9.12',
+                      'kafkacrypto>=0.9.9.14.post1',
                       'matplotlib',
                       'methodtools',
                       'msgpack',
