@@ -1,7 +1,7 @@
 #imports
 import unittest, pathlib, time, logging, shutil
 
-from openmsipython.osn.osn_stream_processor import osn_stream_processor
+from openmsipython.osn.osn_stream_processor import OSNStreamProcessor
 from openmsipython.shared.logging import Logger
 from openmsipython.data_file_io.config import RUN_OPT_CONST
 from openmsipython.data_file_io.data_file_upload_directory import DataFileUploadDirectory
@@ -81,7 +81,7 @@ class TestOSN(unittest.TestCase) :
         #make the directory to reconstruct files into
         # TEST_CONST.TEST_RECO_DIR_PATH.mkdir()
         #start up the DataFileDownloadDirectory
-        osp = osn_stream_processor(
+        osp = OSNStreamProcessor(
             TEST_CONST.TEST_BUCKET_NAME,
                                          TEST_CONST.TEST_CONFIG_FILE_PATH,
                                          TOPIC_NAME,
