@@ -17,7 +17,7 @@ setupkwargs = dict(
                              'LecroyFileUploadDirectory=openmsipython.pdv.lecroy_file_upload_directory:main',
                              'PDVPlotMaker=openmsipython.pdv.pdv_plot_maker:main',
                              'ProvisionNode=openmsipython.utilities.provision_wrapper:main',
-                             'OSNStreamProcessor=openmsipython.osn.OSNStreamProcessor:main',
+                             'OSNStreamProcessor=openmsipython.osn.osn_stream_processor:main',
                             ],
     },
     python_requires='>=3.7,<3.10',
