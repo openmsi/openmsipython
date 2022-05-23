@@ -15,7 +15,7 @@ class S3DataTransfer(OSNService,LogOwner) :
 
     def transfer_object_stream(self, topic_name,datafile):
         file_name = str(datafile.filename)
-        sub_dir=datafile.get_subdir_str
+        sub_dir=datafile.subdir_str
         osn_full_path = topic_name + '/' + sub_dir + '/' + file_name
         try:
             self.s3_client.put_object(Body=datafile.bytestring, Bucket=self.bucket_name,
