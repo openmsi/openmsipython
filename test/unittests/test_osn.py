@@ -2,7 +2,7 @@
 import os
 import unittest, pathlib, time, logging, shutil, hashlib
 from openmsipython.osn.osn_stream_processor import OSNStreamProcessor
-from openmsipython.osn.s3_data_transfer import s3_data_transfer
+from openmsipython.osn.s3_data_transfer import S3DataTransfer
 from openmsipython.shared.logging import Logger
 from openmsipython.data_file_io.config import RUN_OPT_CONST
 from openmsipython.data_file_io.data_file_upload_directory import DataFileUploadDirectory
