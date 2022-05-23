@@ -89,12 +89,6 @@ class osn_stream_processor(DataFileStreamProcessor, Runnable):
 #################### MAIN METHOD TO RUN FROM COMMAND LINE ####################
 
 def main(args=None):
-    args = [
-        '',
-        # '--root_dir', '',
-        '--config', ',
-        '--topic_name', '']
-
     osn_stream_processor.run_from_command_line(args)
 
 
