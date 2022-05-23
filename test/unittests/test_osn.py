@@ -36,7 +36,6 @@ class TestOSN(unittest.TestCase):
                                          'chunk_size': RUN_OPT_CONST.DEFAULT_CHUNK_SIZE,
                                          'max_queue_size': RUN_OPT_CONST.DEFAULT_MAX_UPLOAD_QUEUE_SIZE,
                                          'upload_existing': True})
-
         upload_thread.start()
         try:
             # wait a second, copy the test file into the watched directory, and wait another second
@@ -86,7 +85,6 @@ class TestOSN(unittest.TestCase):
     def run_osn_tranfer_data(self):
         osn_thread = MyThread(target=self.upload_data_into_osn)
         validation_thread = MyThread(target=self.validate_osn_with_producer)
-
         osn_thread.start()
         validation_thread.start()
         try:
@@ -115,27 +113,21 @@ class TestOSN(unittest.TestCase):
                     print('wait until upload into osn...')
 
     def upload_data_into_osn(self):
-        # make the directory to reconstruct files into
-        # TEST_CONST.TEST_RECO_DIR_PATH.mkdir()
-        #start up the DataFileDownloadDirectory
+        #start up the StreamProcessor
         osp = OSNStreamProcessor(
             TEST_CONST.TEST_BUCKET_NAME,
             TEST_CONST.TEST_CONFIG_FILE_PATH,
             TOPIC_NAME,
             n_threads=RUN_OPT_CONST.N_DEFAULT_DOWNLOAD_THREADS,
             update_secs=UPDATE_SECS,
-            consumer_group_ID='consumer_group_ID',
+            consumer_group_ID='test_osn',
             logger=LOGGER,
         )
-        # cls.bucket_name = args.bucket_name
         msg = f'Listening to the {TOPIC_NAME} topic to find Lecroy data files and create '
         LOGGER.info(msg)
-        # n_read, n_processed = osn_stream_proc.make_stream()
-        # n_read, n_processed = \
         osp.make_stream()
         osp.close()
         self.validate_osn_with_producer()
-
 
     def hash_file(self, my_file):
         md5 = hashlib.md5()
@@ -147,7 +139,6 @@ class TestOSN(unittest.TestCase):
                     if not data:
                         break
                     md5.update(data)
-
         except IOError:
             LOGGER.info('Error While Opening the file!')
             return None
@@ -160,21 +151,16 @@ class TestOSN(unittest.TestCase):
         aws_secret_access_key = TEST_CONST.TEST_SECRET_KEY_ID
         region_name = TEST_CONST.TEST_REGION
         bucket_name = TEST_CONST.TEST_BUCKET_NAME
-
         osn_config = {'endpoint_url': endpoint_url, 'access_key_id': aws_access_key_id,
                       'secret_key_id': aws_secret_access_key,
                       'region': region_name, 'bucket_name': bucket_name}
-
-        s3d = s3_data_transfer(osn_config)
-
+        s3d = S3DataTransfer(osn_config)
         for subdir, dirs, files in os.walk(TEST_CONST.TEST_WATCHED_DIR_PATH):
             for file in files:
                 local_path = str(os.path.join(subdir, file))
                 hashed_datafile_stream = self.hash_file(local_path)
-
                 if hashed_datafile_stream == None:
                     raise Exception('datafile_stream producer is null!')
-
                 local_path = str(os.path.join(subdir, file)).replace('\\', '/')
                 object_key = TOPIC_NAME + '/' + local_path[len(str(TEST_CONST.TEST_WATCHED_DIR_PATH)) + 1:]
                 LOGGER.info('now......................')
@@ -182,12 +168,10 @@ class TestOSN(unittest.TestCase):
                                                                          hashed_datafile_stream)):
                     LOGGER.info('did not match for producer')
                     # raise Exception('Failed to match osn object with the original producer data')
-
                 shutil.rmtree(TEST_CONST.TEST_WATCHED_DIR_PATH)
                 s3d.delete_object_from_osn(bucket_name, object_key)
         LOGGER.info('All test cases passed')
 
-    # below we test both upload_files_as_added and then reconstruct, in that order
-    def test_upload_kafka_and_trasnfer_into_osn(self):
+    def test_upload_kafka_and_trasnfer_into_osn_kafka(self):
         self.run_data_file_upload_directory()
         self.run_osn_tranfer_data()

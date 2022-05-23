@@ -71,9 +71,14 @@ def main(args=None) :
     else :
         #make sure the Github repo is still clean from its initial state
         print('Checking the status of the Git repo....')
-        p = subprocess.Popen(f'cd {TOP_DIR_PATH}; sh {TEST_REPO_STATUS_SCRIPT_PATH}; cd {CWD}; exit 0',
-                              stdout=subprocess.PIPE,stderr=subprocess.PIPE,shell=True,universal_newlines=True)
+        p = subprocess.Popen(f'sh {TEST_REPO_STATUS_SCRIPT_PATH}',stdout=subprocess.PIPE,stderr=subprocess.PIPE,
+                             shell=True,cwd=TOP_DIR_PATH,universal_newlines=True)
         stdout,stderr = p.communicate()
+        try :
+            stdout = stdout.decode()
+            stderr = stderr.decode()
+        except :
+            pass
         if stdout!='' :
             raise RuntimeError(f'ERROR: Git repo check failed with output:\n{stdout}')
         print('Repo is good : )')
