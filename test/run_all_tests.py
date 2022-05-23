@@ -72,7 +72,7 @@ def main(args=None) :
         #make sure the Github repo is still clean from its initial state
         print('Checking the status of the Git repo....')
         p = subprocess.Popen(f'sh {TEST_REPO_STATUS_SCRIPT_PATH}',stdout=subprocess.PIPE,stderr=subprocess.PIPE,
-                             shell=True,cwd=TOP_DIR_PATH,universal_newlines=True)
+                             shell=True,cwd=TOP_DIR_PATH)#,universal_newlines=True)
         stdout,stderr = p.communicate()
         try :
             stdout = stdout.decode()
