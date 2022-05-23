@@ -14,7 +14,7 @@ class s3_data_transfer(osn_service):
 
     def transfer_object_stream(self, topic_name,datafile):
         file_name = str(datafile.filename)
-        sub_dir=datafile.get_subdir_str
+        sub_dir=datafile.subdir_str
         osn_full_path = topic_name + '/' + sub_dir + '/' + file_name
 
 
