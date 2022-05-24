@@ -216,12 +216,14 @@ class DataclassTable(LogOwner) :
         with open(self.__filepath,'r') as fp :
             lines_as_read = fp.readlines()
         #first make sure the header line matches what we'd expect for the dataclass
-        if lines_as_read[0].strip()!=self.csv_header_line :
-            errmsg = f'ERROR: header line in {self.__filepath} ({lines_as_read[0]}) does not match expectation for '
-            errmsg+= f'{self.__dataclass_type} ({self.csv_header_line})!'
-            self.logger.error(errmsg)
+        n_header_lines = len(self.csv_header_line.split('\n'))
+        for ihl in range(n_header_lines) :
+            if lines_as_read[ihl].strip()!=(self.csv_header_line.split('\n'))[ihl] :
+                errmsg = f'ERROR: header line in {self.__filepath} ({lines_as_read[0]}) does not match expectation for '
+                errmsg+= f'{self.__dataclass_type} ({self.csv_header_line})!'
+                self.logger.error(errmsg,RuntimeError)
         #add entry lines and objects
-        for line in lines_as_read[1:] :
+        for line in lines_as_read[n_header_lines:] :
             obj = self.__obj_from_line(line)
             #key both dictionaries by the address of the object in memory
             dkey = hex(id(obj))
