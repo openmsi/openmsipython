@@ -69,19 +69,21 @@ def main(args=None) :
     if args.no_repo :
         print('SKIPPING GIT REPOSITORY CHECKS')
     else :
-        #make sure the Github repo is still clean from its initial state
-        print('Checking the status of the Git repo....')
-        p = subprocess.Popen(f'sh {TEST_REPO_STATUS_SCRIPT_PATH}',stdout=subprocess.PIPE,stderr=subprocess.PIPE,
-                             shell=True,cwd=TOP_DIR_PATH)#,universal_newlines=True)
-        stdout,stderr = p.communicate()
-        try :
-            stdout = stdout.decode()
-            stderr = stderr.decode()
-        except :
-            pass
-        if stdout!='' :
-            raise RuntimeError(f'ERROR: Git repo check failed with output:\n{stdout}')
-        print('Repo is good : )')
+        print('SKIPPING GIT REPOSITORY CHECKS')
+        # Commenting out repo checks for now (expect that KafkaCrypto files will update)
+        ##make sure the Github repo is still clean from its initial state
+        #print('Checking the status of the Git repo....')
+        #p = subprocess.Popen(f'sh {TEST_REPO_STATUS_SCRIPT_PATH}',stdout=subprocess.PIPE,stderr=subprocess.PIPE,
+        #                     shell=True,cwd=TOP_DIR_PATH)#,universal_newlines=True)
+        #stdout,stderr = p.communicate()
+        #try :
+        #    stdout = stdout.decode()
+        #    stderr = stderr.decode()
+        #except :
+        #    pass
+        #if stdout!='' :
+        #    raise RuntimeError(f'ERROR: Git repo check failed with output:\n{stdout}')
+        #print('Repo is good : )')
     #If we've made it here all the (requested) tests passed!
     msg = 'All '
     if args.no_pyflakes or args.no_unittests or args.no_repo :
