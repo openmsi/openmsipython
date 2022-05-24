@@ -83,6 +83,7 @@ class TestOSN(unittest.TestCase):
     # called by the test method below
 
     def run_osn_tranfer_data(self):
+        print('im here')
         osn_thread = MyThread(target=self.upload_data_into_osn)
         validation_thread = MyThread(target=self.validate_osn_with_producer)
         osn_thread.start()
