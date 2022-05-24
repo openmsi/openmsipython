@@ -32,7 +32,7 @@ class OSNService(object) :
 
     def get_object_stream_by_osn_datafile(self, topic_name, bucket_name, datafile):
         file_name = str(datafile.filename)
-        sub_dir = datafile.get_subdir_str
+        sub_dir = datafile.subdir_str
         object_key = topic_name + '/' + sub_dir + '/' + file_name
         return self.get_object_stream_by_object_key(bucket_name, object_key)
 
@@ -85,7 +85,7 @@ class OSNService(object) :
             return False
 
         file_name = str(datafile.filename)
-        sub_dir = datafile.get_subdir_str
+        sub_dir = datafile.subdir_str
         object_key = topic_name + '/' + sub_dir + '/' + file_name
 
         s3_response_object = self.s3_client.get_object(Bucket=bucket_name, Key=object_key)
