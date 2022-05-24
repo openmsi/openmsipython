@@ -13,7 +13,7 @@ class OSNStreamProcessor(DataFileStreamProcessor, Runnable) :
         self.__osn_config['bucket_name'] = bucket_name
         self.bucket_name = bucket_name
         self.s3d = S3DataTransfer(self.__osn_config)
-
+  
     def make_stream(self):
         _, _, _ = self.process_files_as_read()
         return self.n_msgs_read
@@ -24,7 +24,7 @@ class OSNStreamProcessor(DataFileStreamProcessor, Runnable) :
 
         if self.s3d.compare_consumer_datafile_with_osn_object_stream(self.topic_name, self.bucket_name, datafile):
             file_name = str(datafile.filename)
-            sub_dir = datafile.get_subdir_str
+            sub_dir = datafile.subdir_str
             object_key = sub_dir + '/' + file_name
             self.logger.info(object_key + ' matched with consumer datafile')
             # self.s3d.delete_object_from_osn(self.bucket_name, object_key)
