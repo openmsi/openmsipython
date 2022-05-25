@@ -3,21 +3,19 @@
 # @date: 04/12/2022
 # @owner: The Institute of Data Intensive Engineering and Science, https://idies.jhu.edu/
 # Johns Hopkins University http://www.jhu.edu
-import logging
+# import logging
 
 from botocore.exceptions import ClientError
-# from ..shared.logging import LogOwner
+from ..shared.logging import LogOwner
 from .osn_service import OSNService
 
-class S3DataTransfer(OSNService) :
+class S3DataTransfer(OSNService, LogOwner) :
 
-    # def __init__(self, osn_config, *args, **kwargs):
-    #     super().__init__(osn_config,*args,**kwargs)
-
-    def __init__(self, osn_config):
-        super().__init__(osn_config)
+    def __init__(self, osn_config, *args, **kwargs):
+        super().__init__(osn_config,*args,**kwargs)
 
     def transfer_object_stream(self, topic_name,datafile):
+        print('in transfer_object_stream...')
         file_name = str(datafile.filename)
         sub_dir=datafile.subdir_str
         osn_full_path = topic_name + '/' + sub_dir + '/' + file_name
@@ -27,9 +25,10 @@ class S3DataTransfer(OSNService) :
                                       # , GrantRead=self.grant_read
                                       )
             msg = file_name + ' successfully transferred into /' + sub_dir
-            logging.info(msg)
+            print(msg)
+            self.logger.info(msg)
         except ClientError as e:
-            logging.error(e.response + ': failed to transfer ' + file_name + ' into /'
+            self.logger.error(e.response + ': failed to transfer ' + file_name + ' into /'
                           + sub_dir)
 
     def find_by_object_key(self, key):
