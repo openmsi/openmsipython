@@ -75,46 +75,14 @@ class TestOSN(unittest.TestCase):
                 except Exception as e:
                     raise e
                 finally:
-                    print('wait until upload into osn...')
-                    # shutil.rmtree(TEST_CONST.TEST_WATCHED_DIR_PATH)
+                    print('still wait until upload into osn...')
+            #     shutil.rmtree(TEST_CONST.TEST_WATCHED_DIR_PATH)
             # if TEST_CONST.TEST_WATCHED_DIR_PATH.is_dir() :
             #     shutil.rmtree(TEST_CONST.TEST_WATCHED_DIR_PATH)
 
     # called by the test method below
 
     def run_osn_tranfer_data(self):
-        print('im here')
-        osn_thread = MyThread(target=self.upload_data_into_osn)
-        validation_thread = MyThread(target=self.validate_osn_with_producer)
-        osn_thread.start()
-        validation_thread.start()
-        try:
-            time.sleep(1)
-            LOGGER.set_stream_level(logging.INFO)
-            LOGGER.set_stream_level(logging.ERROR)
-            # wait for the uploading thread to complete
-            osn_thread.join(timeout=TIMEOUT_SECS)
-            if osn_thread.is_alive():
-                errmsg = 'ERROR: upload thread in upload_data_into_osn '
-                errmsg += f'timed out after {TIMEOUT_SECS} seconds!'
-                raise TimeoutError(errmsg)
-        except Exception as e:
-            raise e
-        finally:
-            if osn_thread.is_alive():
-                try:
-                    osn_thread.join(timeout=JOIN_TIMEOUT_SECS)
-                    if osn_thread.is_alive():
-                        errmsg = 'ERROR: upload thread in upload_data_into_osn timed out after '
-                        errmsg += f'{JOIN_TIMEOUT_SECS} seconds!'
-                        raise TimeoutError(errmsg)
-                except Exception as e:
-                    raise e
-                finally:
-                    print('wait until upload into osn...')
-
-    def upload_data_into_osn(self):
-        #start up the StreamProcessor
         osp = OSNStreamProcessor(
             TEST_CONST.TEST_BUCKET_NAME,
             TEST_CONST.TEST_CONFIG_FILE_PATH,
@@ -124,11 +92,93 @@ class TestOSN(unittest.TestCase):
             consumer_group_ID='test_osn',
             logger=LOGGER,
         )
-        msg = f'Listening to the {TOPIC_NAME} topic to find Lecroy data files and create '
-        LOGGER.info(msg)
-        osp.make_stream()
-        osp.close()
-        self.validate_osn_with_producer()
+        osp_thread = MyThread(target=osp.make_stream)
+        osp_thread.start()
+
+        try:
+            print('run_osn_tranfer_data')
+            # wait a second, copy the test file into the watched directory, and wait another second
+            time.sleep(40)
+
+            # put the "check" command into the input queue a couple of times to test it
+            osp.control_command_queue.put('c')
+            osp.control_command_queue.put('check')
+            # put the quit command in the command queue to stop the process running
+            LOGGER.set_stream_level(logging.INFO)
+            msg = '\nQuitting OSNStreamProcessor; '
+            msg += f'will timeout after {TIMEOUT_SECS} seconds....'
+            LOGGER.info(msg)
+            LOGGER.set_stream_level(logging.ERROR)
+            osp.control_command_queue.put('q')
+            # wait for the uploading thread to complete
+            osp_thread.join(timeout=TIMEOUT_SECS)
+            if osp_thread.is_alive():
+                errmsg = 'ERROR: transfer osn thread in OSNStreamProcessor '
+                errmsg += f'timed out after {TIMEOUT_SECS} seconds!'
+                raise TimeoutError(errmsg)
+        except Exception as e:
+            raise e
+        finally:
+            if osp_thread.is_alive():
+                try:
+                    osp.shutdown()
+                    osp_thread.join(timeout=JOIN_TIMEOUT_SECS)
+                    if osp_thread.is_alive():
+                        errmsg = 'ERROR: transfer osn thread in OSNStreamProcessor timed out after '
+                        errmsg += f'{JOIN_TIMEOUT_SECS} seconds!'
+                        raise TimeoutError(errmsg)
+                except Exception as e:
+                    raise e
+                finally:
+                    print('wait until validate with producer...')
+                    self.validate_osn_with_producer()
+
+    def validate_osn_producer_data_transfer(self):
+        osp = OSNStreamProcessor(
+            TEST_CONST.TEST_BUCKET_NAME,
+            TEST_CONST.TEST_CONFIG_FILE_PATH,
+            TOPIC_NAME,
+            n_threads=RUN_OPT_CONST.N_DEFAULT_DOWNLOAD_THREADS,
+            update_secs=UPDATE_SECS,
+            consumer_group_ID='test_osn',
+            logger=LOGGER,
+        )
+        validate_thread = MyThread(target=self.validate_osn_with_producer)
+        validate_thread.start()
+
+        try:
+            # wait a second, copy the test file into the watched directory, and wait another second
+            time.sleep(10)
+
+            # put the "check" command into the input queue a couple of times to test it
+            osp.control_command_queue.put('c')
+            osp.control_command_queue.put('check')
+            # put the quit command in the command queue to stop the process running
+            LOGGER.set_stream_level(logging.INFO)
+            msg = '\nQuitting validate_osn_producer_data_transfer; '
+            msg += f'will timeout after {TIMEOUT_SECS} seconds....'
+            LOGGER.info(msg)
+            LOGGER.set_stream_level(logging.ERROR)
+            osp.control_command_queue.put('q')
+            # wait for the uploading thread to complete
+            validate_thread.join(timeout=TIMEOUT_SECS)
+            if validate_thread.is_alive():
+                errmsg = 'ERROR: transfer osn thread in validate_osn_producer_data_transfer '
+                errmsg += f'timed out after {TIMEOUT_SECS} seconds!'
+                raise TimeoutError(errmsg)
+        except Exception as e:
+            raise e
+        finally:
+            if validate_thread.is_alive():
+                try:
+                    osp.shutdown()
+                    validate_thread.join(timeout=JOIN_TIMEOUT_SECS)
+                    if validate_thread.is_alive():
+                        errmsg = 'ERROR: transfer osn thread in validate_osn_producer_data_transfer timed out after '
+                        errmsg += f'{JOIN_TIMEOUT_SECS} seconds!'
+                        raise TimeoutError(errmsg)
+                except Exception as e:
+                    raise e
 
     def hash_file(self, my_file):
         md5 = hashlib.md5()
@@ -159,20 +209,31 @@ class TestOSN(unittest.TestCase):
         for subdir, dirs, files in os.walk(TEST_CONST.TEST_WATCHED_DIR_PATH):
             for file in files:
                 local_path = str(os.path.join(subdir, file))
+                if local_path.__contains__('files_fully_uploaded_to_osn_test') or \
+                local_path.__contains__('files_to_upload_to_osn_test') or local_path.__contains__('LOGS'):
+                    continue
+
                 hashed_datafile_stream = self.hash_file(local_path)
                 if hashed_datafile_stream == None:
                     raise Exception('datafile_stream producer is null!')
                 local_path = str(os.path.join(subdir, file)).replace('\\', '/')
                 object_key = TOPIC_NAME + '/' + local_path[len(str(TEST_CONST.TEST_WATCHED_DIR_PATH)) + 1:]
+                print('deleting from osn')
                 LOGGER.info('now......................')
                 if (s3d.compare_producer_datafile_with_osn_object_stream(TEST_CONST.TEST_BUCKET_NAME, object_key,
                                                                          hashed_datafile_stream)):
                     LOGGER.info('did not match for producer')
                     # raise Exception('Failed to match osn object with the original producer data')
-                shutil.rmtree(TEST_CONST.TEST_WATCHED_DIR_PATH)
+                print('deleting from osn')
                 s3d.delete_object_from_osn(bucket_name, object_key)
+
+        shutil.rmtree(TEST_CONST.TEST_WATCHED_DIR_PATH)
+        if TEST_CONST.TEST_WATCHED_DIR_PATH.is_dir() :
+            shutil.rmtree(TEST_CONST.TEST_WATCHED_DIR_PATH)
+        print('All test cases passed')
         LOGGER.info('All test cases passed')
 
     def test_upload_kafka_and_trasnfer_into_osn_kafka(self):
         self.run_data_file_upload_directory()
         self.run_osn_tranfer_data()
+        self.validate_osn_producer_data_transfer()
