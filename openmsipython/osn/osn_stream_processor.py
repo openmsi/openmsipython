@@ -13,13 +13,17 @@ class OSNStreamProcessor(DataFileStreamProcessor, Runnable) :
         self.__osn_config['bucket_name'] = bucket_name
         self.bucket_name = bucket_name
         self.s3d = S3DataTransfer(self.__osn_config)
-  
+
     def make_stream(self):
         _, _, _ = self.process_files_as_read()
         return self.n_msgs_read
 
+    def stream_processor_run(self) :
+        n_read, n_processed = self.make_stream()
+
     def _process_downloaded_data_file(self, datafile, lock):
 
+        print('in _process_downloaded_data_file...')
         self.s3d.transfer_object_stream(self.topic_name, datafile)
 
         if self.s3d.compare_consumer_datafile_with_osn_object_stream(self.topic_name, self.bucket_name, datafile):
