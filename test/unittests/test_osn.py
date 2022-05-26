@@ -148,7 +148,7 @@ class TestOSN(unittest.TestCase):
 
         try:
             # wait a second, copy the test file into the watched directory, and wait another second
-            time.sleep(10)
+            time.sleep(30)
 
             # put the "check" command into the input queue a couple of times to test it
             osp.control_command_queue.put('c')
@@ -197,24 +197,15 @@ class TestOSN(unittest.TestCase):
 
     def validate_osn_with_producer(self):
         print('validating osn with producer')
-        endpoint_url = 'https://sdsc.osn.xsede.org'
-            # TEST_CONST.TEST_ENDPOINT_URL
-        # aws_access_key_id = TEST_CONST.TEST_ASSCESS_KEY_ID
-        # aws_secret_access_key = TEST_CONST.TEST_SECRET_KEY_ID
-        # region_name = TEST_CONST.TEST_REGION
-        # bucket_name = TEST_CONST.TEST_BUCKET_NAME
+
+        endpoint_url = TEST_CONST.TEST_ENDPOINT_URL
+        if not endpoint_url.startswith('https://'):
+            endpoint_url = 'https://' + endpoint_url
 
         aws_access_key_id = TEST_CONST.TEST_ASSCESS_KEY_ID
         aws_secret_access_key = TEST_CONST.TEST_SECRET_KEY_ID
         region_name = TEST_CONST.TEST_REGION
         bucket_name = TEST_CONST.TEST_BUCKET_NAME
-
-        # bucket_name = 'phy210127-bucket01'
-
-        print(f'local aws_access_key_id = {aws_access_key_id}')
-        print(f'local aws_secret_access_key = {aws_secret_access_key}')
-        print(f'local region_name = {region_name}')
-        print(f'local bucket_name = {bucket_name}')
 
         osn_config = {'endpoint_url': endpoint_url, 'access_key_id': aws_access_key_id,
                       'secret_key_id': aws_secret_access_key,
