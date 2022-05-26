@@ -14,10 +14,9 @@ class OSNService(LogOwner) :
         self.session = boto3.session.Session()
         self.bucket_name = osn_config['bucket_name']
         endpoint_url = str(osn_config['endpoint_url'])
-        
+
         if not endpoint_url.startswith('https://'):
             endpoint_url = 'https://' + endpoint_url
-
         self.s3_client = self.session.client(
             service_name='s3',
             aws_access_key_id=osn_config['access_key_id'],
@@ -78,9 +77,6 @@ class OSNService(LogOwner) :
         if hashed_datafile_stream == None:
             return False
 
-        print(f'bucket_name is = {bucket_name}')
-        print(f'object_key is = {object_key}')
-
         s3_response_object = self.s3_client.get_object(Bucket=bucket_name, Key=object_key)
         object_content = s3_response_object['Body'].read()
         md5 = hashlib.md5()
@@ -88,7 +84,8 @@ class OSNService(LogOwner) :
         if object_content == None:
             return False
 
-        return "MD5: {0}".format(md5.hexdigest()) == hashed_datafile_stream
+        hhh = format(md5.hexdigest())
+        return str(hhh) == hashed_datafile_stream
 
     def compare_consumer_datafile_with_osn_object_stream(self, topic_name, bucket_name, datafile):
         if datafile == None:
@@ -109,7 +106,7 @@ class OSNService(LogOwner) :
         object_content_md5 = hashlib.md5()
         object_content_md5.update(object_content)
 
-        return "MD5: {0}".format(datafile_md5.hexdigest()) == "MD5: {0}".format(object_content_md5.hexdigest())
+        return format(datafile_md5.hexdigest()) == format(object_content_md5.hexdigest())
 
     def get_all_object_names(self, bucket_name):
         object_names = []
