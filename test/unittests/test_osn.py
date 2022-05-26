@@ -221,6 +221,7 @@ class TestOSN(unittest.TestCase):
                 local_path = str(os.path.join(subdir, file)).replace('\\', '/')
                 object_key = TOPIC_NAME + '/' + local_path[len(str(TEST_CONST.TEST_WATCHED_DIR_PATH)) + 1:]
                 print('deleting from osn')
+                print(f'key is = {object_key}')
                 LOGGER.info('now......................')
                 if (s3d.compare_producer_datafile_with_osn_object_stream(TEST_CONST.TEST_BUCKET_NAME, object_key,
                                                                          hashed_datafile_stream)):
