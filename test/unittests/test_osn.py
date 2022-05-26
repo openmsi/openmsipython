@@ -199,10 +199,16 @@ class TestOSN(unittest.TestCase):
         print('validating osn with producer')
         endpoint_url = 'https://sdsc.osn.xsede.org'
             # TEST_CONST.TEST_ENDPOINT_URL
-        aws_access_key_id = TEST_CONST.TEST_ASSCESS_KEY_ID
-        aws_secret_access_key = TEST_CONST.TEST_SECRET_KEY_ID
-        region_name = TEST_CONST.TEST_REGION
-        bucket_name = TEST_CONST.TEST_BUCKET_NAME
+        # aws_access_key_id = TEST_CONST.TEST_ASSCESS_KEY_ID
+        # aws_secret_access_key = TEST_CONST.TEST_SECRET_KEY_ID
+        # region_name = TEST_CONST.TEST_REGION
+        # bucket_name = TEST_CONST.TEST_BUCKET_NAME
+
+        aws_access_key_id = 'SB5Y6Y69IIXZAV39CL3Q'
+        aws_secret_access_key = 'EAja8hoN2/EfjHn9C6SZmrucK1nH+8'
+        region_name = 'us-west-1'
+        bucket_name = 'phy210127-bucket01'
+
         # bucket_name = 'phy210127-bucket01'
 
         print(f'local aws_access_key_id = {aws_access_key_id}')
