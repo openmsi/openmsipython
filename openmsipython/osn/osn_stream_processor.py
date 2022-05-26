@@ -21,11 +21,12 @@ class OSNStreamProcessor(DataFileStreamProcessor, Runnable) :
     def stream_processor_run(self) :
         n_read, n_processed = self.make_stream()
 
+    def close_session_client(self) :
+        self.s3d.close_session()
+
     def _process_downloaded_data_file(self, datafile, lock):
-
-        print('in _process_downloaded_data_file...')
+        self.logger.debug('in _process_downloaded_data_file...')
         self.s3d.transfer_object_stream(self.topic_name, datafile)
-
         if self.s3d.compare_consumer_datafile_with_osn_object_stream(self.topic_name, self.bucket_name, datafile):
             file_name = str(datafile.filename)
             sub_dir = datafile.subdir_str

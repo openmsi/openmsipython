@@ -55,12 +55,10 @@ class OSNService(LogOwner) :
             msg  = 'A problem occurred while reading ' + object_key + ' from bucket: ' + bucket_name
             self.logger.error(msg)
             return
-
         # delete the object from the bucket safely
         try:
             self.s3_client.delete_object(Bucket=bucket_name, Key=object_key)
             msg = object_key + ' was deleted successfully from bucket: ' + bucket_name
-            print(msg)
             self.logger.info(msg)
         except Exception:
             msg = 'Could not delete ' + object_key + ' from bucket: ' + bucket_name
@@ -78,36 +76,29 @@ class OSNService(LogOwner) :
     def compare_producer_datafile_with_osn_object_stream(self, bucket_name, object_key, hashed_datafile_stream):
         if hashed_datafile_stream == None:
             return False
-
         s3_response_object = self.s3_client.get_object(Bucket=bucket_name, Key=object_key)
         object_content = s3_response_object['Body'].read()
         md5 = hashlib.md5()
         md5.update(object_content)
         if object_content == None:
             return False
-
         hhh = format(md5.hexdigest())
         return str(hhh) == hashed_datafile_stream
 
     def compare_consumer_datafile_with_osn_object_stream(self, topic_name, bucket_name, datafile):
         if datafile == None:
             return False
-
         file_name = str(datafile.filename)
         sub_dir = datafile.subdir_str
         object_key = topic_name + '/' + sub_dir + '/' + file_name
-
         s3_response_object = self.s3_client.get_object(Bucket=bucket_name, Key=object_key)
         object_content = s3_response_object['Body'].read()
         if object_content == None:
             return False
-
         datafile_md5 = hashlib.md5()
         datafile_md5.update(datafile.bytestring)
-
         object_content_md5 = hashlib.md5()
         object_content_md5.update(object_content)
-
         return format(datafile_md5.hexdigest()) == format(object_content_md5.hexdigest())
 
     def get_all_object_names(self, bucket_name):
@@ -115,7 +106,6 @@ class OSNService(LogOwner) :
         objects = self.s3_client.list_objects_v2(Bucket=bucket_name)
         for obj in objects['Contents']:
             object_names.append(obj['Key'])
-
         return object_names
 
     def close_session(self):

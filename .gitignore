@@ -11,6 +11,7 @@
 !/openmsipython/my_kafka/config_files/test.config
 !/openmsipython/my_kafka/config_files/test_encrypted.config
 !/openmsipython/my_kafka/config_files/test_encrypted_2.config
+!/openmsipython/my_kafka/config_files/test_osn.config
 !/openmsipython/my_kafka/config_files/prod.config
 !/openmsipython/my_kafka/config_files/testing_node/testing_node.config
 !/openmsipython/my_kafka/config_files/testing_node/testing_node.seed
