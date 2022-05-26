@@ -197,12 +197,13 @@ class TestOSN(unittest.TestCase):
 
     def validate_osn_with_producer(self):
         print('validating osn with producer')
-        endpoint_url = TEST_CONST.TEST_ENDPOINT_URL
+        endpoint_url = 'https://sdsc.osn.xsede.org'
+            # TEST_CONST.TEST_ENDPOINT_URL
         aws_access_key_id = TEST_CONST.TEST_ASSCESS_KEY_ID
         aws_secret_access_key = TEST_CONST.TEST_SECRET_KEY_ID
         region_name = TEST_CONST.TEST_REGION
         bucket_name = TEST_CONST.TEST_BUCKET_NAME
-        osn_config = {'endpoint_url': 'https://sdsc.osn.xsede.org', 'access_key_id': aws_access_key_id,
+        osn_config = {'endpoint_url': endpoint_url, 'access_key_id': aws_access_key_id,
                       'secret_key_id': aws_secret_access_key,
                       'region': region_name, 'bucket_name': bucket_name}
         s3d = S3DataTransfer(osn_config)
