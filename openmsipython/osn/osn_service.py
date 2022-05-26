@@ -73,6 +73,10 @@ class OSNService(LogOwner) :
         if hashed_datafile_stream == None:
             return False
 
+        print(f'bucket_name is = {bucket_name}')
+        print(f'object_key is = {object_key}')
+        print(f'url is = ' + s3_client['osn_config'])
+
         s3_response_object = self.s3_client.get_object(Bucket=bucket_name, Key=object_key)
         object_content = s3_response_object['Body'].read()
         md5 = hashlib.md5()
