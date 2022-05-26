@@ -209,6 +209,7 @@ class TestOSN(unittest.TestCase):
         for subdir, dirs, files in os.walk(TEST_CONST.TEST_WATCHED_DIR_PATH):
             for file in files:
                 local_path = str(os.path.join(subdir, file))
+                print(f'local path = {local_path}')
                 if local_path.__contains__('files_fully_uploaded_to_osn_test') or \
                 local_path.__contains__('files_to_upload_to_osn_test') or local_path.__contains__('LOGS'):
                     continue
@@ -223,7 +224,7 @@ class TestOSN(unittest.TestCase):
                 if (s3d.compare_producer_datafile_with_osn_object_stream(TEST_CONST.TEST_BUCKET_NAME, object_key,
                                                                          hashed_datafile_stream)):
                     LOGGER.info('did not match for producer')
-                    # raise Exception('Failed to match osn object with the original producer data')
+                    raise Exception('Failed to match osn object with the original producer data')
                 print('deleting from osn')
                 s3d.delete_object_from_osn(bucket_name, object_key)
 
