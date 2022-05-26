@@ -202,8 +202,13 @@ class TestOSN(unittest.TestCase):
         aws_access_key_id = TEST_CONST.TEST_ASSCESS_KEY_ID
         aws_secret_access_key = TEST_CONST.TEST_SECRET_KEY_ID
         region_name = TEST_CONST.TEST_REGION
-        # bucket_name = TEST_CONST.TEST_BUCKET_NAME
-        bucket_name = 'phy210127-bucket01'
+        bucket_name = TEST_CONST.TEST_BUCKET_NAME
+        # bucket_name = 'phy210127-bucket01'
+
+        print(f'local aws_access_key_id = {aws_access_key_id}')
+        print(f'local aws_secret_access_key = {aws_secret_access_key}')
+        print(f'local region_name = {region_name}')
+        print(f'local bucket_name = {bucket_name}')
 
         osn_config = {'endpoint_url': endpoint_url, 'access_key_id': aws_access_key_id,
                       'secret_key_id': aws_secret_access_key,
