@@ -15,7 +15,6 @@ class S3DataTransfer(OSNService, LogOwner) :
         super().__init__(osn_config,*args,**kwargs)
 
     def transfer_object_stream(self, topic_name,datafile):
-        print('in transfer_object_stream...')
         file_name = str(datafile.filename)
         sub_dir=datafile.subdir_str
         osn_full_path = topic_name + '/' + sub_dir + '/' + file_name
