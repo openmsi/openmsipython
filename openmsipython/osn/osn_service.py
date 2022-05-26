@@ -12,6 +12,7 @@ class OSNService(LogOwner) :
     def __init__(self, osn_config, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.session = boto3.session.Session()
+
         self.bucket_name = osn_config['bucket_name']
         endpoint_url = str(osn_config['endpoint_url'])
 
@@ -24,6 +25,7 @@ class OSNService(LogOwner) :
             region_name=osn_config['region'],
             endpoint_url= endpoint_url
         )
+        self.region = osn_config['region']
         self.grant_read = 'uri="http://acs.amazonaws.com/groups/global/AllUsers"'
 
     # def set_upload_config(self, osn_config):
@@ -115,3 +117,6 @@ class OSNService(LogOwner) :
             object_names.append(obj['Key'])
 
         return object_names
+
+    def close_session(self):
+        pass

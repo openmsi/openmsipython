@@ -26,7 +26,7 @@ class TestOSN(unittest.TestCase):
     def run_data_file_upload_directory(self):
         # make the directory to watch
         dfud = DataFileUploadDirectory(TEST_CONST.TEST_WATCHED_DIR_PATH, update_secs=UPDATE_SECS, logger=LOGGER)
-        print(TEST_CONST.TEST_WATCHED_DIR_PATH)
+        # print(TEST_CONST.TEST_WATCHED_DIR_PATH)
         # osn_path = TEST_CONST.TEST_WATCHED_DIR_PATH.replace('\\', '/')
         # print(osn_path)
         # start upload_files_as_added in a separate thread so we can time it out
@@ -75,7 +75,7 @@ class TestOSN(unittest.TestCase):
                 except Exception as e:
                     raise e
                 finally:
-                    print('still wait until upload into osn...')
+                    ('still wait until upload into osn...')
             #     shutil.rmtree(TEST_CONST.TEST_WATCHED_DIR_PATH)
             # if TEST_CONST.TEST_WATCHED_DIR_PATH.is_dir() :
             #     shutil.rmtree(TEST_CONST.TEST_WATCHED_DIR_PATH)
@@ -96,7 +96,6 @@ class TestOSN(unittest.TestCase):
         osp_thread.start()
 
         try:
-            print('run_osn_tranfer_data')
             # wait a second, copy the test file into the watched directory, and wait another second
             time.sleep(40)
 
@@ -119,6 +118,7 @@ class TestOSN(unittest.TestCase):
         except Exception as e:
             raise e
         finally:
+            osp.close_session_client()
             if osp_thread.is_alive():
                 try:
                     osp.shutdown()
@@ -130,7 +130,7 @@ class TestOSN(unittest.TestCase):
                 except Exception as e:
                     raise e
                 finally:
-                    print('wait until validate with producer...')
+                    LOGGER.info('wait until validate with producer...')
                     self.validate_osn_with_producer()
 
     def validate_osn_producer_data_transfer(self):
@@ -148,7 +148,7 @@ class TestOSN(unittest.TestCase):
 
         try:
             # wait a second, copy the test file into the watched directory, and wait another second
-            time.sleep(30)
+            time.sleep(10)
 
             # put the "check" command into the input queue a couple of times to test it
             osp.control_command_queue.put('c')
@@ -193,10 +193,10 @@ class TestOSN(unittest.TestCase):
         except IOError:
             LOGGER.info('Error While Opening the file!')
             return None
-        return "MD5: {0}".format(md5.hexdigest())
+        return format(md5.hexdigest())
 
     def validate_osn_with_producer(self):
-        print('validating osn with producer')
+        LOGGER.info('validating osn with producer')
 
         endpoint_url = TEST_CONST.TEST_ENDPOINT_URL
         if not endpoint_url.startswith('https://'):
@@ -211,10 +211,10 @@ class TestOSN(unittest.TestCase):
                       'secret_key_id': aws_secret_access_key,
                       'region': region_name, 'bucket_name': bucket_name}
         s3d = S3DataTransfer(osn_config)
+
         for subdir, dirs, files in os.walk(TEST_CONST.TEST_WATCHED_DIR_PATH):
             for file in files:
                 local_path = str(os.path.join(subdir, file))
-                print(f'local path = {local_path}')
                 if local_path.__contains__('files_fully_uploaded_to_osn_test') or \
                 local_path.__contains__('files_to_upload_to_osn_test') or local_path.__contains__('LOGS'):
                     continue
@@ -224,20 +224,18 @@ class TestOSN(unittest.TestCase):
                     raise Exception('datafile_stream producer is null!')
                 local_path = str(os.path.join(subdir, file)).replace('\\', '/')
                 object_key = TOPIC_NAME + '/' + local_path[len(str(TEST_CONST.TEST_WATCHED_DIR_PATH)) + 1:]
-                print('deleting from osn')
-                print(f'key is = {object_key}')
-                LOGGER.info('now......................')
-                if (s3d.compare_producer_datafile_with_osn_object_stream(TEST_CONST.TEST_BUCKET_NAME, object_key,
+
+                if not (s3d.compare_producer_datafile_with_osn_object_stream(TEST_CONST.TEST_BUCKET_NAME, object_key,
                                                                          hashed_datafile_stream)):
                     LOGGER.info('did not match for producer')
                     raise Exception('Failed to match osn object with the original producer data')
-                print('deleting from osn')
                 s3d.delete_object_from_osn(bucket_name, object_key)
 
         shutil.rmtree(TEST_CONST.TEST_WATCHED_DIR_PATH)
         if TEST_CONST.TEST_WATCHED_DIR_PATH.is_dir() :
             shutil.rmtree(TEST_CONST.TEST_WATCHED_DIR_PATH)
-        print('All test cases passed')
+
+        s3d.close_session()
         LOGGER.info('All test cases passed')
 
     def test_upload_kafka_and_trasnfer_into_osn_kafka(self):

@@ -48,3 +48,6 @@ class S3DataTransfer(OSNService, LogOwner) :
 
     def delete_object_from_osn(self, bucket_name, object_key):
         return super().delete_object_from_osn(bucket_name, object_key)
+
+    def close_session(self):
+        return super().close_session()
