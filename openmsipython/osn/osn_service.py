@@ -18,7 +18,8 @@ class OSNService(LogOwner) :
             aws_access_key_id=osn_config['access_key_id'],
             aws_secret_access_key=osn_config['secret_key_id'],
             region_name=osn_config['region'],
-            endpoint_url=osn_config['endpoint_url']
+            endpoint_url='sdsc.osn.xsede.org'
+            # osn_config['endpoint_url']
         )
         self.grant_read = 'uri="http://acs.amazonaws.com/groups/global/AllUsers"'
 
