@@ -13,12 +13,15 @@ class OSNService(LogOwner) :
         super().__init__(*args, **kwargs)
         self.session = boto3.session.Session()
         self.bucket_name = osn_config['bucket_name']
+        endpoint_url = str(osn_config['endpoint_url'])
+        if not endpoint_url.startswith('https://'):
+            endpoint_url = 'https://' + endpoint_url
         self.s3_client = self.session.client(
             service_name='s3',
             aws_access_key_id=osn_config['access_key_id'],
             aws_secret_access_key=osn_config['secret_key_id'],
             region_name=osn_config['region'],
-            endpoint_url= 'https://' + osn_config['endpoint_url']
+            endpoint_url= endpoint_url
         )
         self.grant_read = 'uri="http://acs.amazonaws.com/groups/global/AllUsers"'
 
@@ -74,7 +77,7 @@ class OSNService(LogOwner) :
             return False
 
         print(f'bucket_name is = {bucket_name}')
-        print(f'object_key is = {object_key}') 
+        print(f'object_key is = {object_key}')
 
         s3_response_object = self.s3_client.get_object(Bucket=bucket_name, Key=object_key)
         object_content = s3_response_object['Body'].read()
