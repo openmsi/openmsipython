@@ -14,9 +14,10 @@ class OSNService(LogOwner) :
         self.session = boto3.session.Session()
         self.bucket_name = osn_config['bucket_name']
         endpoint_url = str(osn_config['endpoint_url'])
+        
         if not endpoint_url.startswith('https://'):
             endpoint_url = 'https://' + endpoint_url
-            
+
         self.s3_client = self.session.client(
             service_name='s3',
             aws_access_key_id=osn_config['access_key_id'],
