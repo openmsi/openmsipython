@@ -74,8 +74,7 @@ class OSNService(LogOwner) :
             return False
 
         print(f'bucket_name is = {bucket_name}')
-        print(f'object_key is = {object_key}')
-        print(f'url is = ' + self.s3_client['osn_config'])
+        print(f'object_key is = {object_key}') 
 
         s3_response_object = self.s3_client.get_object(Bucket=bucket_name, Key=object_key)
         object_content = s3_response_object['Body'].read()
