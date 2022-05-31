@@ -13,7 +13,7 @@ i. Environmental Configuration, under [osn] in an inputted config file :
    3) endpoint_url ($ENDPOINT_URL)
    4) region ($REGION)
 
-The above items from 1-4, need to be set as environment variables on your machine. 
+The above items from 1-4, need to be set as environment variables on your machine, or otherwise specified in the configuration file you use. 
 
 ii. Command Line:
    5) bucket_name
