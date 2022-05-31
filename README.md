@@ -137,6 +137,8 @@ The [readme file here](./openmsipython/data_file_io/) explains programs used to 
 
 The [readme file here](./openmsipython/my_kafka) explains how to enable message-layer encryption through [KafkaCrypto](https://github.com/tmcqueen-materials/kafkacrypto), and gives more details about options for configuration files used to define which kafka cluster(s) the programs interact with and how data are produced to/consumed from topics within them.
 
+The [readme file here](./openmsipython/osn) explains how to consume files to arbitrary S3 buckets instead of saving them locally.
+
 The [readme file here](./openmsipython/services) details procedures for installing any available command-line program as a Windows Service and working with it.
 
 The [readme file here](./openmsipython/data_models) describes how GEMD data structures are used to model data across the different projects in the Open MSI / DMREF project.
@@ -150,7 +152,6 @@ The [readme file here](./test) describes the automatic testing and CI/CD setup f
 The following items are currently planned to be implemented ASAP:
 
 1. New applications for asynchronous and repeatable stream filtering and processing (i.e. to facilitate decentralized/asynchronous lab data analysis)
-1. Adding a safer and more graceful shutdown when stopping Services so that no external lag time needs to be considered
 1. Allowing watching directories where large files are in the process of being created/saved instead of just directories where fully-created files are being added
 1. Implementing other data types and serialization schemas, likely using Avro
 1. Create pypi and conda installations. Pypi method using twine here: https://github.com/bast/pypi-howto. Putting on conda-forge is a heavier lift. Need to decide if it's worth it; probably not for such an immature package.
@@ -158,7 +159,7 @@ The following items are currently planned to be implemented ASAP:
 
 ## Questions that will arise later (inFAQs?)
 
-1. What are best practices for topic creation and naming?  Should we have a new topic for each student, for each instrument, for each “kind” of data, ...?
-1. How do I know (and trust!) my data made it and is safe?
+1. What happens if we send very large files to topics to be consumed to an object store? (Might not be able to transfer GB of data at once?)
+1. How robust is the object store we're using (automatic backups, etc.)
 1. What if I forget and write my data to some “wrong” place?  What if I write my data to the directory twice?  
 1. Should I clear my data out of the streaming directory once it’s been produced to Kafka?
