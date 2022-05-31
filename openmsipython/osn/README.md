@@ -1,10 +1,10 @@
-### OSN_MSI General information
+### General information
 The Open Storage Network (OSN) is intended for data integrity coming from different labs through kafka-streaming into corresponding objects.
 
-### OSN_MSI
+### OSNStreamProcessor
 This module uploads data from streaming-consumer into OSN directly.
 
-### OSN_MSI Command Line and Environmental Configuration
+### OSNStreamProcessor Command Line and Environmental Configuration
 There are different approaches that data could be sent into OSN. In this particular module we send data through s3Client. Therefore, we will need to access the following information:
 
 i. Environmental Configuration, under [osn] in an inputted config file :
