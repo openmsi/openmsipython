@@ -1,5 +1,5 @@
 #imports
-import pathlib
+import os, pathlib
 from openmsipython.shared.config import UTIL_CONST
 from openmsipython.data_file_io.config import RUN_OPT_CONST
 
@@ -7,7 +7,21 @@ class TestRoutineConstants :
     """
     constants used in running tests
     """
-
+    @property
+    def TEST_ENDPOINT_URL(self):  # the endpoint_url for osn connection
+        return os.environ['ENDPOINT_URL']
+    @property
+    def TEST_BUCKET_NAME(self):  # the bucket name to upload data to OSN (S3Client)
+        return os.environ['BUCKET_NAME']
+    @property
+    def TEST_ASSCESS_KEY_ID(self):  # the access_key_id for OSN Authentication
+        return os.environ['ACCESS_SECRET_KEY_ID']
+    @property
+    def TEST_SECRET_KEY_ID(self):  # the secret_key_id for OSN Authentication
+        return os.environ['SECRET_KEY_ID']
+    @property
+    def TEST_REGION(self):  # the region for osn
+        return os.environ['REGION']
     @property
     def TEST_CONFIG_FILE_PATH(self) : # The path to the Kafka config file to use
         return (UTIL_CONST.CONFIG_FILE_DIR / f'{RUN_OPT_CONST.DEFAULT_CONFIG_FILE}{UTIL_CONST.CONFIG_FILE_EXT}').resolve()
@@ -17,6 +31,9 @@ class TestRoutineConstants :
     @property
     def TEST_CONFIG_FILE_PATH_ENCRYPTED_2(self) : # Same as above except it includes a node_id to test encryption
         return (UTIL_CONST.CONFIG_FILE_DIR / f'test_encrypted_2{UTIL_CONST.CONFIG_FILE_EXT}').resolve()
+    @property
+    def TEST_CONFIG_FILE_PATH_OSN(self) : # Same as above except it includes OSN configs
+        return (UTIL_CONST.CONFIG_FILE_DIR / f'test_osn{UTIL_CONST.CONFIG_FILE_EXT}').resolve()
     @property
     def PROD_CONFIG_FILE_PATH(self) : # The path to the "prod" Kafka config file to use in making sure that the prod environment variables are not set
         return (UTIL_CONST.CONFIG_FILE_DIR / f'prod{UTIL_CONST.CONFIG_FILE_EXT}').resolve()
@@ -59,6 +76,9 @@ class TestRoutineConstants :
     @property
     def TEST_WATCHED_DIR_PATH_ENCRYPTED(self) : #same as above except for the encrypted tests
         return pathlib.Path(__file__).parent.parent / 'test_watched_dir_encrypted'
+    @property
+    def TEST_WATCHED_DIR_PATH_OSN(self) : #same as above except for the tests that interact with the object store
+        return pathlib.Path(__file__).parent.parent / 'test_watched_dir_osn'
     @property
     def TEST_RECO_DIR_PATH(self) : # Path to the directory where consumed files should be reconstructed
         return pathlib.Path(__file__).parent.parent / 'test_reco'

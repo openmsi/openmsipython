@@ -30,6 +30,10 @@ class DownloadDataFile(DataFile,ABC) :
         return self.__full_filepath
 
     @property
+    def subdir_str(self) :
+        return self.__subdir_str
+
+    @property
     @abstractmethod
     def check_file_hash(self) :
         pass #the hash of the data in the file after it was read; not implemented in the base class
@@ -41,6 +45,7 @@ class DownloadDataFile(DataFile,ABC) :
         #start an empty set of this file's downloaded offsets
         self._chunk_offsets_downloaded = []
         self.__full_filepath = None
+        self.__subdir_str = None
 
     def add_chunk(self,dfc,thread_lock=nullcontext(),*args,**kwargs) :
         """
@@ -72,6 +77,12 @@ class DownloadDataFile(DataFile,ABC) :
             errmsg = f'ERROR: filepath for data file chunk {dfc.chunk_i}/{dfc.n_total_chunks} with offset '
             errmsg+= f'{dfc.chunk_offset_write} is {full_filepath} but the file being reconstructed is '
             errmsg+= f'expected to have filepath {self.__full_filepath}'
+            self.logger.error(errmsg,ValueError)
+        #add the subdirectory string to this file
+        if self.__subdir_str is None :
+            self.__subdir_str = dfc.subdir_str
+        elif self.__subdir_str!=dfc.subdir_str :
+            errmsg = f"Mismatched subdirectory strings! From file = {self.__subdir_str}, from chunk = {dfc.subdir_str}"
             self.logger.error(errmsg,ValueError)
         #acquire the thread lock to make sure this process is the only one dealing with this particular file
         with thread_lock:
