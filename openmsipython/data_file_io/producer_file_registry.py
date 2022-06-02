@@ -118,15 +118,24 @@ class ProducerFileRegistry(LogOwner) :
                 return True
             else :
                 return False
-        #otherwise it's a new file to add to "in_progress"
+        #otherwise it's a new file to list somewhere
         else :
             to_deliver = set([])
             for ic in range(1,n_total_chunks+1) :
                 if ic!=chunk_i :
                     to_deliver.add(ic)
-            in_prog_entry = RegistryLineInProgress(filename,filepath,n_total_chunks,
-                                                   1,n_total_chunks-1,datetime.datetime.now(),
-                                                   set([chunk_i]),to_deliver)
-            self.__in_prog.add_entries(in_prog_entry)
-            self.__in_prog.dump_to_file()
-            return False
+            #if there are other chunks to deliver, register it to "in_progress"
+            if len(to_deliver)>0 :
+                in_prog_entry = RegistryLineInProgress(filename,filepath,n_total_chunks,
+                                                       1,n_total_chunks-1,datetime.datetime.now(),
+                                                       set([chunk_i]),to_deliver)
+                self.__in_prog.add_entries(in_prog_entry)
+                self.__in_prog.dump_to_file()
+                return False
+            #otherwise register it as a completed file
+            else :
+                completed_entry = RegistryLineCompleted(filename,filepath,n_total_chunks,
+                                                        datetime.datetime.now(),datetime.datetime.now())
+                self.__completed.add_entries(completed_entry)
+                self.__completed.dump_to_file()
+                return True
