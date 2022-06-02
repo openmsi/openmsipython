@@ -47,6 +47,6 @@ class ServicesConstants :
         return (pathlib.Path(__file__).parent / 'working_dir' / 'nssm.exe').resolve()
     @property
     def SERVICE_EXECUTABLE_NAME_STEM(self) :
-        return '_python_executable.py'
+        return '_service_executable.py'
 
 SERVICE_CONST = ServicesConstants()

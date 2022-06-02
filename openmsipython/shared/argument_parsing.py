@@ -137,6 +137,8 @@ class MyArgumentParser(ArgumentParser) :
                          'help':'Optional path to directory to put output in'}],
         'service_name':
             ['positional',{'help':'The name of the service to work with'}],
+        'optional_service_name':
+            ['optional',{'help':'The customized name of the Service that will be installed to run the chosen class'}],
         'run_mode':
             ['positional',{'choices':['start','status','stop','remove','stop_and_remove'],
                            'help':'What to do with the service'}],
@@ -217,11 +219,13 @@ class MyArgumentParser(ArgumentParser) :
         self.__subparsers[cmd] = self.__subparsers_action_obj.add_parser(cmd,**kwargs)
         return self.__subparsers[cmd]
 
-    def add_subparser_arguments_from_class(self,class_to_add,**kwargs) :
+    def add_subparser_arguments_from_class(self,class_to_add,*,addl_args=None,addl_kwargs=None,**other_kwargs) :
         """
         Create a new subparser and add arguments from the given class to it
         class_to_add must inherit from Runnable to be able to get its arguments
-        kwargs are passed to subparsers.add_parser
+        addl_args/kwargs = a list and/or dictionary of additional arguments that should be added to every subparser 
+                                 (same format as args/kwargs for add_arguments above)
+        other_kwargs are passed to subparsers.add_parser
         """
         if self.__subparsers_action_obj is None :
             errmsg = 'ERROR: add_subparser_arguments_for_class called for an argument parser that '
@@ -231,9 +235,13 @@ class MyArgumentParser(ArgumentParser) :
         if class_name in self.__subparsers.keys() :
             errmsg = f'ERROR: subparser arguments for {class_name} have already been added to this argument parser!'
             raise RuntimeError(errmsg)
-        self.__subparsers[class_name] = self.__subparsers_action_obj.add_parser(class_name,**kwargs)
+        self.__subparsers[class_name] = self.__subparsers_action_obj.add_parser(class_name,**other_kwargs)
         self.__subparser_argnames_added[class_name] = []
         argnames, argnames_with_defaults = class_to_add.get_command_line_arguments()
+        if addl_args is not None :
+            argnames = [*argnames,*addl_args]
+        if addl_kwargs is not None :
+            argnames_with_defaults = {**argnames_with_defaults,**addl_kwargs}
         for argname in argnames :
             argname_to_add, kwargs_for_arg = self.__get_argname_and_kwargs(argname)
             if argname_to_add not in self.__subparser_argnames_added[class_name] :
