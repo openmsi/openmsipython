@@ -6,7 +6,7 @@ from openmsipython.services.install_service import write_executable_file
 from config import TEST_CONST
 
 #constants
-TEST_SERVICE_CLASS_NAME = 'DataFileUploadDirectoryService'
+TEST_SERVICE_CLASS_NAME = 'DataFileUploadDirectory'
 TEST_SERVICE_NAME = 'testing_service'
 TEST_SERVICE_EXECUTABLE_ARGSLIST = ['test_upload']
 
@@ -32,7 +32,6 @@ class TestServiceUtilities(unittest.TestCase) :
         #the test below does create a file but that file should be ignored in the repo
         test_exec_fp = pathlib.Path(__file__).parent.parent.parent/'openmsipython'/'services'/'working_dir'
         test_exec_fp = test_exec_fp/f'{TEST_SERVICE_NAME}{SERVICE_CONST.SERVICE_EXECUTABLE_NAME_STEM}'
-
         service_dict = [sd for sd in SERVICE_CONST.AVAILABLE_SERVICES if sd['script_name']==TEST_SERVICE_CLASS_NAME]
         if len(service_dict)!=1 :
             errmsg = f'ERROR: could not find the Service dictionary for {TEST_SERVICE_CLASS_NAME}! '
