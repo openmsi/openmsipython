@@ -1,5 +1,4 @@
 #imports
-import platform
 from subprocess import CalledProcessError
 from ..shared.argument_parsing import MyArgumentParser
 from .config import SERVICE_CONST
