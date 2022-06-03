@@ -6,7 +6,7 @@
       "notes": null,
       "origin": "specified",
       "template": {
-        "id": "8d5d03b6-93ad-4bc3-b3e4-7c3707d2fefc",
+        "id": "c20ba7ed-4cdc-48f9-8573-1b1e5be08e2c",
         "scope": "auto",
         "type": "link_by_uid"
       },
@@ -22,7 +22,7 @@
       "notes": null,
       "origin": "specified",
       "template": {
-        "id": "1157eb9e-5c3d-410e-a51c-80ed91310e75",
+        "id": "5420e023-829f-4e33-9310-be9cedbcc6ac",
         "scope": "auto",
         "type": "link_by_uid"
       },
@@ -50,7 +50,7 @@
       "notes": null,
       "origin": "specified",
       "template": {
-        "id": "cea1d122-a7db-4245-901e-977639e8a6dc",
+        "id": "ffbd29b3-3ebc-4966-8473-d846c3777579",
         "scope": "auto",
         "type": "link_by_uid"
       },
@@ -67,7 +67,7 @@
       "notes": null,
       "origin": "specified",
       "template": {
-        "id": "412fb64e-b0c1-4480-a85c-2831bac8065e",
+        "id": "f4ec6bad-55a4-462c-ad51-f73639c69965",
         "scope": "auto",
         "type": "link_by_uid"
       },
@@ -83,7 +83,7 @@
       "notes": null,
       "origin": "specified",
       "template": {
-        "id": "16cbd474-f48c-4431-88f8-d6151db1ff6c",
+        "id": "eda8ed36-45e1-4d2b-b7c3-878b2c1dbf0e",
         "scope": "auto",
         "type": "link_by_uid"
       },
@@ -102,12 +102,12 @@
     "ObjectType::LaserShockSpacerCuttingProgram"
   ],
   "template": {
-    "id": "75676a2b-8e1c-40a1-b9df-c02d646b8512",
+    "id": "427bd18f-a5c1-4a36-82ee-3f7a256e4297",
     "scope": "auto",
     "type": "link_by_uid"
   },
   "type": "process_spec",
   "uids": {
-    "auto": "06afdc2b-78f7-43c0-aff4-532c6dcd818e"
+    "auto": "73d1bac6-4c01-406c-8865-50708a709c86"
   }
 }

@@ -3,7 +3,7 @@
   "name": "50.4um (0.002\") Hard Al (AluFoil)",
   "notes": "",
   "process": {
-    "id": "3c0a6984-51b9-4917-b88a-66bc5c051e89",
+    "id": "b26ab956-07b1-4ce3-a2c8-48b5a6fe481d",
     "scope": "auto",
     "type": "link_by_uid"
   },
@@ -16,7 +16,7 @@
         "notes": null,
         "origin": "specified",
         "template": {
-          "id": "e50c850b-b0bc-44e7-a30b-282419a17276",
+          "id": "db7874f1-f6f9-4264-ac50-82678ac16195",
           "scope": "auto",
           "type": "link_by_uid"
         },
@@ -37,7 +37,7 @@
         "notes": null,
         "origin": "specified",
         "template": {
-          "id": "30d16931-5735-4c4d-99e1-6ff66c2bce81",
+          "id": "2483ea9c-145a-4e1c-a1d8-dc20769f9d6a",
           "scope": "auto",
           "type": "link_by_uid"
         },
@@ -58,7 +58,7 @@
         "notes": null,
         "origin": "specified",
         "template": {
-          "id": "fb37c2b6-71c0-4e7e-a828-1a5d472f2078",
+          "id": "0f795bd5-04a6-48bf-8c28-d00ec1da065b",
           "scope": "auto",
           "type": "link_by_uid"
         },
@@ -79,7 +79,7 @@
         "notes": null,
         "origin": "specified",
         "template": {
-          "id": "62005583-9131-446f-9a5f-043915ff9d8a",
+          "id": "24e81466-34ec-48da-9eda-9d70aab4e8ef",
           "scope": "auto",
           "type": "link_by_uid"
         },
@@ -99,7 +99,7 @@
         "notes": null,
         "origin": "specified",
         "template": {
-          "id": "0d68fd90-fc06-4606-92f5-0ee842298af9",
+          "id": "55ef1a09-032f-48d5-95aa-3e9f994330b0",
           "scope": "auto",
           "type": "link_by_uid"
         },
@@ -119,12 +119,12 @@
     "ObjectType::LaserShockFoilID"
   ],
   "template": {
-    "id": "356e57cd-34b0-41eb-8518-4a8cfe77df6f",
+    "id": "2258df01-79d8-4e6e-9928-25c0397a79d0",
     "scope": "auto",
     "type": "link_by_uid"
   },
   "type": "material_spec",
   "uids": {
-    "auto": "1e994c7e-8dd6-4f19-ba41-83ee7ccb4e61"
+    "auto": "330ac8ca-bacc-4bc7-b8fb-bede1a861058"
   }
 }
