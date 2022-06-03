@@ -6,7 +6,8 @@ from openmsipython.services.install_service import write_executable_file
 from config import TEST_CONST
 
 #constants
-TEST_SERVICE_NAME = 'DataFileUploadDirectoryService'
+TEST_SERVICE_CLASS_NAME = 'DataFileUploadDirectoryService'
+TEST_SERVICE_NAME = 'testing_service'
 TEST_SERVICE_EXECUTABLE_ARGSLIST = ['test_upload']
 
 class TestServiceUtilities(unittest.TestCase) :
@@ -29,9 +30,16 @@ class TestServiceUtilities(unittest.TestCase) :
         Make sure an executable file is written to the expected location with the expected format
         """
         #the test below does create a file but that file should be ignored in the repo
-        test_exec_fp = pathlib.Path(__file__).parent.parent.parent/'openmsipython'/'services'
-        test_exec_fp = test_exec_fp/'working_dir'/f'{TEST_SERVICE_NAME}{SERVICE_CONST.SERVICE_EXECUTABLE_NAME_STEM}'
-        write_executable_file(TEST_SERVICE_NAME,TEST_SERVICE_EXECUTABLE_ARGSLIST,test_exec_fp)
+        test_exec_fp = pathlib.Path(__file__).parent.parent.parent/'openmsipython'/'services'/'working_dir'
+        test_exec_fp = test_exec_fp/f'{TEST_SERVICE_NAME}{SERVICE_CONST.SERVICE_EXECUTABLE_NAME_STEM}'
+
+        service_dict = [sd for sd in SERVICE_CONST.AVAILABLE_SERVICES if sd['script_name']==TEST_SERVICE_CLASS_NAME]
+        if len(service_dict)!=1 :
+            errmsg = f'ERROR: could not find the Service dictionary for {TEST_SERVICE_CLASS_NAME}! '
+            errmsg+= f'service_dict = {service_dict}'
+            raise RuntimeError(errmsg)
+        service_dict = service_dict[0]
+        write_executable_file(service_dict,TEST_SERVICE_NAME,TEST_SERVICE_EXECUTABLE_ARGSLIST,filepath=test_exec_fp)
         self.assertTrue(test_exec_fp.is_file())
         with open(test_exec_fp,'r') as test_fp :
             test_lines = test_fp.readlines()
