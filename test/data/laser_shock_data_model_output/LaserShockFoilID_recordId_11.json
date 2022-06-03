@@ -3,7 +3,7 @@
   "name": "50.4um (0.002\") Hard Al (AluFoil)",
   "notes": "",
   "process": {
-    "id": "b26ab956-07b1-4ce3-a2c8-48b5a6fe481d",
+    "id": "9c270918-e2ec-4eb8-bd18-7fb2f7cc211a",
     "scope": "auto",
     "type": "link_by_uid"
   },
@@ -16,7 +16,7 @@
         "notes": null,
         "origin": "specified",
         "template": {
-          "id": "db7874f1-f6f9-4264-ac50-82678ac16195",
+          "id": "fe4e7bca-a268-4288-bc40-b5e0b87465b1",
           "scope": "auto",
           "type": "link_by_uid"
         },
@@ -37,7 +37,7 @@
         "notes": null,
         "origin": "specified",
         "template": {
-          "id": "2483ea9c-145a-4e1c-a1d8-dc20769f9d6a",
+          "id": "ecab508b-dd46-4db1-90a8-1113ab854dc3",
           "scope": "auto",
           "type": "link_by_uid"
         },
@@ -58,7 +58,7 @@
         "notes": null,
         "origin": "specified",
         "template": {
-          "id": "0f795bd5-04a6-48bf-8c28-d00ec1da065b",
+          "id": "fe3dc543-0369-438a-929e-b5f8d97984b6",
           "scope": "auto",
           "type": "link_by_uid"
         },
@@ -79,7 +79,7 @@
         "notes": null,
         "origin": "specified",
         "template": {
-          "id": "24e81466-34ec-48da-9eda-9d70aab4e8ef",
+          "id": "785b011a-3d13-474f-ad0c-ac04cb3a7ccc",
           "scope": "auto",
           "type": "link_by_uid"
         },
@@ -99,7 +99,7 @@
         "notes": null,
         "origin": "specified",
         "template": {
-          "id": "55ef1a09-032f-48d5-95aa-3e9f994330b0",
+          "id": "cf54d950-e5a5-46c5-b83a-011e3e9442e7",
           "scope": "auto",
           "type": "link_by_uid"
         },
@@ -119,12 +119,12 @@
     "ObjectType::LaserShockFoilID"
   ],
   "template": {
-    "id": "2258df01-79d8-4e6e-9928-25c0397a79d0",
+    "id": "ae2a25d9-65a6-4198-b691-0ccc1a700943",
     "scope": "auto",
     "type": "link_by_uid"
   },
   "type": "material_spec",
   "uids": {
-    "auto": "330ac8ca-bacc-4bc7-b8fb-bede1a861058"
+    "auto": "e60dc593-d663-4a15-9bc3-2c2a6f787058"
   }
 }

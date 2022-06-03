@@ -3,13 +3,13 @@
   "name": "Flyer Stack",
   "notes": "",
   "process": {
-    "id": "07f675a6-0825-48f7-95a6-dcd9420a5c67",
+    "id": "c660a5df-0027-4427-8f10-3963d54911c3",
     "scope": "auto",
     "type": "link_by_uid"
   },
   "sample_type": "unknown",
   "spec": {
-    "id": "f0802b1d-58c9-48fb-a961-504b429a820e",
+    "id": "7bdbf3fa-d350-44b8-b849-1594772c40ec",
     "scope": "auto",
     "type": "link_by_uid"
   },
@@ -21,6 +21,6 @@
   ],
   "type": "material_run",
   "uids": {
-    "auto": "85d93035-f24b-4dba-b9c6-ab8ab5b2157c"
+    "auto": "d3619db6-e600-4742-8e07-44d09ceb813b"
   }
 }
