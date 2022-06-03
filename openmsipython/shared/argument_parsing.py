@@ -146,6 +146,9 @@ class MyArgumentParser(ArgumentParser) :
             ['optional',{'action':'store_true',
                          'help':'''Add this flag to also remove username/password environment variables 
                                    when removing a Service'''}],
+        'remove_nssm':
+            ['optional',{'action':'store_true',
+                         'help':'Add this flag to also remove the NSSM executable when removing a Service'}],
         'gemd_json_dir':
             ['positional',{'type':existing_dir,
                            'help':'Directory containing all of the GEMD JSON dump files that should be uploaded'}]

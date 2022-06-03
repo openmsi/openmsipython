@@ -3,7 +3,7 @@ import sys, pathlib, os, textwrap
 from subprocess import Popen, PIPE, STDOUT
 from ..shared.argument_parsing import MyArgumentParser
 from .config import SERVICE_CONST
-from .utilities import set_env_var_from_user_input, find_install_NSSM
+from .utilities import get_os_name, set_env_var_from_user_input, find_install_NSSM
 from .utilities import run_cmd_in_subprocess, copy_libsodium_dll_to_system32
 
 #################### HELPER FUNCTIONS ####################
@@ -52,16 +52,10 @@ def test_python_code() :
         return
     SERVICE_CONST.LOGGER.debug('All unittest checks complete : )')
 
-def write_executable_file(service_class_name,service_name,argslist,filepath=None) :
+def write_executable_file(service_dict,service_name,argslist,filepath=None) :
     """
     write out the executable python file that the service will actually be running
     """
-    service_dict = [sd for sd in SERVICE_CONST.AVAILABLE_SERVICES if sd['script_name']==service_class_name]
-    if len(service_dict)!=1 :
-        errmsg = f'ERROR: could not find the Service dictionary for {service_name} (a {service_class_name} program)! '
-        errmsg+= f'service_dict = {service_dict}'
-        raise RuntimeError(errmsg)
-    service_dict = service_dict[0]
     code = f'''\
         if __name__=='__main__' :
             try :
@@ -85,7 +79,33 @@ def write_executable_file(service_class_name,service_name,argslist,filepath=None
         fp.write(textwrap.dedent(code))
     return exec_fp
 
-def install_service(service_class_name,service_name,argslist) :
+def write_daemon_file(service_dict,service_name,exec_filepath) :
+    #make sure the directory to hold the file exists
+    if not SERVICE_CONST.DAEMON_SERVICE_DIR.is_dir() :
+        SERVICE_CONST.LOGGER.info(f'Creating a new daemon service directory at {SERVICE_CONST.DAEMON_SERVICE_DIR}')
+        SERVICE_CONST.DAEMON_SERVICE_DIR.mkdir(parents=True)
+    #write out the file pointing to the python executable
+    code = f'''\
+        [Unit]
+        Description = {service_dict['class'].__doc__.strip()}
+        Requires = network-online.target remote-fs.target
+        After = network-online.target remote-fs.target
+
+        [Service]
+        Type = simple
+        ExecStart = {sys.executable} {exec_filepath}
+        User = {service_name}
+        WorkingDirectory = {pathlib.Path().resolve()}
+        Restart = on-failure
+        RestartSec = 30
+
+        [Install]
+        WantedBy = multi-user.target'''
+    daemon_filepath = SERVICE_CONST.DAEMON_SERVICE_DIR/f'{service_name}.service'
+    with open(daemon_filepath,'w') as fp :
+        fp.write(textwrap.dedent(code))
+
+def install_service(service_class_name,service_name,argslist,operating_system) :
     """
     install the Service using NSSM
     """
@@ -96,22 +116,45 @@ def install_service(service_class_name,service_name,argslist) :
         msg+= 'Please close this window and rerun InstallService so that their values get picked up.'
         SERVICE_CONST.LOGGER.info(msg)
         sys.exit(0)
-    #if it doesn't exist there yet, copy the libsodium.dll file to C:\Windows\system32
-    copy_libsodium_dll_to_system32()
-    #find or install NSSM to run the executable
-    find_install_NSSM()
+    #find the dictionary with details about the program that will run
+    service_dict = [sd for sd in SERVICE_CONST.AVAILABLE_SERVICES if sd['script_name']==service_class_name]
+    if len(service_dict)!=1 :
+        errmsg = f'ERROR: could not find the Service dictionary for {service_name} (a {service_class_name} program)! '
+        errmsg+= f'service_dict = {service_dict}'
+        raise RuntimeError(errmsg)
+    service_dict = service_dict[0]
     #write out the executable file
-    exec_filepath = write_executable_file(service_class_name,service_name,argslist)
-    #install the service using NSSM
+    exec_filepath = write_executable_file(service_dict,service_name,argslist)
+    #install the service
     msg='Installing a'
     if service_class_name[0].lower() in ('a','e','i','o','u','y') :
         msg+='n'
     msg+=f' program {service_class_name} as "{service_name}" from executable at {exec_filepath}...'
     SERVICE_CONST.LOGGER.info(msg)
-    cmd = f'{SERVICE_CONST.NSSM_EXECUTABLE_PATH} install {service_name} \"{sys.executable}\" \"{exec_filepath}\"'
-    run_cmd_in_subprocess(['powershell.exe',cmd])
-    run_cmd_in_subprocess(['powershell.exe',
-                           f'{SERVICE_CONST.NSSM_EXECUTABLE_PATH} set {service_name} DisplayName {service_name}'])
+    #on Windows, it's a Service managed using NSSM
+    if operating_system=='Windows' :
+        #if it doesn't exist there yet, copy the libsodium.dll file to C:\Windows\system32
+        copy_libsodium_dll_to_system32()
+        #find or install NSSM to run the executable
+        find_install_NSSM()
+        #run NSSM
+        cmd = f'{SERVICE_CONST.NSSM_EXECUTABLE_PATH} install {service_name} \"{sys.executable}\" \"{exec_filepath}\"'
+        run_cmd_in_subprocess(['powershell.exe',cmd])
+        run_cmd_in_subprocess(['powershell.exe',
+                                f'{SERVICE_CONST.NSSM_EXECUTABLE_PATH} set {service_name} DisplayName {service_name}'])
+    #on Linux, it's a daemon managed using systemd
+    elif operating_system=='Linux' :
+        #make sure systemd is running
+        check = run_cmd_in_subprocess(['ps','--no-headers','-o','comm','1'])
+        if check.decode().rstrip()!='systemd' :
+            errmsg = 'ERROR: Installing programs as Services ("daemons") on Linux requires systemd!'
+            errmsg = 'You can install systemd with "sudo apt install systemd" and try again if you would like.'
+            SERVICE_CONST.LOGGER.error(errmsg,RuntimeError)
+        #write the daemon file pointing to the executable
+        write_daemon_file()
+        #enable the service
+        run_cmd_in_subprocess(['sudo','systemctl','daemon-reload'])
+        run_cmd_in_subprocess(['sudo','systemctl','enable',f'{service_name}.service'])
     SERVICE_CONST.LOGGER.info(f'Done installing {service_name}')
 
 #################### MAIN FUNCTION ####################
@@ -143,8 +186,10 @@ def main() :
             index = argslist.index('--service_name')
             argslist.pop(index)
             argslist.pop(index)
+        #get the name of the OS
+        operating_system = get_os_name()
         #install the service
-        install_service(args.service_class_name,service_name,sys.argv[2:])
+        install_service(args.service_class_name,service_name,sys.argv[2:],operating_system)
 
 if __name__=='__main__' :
     main()

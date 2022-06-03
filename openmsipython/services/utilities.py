@@ -1,7 +1,24 @@
 #imports
-import pathlib, os, shutil, ctypes.util
+import pathlib, os, shutil, ctypes.util, platform
 from subprocess import check_output, CalledProcessError
 from .config import SERVICE_CONST
+
+def get_os_name() :
+    """
+    Return the name of the operating system the Service is being installed or running on
+    """
+    if platform.system()=='Windows' :
+        return 'Windows'
+    elif platform.system()=='Linux' :
+        return 'Linux'
+    #MacOS is not supported
+    elif platform.system()=='Darwin' :
+        errmsg = f'ERROR: Installing programs as Services is not supported on MacOS!'
+        SERVICE_CONST.LOGGER.error(errmsg,NotImplementedError)
+    #otherwise I don't know what happened
+    else :
+        errmsg = f'ERROR: could not determine operating system from platform.system() output "{platform.system()}"'
+        SERVICE_CONST.LOGGER.error(errmsg,ValueError)
 
 def run_cmd_in_subprocess(args,*,shell=False) :
     """

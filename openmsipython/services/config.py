@@ -48,5 +48,8 @@ class ServicesConstants :
     @property
     def SERVICE_EXECUTABLE_NAME_STEM(self) :
         return '_service_executable.py'
+    @property
+    def DAEMON_SERVICE_DIR(self) :
+        return pathlib.Path('/etc/systemd/system/')
 
 SERVICE_CONST = ServicesConstants()
