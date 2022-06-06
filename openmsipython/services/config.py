@@ -31,8 +31,11 @@ class ServicesConstants :
                                            'filepath':path,
                                            'func_name':funcname})
         #make the logger to use
-        self.logger = Logger('Services',logger_filepath=pathlib.Path(__file__).parent/'working_dir'/'Services.log')
+        self.logger = Logger('Services',logger_filepath=self.WORKING_DIR/'Services.log')
 
+    @property
+    def WORKING_DIR(self) :
+        return (pathlib.Path(__file__).parent/'working_dir').resolve()
     @property
     def AVAILABLE_SERVICES(self) :
         return self.service_dicts # A dictionary with details of the services that are available
@@ -44,7 +47,7 @@ class ServicesConstants :
         return 'https://nssm.cc/release/nssm-2.24.zip' # The URL to use for downloading NSSM when needed
     @property
     def NSSM_EXECUTABLE_PATH(self) :
-        return (pathlib.Path(__file__).parent / 'working_dir' / 'nssm.exe').resolve()
+        return (self.WORKING_DIR / 'nssm.exe')
     @property
     def SERVICE_EXECUTABLE_NAME_STEM(self) :
         return '_service_executable.py'

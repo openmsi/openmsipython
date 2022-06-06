@@ -47,7 +47,7 @@ def stop_service(service_name,operating_system) :
         run_cmd_in_subprocess(['sudo','systemctl','stop',f'{service_name}.service'])
     SERVICE_CONST.LOGGER.info(f'Done stopping {service_name}')
 
-def remove_service(service_name,remove_env_vars,remove_nssm,operating_system) :
+def remove_service(service_name,operating_system,remove_env_vars=False,remove_nssm=False) :
     """
     remove the Service
     """
@@ -116,7 +116,8 @@ def main() :
     if args.run_mode in ['stop','stop_and_remove'] :
         stop_service(args.service_name,operating_system)
     if args.run_mode in ['remove','stop_and_remove'] :
-        remove_service(args.service_name,args.remove_env_vars,args.remove_nssm,operating_system)
+        remove_service(args.service_name,operating_system,
+                       remove_env_vars=args.remove_env_vars,remove_nssm=args.remove_nssm)
 
 if __name__=='__main__' :
     main()
