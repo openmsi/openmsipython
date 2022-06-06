@@ -158,7 +158,7 @@ def install_service(service_class_name,service_name,argslist,operating_system,in
                 errmsg = 'You can install systemd with "sudo apt install systemd" (or similar) and try again.'
                 SERVICE_CONST.LOGGER.error(errmsg,RuntimeError)
         #write the daemon file pointing to the executable
-        write_daemon_file()
+        write_daemon_file(service_dict,service_name,exec_filepath)
         #enable the service
         run_cmd_in_subprocess(['sudo','systemctl','daemon-reload'])
         run_cmd_in_subprocess(['sudo','systemctl','enable',f'{service_name}.service'])
