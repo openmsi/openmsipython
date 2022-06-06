@@ -4,6 +4,9 @@ FROM cimg/python:3.9
 # Switch to root user
 USER root
 
+# Install systemd
+RUN sudo apt install systemd
+
 # Install miniconda3
 ENV PATH="/root/miniconda3/bin:$PATH"
 ARG PATH="/root/miniconda3/bin:$PATH"
