@@ -51,11 +51,11 @@ def remove_service(service_name,operating_system,remove_env_vars=False,remove_ns
     """
     remove the Service
     """
-    #find or install NSSM in the current directory
-    find_install_NSSM()
     #remove the service
     SERVICE_CONST.LOGGER.info(f'Removing {service_name}...')
     if operating_system=='Windows' :
+        #find or install NSSM in the current directory
+        find_install_NSSM()
         #using NSSM
         cmd = f'{SERVICE_CONST.NSSM_EXECUTABLE_PATH} remove {service_name} confirm'
         run_cmd_in_subprocess(['powershell.exe',cmd])
