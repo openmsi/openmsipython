@@ -2,6 +2,7 @@
 import sys, pathlib, os, textwrap
 from subprocess import Popen, PIPE, STDOUT
 from ..shared.argument_parsing import MyArgumentParser
+from ..shared.config_file_parser import ConfigFileParser
 from .config import SERVICE_CONST
 from .utilities import get_os_name, set_env_var_from_user_input, find_install_NSSM
 from .utilities import run_cmd_in_subprocess, copy_libsodium_dll_to_system32
@@ -85,11 +86,19 @@ def write_executable_file(service_dict,service_name,argslist,filepath=None) :
         fp.write(textwrap.dedent(code))
     return exec_fp
 
-def write_daemon_file(service_dict,service_name,exec_filepath) :
+def write_daemon_file(service_dict,service_name,argslist,exec_filepath) :
     #make sure the directory to hold the file exists
     if not SERVICE_CONST.DAEMON_SERVICE_DIR.is_dir() :
         SERVICE_CONST.LOGGER.info(f'Creating a new daemon service directory at {SERVICE_CONST.DAEMON_SERVICE_DIR}')
         SERVICE_CONST.DAEMON_SERVICE_DIR.mkdir(parents=True)
+    #get the names/values of environment variables from the command line and config file to add to the service file
+    env_var_names = [arg for arg in argslist if arg.startswith('$')]
+    p = service_dict['class'].get_argument_parser()
+    argsdests = [action.dest for action in p._actions]
+    if 'config' in argsdests :
+        pargs = p.parse_args(args=argslist)
+        cfp = ConfigFileParser(pargs.config,logger=SERVICE_CONST.LOGGER)
+        env_var_names+=[evn for evn in cfp.env_var_names]
     #write out the file pointing to the python executable
     code = f'''\
         [Unit]
@@ -99,8 +108,14 @@ def write_daemon_file(service_dict,service_name,exec_filepath) :
 
         [Service]
         Type = simple
-        ExecStart = {sys.executable} {exec_filepath}
-        User = {service_name}
+        ExecStart = {sys.executable} {exec_filepath}'''
+    for evn in env_var_names :
+        val = os.path.expandvars(evn)
+        if val==evn :
+            raise RuntimeError(f'ERROR: value not found for expected environment variable {evn}!')
+        code += f'''\n\
+        Environment="{evn[1:]}={val}"'''
+    code+=f'''\
         WorkingDirectory = {pathlib.Path().resolve()}
         Restart = on-failure
         RestartSec = 30
@@ -158,7 +173,7 @@ def install_service(service_class_name,service_name,argslist,operating_system,in
             errmsg = 'You can install systemd with "sudo apt install systemd" (or similar) and try again.'
             SERVICE_CONST.LOGGER.error(errmsg,RuntimeError)
         #write the daemon file pointing to the executable
-        write_daemon_file(service_dict,service_name,exec_filepath)
+        write_daemon_file(service_dict,service_name,argslist,exec_filepath)
         #enable the service
         run_cmd_in_subprocess(['sudo','systemctl','daemon-reload'])
         run_cmd_in_subprocess(['sudo','systemctl','enable',f'{service_name}.service'])
