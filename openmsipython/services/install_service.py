@@ -151,12 +151,11 @@ def install_service(service_class_name,service_name,argslist,operating_system,in
     #on Linux, it's a daemon managed using systemd
     elif operating_system=='Linux' :
         #make sure systemd is running
-        if interactive :
-            check = run_cmd_in_subprocess(['ps','--no-headers','-o','comm','1'])
-            if check.decode().rstrip()!='systemd' :
-                errmsg = 'ERROR: Installing programs as Services ("daemons") on Linux requires systemd!'
-                errmsg = 'You can install systemd with "sudo apt install systemd" (or similar) and try again.'
-                SERVICE_CONST.LOGGER.error(errmsg,RuntimeError)
+        check = run_cmd_in_subprocess(['ps','--no-headers','-o','comm','1'])
+        if check.decode().rstrip()!='systemd' :
+            errmsg = 'ERROR: Installing programs as Services ("daemons") on Linux requires systemd!'
+            errmsg = 'You can install systemd with "sudo apt install systemd" (or similar) and try again.'
+            SERVICE_CONST.LOGGER.error(errmsg,RuntimeError)
         #write the daemon file pointing to the executable
         write_daemon_file(service_dict,service_name,exec_filepath)
         #enable the service

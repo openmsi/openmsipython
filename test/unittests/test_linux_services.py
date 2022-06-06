@@ -1,5 +1,6 @@
 #imports
 import unittest, platform, shutil
+from subprocess import check_output
 from openmsipython.services.config import SERVICE_CONST
 from openmsipython.services.utilities import get_os_name
 from openmsipython.services.install_service import install_service
@@ -11,7 +12,8 @@ class TestLinuxServices(unittest.TestCase) :
     Class for testing that Services can be installed/started/stopped/removed without any errors on Linux OS
     """
 
-    @unittest.skipIf(platform.system()!='Linux','test requires systemd so only runs on Linux')
+    @unittest.skipIf(platform.system()!='Linux' or check_output(['ps','--no-headers','-o','comm','1'])!='systemd',
+                     'test requires systemd running on Linux')
     def test_install_start_stop_remove_linux_services(self) :
         """
         Make sure every possible Linux service can be installed, started, checked, stopped, and removed
