@@ -4,14 +4,20 @@ FROM cimg/python:3.9
 # Switch to root user
 USER root
 
-# Install miniconda3
-ENV PATH="/root/miniconda3/bin:$PATH"
-ARG PATH="/root/miniconda3/bin:$PATH"
-RUN wget \
-    https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh \
-    && mkdir /root/.conda \
-    && bash Miniconda3-latest-Linux-x86_64.sh -b \
-    && rm -f Miniconda3-latest-Linux-x86_64.sh 
+#start in the default area
+WORKDIR /
 
-# Install libsodium
-RUN conda install -c anaconda libsodium
+#install libsodium
+RUN apt-get update -y && \
+    apt-get install -y libsodium-dev
+
+#install git
+RUN apt-get install -y git
+
+#clone the openmsipython repo and install it
+RUN git clone https://github.com/openmsi/openmsipython.git
+WORKDIR /openmsipython
+RUN pip install .
+
+#switch back to the default area
+WORKDIR /
