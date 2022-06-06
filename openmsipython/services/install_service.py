@@ -107,9 +107,10 @@ def write_daemon_file(service_dict,service_name,exec_filepath) :
 
         [Install]
         WantedBy = multi-user.target'''
-    daemon_filepath = SERVICE_CONST.DAEMON_SERVICE_DIR/f'{service_name}.service'
-    with open(daemon_filepath,'w') as fp :
+    daemon_working_dir_filepath = SERVICE_CONST.WORKING_DIR/f'{service_name}.service'
+    with open(daemon_working_dir_filepath,'w') as fp :
         fp.write(textwrap.dedent(code))
+    run_cmd_in_subprocess(['sudo','mv',str(daemon_working_dir_filepath),str(SERVICE_CONST.DAEMON_SERVICE_DIR)])
 
 def install_service(service_class_name,service_name,argslist,operating_system,interactive=True) :
     """

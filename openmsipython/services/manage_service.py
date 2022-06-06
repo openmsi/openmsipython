@@ -63,7 +63,7 @@ def remove_service(service_name,operating_system,remove_env_vars=False,remove_ns
         run_cmd_in_subprocess(['sudo','systemctl','disable',f'{service_name}.service'])
         daemon_filepath = SERVICE_CONST.DAEMON_SERVICE_DIR/f'{service_name}.service'
         if daemon_filepath.exists() :
-            daemon_filepath.unlink()
+            run_cmd_in_subprocess(['sudo','rm','-f',str(daemon_filepath)])
         run_cmd_in_subprocess(['sudo','systemctl','daemon-reload'])
         run_cmd_in_subprocess(['sudo','systemctl','reset-failed'])
     SERVICE_CONST.LOGGER.info('Service removed')
