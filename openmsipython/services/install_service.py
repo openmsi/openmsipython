@@ -19,6 +19,8 @@ def set_env_vars(interactive=True) :
                         ]
     variables_set = False
     for env_var_tuple in env_var_names_descs :
+        if (not interactive) and (env_var_tuple[0] in ('KAFKA_PROD_CLUSTER_USERNAME','KAFKA_PROD_CLUSTER_PASSWORD')) :
+            continue
         if os.path.expandvars(f'${env_var_tuple[0]}') == f'${env_var_tuple[0]}' :
             if interactive :
                 set_env_var_from_user_input(*env_var_tuple)
