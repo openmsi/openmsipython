@@ -196,7 +196,7 @@ def main() :
         #get the name of the OS
         operating_system = get_os_name()
         #install the service
-        install_service(args.service_class_name,service_name,sys.argv[2:],operating_system)
+        install_service(args.service_class_name,service_name,argslist,operating_system)
 
 if __name__=='__main__' :
     main()
