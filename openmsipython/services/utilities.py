@@ -30,8 +30,13 @@ def run_cmd_in_subprocess(args,*,shell=False) :
         result = check_output(args,shell=shell,env=os.environ)
         return result
     except CalledProcessError as e :
-        errmsg = f'ERROR: failed to run a command. output:\n{e.output.decode()}\nstdout:\n{e.stdout.decode()}'
-        errmsg+= f'\nstderr:\n{e.stderr.decode()}'
+        errmsg = 'ERROR: failed to run a command! '
+        if e.output is not None :
+            errmsg+= f'output:\n{e.output.decode()}'
+        if e.stdout is not None :
+            errmsg+= f'\nstdout:\n{e.stdout.decode()}'
+        if e.stderr is not None :
+            errmsg+= f'\nstderr:\n{e.stderr.decode()}'
         SERVICE_CONST.LOGGER.error(errmsg,exc_obj=e)
 
 def remove_machine_env_var(var_name) :
