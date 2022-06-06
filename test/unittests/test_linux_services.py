@@ -48,7 +48,7 @@ class TestLinuxServices(unittest.TestCase) :
                 argslist_to_use = []
                 for arg in argslists_by_class_name[service_class_name] :
                     argslist_to_use.append(str(arg))
-                install_service(service_class_name,service_name,argslist_to_use,operating_system)
+                install_service(service_class_name,service_name,argslist_to_use,operating_system,interactive=False)
                 start_service(service_name,operating_system)
                 service_status(service_name,operating_system)
                 stop_service(service_name,operating_system)
