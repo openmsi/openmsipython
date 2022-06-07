@@ -1,12 +1,12 @@
 #imports
-import unittest, pathlib, importlib#, os
+import unittest, pathlib, importlib
 from openmsipython.services.config import SERVICE_CONST
-from openmsipython.services.utilities import find_install_NSSM
-from openmsipython.services.install_service import write_executable_file
+from openmsipython.services.service_manager import LinuxServiceManager
 from config import TEST_CONST
 
 #constants
-TEST_SERVICE_NAME = 'DataFileUploadDirectoryService'
+TEST_SERVICE_CLASS_NAME = 'DataFileUploadDirectory'
+TEST_SERVICE_NAME = 'testing_service'
 TEST_SERVICE_EXECUTABLE_ARGSLIST = ['test_upload']
 
 class TestServiceUtilities(unittest.TestCase) :
@@ -29,9 +29,12 @@ class TestServiceUtilities(unittest.TestCase) :
         Make sure an executable file is written to the expected location with the expected format
         """
         #the test below does create a file but that file should be ignored in the repo
-        test_exec_fp = pathlib.Path(__file__).parent.parent.parent/'openmsipython'/'services'
-        test_exec_fp = test_exec_fp/'working_dir'/f'{TEST_SERVICE_NAME}{SERVICE_CONST.SERVICE_EXECUTABLE_NAME_STEM}'
-        write_executable_file(TEST_SERVICE_NAME,TEST_SERVICE_EXECUTABLE_ARGSLIST,test_exec_fp)
+        test_exec_fp = pathlib.Path(__file__).parent.parent.parent/'openmsipython'/'services'/'working_dir'
+        test_exec_fp = test_exec_fp/f'{TEST_SERVICE_NAME}{SERVICE_CONST.SERVICE_EXECUTABLE_NAME_STEM}'
+        manager = LinuxServiceManager(TEST_SERVICE_NAME,
+                                      service_class_name=TEST_SERVICE_CLASS_NAME,
+                                      argslist=TEST_SERVICE_EXECUTABLE_ARGSLIST)
+        manager._write_executable_file(filepath=test_exec_fp)
         self.assertTrue(test_exec_fp.is_file())
         with open(test_exec_fp,'r') as test_fp :
             test_lines = test_fp.readlines()
@@ -44,14 +47,3 @@ class TestServiceUtilities(unittest.TestCase) :
                 continue
             else :
                 self.assertTrue(test_line==ref_line)
-
-    #@unittest.skipIf(os.name!='nt','test requires Powershell and so only runs on Windows')
-    @unittest.skip("Skipping NSSM download test because it's finicky")
-    def test_download_NSSM(self) :
-        """
-        Make sure NSSM can be downloaded to the expected location
-        """
-        self.assertFalse(SERVICE_CONST.NSSM_EXECUTABLE_PATH.is_file())
-        #the command below does leave a file in the repo but it should be ignored
-        find_install_NSSM()
-        self.assertTrue(SERVICE_CONST.NSSM_EXECUTABLE_PATH.is_file())

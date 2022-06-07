@@ -80,6 +80,9 @@ class TestRoutineConstants :
     def TEST_WATCHED_DIR_PATH_OSN(self) : #same as above except for the tests that interact with the object store
         return pathlib.Path(__file__).parent.parent / 'test_watched_dir_osn'
     @property
+    def TEST_DIR_SERVICES_TEST(self) : # scrap directory to use for services tests
+        return pathlib.Path(__file__).parent.parent / 'test_dir_services'
+    @property
     def TEST_RECO_DIR_PATH(self) : # Path to the directory where consumed files should be reconstructed
         return pathlib.Path(__file__).parent.parent / 'test_reco'
     @property

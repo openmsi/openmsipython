@@ -1,8 +1,9 @@
 #imports
 from abc import ABC, abstractmethod
 from .argument_parsing import MyArgumentParser
+from .has_argument_parser import HasArgumentParser
 
-class Runnable(ABC) :
+class Runnable(HasArgumentParser,ABC) :
     """
     Class for any child classes that can be run on their own from the command line
     """

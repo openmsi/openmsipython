@@ -18,6 +18,12 @@ class ConfigFileParser(LogOwner) :
     @property
     def filepath(self) :
         return self._filepath
+    @property
+    def env_var_names(self) :
+        for csd in self._config.values() :
+            for k,v in csd.items() :
+                if v.startswith('$') :
+                    yield v
 
     #################### PUBLIC FUNCTIONS ####################
 

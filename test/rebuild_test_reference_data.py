@@ -4,9 +4,10 @@ from openmsipython.shared.logging import Logger
 from openmsipython.data_file_io.config import RUN_OPT_CONST
 from openmsipython.data_file_io.upload_data_file import UploadDataFile
 from openmsipython.my_kafka.serialization import DataFileChunkSerializer
-from openmsipython.services.install_service import write_executable_file
+from openmsipython.services.service_manager import WindowsServiceManager
 from openmsipython.data_models.laser_shock.config import LASER_SHOCK_CONST
 from openmsipython.data_models.laser_shock.laser_shock_lab import LaserShockLab
+from openmsipython.services.config import SERVICE_CONST
 from unittests.config import TEST_CONST
 
 #constants
@@ -162,6 +163,7 @@ def rebuild_binary_file_chunks_for_serialization_reference() :
     df = UploadDataFile(test_data_fp,rootdir=EXISTING_TEST_DATA_DIR/TEST_CONST.TEST_DATA_FILE_ROOT_DIR_NAME,
                         logger=LOGGER)
     df._build_list_of_file_chunks(RUN_OPT_CONST.DEFAULT_CHUNK_SIZE)
+    df.add_chunks_to_upload()
     #populate and serialize a few chunks and save them as binary data
     dfcs = DataFileChunkSerializer()
     for i in range(3) :
@@ -177,13 +179,17 @@ def rebuild_test_services_executable() :
     Rebuild the executable file used to double-check Services behavior
     """
     #some constants
-    TEST_SERVICE_NAME = 'DataFileUploadDirectoryService'
+    TEST_SERVICE_CLASS_NAME = 'DataFileUploadDirectory'
+    TEST_SERVICE_NAME = 'testing_service'
     TEST_SERVICE_EXECUTABLE_ARGSLIST = ['test_upload']
     #create the file using the function supplied
-    write_executable_file(TEST_SERVICE_NAME,TEST_SERVICE_EXECUTABLE_ARGSLIST)
+    manager = WindowsServiceManager(TEST_SERVICE_NAME,
+                                    service_class_name=TEST_SERVICE_CLASS_NAME,
+                                    argslist=TEST_SERVICE_EXECUTABLE_ARGSLIST)
+    manager._write_executable_file()
     #move it to the new test data folder
     exec_fp = pathlib.Path(__file__).parent.parent/'openmsipython'/'services'/'working_dir'
-    exec_fp = exec_fp/f'{TEST_SERVICE_NAME}_python_executable.py'
+    exec_fp = exec_fp/f'{TEST_SERVICE_NAME}{SERVICE_CONST.SERVICE_EXECUTABLE_NAME_STEM}'
     exec_fp.replace(NEW_TEST_DATA_DIR/exec_fp.name)
     compare_and_check_old_and_new_files(exec_fp.name)
 

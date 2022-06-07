@@ -6,7 +6,7 @@
       "notes": null,
       "origin": "specified",
       "template": {
-        "id": "8d5d03b6-93ad-4bc3-b3e4-7c3707d2fefc",
+        "id": "d90c8e00-5a3c-4a75-b454-6bcf8f6d3d24",
         "scope": "auto",
         "type": "link_by_uid"
       },
@@ -22,7 +22,7 @@
       "notes": null,
       "origin": "specified",
       "template": {
-        "id": "1157eb9e-5c3d-410e-a51c-80ed91310e75",
+        "id": "6b2ef65f-3236-408d-a539-0dace47c5639",
         "scope": "auto",
         "type": "link_by_uid"
       },
@@ -39,7 +39,7 @@
       "notes": null,
       "origin": "specified",
       "template": {
-        "id": "27beaa73-a4e0-4117-abc4-89e2fec49f38",
+        "id": "ba7100d2-2d41-43bf-9f02-0bb54656a1e4",
         "scope": "auto",
         "type": "link_by_uid"
       },
@@ -66,7 +66,7 @@
       "notes": null,
       "origin": "specified",
       "template": {
-        "id": "cea1d122-a7db-4245-901e-977639e8a6dc",
+        "id": "44debc28-1ef9-4c8f-98f6-ff95580c058b",
         "scope": "auto",
         "type": "link_by_uid"
       },
@@ -83,7 +83,7 @@
       "notes": null,
       "origin": "specified",
       "template": {
-        "id": "412fb64e-b0c1-4480-a85c-2831bac8065e",
+        "id": "b70280a0-9908-43df-b8e2-f0369d951a9c",
         "scope": "auto",
         "type": "link_by_uid"
       },
@@ -99,7 +99,7 @@
       "notes": null,
       "origin": "specified",
       "template": {
-        "id": "16cbd474-f48c-4431-88f8-d6151db1ff6c",
+        "id": "dbe74513-78b2-4f2d-9453-cde9a7a4721b",
         "scope": "auto",
         "type": "link_by_uid"
       },
@@ -115,7 +115,7 @@
       "notes": null,
       "origin": "specified",
       "template": {
-        "id": "8d5e7943-7c5a-4dca-a451-14b665fe0fdb",
+        "id": "7bd4dd4f-56e7-462c-b98f-24d2cf6003b5",
         "scope": "auto",
         "type": "link_by_uid"
       },
@@ -134,12 +134,12 @@
     "ObjectType::LaserShockFlyerCuttingProgram"
   ],
   "template": {
-    "id": "38268ada-0b6c-483d-8c4b-777f0212836d",
+    "id": "a8396a76-85d4-4f22-b044-7f1fbbe569ea",
     "scope": "auto",
     "type": "link_by_uid"
   },
   "type": "process_spec",
   "uids": {
-    "auto": "86a8c460-de80-47d7-aeab-962bc1469f86"
+    "auto": "067b1007-352a-4750-a80a-d3d8e85b79a4"
   }
 }

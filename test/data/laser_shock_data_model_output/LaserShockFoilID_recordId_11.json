@@ -3,7 +3,7 @@
   "name": "50.4um (0.002\") Hard Al (AluFoil)",
   "notes": "",
   "process": {
-    "id": "3c0a6984-51b9-4917-b88a-66bc5c051e89",
+    "id": "8e651393-6052-4122-94b0-10efca0f7af1",
     "scope": "auto",
     "type": "link_by_uid"
   },
@@ -16,7 +16,7 @@
         "notes": null,
         "origin": "specified",
         "template": {
-          "id": "e50c850b-b0bc-44e7-a30b-282419a17276",
+          "id": "54763951-6ebf-4583-91b3-845f3bb03983",
           "scope": "auto",
           "type": "link_by_uid"
         },
@@ -37,7 +37,7 @@
         "notes": null,
         "origin": "specified",
         "template": {
-          "id": "30d16931-5735-4c4d-99e1-6ff66c2bce81",
+          "id": "d2668e4e-35c2-48e2-b275-27475d71da4b",
           "scope": "auto",
           "type": "link_by_uid"
         },
@@ -58,7 +58,7 @@
         "notes": null,
         "origin": "specified",
         "template": {
-          "id": "fb37c2b6-71c0-4e7e-a828-1a5d472f2078",
+          "id": "8056faf2-b599-4c59-9e58-a6cf81a181ea",
           "scope": "auto",
           "type": "link_by_uid"
         },
@@ -79,7 +79,7 @@
         "notes": null,
         "origin": "specified",
         "template": {
-          "id": "62005583-9131-446f-9a5f-043915ff9d8a",
+          "id": "29656a84-382a-4f57-b0cc-03d246ccc65e",
           "scope": "auto",
           "type": "link_by_uid"
         },
@@ -99,7 +99,7 @@
         "notes": null,
         "origin": "specified",
         "template": {
-          "id": "0d68fd90-fc06-4606-92f5-0ee842298af9",
+          "id": "a8855fe6-8519-4257-9580-0da35470bdf3",
           "scope": "auto",
           "type": "link_by_uid"
         },
@@ -119,12 +119,12 @@
     "ObjectType::LaserShockFoilID"
   ],
   "template": {
-    "id": "356e57cd-34b0-41eb-8518-4a8cfe77df6f",
+    "id": "636cee34-9ca1-4e2b-8e84-5242ec82c7a4",
     "scope": "auto",
     "type": "link_by_uid"
   },
   "type": "material_spec",
   "uids": {
-    "auto": "1e994c7e-8dd6-4f19-ba41-83ee7ccb4e61"
+    "auto": "8f749035-61e8-499e-876d-e83b8b0ab880"
   }
 }

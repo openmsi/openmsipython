@@ -221,7 +221,7 @@ class TestOSN(unittest.TestCase):
         s3d.close_session()
         LOGGER.info('All test cases passed')
 
-    def test_upload_kafka_and_trasnfer_into_osn_kafka(self):
+    def test_upload_and_transfer_into_osn_kafka(self):
         self.run_data_file_upload_directory()
         self.run_osn_tranfer_data()
         self.validate_osn_producer_data_transfer()

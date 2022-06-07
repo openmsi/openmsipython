@@ -1,32 +1,32 @@
-## Installing programs as Windows Services
+## Installing programs as Windows Services and Linux Daemons
 
-**Any** of the available top-level programs can be run from the command line or, alternatively, installed as Windows Services on machines running Windows. Services can be installed for all users of a particular machine and, once installed, they will run automatically from when the machine boots until it is stopped and/or removed. Programs running as Windows Services cannot be interacted with from the command line after they've been installed, but they will still produce output to log files.
+**Any** of the available top-level programs can be run from the command line or, alternatively, installed as Services on machines running Windows or Daemons on machines running Linux (with `systemd` installed). Services can be installed for all users of a particular machine and, once installed, they will run automatically from when the machine boots until it is stopped and/or removed. Programs running as Windows Services cannot be interacted with from the command line after they've been installed, but they will still produce output to log files.
 
-### Preparing the Windows environment
+### Preparing the environment (note for Windows)
 
 Issues with loading `.dll` files manifest differently when running `OpenMSIPython` code as Windows Services because Services run in `%WinDir%\System32` and don't read the same `PATH` locations as running interactively. Some workarounds are built into `OpenMSIPython` to mitigate these problems, but if you run into trouble with missing `.dll` files they can typically be resolved by copying those files into the `%WinDir%\System32` directory.
 
 ### Setup and installation
 
-To install a Service, type the following command in the `openmsi` environment in your Terminal or Anaconda Prompt (you will need to be in admin mode):
+To install a Service or Daemon, type the following command in the `openmsi` environment in your Terminal or Anaconda Prompt (you will need to be in admin mode):
 
-`InstallService [program_name] [command_line_options]`
+`InstallService [program_name] [command_line_options] --service_name [name_for_service_or_daemon]`
 
-where `[program_name]` is the name of a top-level program (corresponding to a Python Class) and `[command_line_options]` is a placeholder for that top-level program's command line options. Typing `InstallService -h` or `InstallService [program_name] -h` will give a helpful output detailing the required and optional command line arguments. These command line arguments will only need to be specified once, when the Service is installed.
+where `[program_name]` is the name of a top-level program (corresponding to a Python Class), `[command_line_options]` is a placeholder for that top-level program's command line options, and `[name_for_service_or_daemon]` is a unique name you'd like to use for the instance of the program. Typing `InstallService -h` or `InstallService [program_name] -h` will give a helpful output detailing the required and optional command line arguments. These command line arguments will only need to be specified once, when the Service is installed.
 
 Any optional command line arguments applicable to running a program are also applicable to installing the program as a Service. **PLEASE NOTE** that any arguments whose values are paths to directories or files **must be given as absolute paths** and not relative paths, otherwise the underlying code may crash if it can't find a specified path, and even debugging this error using the executable may be opaque. 
 
 While the script runs, you may be prompted to input the usernames and passwords to the Kafka "test" and "production" clusters. You should have those from somewhere else if you're looking to install any Service. If you input these values you will need to close and reopen the Terminal or Admin mode Anaconda Prompt you were working in and rerun the `InstallService` command.
 
-If the script completes successfully, you should be able to see the Service listed in the Windows Service Manager window that pops up when you type `mmc Services.msc`. The Service will not start running until it is "start"ed using the command in the next section.
+If the script completes successfully on Windows, you should be able to see the Service listed in the Windows Service Manager window that pops up when you type `mmc Services.msc`. The Service will not start running until it is "start"ed using the command in the next section.
 
 ### Starting Services and other interaction
 
-After installing a Service, you can use the `ManageService [program_name]` command to perform several actions on the program running as a Service:
-1. **start the Service running** with `ManageService [program_name] start`. You must do this after installing the Service to get it running.
-1. **check the Service status** with `ManageService [program_name] status` to make sure it's running properly
-1. **stop the Service running** with `ManageService [program_name] stop`. If you temporarily stop the Service using this command, you can restart it afterward with `ManageService [program_name] start`.
-1. **uninstall the Service completely** with `ManageService [program_name] stop_and_remove` (or, if the Service is already stopped, simply `ManageService [program_name] remove`). If it was the only Service running on the machine, you can also add the `--remove_env_vars` flag to un-set the Machine-level username/password environment variables.
+After installing a Service/Daemon, you can use the `ManageService [name_for_service_or_daemon]` command to perform several actions on the program running as a Service:
+1. **start the Service running** with `ManageService [name_for_service_or_daemon] start`. You must do this after installing the Service to get it running.
+1. **check the Service status** with `ManageService [name_for_service_or_daemon] status` to make sure it's running properly
+1. **stop the Service running** with `ManageService [name_for_service_or_daemon] stop`. If you temporarily stop the Service using this command, you can restart it afterward with `ManageService [name_for_service_or_daemon] start`.
+1. **uninstall the Service completely** with `ManageService [name_for_service_or_daemon] stop_and_remove` (or, if the Service is already stopped, simply `ManageService [name_for_service_or_daemon] remove`). If it was the only Service running on the machine, you can also add the `--remove_env_vars` flag to un-set the username/password environment variables.
 
 ### Debugging problems
 

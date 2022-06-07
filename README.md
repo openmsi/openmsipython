@@ -1,5 +1,5 @@
 # <div align="center"> Open MSI Python Code </div>
-#### <div align="center">***v0.9.2.3***</div>
+#### <div align="center">***v0.9.3.3***</div>
 
 #### <div align="center">Maggie Eminizer<sup>2</sup>, Amir Sharifzadeh<sup>2</sup>, Sam Tabrisky<sup>3</sup>, Alakarthika Ulaganathan<sup>4</sup>, David Elbert<sup>1</sup></div>
 
@@ -115,11 +115,13 @@ python
 
 and if that line runs without any problems then the package was installed correctly.
 
-### Environment variables
+### Environment variables (for Confluent Cloud or S3 Object Stores)
 
-Interacting with the Kafka broker, including running code tests as described [here](./test), requires that some environment variables are set on your system. If you're installing any software to run as a Windows Service (as described [here](./openmsipython/services)) then you'll be prompted to enter these variables' values, but you may find it more convenient to set them once. The environment variables are called `KAFKA_TEST_CLUSTER_USERNAME`, `KAFKA_TEST_CLUSTER_PASSWORD`, `KAFKA_PROD_CLUSTER_USERNAME`, and `KAFKA_PROD_CLUSTER_PASSWORD`. The "`TEST`" variables are used to connect to the test cluster, and must be set to successfully run the automatic code tests. The "`PROD`" variables are used to connect to the full production cluster and are only needed for fully deployed code.
+Interacting with the Kafka broker on Confluent Cloud, including running code tests as described [here](./test), requires that some environment variables are set on your system. If you're installing any software to run as a Windows Service or Linux Daemon (as described [here](./openmsipython/services)) then you'll be prompted to enter these variables' values, but you may find it more convenient to set them once. The environment variables are called `KAFKA_TEST_CLUSTER_USERNAME`, `KAFKA_TEST_CLUSTER_PASSWORD`, `KAFKA_PROD_CLUSTER_USERNAME`, and `KAFKA_PROD_CLUSTER_PASSWORD`. The "`TEST`" variables are used to connect to the test cluster, and must be set to successfully run the automatic code tests. The "`PROD`" variables are used to connect to the full production cluster and are only needed for fully deployed code.
 
 You can set these environment variables in a shell `.rc` or `.profile` file if running on Linux or Mac OS. On Windows you can set them as machine environment variables using commands like `[Environment]::SetEnvironmentVariable("NAME","VALUE",[EnvironmentVariableTarget]::Machine)`. You can also set them as "User" or "Process" environment variables on Windows if you don't have the necessary permissions to set them for the "Machine". 
+
+Secrets for connecting to S3 object stores should similarly be stored as environment variables and referenced in config files, rather than hard-coded.
 
 ### Other documentation
 
@@ -139,7 +141,7 @@ The [readme file here](./openmsipython/my_kafka) explains how to enable message-
 
 The [readme file here](./openmsipython/osn) explains how to consume files to arbitrary S3 buckets instead of saving them locally.
 
-The [readme file here](./openmsipython/services) details procedures for installing any available command-line program as a Windows Service and working with it.
+The [readme file here](./openmsipython/services) details procedures for installing any available command-line program as a Windows Service or Linux Daemon and working with it.
 
 The [readme file here](./openmsipython/data_models) describes how GEMD data structures are used to model data across the different projects in the Open MSI / DMREF project.
 
