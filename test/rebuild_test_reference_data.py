@@ -4,7 +4,7 @@ from openmsipython.shared.logging import Logger
 from openmsipython.data_file_io.config import RUN_OPT_CONST
 from openmsipython.data_file_io.upload_data_file import UploadDataFile
 from openmsipython.my_kafka.serialization import DataFileChunkSerializer
-from openmsipython.services.install_service import write_executable_file
+from openmsipython.services.service_manager import WindowsServiceManager
 from openmsipython.data_models.laser_shock.config import LASER_SHOCK_CONST
 from openmsipython.data_models.laser_shock.laser_shock_lab import LaserShockLab
 from openmsipython.services.config import SERVICE_CONST
@@ -182,9 +182,11 @@ def rebuild_test_services_executable() :
     TEST_SERVICE_CLASS_NAME = 'DataFileUploadDirectory'
     TEST_SERVICE_NAME = 'testing_service'
     TEST_SERVICE_EXECUTABLE_ARGSLIST = ['test_upload']
-    service_dict = ([sd for sd in SERVICE_CONST.AVAILABLE_SERVICES if sd['script_name']==TEST_SERVICE_CLASS_NAME])[0]
     #create the file using the function supplied
-    write_executable_file(service_dict,TEST_SERVICE_NAME,TEST_SERVICE_EXECUTABLE_ARGSLIST)
+    manager = WindowsServiceManager(TEST_SERVICE_NAME,
+                                    service_class_name=TEST_SERVICE_CLASS_NAME,
+                                    argslist=TEST_SERVICE_EXECUTABLE_ARGSLIST)
+    manager._write_executable_file()
     #move it to the new test data folder
     exec_fp = pathlib.Path(__file__).parent.parent/'openmsipython'/'services'/'working_dir'
     exec_fp = exec_fp/f'{TEST_SERVICE_NAME}{SERVICE_CONST.SERVICE_EXECUTABLE_NAME_STEM}'

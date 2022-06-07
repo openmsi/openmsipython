@@ -1,5 +1,5 @@
 #imports
-import pathlib, os, shutil, ctypes.util, platform
+import pathlib, os, sys, platform
 from subprocess import check_output, CalledProcessError
 from .config import SERVICE_CONST
 
@@ -39,73 +39,75 @@ def run_cmd_in_subprocess(args,*,shell=False) :
             errmsg+= f'\nstderr:\n{e.stderr.decode()}'
         SERVICE_CONST.LOGGER.error(errmsg,exc_obj=e)
 
-def remove_machine_env_var(var_name) :
+def set_env_var(var_name,var_val) :
     """
-    remove a machine environment variable using a powershell command given its name
+    set an environment variable given its name and value
     """
-    pwrsh_cmd = f'[Environment]::SetEnvironmentVariable("{var_name}",$null,[EnvironmentVariableTarget]::Machine)'
-    run_cmd_in_subprocess(['powershell.exe',pwrsh_cmd])
-
-def set_machine_env_var(var_name,var_val) :
-    """
-    set a machine environment variable using a powershell command given its name and value
-    """
-    pwrsh_cmd = f'[Environment]::SetEnvironmentVariable("{var_name}","{var_val}",[EnvironmentVariableTarget]::Machine)'
-    run_cmd_in_subprocess(['powershell.exe',pwrsh_cmd])
+    if get_os_name()=='Windows' :
+        pwrsh_cmd = f'[Environment]::SetEnvironmentVariable("{var_name}","{var_val}",[EnvironmentVariableTarget]::Machine)'
+        run_cmd_in_subprocess(['powershell.exe',pwrsh_cmd])
+    elif get_os_name()=='Linux' :
+        run_cmd_in_subprocess(['export',f'{var_name}={var_val}'])
     os.environ[var_name]=var_val
+
+def remove_env_var(var_name) :
+    """
+    remove an environment variable given its name
+    """
+    if get_os_name()=='Windows' :
+        pwrsh_cmd = f'[Environment]::SetEnvironmentVariable("{var_name}",$null,[EnvironmentVariableTarget]::Machine)'
+        run_cmd_in_subprocess(['powershell.exe',pwrsh_cmd])
+    elif get_os_name()=='Linux' :
+        run_cmd_in_subprocess(['unset',var_name])
+    else :
+        raise NotImplementedError
 
 def set_env_var_from_user_input(var_name,var_desc) :
     """
-    set a machine environment variable with the given name and description based on user input
+    set an environment variable with the given name and description based on user input
     """
     var_val = input(f'Please enter the {var_desc}: ')
-    set_machine_env_var(var_name,var_val)
+    set_env_var(var_name,var_val)
 
-def find_install_NSSM(move_local=True) :
+def set_env_vars(interactive=True) :
     """
-    Ensure the NSSM executable exists in the expected location.
-    If it exists in the current directory, move it to the expected location.
-    If it doesn't exist anywhere, try to download it from the web, but that's finicky in powershell.
+    set the necessary environment variables
     """
-    if SERVICE_CONST.NSSM_EXECUTABLE_PATH.is_file() :
-        return
-    else :
-        if (pathlib.Path()/SERVICE_CONST.NSSM_EXECUTABLE_PATH.name).is_file() and move_local :
-            (pathlib.Path()/SERVICE_CONST.NSSM_EXECUTABLE_PATH.name).replace(SERVICE_CONST.NSSM_EXECUTABLE_PATH)
-            return find_install_NSSM(move_local=False)
-        SERVICE_CONST.LOGGER.info(f'Installing NSSM from {SERVICE_CONST.NSSM_DOWNLOAD_URL}...')
-        nssm_zip_file_name = SERVICE_CONST.NSSM_DOWNLOAD_URL.split('/')[-1]
-        run_cmd_in_subprocess(['powershell.exe','[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12'])
-        cmd_tuples = [
-            (f'curl {SERVICE_CONST.NSSM_DOWNLOAD_URL} -O',
-             f'Invoke-WebRequest -Uri {SERVICE_CONST.NSSM_DOWNLOAD_URL} -OutFile {nssm_zip_file_name}'),
-            (f'tar -xf {pathlib.Path() / nssm_zip_file_name}',
-             f'Expand-Archive {nssm_zip_file_name} -DestinationPath {pathlib.Path().resolve()}'),
-            (f'del {nssm_zip_file_name}',
-             f'Remove-Item -Path {nssm_zip_file_name}'),
-            (f'move {pathlib.Path() / nssm_zip_file_name.rstrip(".zip") / "win64" / "nssm.exe"} {pathlib.Path()}',
-             f'''Move-Item -Path {pathlib.Path()/nssm_zip_file_name.rstrip(".zip")/"win64"/"nssm.exe"} \
-                 -Destination {SERVICE_CONST.NSSM_EXECUTABLE_PATH}'''),
-            (f'rmdir /S /Q {nssm_zip_file_name.rstrip(".zip")}',
-             f'Remove-Item -Recurse -Force {nssm_zip_file_name.rstrip(".zip")}'),
-        ]
-        for cmd in cmd_tuples :
-            try :
-                run_cmd_in_subprocess(['powershell.exe',cmd[1]])
-            except CalledProcessError :
-                run_cmd_in_subprocess(cmd[0],shell=True)
-        SERVICE_CONST.LOGGER.debug('Done installing NSSM')
+    env_var_names_descs = [('KAFKA_TEST_CLUSTER_USERNAME','Kafka TESTING cluster username'),
+                           ('KAFKA_TEST_CLUSTER_PASSWORD','Kafka TESTING cluster password'),
+                           ('KAFKA_PROD_CLUSTER_USERNAME','Kafka PRODUCTION cluster username'),
+                           ('KAFKA_PROD_CLUSTER_PASSWORD','Kafka PRODUCTION cluster password'),
+                        ]
+    variables_set = False
+    for env_var_tuple in env_var_names_descs :
+        if (not interactive) and (env_var_tuple[0] in ('KAFKA_PROD_CLUSTER_USERNAME','KAFKA_PROD_CLUSTER_PASSWORD')) :
+            continue
+        if os.path.expandvars(f'${env_var_tuple[0]}') == f'${env_var_tuple[0]}' :
+            if interactive :
+                set_env_var_from_user_input(*env_var_tuple)
+                variables_set = True
+            else :
+                raise RuntimeError(f'ERROR: a value for the {env_var_tuple[1]} environment variable is not set!')
+        else :
+            if interactive :
+                choice = input(f'A value for the {env_var_tuple[1]} is already set, would you like to reset it? [y/(n)]: ')
+                if choice.lower() in ('yes','y') :
+                    set_env_var_from_user_input(*env_var_tuple)
+                    variables_set = True
+    return variables_set
 
-def copy_libsodium_dll_to_system32() :
+def test_python_code() :
     """
-    Ensure that the libsodium.dll file exists in C:\Windows\system32
-    (Needed to properly load it when running as a service)
+    briefly test the python code for the repo to catch any errors
     """
-    system32_path = pathlib.Path(r'C:\Windows\system32')/'libsodium.dll'
-    if system32_path.is_file() :
-        return
-    current_env_dll = ctypes.util.find_library('libsodium')
-    if current_env_dll is not None :
-        shutil.copy(pathlib.Path(current_env_dll),system32_path)
-    else :
-        raise ValueError('ERROR: could not locate libsodium DLL to copy to system32 folder for Service!')
+    must_rerun = set_env_vars()
+    if must_rerun :
+        msg = 'New values for environment variables have been set. '
+        msg+= 'Please close this window and rerun InstallService so that their values get picked up.'
+        SERVICE_CONST.LOGGER.info(msg)
+        sys.exit(0)
+    SERVICE_CONST.LOGGER.debug('Testing code to check for errors...')
+    unittest_dir_path = pathlib.Path(__file__).parent.parent.parent / 'test' / 'unittests'
+    SERVICE_CONST.LOGGER.debug(f'Running all unittests in {unittest_dir_path}...')
+    run_cmd_in_subprocess([f'{sys.executable}','-m','unittest','discover','-s',f'{unittest_dir_path}','-vf'])
+    SERVICE_CONST.LOGGER.debug('All unittest checks complete : )')
