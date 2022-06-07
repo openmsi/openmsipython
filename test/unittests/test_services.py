@@ -1,9 +1,14 @@
 #imports
-import unittest, platform, shutil
+import unittest, platform, shutil, pathlib, logging, time
 from subprocess import check_output
+from openmsipython.shared.logging import Logger
 from openmsipython.services.config import SERVICE_CONST
+from openmsipython.services.utilities import run_cmd_in_subprocess
 from openmsipython.services.service_manager import WindowsServiceManager, LinuxServiceManager
 from config import TEST_CONST
+
+#constants
+LOGGER = Logger(pathlib.Path(__file__).name.split('.')[0],logging.ERROR)
 
 class TestServices(unittest.TestCase) :
     """
@@ -55,10 +60,13 @@ class TestServices(unittest.TestCase) :
             manager = WindowsServiceManager(service_name,
                                             service_class_name=service_class_name,
                                             argslist=argslist_to_use,
-                                            interactive=False)
+                                            interactive=False,
+                                            logger=LOGGER)
             manager.install_service()
             for run_mode in ('start','status','stop','remove') :
+                time.sleep(1)
                 manager.run_manage_command(run_mode,False,False)
+            time.sleep(1)
     
     @unittest.skipIf(platform.system()!='Linux' or 
                      check_output(['ps','--no-headers','-o','comm','1']).decode().strip()!='systemd',
@@ -69,18 +77,30 @@ class TestServices(unittest.TestCase) :
         """
         self.assertTrue(len(SERVICE_CONST.AVAILABLE_SERVICES)>0)
         for sd in SERVICE_CONST.AVAILABLE_SERVICES :
-            service_class_name = sd['class'].__name__
-            if service_class_name not in self.argslists_by_class_name.keys() :
-                raise ValueError(f'ERROR: no arguments to use found for class "{service_class_name}"!')
-            service_name = service_class_name+'_test'
-            argslist_to_use = []
-            for arg in self.argslists_by_class_name[service_class_name] :
-                argslist_to_use.append(str(arg))
-            manager = LinuxServiceManager(service_name,
-                                            service_class_name=service_class_name,
-                                            argslist=argslist_to_use,
-                                            interactive=False)
-            manager.install_service()
-            for run_mode in ('start','status','stop','remove') :
-                manager.run_manage_command(run_mode,False,False)
-            self.assertFalse((SERVICE_CONST.DAEMON_SERVICE_DIR/f'{service_name}.service').exists())
+            try :
+                service_class_name = sd['class'].__name__
+                if service_class_name not in self.argslists_by_class_name.keys() :
+                    raise ValueError(f'ERROR: no arguments to use found for class "{service_class_name}"!')
+                service_name = service_class_name+'_test'
+                argslist_to_use = []
+                for arg in self.argslists_by_class_name[service_class_name] :
+                    argslist_to_use.append(str(arg))
+                manager = LinuxServiceManager(service_name,
+                                                service_class_name=service_class_name,
+                                                argslist=argslist_to_use,
+                                                interactive=False,
+                                                logger=LOGGER)
+                manager.install_service()
+                for run_mode in ('start','status','stop','remove') :
+                    time.sleep(1)
+                    manager.run_manage_command(run_mode,False,False)
+                time.sleep(1)
+                self.assertFalse((SERVICE_CONST.DAEMON_SERVICE_DIR/f'{service_name}.service').exists())
+            except Exception as e :
+                raise e
+            finally :
+                if (SERVICE_CONST.DAEMON_SERVICE_DIR/f'{service_name}.service').exists() :
+                    run_cmd_in_subprocess(['sudo',
+                                           'rm',
+                                           str((SERVICE_CONST.DAEMON_SERVICE_DIR/f'{service_name}.service'))],
+                                           logger=LOGGER)

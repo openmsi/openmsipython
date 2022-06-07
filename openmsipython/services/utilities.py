@@ -20,7 +20,7 @@ def get_os_name() :
         errmsg = f'ERROR: could not determine operating system from platform.system() output "{platform.system()}"'
         SERVICE_CONST.LOGGER.error(errmsg,ValueError)
 
-def run_cmd_in_subprocess(args,*,shell=False) :
+def run_cmd_in_subprocess(args,*,shell=False,logger=None) :
     """
     run a command in a subprocess and return its result, printing and re-throwing any exceptions it causes
     """
@@ -37,7 +37,10 @@ def run_cmd_in_subprocess(args,*,shell=False) :
             errmsg+= f'\nstdout:\n{e.stdout.decode()}'
         if e.stderr is not None and e.stderr.strip()!='' :
             errmsg+= f'\nstderr:\n{e.stderr.decode()}'
-        SERVICE_CONST.LOGGER.error(errmsg,exc_obj=e)
+        if logger is not None :
+            logger.error(errmsg,exc_obj=e)
+        else :
+            SERVICE_CONST.LOGGER.error(errmsg,exc_obj=e)
 
 def set_env_var(var_name,var_val) :
     """

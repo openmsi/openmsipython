@@ -187,16 +187,17 @@ class WindowsServiceManager(ServiceManagerBase) :
         self.__find_install_NSSM()
         #run NSSM to install the service
         cmd = f'{SERVICE_CONST.NSSM_PATH} install {self.service_name} \"{sys.executable}\" \"{self.exec_fp}\"'
-        run_cmd_in_subprocess(['powershell.exe',cmd])
+        run_cmd_in_subprocess(['powershell.exe',cmd],logger=self.logger)
         run_cmd_in_subprocess(['powershell.exe',
-                                f'{SERVICE_CONST.NSSM_PATH} set {self.service_name} DisplayName {self.service_name}'])
+                               f'{SERVICE_CONST.NSSM_PATH} set {self.service_name} DisplayName {self.service_name}'],
+                               logger=self.logger)
         self.logger.info(f'Done installing {self.service_name}')
 
     def start_service(self) :
         self.logger.info(f'Starting {self.service_name}...')
         #start the service using net
         cmd = f'net start {self.service_name}'
-        run_cmd_in_subprocess(['powershell.exe',cmd])
+        run_cmd_in_subprocess(['powershell.exe',cmd],logger=self.logger)
         self.logger.info(f'Done starting {self.service_name}')
 
     def service_status(self) :
@@ -204,14 +205,14 @@ class WindowsServiceManager(ServiceManagerBase) :
         self.__find_install_NSSM()
         #get the service status
         cmd = f'{SERVICE_CONST.NSSM_PATH} status {self.service_name}'
-        result = run_cmd_in_subprocess(['powershell.exe',cmd])
+        result = run_cmd_in_subprocess(['powershell.exe',cmd],logger=self.logger)
         self.logger.info(f'{self.service_name} status: {result.decode()}')
 
     def stop_service(self) :
         self.logger.info(f'Stopping {self.service_name}...')
         #stop the service using net
         cmd = f'net stop {self.service_name}'
-        run_cmd_in_subprocess(['powershell.exe',cmd])
+        run_cmd_in_subprocess(['powershell.exe',cmd],logger=self.logger)
         self.logger.info(f'Done stopping {self.service_name}')
 
     def remove_service(self,remove_env_vars=False,remove_nssm=False) :
@@ -220,13 +221,13 @@ class WindowsServiceManager(ServiceManagerBase) :
         self.__find_install_NSSM()
         #using NSSM
         cmd = f'{SERVICE_CONST.NSSM_PATH} remove {self.service_name} confirm'
-        run_cmd_in_subprocess(['powershell.exe',cmd])
+        run_cmd_in_subprocess(['powershell.exe',cmd],logger=self.logger)
         self.logger.info('Service removed')
         #remove NSSM if requested
         if remove_nssm :
             if SERVICE_CONST.NSSM_PATH.is_file() :
                 try :
-                    run_cmd_in_subprocess(['powershell.exe',f'del {SERVICE_CONST.NSSM_PATH}'])
+                    run_cmd_in_subprocess(['powershell.exe',f'del {SERVICE_CONST.NSSM_PATH}'],logger=self.logger)
                 except CalledProcessError :
                     msg = f'WARNING: failed to delete {SERVICE_CONST.NSSM_PATH}. '
                     msg+= 'You are free to delete it manually if you would like.'
@@ -270,7 +271,8 @@ class WindowsServiceManager(ServiceManagerBase) :
             SERVICE_CONST.LOGGER.info(f'Installing NSSM from {SERVICE_CONST.NSSM_DOWNLOAD_URL}...')
             nssm_zip_file_name = SERVICE_CONST.NSSM_DOWNLOAD_URL.split('/')[-1]
             run_cmd_in_subprocess(['powershell.exe',
-                                   '[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12'])
+                                   '[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12'],
+                                   logger=self.logger)
             cmd_tuples = [
                 (f'curl {SERVICE_CONST.NSSM_DOWNLOAD_URL} -O',
                 f'Invoke-WebRequest -Uri {SERVICE_CONST.NSSM_DOWNLOAD_URL} -OutFile {nssm_zip_file_name}'),
@@ -286,9 +288,9 @@ class WindowsServiceManager(ServiceManagerBase) :
             ]
             for cmd in cmd_tuples :
                 try :
-                    run_cmd_in_subprocess(['powershell.exe',cmd[1]])
+                    run_cmd_in_subprocess(['powershell.exe',cmd[1]],logger=self.logger)
                 except CalledProcessError :
-                    run_cmd_in_subprocess(cmd[0],shell=True)
+                    run_cmd_in_subprocess(cmd[0],shell=True,logger=self.logger)
             SERVICE_CONST.LOGGER.debug('Done installing NSSM')
 
 ################################################################################
@@ -313,36 +315,36 @@ class LinuxServiceManager(ServiceManagerBase) :
         #write the daemon file pointing to the executable
         self.__write_daemon_file()
         #enable the service
-        run_cmd_in_subprocess(['sudo','systemctl','daemon-reload'])
-        run_cmd_in_subprocess(['sudo','systemctl','enable',f'{self.service_name}.service'])
+        run_cmd_in_subprocess(['sudo','systemctl','daemon-reload'],logger=self.logger)
+        run_cmd_in_subprocess(['sudo','systemctl','enable',f'{self.service_name}.service'],logger=self.logger)
         self.logger.info(f'Done installing {self.service_name}')
 
     def start_service(self) :
         self.logger.info(f'Starting {self.service_name}...')
         self.__check_systemd_installed()
-        run_cmd_in_subprocess(['sudo','systemctl','daemon-reload'])
-        run_cmd_in_subprocess(['sudo','systemctl','start',f'{self.service_name}.service'])
+        run_cmd_in_subprocess(['sudo','systemctl','daemon-reload'],logger=self.logger)
+        run_cmd_in_subprocess(['sudo','systemctl','start',f'{self.service_name}.service'],logger=self.logger)
         self.logger.info(f'Done starting {self.service_name}')
 
     def service_status(self) :
         self.__check_systemd_installed()
-        result = run_cmd_in_subprocess(['sudo','systemctl','status',f'{self.service_name}.service'])
+        result = run_cmd_in_subprocess(['sudo','systemctl','status',f'{self.service_name}.service'],logger=self.logger)
         self.logger.info(f'{self.service_name} status: {result.decode()}')
 
     def stop_service(self) :
         self.logger.info(f'Stopping {self.service_name}...')
         self.__check_systemd_installed()
-        run_cmd_in_subprocess(['sudo','systemctl','stop',f'{self.service_name}.service'])
+        run_cmd_in_subprocess(['sudo','systemctl','stop',f'{self.service_name}.service'],logger=self.logger)
         self.logger.info(f'Done stopping {self.service_name}')
 
     def remove_service(self,remove_env_vars=False,remove_nssm=False) :
         self.logger.info(f'Removing {self.service_name}...')
         self.__check_systemd_installed()
-        run_cmd_in_subprocess(['sudo','systemctl','disable',f'{self.service_name}.service'])
+        run_cmd_in_subprocess(['sudo','systemctl','disable',f'{self.service_name}.service'],logger=self.logger)
         if self.daemon_filepath.exists() :
-            run_cmd_in_subprocess(['sudo','rm','-f',str(self.daemon_filepath)])
-        run_cmd_in_subprocess(['sudo','systemctl','daemon-reload'])
-        run_cmd_in_subprocess(['sudo','systemctl','reset-failed'])
+            run_cmd_in_subprocess(['sudo','rm','-f',str(self.daemon_filepath)],logger=self.logger)
+        run_cmd_in_subprocess(['sudo','systemctl','daemon-reload'],logger=self.logger)
+        run_cmd_in_subprocess(['sudo','systemctl','reset-failed'],logger=self.logger)
         self.logger.info('Service removed')
         if self.env_var_filepath.is_file() :
             self.env_var_filepath.unlink()
@@ -356,7 +358,7 @@ class LinuxServiceManager(ServiceManagerBase) :
         """
         Raises an error if systemd is not installed (systemd is needed to control Linux daemons)
         """
-        check = run_cmd_in_subprocess(['ps','--no-headers','-o','comm','1'])
+        check = run_cmd_in_subprocess(['ps','--no-headers','-o','comm','1'],logger=self.logger)
         if check.decode().rstrip()!='systemd' :
             errmsg = 'ERROR: Installing programs as Services ("daemons") on Linux requires systemd!'
             errmsg = 'You can install systemd with "sudo apt install systemd" (or similar) and try again.'
@@ -394,7 +396,8 @@ class LinuxServiceManager(ServiceManagerBase) :
             WantedBy = multi-user.target'''
         with open(self.daemon_working_dir_filepath,'w') as fp :
             fp.write(textwrap.dedent(code))
-        run_cmd_in_subprocess(['sudo','mv',str(self.daemon_working_dir_filepath),str(self.daemon_filepath.parent)])
+        run_cmd_in_subprocess(['sudo','mv',str(self.daemon_working_dir_filepath),str(self.daemon_filepath.parent)],
+                              logger=self.logger)
 
     def __write_env_var_file(self) :
         """
