@@ -2,7 +2,7 @@
 # Files for working with Services in openmsiython/services/working_dir
 /openmsipython/services/working_dir/Services.log
 /openmsipython/services/working_dir/nssm.exe
-/openmsipython/services/working_dir/*Service_*.py
+/openmsipython/services/working_dir/*_service_executable.py
 # *.config, *.seed, and *.crypto files (other than the testing files) in openmsipython/my_kafka/config_files/[some_node_name]
 /openmsipython/my_kafka/config_files/*.config
 /openmsipython/my_kafka/config_files/*/*.config
