@@ -56,7 +56,7 @@ def test_python_code() :
     return_code = p.wait()
     if return_code>0 :
         raise RuntimeError('ERROR: some unittest(s) failed! See output above for details.')
-        return
+        #return
     SERVICE_CONST.LOGGER.debug('All unittest checks complete : )')
 
 def write_executable_file(service_dict,service_name,argslist,filepath=None) :
@@ -80,17 +80,12 @@ def write_executable_file(service_dict,service_name,argslist,filepath=None) :
     if filepath is not None :
         exec_fp = filepath
     else :
-        exec_fp = pathlib.Path(__file__).parent/'working_dir'
-        exec_fp = exec_fp/f'{service_name}{SERVICE_CONST.SERVICE_EXECUTABLE_NAME_STEM}'
+        exec_fp = SERVICE_CONST.WORKING_DIR/f'{service_name}{SERVICE_CONST.SERVICE_EXECUTABLE_NAME_STEM}'
     with open(exec_fp,'w') as fp :
         fp.write(textwrap.dedent(code))
     return exec_fp
 
-def write_daemon_file(service_dict,service_name,argslist,exec_filepath) :
-    #make sure the directory to hold the file exists
-    if not SERVICE_CONST.DAEMON_SERVICE_DIR.is_dir() :
-        SERVICE_CONST.LOGGER.info(f'Creating a new daemon service directory at {SERVICE_CONST.DAEMON_SERVICE_DIR}')
-        SERVICE_CONST.DAEMON_SERVICE_DIR.mkdir(parents=True)
+def write_env_var_file(service_dict,service_name,argslist) :
     #get the names/values of environment variables from the command line and config file to add to the service file
     env_var_names = [arg for arg in argslist if arg.startswith('$')]
     p = service_dict['class'].get_argument_parser()
@@ -99,7 +94,27 @@ def write_daemon_file(service_dict,service_name,argslist,exec_filepath) :
         pargs = p.parse_args(args=argslist)
         cfp = ConfigFileParser(pargs.config,logger=SERVICE_CONST.LOGGER)
         env_var_names+=[evn for evn in cfp.env_var_names]
+    if len(env_var_names)<=0 :
+        return None
+    env_var_filepath = SERVICE_CONST.WORKING_DIR/f'{service_name}_env_vars.txt'
+    code = ''
+    for evn in env_var_names :
+        val = os.path.expandvars(evn)
+        if val==evn :
+            raise RuntimeError(f'ERROR: value not found for expected environment variable {evn}!')
+        code += f'{evn[1:]}={val}\n'
+    with open(env_var_filepath,'w') as fp :
+        fp.write(code)
+    run_cmd_in_subprocess(['chmod','go-rwx',env_var_filepath])
+    return env_var_filepath
+
+def write_daemon_file(service_dict,service_name,argslist,exec_filepath) :
+    #make sure the directory to hold the file exists
+    if not SERVICE_CONST.DAEMON_SERVICE_DIR.is_dir() :
+        SERVICE_CONST.LOGGER.info(f'Creating a new daemon service directory at {SERVICE_CONST.DAEMON_SERVICE_DIR}')
+        SERVICE_CONST.DAEMON_SERVICE_DIR.mkdir(parents=True)
     #write out the file pointing to the python executable
+    env_var_filepath = write_env_var_file(service_dict,service_name,argslist)
     code = f'''\
         [Unit]
         Description = {service_dict['class'].__doc__.strip()}
@@ -108,14 +123,12 @@ def write_daemon_file(service_dict,service_name,argslist,exec_filepath) :
 
         [Service]
         Type = simple
+        User = {os.path.expandvars('$USER')}
         ExecStart = {sys.executable} {exec_filepath}'''
-    for evn in env_var_names :
-        val = os.path.expandvars(evn)
-        if val==evn :
-            raise RuntimeError(f'ERROR: value not found for expected environment variable {evn}!')
-        code += f'''\n\
-        Environment="{evn[1:]}={val}"'''
-    code+=f'''\
+    if env_var_filepath is not None :
+        code+=f'''\n\
+        EnvironmentFile = {env_var_filepath}'''
+    code+=f'''\n\
         WorkingDirectory = {pathlib.Path().resolve()}
         Restart = on-failure
         RestartSec = 30

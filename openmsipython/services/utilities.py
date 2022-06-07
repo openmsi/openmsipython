@@ -31,11 +31,11 @@ def run_cmd_in_subprocess(args,*,shell=False) :
         return result
     except CalledProcessError as e :
         errmsg = 'ERROR: failed to run a command! '
-        if e.output is not None :
-            errmsg+= f'output:\n{e.output.decode()}'
-        if e.stdout is not None :
+        if e.output is not None and e.output.strip()!='' :
+            errmsg+= f'\noutput:\n{e.output.decode()}'
+        if e.stdout is not None and e.stdout.strip()!=''  :
             errmsg+= f'\nstdout:\n{e.stdout.decode()}'
-        if e.stderr is not None :
+        if e.stderr is not None and e.stderr.strip()!='' :
             errmsg+= f'\nstderr:\n{e.stderr.decode()}'
         SERVICE_CONST.LOGGER.error(errmsg,exc_obj=e)
 
