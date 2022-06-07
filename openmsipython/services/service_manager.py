@@ -80,7 +80,7 @@ class ServiceManagerBase(LogOwner,HasArgumentParser) :
         msg='Installing a'
         if self.service_class_name[0].lower() in ('a','e','i','o','u','y') :
             msg+='n'
-        msg+=f' {self.service_class_name} program as "{self.service_name}" from executable at {self.exec_filepath}...'
+        msg+=f' {self.service_class_name} program as "{self.service_name}" from executable at {self.exec_fp}...'
         self.logger.info(msg)
 
     def run_manage_command(self,run_mode,remove_env_vars=False,remove_nssm=False) :
@@ -381,7 +381,7 @@ class LinuxServiceManager(ServiceManagerBase) :
             [Service]
             Type = simple
             User = {os.path.expandvars('$USER')}
-            ExecStart = {sys.executable} {self.exec_filepath}'''
+            ExecStart = {sys.executable} {self.exec_fp}'''
         if env_vars_needed :
             code+=f'''\n\
             EnvironmentFile = {self.env_var_filepath}'''
