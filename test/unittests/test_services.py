@@ -60,7 +60,8 @@ class TestServices(unittest.TestCase) :
             for run_mode in ('start','status','stop','remove') :
                 manager.run_manage_command(run_mode,False,False)
     
-    @unittest.skipIf(platform.system()!='Linux' or check_output(['ps','--no-headers','-o','comm','1'])!='systemd',
+    @unittest.skipIf(platform.system()!='Linux' or 
+                     check_output(['ps','--no-headers','-o','comm','1']).decode().strip()!='systemd',
                      'test requires systemd running on Linux')
     def test_install_start_stop_remove_linux_services(self) :
         """
