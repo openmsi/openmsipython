@@ -19,24 +19,24 @@ Developed for Open MSI (NSF DMREF award #1921959)
 
 ## Installation
 
-Programs use the Python implementation of the Apache Kafka API, and are designed to run on Windows machines connected to laboratory instruments. 
+Programs use the Python implementation of the Apache Kafka API, and are designed to run on Windows, Mac or Linux machines.  Data producers typically run on Windows or Linux computers that run collection of data on laboratory instruments; Data consumers and stream processors run on the same computers, on servers with more compute power as needed, or where storage of data is hosted.  In all these cases, Open MSI components are run in Python 3 in virtual environments or sometimes in Docker containers. Open MSI can be used interactively from the command line or run as an always available service (on Windows) or daemon (on Linux).  We recommend using a minimal installation of the conda open source package management system and environment management system. These installation instructions start with installation of conda and outline all the necessary steps to run Open MSI tools.  To run Open MSI usefully, you need to understand that data streams through *topics* served by a *broker*.  In pracitce that means you will need access to a broker running on a server or in the cloud somewhere and you will need to create topics on the broker to hold the streams.  If these concepts are new to you we suggest contacting us for assistance and/or using a simple, managed cloud solution, such as Confluent Cloud, as your broker. 
 
 ### Quick start with miniconda3
 
-The quickest way to get started is to use Miniconda3. Miniconda3 installers can be downloaded from [the website here](https://docs.conda.io/en/latest/miniconda.html), and installation instructions can be found on [the website here](https://conda.io/projects/conda/en/latest/user-guide/install/index.html).
+The quickest way to get a minimal installation is to use Miniconda3. Miniconda3 installers can be downloaded from [the website here](https://docs.conda.io/en/latest/miniconda.html), and installation instructions can be found on [the website here](https://conda.io/projects/conda/en/latest/user-guide/install/index.html).
 
-With Miniconda installed, next create and switch to a new environment for Open MSI. In a terminal window (or Anaconda Prompt in admin mode on Windows) type:
+With Miniconda installed, create and switch to a new environment for Open MSI. In a terminal shell window (or Anaconda Prompt in admin mode on Windows) type:
 
 ```
 conda create -n openmsi python=3.9
 conda activate openmsi
 ```
 
-Python 3.9 is the most recent minor release of Python supported by confluent-kafka on Windows 10, and is recommended for most deployments. 
+At the time of writing this ReadMe, Python 3.9 is the most recent minor release of Python supported by confluent-kafka on Windows 10, and is recommended for most deployments. 
 
 You'll need to use that second "activate" command every time you open a Terminal window or Anaconda Prompt to switch to the `openmsi` environment. 
 
-Miniconda installs `pip`, and if you need to install Git you can do so with
+Miniconda installs `pip`; if you don't already have git installed, you should do so now with
 
 `conda install -c anaconda git`
 
@@ -52,7 +52,7 @@ This step is required to use the [`pysodium` package](https://pypi.org/project/p
 
 ##### Older versions of Windows
 
-Python 3.9 is not supported on Windows 7 or earlier. Therefor, installations on earlier Windows systems should use Python 3.7 instead of Python 3.9, in which case, the above commands are:
+Python 3.9 is not supported on Windows 7 or earlier. Installations on pre-Windows 10 systems should, therefore, use Python 3.7 instead of Python 3.9, in which case, the above commands are:
 
 ```
 conda create -n openmsi python=3.7
@@ -75,9 +75,9 @@ Due to the wide variety of Windows builds, setting this environment variable may
 
 Another common issue with Windows builds is a seemingly "missing" `libsodium.dll` file. If you have trouble importing `pysodium`, make sure the directory containing your `libsodium.dll` is added to your `PATH`, or that the `libsodium.dll` file is properly registered on your system.
 
-#### Extra setup on Mac OS
+#### Extra setup on Intel-based MacOS
 
-Mac OS is not officially supported for `OpenMSIPython`, but if you would like to work with it you will need to install `librdkafka` using homebrew to do so. This may also require installing Xcode command line tools. You can install both of these using the commands below:
+MacOS is not officially supported for `OpenMSIPython`, but works reliably at this time. If you would like to work with MacOS you will need to install `librdkafka` using the package manager homebrew. This may also require installing Xcode command line tools. You can install both of these using the commands below:
 
 ```
 xcode-select --install
@@ -91,6 +91,57 @@ Some Mac machines may also run into an esoteric issue related to the number of a
 when the Kafka server is otherwise available and should be fine, especially when using relatively large numbers of parallel threads. Instead of the above error, you may get `too many open files` errors.
 
 These errors may be due to running out of file descriptors as discussed in [this known `confluent-kafka`/`librdkafka` issue](https://github.com/edenhill/kcat/issues/209): using a broker hosted on Confluent Cloud may increase the likelihood of getting errors like these, because `librdkafka` creates two separate file descriptors for each known broker regardless of whether a connection is established. If you type `ulimit -n` into a Terminal window and get an output like `256`, it's likely this is the cause. To solve this issue, you will need to increase the limit of the number of allowed file descriptors, by running `ulimit -n 4096`. If that makes the errors go away, then you might want to add that line to your shell `.profile` or `.rc` file.
+
+#### Extra setup on M1, Apple-silicon MacOS Monterey
+
+MacOS on Apple-silicon Macs is not officially supported for `OpenMSIPython`, but works reliably at this time. To install `OpenMSIPython` on an M1 machine use the following steps in the Mac Terminal Shell:
+
+1. Change the default shell to Bash:
+ 
+    `chsh -s /bin/bash`
+
+2. Install miniconda by downloading and running the installer for M1 Macs from the [Anaconda website:
+https://docs.conda.io/en/latest/miniconda.html](https://docs.conda.io/en/latest/miniconda.html)
+3. Create a conda environment and activate it:
+ 
+    ```
+    conda create -n openmsi python=3.9
+    conda activate openmsi
+    ```
+
+4. Conda install *libsodium* using the anaconda channel. *It is important that you use the anaconda channel since it has a Mac ARM processor version; The M1 processor has ARM architecture*:
+ 
+    `conda install -c anaconda lib sodium`    
+5. Install home-brew:
+ 
+    `/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"`
+6. Add homebrew bin and sbin locations to your path:
+ 
+    `export PATH=/opt/homebrew/bin:$PATH`
+    `export PATH=/opt/homebrew/sbin:$PATH`
+7. Use brew to install *librdkafka*:
+ 
+    `brew install librdkafka`
+8.  Clone this `openmsipython` github repo and change directory to openmsipython:
+ 
+    `git clone https://github.com/openmsi/openmsipython.git`
+    `cd openmsipython/`
+9. Do some path work to let your system find the GCC compilers while building things. **N.B. You may need to edit these steps because they refer to the specific version number of librdkafka library (1.8.2 as of this writing). If the version of librdkafka your installed in step 7 is not 1.8.2, then edit these commands to refer to the actual version installed.**
+ 
+    `CPATH=/opt/homebrew/Cellar/librdkafka/1.8.2/include pip install confluent-kafka`
+     `C_INCLUDE_PATH=/opt/homebrew/Cellar/librdkafka/1.8.2/include LIBRARY_PATH=/opt/homebrew/Cellar/librdkafka/1.8.2/lib pip install confluent_kafka`
+10. Install pymssql which also requires openssl and FreeTDS:
+ 
+    `brew install openssl`   
+    `brew install FreeTDS`  
+    `pip3 install pymssql`
+12.  Pip install openmsi:
+ 
+    `pip install -e .`
+
+**This completes installation on an M1 Mac. You may skip to the section about Environmental variables.**
+
+
 
 ### Cloning this repo and installing the openmsipython package
 
@@ -159,7 +210,7 @@ The following items are currently planned to be implemented ASAP:
 1. Create pypi and conda installations. Pypi method using twine here: https://github.com/bast/pypi-howto. Putting on conda-forge is a heavier lift. Need to decide if it's worth it; probably not for such an immature package.
 1. Re-implement PDV plots from a submodule
 
-## Questions that will arise later (inFAQs?)
+## Questions that will arise later (in FAQs?)
 
 1. What happens if we send very large files to topics to be consumed to an object store? (Might not be able to transfer GB of data at once?)
 1. How robust is the object store we're using (automatic backups, etc.)
