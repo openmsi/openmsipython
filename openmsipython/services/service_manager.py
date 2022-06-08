@@ -297,9 +297,9 @@ class WindowsServiceManager(ServiceManagerBase) :
         code = ''
         for evn in self.env_var_names :
             val = os.path.expandvars(f'${evn}')
-            if val==evn :
+            if val==f'${evn}' :
                 raise RuntimeError(f'ERROR: value not found for expected environment variable {evn}!')
-            code += f'{evn[1:]}\n'
+            code += f'{evn}\n'
         if code=='' :
             return False
         with open(self.env_var_filepath,'w') as fp :
@@ -436,9 +436,9 @@ class LinuxServiceManager(ServiceManagerBase) :
         code = ''
         for evn in self.env_var_names :
             val = os.path.expandvars(f'${evn}')
-            if val==evn :
+            if val==f'${evn}' :
                 raise RuntimeError(f'ERROR: value not found for expected environment variable {evn}!')
-            code += f'{evn[1:]}={val}\n'
+            code += f'{evn}={val}\n'
         if code=='' :
             return False
         with open(self.env_var_filepath,'w') as fp :
