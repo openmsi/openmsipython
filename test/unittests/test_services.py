@@ -50,23 +50,29 @@ class TestServices(unittest.TestCase) :
         """
         self.assertTrue(len(SERVICE_CONST.AVAILABLE_SERVICES)>0)
         for sd in SERVICE_CONST.AVAILABLE_SERVICES :
-            service_class_name = sd['class'].__name__
-            if service_class_name not in self.argslists_by_class_name.keys() :
-                raise ValueError(f'ERROR: no arguments to use found for class "{service_class_name}"!')
-            service_name = service_class_name+'_test'
-            argslist_to_use = []
-            for arg in self.argslists_by_class_name[service_class_name] :
-                argslist_to_use.append(str(arg))
-            manager = WindowsServiceManager(service_name,
-                                            service_class_name=service_class_name,
-                                            argslist=argslist_to_use,
-                                            interactive=False,
-                                            logger=LOGGER)
-            manager.install_service()
-            for run_mode in ('start','status','stop','remove') :
+            try :
+                service_class_name = sd['class'].__name__
+                if service_class_name not in self.argslists_by_class_name.keys() :
+                    raise ValueError(f'ERROR: no arguments to use found for class "{service_class_name}"!')
+                service_name = service_class_name+'_test'
+                argslist_to_use = []
+                for arg in self.argslists_by_class_name[service_class_name] :
+                    argslist_to_use.append(str(arg))
+                manager = WindowsServiceManager(service_name,
+                                                service_class_name=service_class_name,
+                                                argslist=argslist_to_use,
+                                                interactive=False,
+                                                logger=LOGGER)
+                manager.install_service()
+                for run_mode in ('start','status','stop','remove') :
+                    time.sleep(1)
+                    manager.run_manage_command(run_mode,False,False)
                 time.sleep(1)
-                manager.run_manage_command(run_mode,False,False)
-            time.sleep(1)
+            except Exception as e :
+                raise e
+            finally :
+                if (SERVICE_CONST.WORKING_DIR/f'{service_name}_env_vars.txt').exists() :
+                   (SERVICE_CONST.WORKING_DIR/f'{service_name}_env_vars.txt').unlink() 
     
     @unittest.skipIf(platform.system()!='Linux' or 
                      check_output(['ps','--no-headers','-o','comm','1']).decode().strip()!='systemd',
@@ -104,3 +110,7 @@ class TestServices(unittest.TestCase) :
                                            'rm',
                                            str((SERVICE_CONST.DAEMON_SERVICE_DIR/f'{service_name}.service'))],
                                            logger=LOGGER)
+                if (SERVICE_CONST.WORKING_DIR/f'{service_name}_env_vars.txt').exists() :
+                   (SERVICE_CONST.WORKING_DIR/f'{service_name}_env_vars.txt').unlink() 
+                if (SERVICE_CONST.WORKING_DIR/f'{self.service_name}.service').exists() :
+                   (SERVICE_CONST.WORKING_DIR/f'{self.service_name}.service').unlink() 
