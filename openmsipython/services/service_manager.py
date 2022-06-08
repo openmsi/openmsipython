@@ -148,6 +148,9 @@ class ServiceManagerBase(LogOwner,HasArgumentParser) :
         remove the Service
         child classes should call this after doing whatever they need to do to possibly remove environment variables
         """
+        #remove the executable file
+        if self.exec_fp.is_file() :
+            self.exec_fp.unlink()
         #remove the environment variables that were set when the service was installed
         if remove_env_vars :
             try :
@@ -160,6 +163,9 @@ class ServiceManagerBase(LogOwner,HasArgumentParser) :
                 self.logger.info(warnmsg)
         else :
             self.logger.info('Environment variables will be retained')
+        #remove the actual environment variable file
+        if self.env_var_filepath.is_file() :
+            self.env_var_filepath.unlink()
         self.logger.info(f'Done removing {self.service_name}')
 
     #################### PRIVATE HELPER FUNCTIONS ####################
@@ -420,8 +426,6 @@ class LinuxServiceManager(ServiceManagerBase) :
         run_cmd_in_subprocess(['sudo','systemctl','daemon-reload'],logger=self.logger)
         run_cmd_in_subprocess(['sudo','systemctl','reset-failed'],logger=self.logger)
         self.logger.info('Service removed')
-        if self.env_var_filepath.is_file() :
-            self.env_var_filepath.unlink()
         if remove_nssm :
             warnmsg = "WARNING: requested to remove NSSM along with the Service, "
             warnmsg+= "but Linux Services don't install NSSM so nothing was done."
@@ -537,7 +541,7 @@ def manage() :
     manager_class = MANAGERS_BY_OS_NAME[operating_system]
     manager = manager_class(*manager_args,**manager_kwargs)
     #run some function based on the run mode
-    manager.run_manage_command(args.run_mode,args.remove_env_vars,args.remove_nssm)
+    manager.run_manage_command(args.run_mode,remove_env_vars=args.remove_env_vars,remove_nssm=args.remove_nssm)
 
 def main() :
     SERVICE_CONST.LOGGER.error('ERROR: please run "install" or "manage" instead of "main" for this file')
