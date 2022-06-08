@@ -23,6 +23,8 @@ Programs use the Python implementation of the Apache Kafka API, and are designed
 
 ### Quick start with miniconda3
 
+**NOTE** The quick-start instructions below only apply to users working on Windows>7, most Linux distros, and Mac OS machines without M1 chips. Please read the entire installation section to see which steps you'll need to perform for your specific OS.
+
 The quickest way to get a minimal installation is to use Miniconda3. Miniconda3 installers can be downloaded from [the website here](https://docs.conda.io/en/latest/miniconda.html), and installation instructions can be found on [the website here](https://conda.io/projects/conda/en/latest/user-guide/install/index.html).
 
 With Miniconda installed, create and switch to a new environment for Open MSI. In a terminal shell window (or Anaconda Prompt in admin mode on Windows) type:
@@ -140,8 +142,6 @@ https://docs.conda.io/en/latest/miniconda.html](https://docs.conda.io/en/latest/
     `pip install -e .`
 
 **This completes installation on an M1 Mac. You may skip to the section about Environmental variables.**
-
-
 
 ### Cloning this repo and installing the openmsipython package
 
