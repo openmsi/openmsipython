@@ -96,7 +96,7 @@ class ServiceManagerBase(LogOwner,HasArgumentParser) :
             self.logger.info(msg)
             sys.exit(0)
         #write out the environment variable file
-        self._write_env_var_file()
+        self.env_vars_needed = self._write_env_var_file()
         #write out the executable file
         self._write_executable_file()
         #install the service
@@ -465,7 +465,6 @@ class LinuxServiceManager(ServiceManagerBase) :
             SERVICE_CONST.LOGGER.info(f'Creating a new daemon service directory at {SERVICE_CONST.DAEMON_SERVICE_DIR}')
             SERVICE_CONST.DAEMON_SERVICE_DIR.mkdir(parents=True)
         #write out the file pointing to the python executable
-        env_vars_needed = self._write_env_var_file()
         code = f'''\
             [Unit]
             Description = {self.service_dict['class'].__doc__.strip()}
@@ -476,7 +475,7 @@ class LinuxServiceManager(ServiceManagerBase) :
             Type = simple
             User = {os.path.expandvars('$USER')}
             ExecStart = {sys.executable} {self.exec_fp}'''
-        if env_vars_needed :
+        if self.env_vars_needed :
             code+=f'''\n\
             EnvironmentFile = {self.env_var_filepath}'''
         code+=f'''\n\

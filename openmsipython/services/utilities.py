@@ -50,7 +50,7 @@ def set_env_var(var_name,var_val) :
         pwrsh_cmd = f'[Environment]::SetEnvironmentVariable("{var_name}","{var_val}",[EnvironmentVariableTarget]::Machine)'
         run_cmd_in_subprocess(['powershell.exe',pwrsh_cmd])
     elif get_os_name()=='Linux' :
-        run_cmd_in_subprocess(['export',f'{var_name}={var_val}'])
+        run_cmd_in_subprocess(['export',f'{var_name}={var_val}'],shell=True)
     os.environ[var_name]=var_val
 
 def remove_env_var(var_name) :
@@ -61,7 +61,7 @@ def remove_env_var(var_name) :
         pwrsh_cmd = f'[Environment]::SetEnvironmentVariable("{var_name}",$null,[EnvironmentVariableTarget]::Machine)'
         run_cmd_in_subprocess(['powershell.exe',pwrsh_cmd])
     elif get_os_name()=='Linux' :
-        run_cmd_in_subprocess(['export',f'{var_name}='])
+        run_cmd_in_subprocess(['unset',var_name],shell=True)
     else :
         raise NotImplementedError
     os.environ[var_name]=''
