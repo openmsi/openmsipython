@@ -461,7 +461,7 @@ class LinuxServiceManager(ServiceManagerBase) :
             SERVICE_CONST.LOGGER.info(f'Creating a new daemon service directory at {SERVICE_CONST.DAEMON_SERVICE_DIR}')
             SERVICE_CONST.DAEMON_SERVICE_DIR.mkdir(parents=True)
         #write out the file pointing to the python executable
-        env_vars_needed = self.__write_env_var_file()
+        env_vars_needed = self._write_env_var_file()
         code = f'''\
             [Unit]
             Description = {self.service_dict['class'].__doc__.strip()}
