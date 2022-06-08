@@ -290,7 +290,7 @@ class WindowsServiceManager(ServiceManagerBase) :
     def _write_env_var_file(self) :
         code = ''
         for evn in self.env_var_names :
-            val = os.path.expandvars(evn)
+            val = os.path.expandvars(f'${evn}')
             if val==evn :
                 raise RuntimeError(f'ERROR: value not found for expected environment variable {evn}!')
             code += f'{evn[1:]}\n'
@@ -431,7 +431,7 @@ class LinuxServiceManager(ServiceManagerBase) :
     def _write_env_var_file(self) :
         code = ''
         for evn in self.env_var_names :
-            val = os.path.expandvars(evn)
+            val = os.path.expandvars(f'${evn}')
             if val==evn :
                 raise RuntimeError(f'ERROR: value not found for expected environment variable {evn}!')
             code += f'{evn[1:]}={val}\n'
