@@ -38,6 +38,26 @@ class ServiceManagerBase(LogOwner,HasArgumentParser) :
             raise ValueError(errmsg)
         return parser
 
+    #################### PROPERTIES ####################
+
+    @property
+    def env_var_names(self) :
+        """
+        Names of the environment variables used by the service
+        """
+        #get the names of environment variables from the command line and config file
+        if self.argslist is not None and self.service_dict is not None :
+            for arg in self.argslist :
+                if arg.startswith('$') :
+                    yield arg
+            p = self.service_dict['class'].get_argument_parser()
+            argsdests = [action.dest for action in p._actions]
+            if 'config' in argsdests :
+                pargs = p.parse_args(args=self.argslist)
+                cfp = ConfigFileParser(pargs.config,logger=SERVICE_CONST.LOGGER)
+                for evn in cfp.env_var_names :
+                    yield evn
+
     #################### PUBLIC FUNCTIONS ####################
 
     def __init__(self,service_name,*args,service_class_name=None,argslist=None,interactive=None,**kwargs) :
@@ -57,6 +77,7 @@ class ServiceManagerBase(LogOwner,HasArgumentParser) :
         self.argslist = argslist
         self.interactive = interactive
         self.exec_fp = SERVICE_CONST.WORKING_DIR/f'{self.service_name}{SERVICE_CONST.SERVICE_EXECUTABLE_NAME_STEM}'
+        self.env_var_filepath = SERVICE_CONST.WORKING_DIR/f'{self.service_name}_env_vars.txt'
     
     def install_service(self) :
         """
@@ -68,12 +89,14 @@ class ServiceManagerBase(LogOwner,HasArgumentParser) :
             errmsg = 'ERROR: newly installing a Service requires that the class name and argslist are supplied!'
             self.logger.error(errmsg,RuntimeError)
         #set the environment variables
-        must_rerun = set_env_vars(interactive=self.interactive)
+        must_rerun = set_env_vars(self.env_var_names,interactive=self.interactive)
         if must_rerun :
             msg = 'New values for environment variables have been set. '
             msg+= 'Please close this window and rerun InstallService so that their values get picked up.'
             self.logger.info(msg)
             sys.exit(0)
+        #write out the environment variable file
+        self._write_env_var_file()
         #write out the executable file
         self._write_executable_file()
         #install the service
@@ -128,11 +151,9 @@ class ServiceManagerBase(LogOwner,HasArgumentParser) :
         #remove the environment variables that were set when the service was installed
         if remove_env_vars :
             try :
-                remove_env_var('KAFKA_TEST_CLUSTER_USERNAME')
-                remove_env_var('KAFKA_TEST_CLUSTER_PASSWORD')
-                remove_env_var('KAFKA_PROD_CLUSTER_USERNAME')
-                remove_env_var('KAFKA_PROD_CLUSTER_PASSWORD')
-                self.logger.info('Username/password environment variables successfully removed')
+                for env_var_name in self.env_var_names :
+                    remove_env_var(env_var_name)
+                    self.logger.info(f'{env_var_name} environment variable successfully removed')
             except CalledProcessError :
                 warnmsg = 'WARNING: failed to remove environment variables. You should remove any username/password '
                 warnmsg+= 'environment variables manually even though the service is uninstalled!'
@@ -142,7 +163,7 @@ class ServiceManagerBase(LogOwner,HasArgumentParser) :
         self.logger.info(f'Done removing {self.service_name}')
 
     #################### PRIVATE HELPER FUNCTIONS ####################
-
+    
     def _write_executable_file(self,filepath=None) :
         """
         write out the executable python file that the service will actually be running
@@ -170,6 +191,15 @@ class ServiceManagerBase(LogOwner,HasArgumentParser) :
         with open(exec_fp,'w') as fp :
             fp.write(textwrap.dedent(code))
 
+    @abstractmethod
+    def _write_env_var_file(self) :
+        """
+        Write and set permissions for the file holding the values of the environment variables needed by the Service
+        returns True if a file was written, False if none needed
+        not implemented in base class
+        """
+        pass
+
 ################################################################################
 ############################### WINDOWS SERVICES ###############################
 ################################################################################
@@ -178,6 +208,22 @@ class WindowsServiceManager(ServiceManagerBase) :
     """
     Class for working with Windows Services
     """
+
+    @property
+    def env_var_names(self):
+        for evn in super().env_var_names :
+            yield evn
+        #get the names of environment variables from the env_var file
+        if self.env_var_filepath.is_file() :
+            with open(self.env_var_filepath,'r') as fp :
+                lines = fp.readlines()
+            for line in lines :
+                try :
+                    linestrip = line.strip()
+                    if linestrip!='' :
+                        yield linestrip
+                except :
+                    pass
 
     def install_service(self) :
         super().install_service()
@@ -241,6 +287,19 @@ class WindowsServiceManager(ServiceManagerBase) :
                 self.logger.info(msg)
         super().remove_service(remove_env_vars=remove_env_vars)
 
+    def _write_env_var_file(self) :
+        code = ''
+        for evn in self.env_var_names :
+            val = os.path.expandvars(evn)
+            if val==evn :
+                raise RuntimeError(f'ERROR: value not found for expected environment variable {evn}!')
+            code += f'{evn[1:]}\n'
+        if code=='' :
+            return False
+        with open(self.env_var_filepath,'w') as fp :
+            fp.write(code)
+        return True
+
     def __copy_libsodium_dll_to_system32(self) :
         """
         Ensure that the libsodium.dll file exists in C:\Windows\system32
@@ -302,11 +361,26 @@ class LinuxServiceManager(ServiceManagerBase) :
     Class for working with Linux Services/daemons
     """
 
+    @property
+    def env_var_names(self):
+        for evn in super().env_var_names :
+            yield evn
+        #get the names of environment variables from the env_var file
+        if self.env_var_filepath.is_file() :
+            with open(self.env_var_filepath,'r') as fp :
+                lines = fp.readlines()
+            for line in lines :
+                try :
+                    linesplit = (line.strip()).split('=')
+                    if len(linesplit)==2 :
+                        yield linesplit[0]
+                except :
+                    pass
+
     def __init__(self,*args,**kwargs) :
         super().__init__(*args,**kwargs)
         self.daemon_working_dir_filepath = SERVICE_CONST.WORKING_DIR/f'{self.service_name}.service'
         self.daemon_filepath = SERVICE_CONST.DAEMON_SERVICE_DIR/self.daemon_working_dir_filepath.name
-        self.env_var_filepath = SERVICE_CONST.WORKING_DIR/f'{self.service_name}_env_vars.txt'
 
     def install_service(self) :
         super().install_service()
@@ -354,6 +428,20 @@ class LinuxServiceManager(ServiceManagerBase) :
             self.logger.warning(warnmsg)
         super().remove_service(remove_env_vars=remove_env_vars)
 
+    def _write_env_var_file(self) :
+        code = ''
+        for evn in self.env_var_names :
+            val = os.path.expandvars(evn)
+            if val==evn :
+                raise RuntimeError(f'ERROR: value not found for expected environment variable {evn}!')
+            code += f'{evn[1:]}={val}\n'
+        if code=='' :
+            return False
+        with open(self.env_var_filepath,'w') as fp :
+            fp.write(code)
+        run_cmd_in_subprocess(['chmod','go-rwx',self.env_var_filepath])
+        return True
+
     def __check_systemd_installed(self) :
         """
         Raises an error if systemd is not installed (systemd is needed to control Linux daemons)
@@ -398,32 +486,6 @@ class LinuxServiceManager(ServiceManagerBase) :
             fp.write(textwrap.dedent(code))
         run_cmd_in_subprocess(['sudo','mv',str(self.daemon_working_dir_filepath),str(self.daemon_filepath.parent)],
                               logger=self.logger)
-
-    def __write_env_var_file(self) :
-        """
-        Write and set permissions for the file holding the values of the environment variables needed by the Service
-        returns True if a file was written, False if none needed
-        """
-        #get the names/values of environment variables from the command line and config file to add to the service file
-        env_var_names = [arg for arg in self.argslist if arg.startswith('$')]
-        p = self.service_dict['class'].get_argument_parser()
-        argsdests = [action.dest for action in p._actions]
-        if 'config' in argsdests :
-            pargs = p.parse_args(args=self.argslist)
-            cfp = ConfigFileParser(pargs.config,logger=SERVICE_CONST.LOGGER)
-            env_var_names+=[evn for evn in cfp.env_var_names]
-        if len(env_var_names)<=0 :
-            return False
-        code = ''
-        for evn in env_var_names :
-            val = os.path.expandvars(evn)
-            if val==evn :
-                raise RuntimeError(f'ERROR: value not found for expected environment variable {evn}!')
-            code += f'{evn[1:]}={val}\n'
-        with open(self.env_var_filepath,'w') as fp :
-            fp.write(code)
-        run_cmd_in_subprocess(['chmod','go-rwx',self.env_var_filepath])
-        return True
 
 ################################################################################
 ######################## FILE-SCOPE VARIABLES/FUNCTIONS ########################

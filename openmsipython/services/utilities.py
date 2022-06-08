@@ -65,37 +65,32 @@ def remove_env_var(var_name) :
     else :
         raise NotImplementedError
 
-def set_env_var_from_user_input(var_name,var_desc) :
+def set_env_var_from_user_input(var_name) :
     """
     set an environment variable with the given name and description based on user input
     """
-    var_val = input(f'Please enter the {var_desc}: ')
+    var_val = input(f'Please enter the value for environment variable {var_name}: ')
     set_env_var(var_name,var_val)
 
-def set_env_vars(interactive=True) :
+def set_env_vars(env_var_names,interactive=True) :
     """
     set the necessary environment variables
     """
-    env_var_names_descs = [('KAFKA_TEST_CLUSTER_USERNAME','Kafka TESTING cluster username'),
-                           ('KAFKA_TEST_CLUSTER_PASSWORD','Kafka TESTING cluster password'),
-                           ('KAFKA_PROD_CLUSTER_USERNAME','Kafka PRODUCTION cluster username'),
-                           ('KAFKA_PROD_CLUSTER_PASSWORD','Kafka PRODUCTION cluster password'),
-                        ]
     variables_set = False
-    for env_var_tuple in env_var_names_descs :
-        if (not interactive) and (env_var_tuple[0] in ('KAFKA_PROD_CLUSTER_USERNAME','KAFKA_PROD_CLUSTER_PASSWORD')) :
+    for env_var_name in env_var_names :
+        if (not interactive) and (env_var_name in ('KAFKA_PROD_CLUSTER_USERNAME','KAFKA_PROD_CLUSTER_PASSWORD')) :
             continue
-        if os.path.expandvars(f'${env_var_tuple[0]}') == f'${env_var_tuple[0]}' :
+        if os.path.expandvars(f'${env_var_name}') == f'${env_var_name}' :
             if interactive :
-                set_env_var_from_user_input(*env_var_tuple)
+                set_env_var_from_user_input(env_var_name)
                 variables_set = True
             else :
-                raise RuntimeError(f'ERROR: a value for the {env_var_tuple[1]} environment variable is not set!')
+                raise RuntimeError(f'ERROR: a value for the {env_var_name} environment variable is not set!')
         else :
             if interactive :
-                choice = input(f'A value for the {env_var_tuple[1]} is already set, would you like to reset it? [y/(n)]: ')
+                choice = input(f'A value for the {env_var_name} is already set, would you like to reset it? [y/(n)]: ')
                 if choice.lower() in ('yes','y') :
-                    set_env_var_from_user_input(*env_var_tuple)
+                    set_env_var_from_user_input(env_var_name)
                     variables_set = True
     return variables_set
 
@@ -103,7 +98,7 @@ def test_python_code() :
     """
     briefly test the python code for the repo to catch any errors
     """
-    must_rerun = set_env_vars()
+    must_rerun = set_env_vars(['KAFKA_TEST_CLUSTER_USERNAME','KAFKA_TEST_CLUSTER_PASSWORD'])
     if must_rerun :
         msg = 'New values for environment variables have been set. '
         msg+= 'Please close this window and rerun InstallService so that their values get picked up.'
