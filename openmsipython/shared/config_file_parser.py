@@ -23,7 +23,7 @@ class ConfigFileParser(LogOwner) :
         for csd in self._config.values() :
             for k,v in csd.items() :
                 if v.startswith('$') :
-                    yield v
+                    yield v[1:]
 
     #################### PUBLIC FUNCTIONS ####################
 
