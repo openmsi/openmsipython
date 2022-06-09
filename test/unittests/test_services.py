@@ -4,7 +4,8 @@ from subprocess import check_output
 from openmsipython.shared.logging import Logger
 from openmsipython.services.config import SERVICE_CONST
 from openmsipython.services.utilities import run_cmd_in_subprocess
-from openmsipython.services.service_manager import WindowsServiceManager, LinuxServiceManager
+from openmsipython.services.windows_service_manager import WindowsServiceManager
+from openmsipython.services.linux_service_manager import LinuxServiceManager
 from config import TEST_CONST
 
 #constants
