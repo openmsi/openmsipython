@@ -163,8 +163,13 @@ class ServiceManagerBase(LogOwner,HasArgumentParser) :
         if self.env_var_filepath.is_file() :
             self.env_var_filepath.unlink()
         #remove the installation arguments file
-        if remove_install_args and self.install_args_filepath.is_file() :
-            self.install_args_filepath.unlink()
+        if remove_install_args :
+            if self.install_args_filepath.is_file() :
+                self.install_args_filepath.unlink()
+                self.logger.info(f'Installation arguments file {self.install_args_filepath} deleted.')
+        else :
+            if self.install_args_filepath.is_file() :
+                self.logger.info(f'Installatiion arguments file {self.install_args_filepath} will be retained')
         self.logger.info(f'Done removing {self.service_name}')
     
     def reinstall_service(self) :
