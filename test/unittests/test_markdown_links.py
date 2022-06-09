@@ -22,7 +22,7 @@ class GithubToc:
     self.renderer_mixins = [GithubTocRendererMixin]
 
 thisfolder = pathlib.Path(__file__).parent
-mainfolder = thisfolder.parent
+mainfolder = thisfolder.parent.parent
 
 class LinkError(Exception): pass
 
