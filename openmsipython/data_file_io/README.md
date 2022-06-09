@@ -3,6 +3,7 @@
 The `openmsipython` code provides a few programs to use for uploading or downloading arbitrary data stored in files on disk.
 
 ### UploadDataFile
+
 This module uploads a single specified file to a topic on a broker by breaking it into chunks of a particular size and uploading those chunks in several parallel threads. To run it in the most common use case, enter the following command and arguments:
 
 `UploadDataFile [file_path] --config [config_file_path] --topic_name [topic_name]`
@@ -16,6 +17,7 @@ Options for running the code include:
 To see other optional command line arguments, run `UploadDataFile -h`. The Python Class defining this module is [here](./upload_data_file.py).
 
 ### DataFileUploadDirectory
+
 This module uploads any files that are added to a given directory path to a topic on a broker using the same "chunking" idea as above. It also preserves subdirectory structure relative to the watched directory. To run it in the most common use case, enter the following command and arguments:
 
 `DataFileUploadDirectory [directory_path] --config [config_file_path] --topic_name [name_of_topic]`
@@ -39,6 +41,7 @@ Options for running the code include:
 To see other optional command line arguments, run `DataFileUploadDirectory -h`. The Python Class defining this module is [here](./data_file_upload_directory.py).
 
 ### DataFileDownloadDirectory
+
 This module subscribes a group of consumers to a topic on a broker and passively listens in several parallel threads for messages that are file chunks of the type produced by `upload_data_file`. It reconstructs files produced to the topic from their individual chunks and puts the reconstructed files in a specified directory, preserving any subdirectory structure on the production end. To run it in the most common use case, enter the following command and arguments:
 
 `DataFileDownloadDirectory [working_directory_path] --config [config_file_path] --topic_name [topic_name]`

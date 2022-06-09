@@ -94,7 +94,7 @@ If your system does not have git installed, you can do so with conda.  If you ne
 
 If it is not present then install it with 
 
-'conda install -c anaconda git`
+`conda install -c anaconda git`
 
 #### 5. Install librdkafka for Macs (this step not required on Windows)
 
@@ -132,26 +132,34 @@ brew install librdkafka
 
 **Clone** this `openmsipython` github repo and change directory to openmsipython:
  
-    `git clone https://github.com/openmsi/openmsipython.git`
-    `cd openmsipython/`
+```
+git clone https://github.com/openmsi/openmsipython.git
+cd openmsipython/
+```
 
 ##### N.B Extra Steps for M1 Macs:
 
 *On M1 Macs you need to define system paths to allow your system find the GCC compilers used while building things. You may need to edit these steps because they refer to the specific version number of librdkafka library (1.8.2 as of this writing). If the version of librdkafka your installed in step 7 is not 1.8.2, then edit these commands to refer to the actual version installed.*
  
-    `CPATH=/opt/homebrew/Cellar/librdkafka/1.8.2/include pip install confluent-kafka`
-     `C_INCLUDE_PATH=/opt/homebrew/Cellar/librdkafka/1.8.2/include LIBRARY_PATH=/opt/homebrew/Cellar/librdkafka/1.8.2/lib pip install confluent_kafka`
+```
+CPATH=/opt/homebrew/Cellar/librdkafka/1.8.2/include pip install confluent-kafka
+C_INCLUDE_PATH=/opt/homebrew/Cellar/librdkafka/1.8.2/include LIBRARY_PATH=/opt/homebrew/Cellar/librdkafka/1.8.2/lib pip install confluent_kafka
+```
 
 *On M1 Macs you'll also need to manually install `pymssql` which first requires installing openssl and FreeTDS:*
  
-    `brew install openssl`   
-    `brew install FreeTDS`  
-    `pip3 install pymssql`
+```
+brew install openssl
+brew install FreeTDS
+pip3 install pymssql
+```
 
 #### 7. **Install** openmsipython:
  
-    `pip install .`
-    `cd ..`
+```
+pip install .
+cd ..
+```
 
 If you'd like to be able to make changes to the `openmsipython` code without reinstalling, you can include the `--editable` flag in the `pip install` command. If you'd like to run the automatic code tests, you can install the optional dependencies needed with `pip install .[all]` with or without the `--editable` flag.
 
@@ -278,5 +286,3 @@ The following items are currently planned to be implemented ASAP:
 
 1. What happens if we send very large files to topics to be consumed to an object store? (Might not be able to transfer GB of data at once?)
 1. How robust is the object store we're using (automatic backups, etc.)
-1. What if I forget and write my data to some “wrong” place?  What if I write my data to the directory twice?  
-1. Should I clear my data out of the streaming directory once it’s been produced to Kafka?

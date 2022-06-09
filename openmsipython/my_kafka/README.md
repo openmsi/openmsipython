@@ -5,7 +5,7 @@ All available programs depend on configuration files to define which kafka broke
 In general, a configuration file is a text file with one or more distinct and named sections. Comments can be added by using lines starting with "`#`", and other whitespace in general is ignored. Each section begins with a heading line like "`[section_name]`" (with square brackets included), and beneath that heading different parameters are supplied using lines like "`key = value`". If any parameter `value`s begin with the "`$`" character, the configuration file parser will attempt to expand those values as environment variables (this is useful to, for example, store usernames or passwords as environment variables instead of plain text in the repository).
 
 The different sections recognized by the `openmsipython` code are:
-1. `[broker]` to configure which Kafka broker should be used by a program and how to connect to it. Common parameters here include:
+1. `[broker]` to configure which Kafka broker should be used by a program and how to connect to it. You can add here any [parameters recognized by Kafka brokers](https://docs.confluent.io/platform/current/installation/configuration/broker-configs.html) in general, but common parameters here include:
     - `bootstrap.servers` to detail the server on which the broker is hosted
     - `sasl.mechanism` and `security.protocol` to describe how programs are authenticated to interact with the broker
     - `sasl.username` and `sasl.password` to provide the key and secret of an API key created for the broker
@@ -54,9 +54,9 @@ For any other issues with provisioning please refer to KafkaCrypto's documentati
 
 ### Additional configurations needed
 
-Successfully running the `ProvisionNode` command will create a new directory in the [`config_files` directory](./config_files) with a name corresponding to the node ID, containing a `my-node-id.config file`, a `my-node-id.crypto` file, and a `my-node-id.seed` file. KafkaCrypto needs the `my-node-id.config` file to setup producers and consumers, and that file is not secret. The `my-node-id.crypto` and `my-node-id.seed` files, however, should never be saved or transmitted plaintext (files with this pattern [are in the `.gitignore`](../../.gitignore) so if everything is running in the expected way this won't be an issue). An example of one of these created directories can be found [here](./config_files/testing_node) with all files intact because they're used for testing.
+Successfully running the `ProvisionNode` command will create a new subdirectory in the [`config_files` directory](./config_files) with a name corresponding to the node ID, containing a `my-node-id.config file`, a `my-node-id.crypto` file, and a `my-node-id.seed` file. KafkaCrypto needs the `my-node-id.config` file to setup producers and consumers, and that file is not secret. The `my-node-id.crypto` and `my-node-id.seed` files, however, should never be saved or transmitted plaintext (files with this pattern [are in the `.gitignore`](../../.gitignore) so if everything is running in the expected way this won't be an issue). An example of one of these created directories can be found [here](./config_files/testing_node) with all files intact because they're used for testing.
 
-To point OpenMSIPython to the config file that's created, one of two options must be added to the config file passed as discussed in the documentation [here](../data_file_io/README.md) (for example). Both options list a single new parameter under a heading called `[kafkacrypto]`. 
+To point OpenMSIPython to the config file that's created, one of two options must be added to the config file passed as discussed in the documentation [here](../data_file_io) (for example). Both options list a single new parameter under a heading called `[kafkacrypto]`. 
 
 The first option is to add just the node id, like `node_id = my-node-id`, which works if a directory called `my-node-id` exists in the location expected from running the `ProvisionNode` command. 
 
