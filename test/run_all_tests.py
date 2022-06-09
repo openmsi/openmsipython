@@ -1,5 +1,5 @@
 #imports
-import unittest, subprocess, pathlib
+import unittest, subprocess, pathlib, re
 from argparse import ArgumentParser
 
 #constants
@@ -20,6 +20,8 @@ def main(args=None) :
                                help='Add this flag to skip running the unittest checks')
     unittest_opts.add_argument('--no_kafka', action='store_true',
                                help='Add this flag to skip running the unittest checks')
+    unittest_opts.add_argument('--unittest_regex',type=re.compile,default=None,
+                               help='Only unittests whose function names match this regex will be run')
     parser.add_argument('--no_repo', action='store_true',
                         help='Add this flag to skip running the Git repository checks')
     parser.add_argument('--failfast', action='store_true',
@@ -55,6 +57,15 @@ def main(args=None) :
                         if (test._testMethodName).endswith('kafka') :
                             test_name = test._testMethodName
                             msg = 'tests that interact with the kafka broker are being skipped'
+                            setattr(test, test_name, 
+                                    unittest.skip(msg)(getattr(test, test_name)))
+        elif args.unittest_regex is not None :
+            for suite in suites :
+                for test_group in suite._tests :
+                    for test in test_group :
+                        if not args.unittest_regex.match(test._testMethodName) :
+                            test_name = test._testMethodName
+                            msg = f"tests that don't match the regex '{args.unittest_regex}' are being skipped"
                             setattr(test, test_name, 
                                     unittest.skip(msg)(getattr(test, test_name)))
         runner_kwargs = {'verbosity':3}

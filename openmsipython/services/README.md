@@ -34,4 +34,4 @@ If something goes wrong while the program is running as a Service, a file called
 
 ### Output in the "working directory"
 
-Working with Services will create a few files in the ["`working_dir`" subdirectory](./working_dir). A logfile called "Services.log" will contain some lines related to installing or working with any Services. Python files in that directory will correspond to the executables that are installed as Services, and so checking these files will give details on the setup for their corresponding Services. None of these created files will be tracked in the repo (they're in the [gitignore](../../.gitignore#L2-L5)).
+Working with Services will create a few files in the ["`working_dir`" subdirectory](./working_dir). A logfile called "Services.log" will contain some lines related to installing or working with any Services. Python files in that directory will correspond to the executables that are installed as Services, and so checking these files will give details on the setup for their corresponding Services. None of these created files will be tracked in the repo (they're in the [gitignore](../../.gitignore)).
