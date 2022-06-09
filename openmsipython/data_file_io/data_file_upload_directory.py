@@ -1,6 +1,6 @@
 #imports
 import pathlib, datetime, time
-from threading import Thread
+from threading import Thread, Lock
 from queue import Queue
 from ..utilities.misc import populated_kwargs
 from ..shared.config import UTIL_CONST
@@ -70,6 +70,7 @@ class DataFileUploadDirectory(DataFileDirectory,ControlledProcessSingleThread,Ru
         self.__upload_regex = upload_regex
         self.__datafile_type = datafile_type
         self.__wait_time = self.MIN_WAIT_TIME
+        self.__lock = Lock()
         
     def upload_files_as_added(self,config_path,topic_name,
                               n_threads=RUN_OPT_CONST.N_DEFAULT_UPLOAD_THREADS,
@@ -163,17 +164,18 @@ class DataFileUploadDirectory(DataFileDirectory,ControlledProcessSingleThread,Ru
             self.__add_chunks_for_filepath(filepath,[chunk_i])
         # Otherwise, register the chunk as successfully sent to the broker
         else :
-            fully_produced = self.__file_registry.register_chunk(filename,filepath,n_total_chunks,chunk_i)
-            #If the file has now been fully produced to the topic, set the variable for the file and log a line
-            if fully_produced :
-                self.data_files_by_path[filepath].fully_produced = True
-                msg = f'{filepath.relative_to(self.dirpath)} has been fully produced to the '
-                msg+= f'"{self.__topic_name}" topic as '
-                if n_total_chunks==1 :
-                    msg+=f'{n_total_chunks} message'
-                else :
-                    msg+=f'a set of {n_total_chunks} messages'
-                self.logger.info(msg)
+            with self.__lock :
+                fully_produced = self.__file_registry.register_chunk(filename,filepath,n_total_chunks,chunk_i)
+                #If the file has now been fully produced to the topic, set the variable for the file and log a line
+                if fully_produced :
+                    self.data_files_by_path[filepath].fully_produced = True
+                    msg = f'{filepath.relative_to(self.dirpath)} has been fully produced to the '
+                    msg+= f'"{self.__topic_name}" topic as '
+                    if n_total_chunks==1 :
+                        msg+=f'{n_total_chunks} message'
+                    else :
+                        msg+=f'a set of {n_total_chunks} messages'
+                    self.logger.info(msg)
 
     #################### PRIVATE HELPER FUNCTIONS ####################
 
