@@ -5,15 +5,15 @@ site.ENABLE_USER_SITE = True #https://www.scivision.dev/python-pip-devel-user-in
 
 setupkwargs = dict(
     name='openmsipython',
-    version='0.9.3.6',
+    version='0.9.3.7',
     packages=setuptools.find_packages(include=['openmsipython*']),
     include_package_data=True,
     entry_points = {
         'console_scripts' : ['UploadDataFile=openmsipython.data_file_io.upload_data_file:main',
                              'DataFileUploadDirectory=openmsipython.data_file_io.data_file_upload_directory:main',
                              'DataFileDownloadDirectory=openmsipython.data_file_io.data_file_download_directory:main',
-                             'InstallService=openmsipython.services.service_manager:install',
-                             'ManageService=openmsipython.services.service_manager:manage',
+                             'InstallService=openmsipython.services.install_service:main',
+                             'ManageService=openmsipython.services.manage_service:main',
                              'LecroyFileUploadDirectory=openmsipython.pdv.lecroy_file_upload_directory:main',
                              'PDVPlotMaker=openmsipython.pdv.pdv_plot_maker:main',
                              'ProvisionNode=openmsipython.utilities.provision_wrapper:main',

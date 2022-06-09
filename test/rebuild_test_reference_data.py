@@ -4,7 +4,7 @@ from openmsipython.shared.logging import Logger
 from openmsipython.data_file_io.config import RUN_OPT_CONST
 from openmsipython.data_file_io.upload_data_file import UploadDataFile
 from openmsipython.my_kafka.serialization import DataFileChunkSerializer
-from openmsipython.services.service_manager import WindowsServiceManager
+from openmsipython.services.windows_service_manager import WindowsServiceManager
 from openmsipython.data_models.laser_shock.config import LASER_SHOCK_CONST
 from openmsipython.data_models.laser_shock.laser_shock_lab import LaserShockLab
 from openmsipython.services.config import SERVICE_CONST

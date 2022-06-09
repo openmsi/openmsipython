@@ -4,7 +4,8 @@ from subprocess import check_output
 from openmsipython.shared.logging import Logger
 from openmsipython.services.config import SERVICE_CONST
 from openmsipython.services.utilities import run_cmd_in_subprocess
-from openmsipython.services.service_manager import WindowsServiceManager, LinuxServiceManager
+from openmsipython.services.windows_service_manager import WindowsServiceManager
+from openmsipython.services.linux_service_manager import LinuxServiceManager
 from config import TEST_CONST
 
 #constants
@@ -44,9 +45,9 @@ class TestServices(unittest.TestCase) :
                 shutil.rmtree(dirpath)
 
     @unittest.skipIf(platform.system()!='Windows','test can only be run on Windows')
-    def test_install_start_stop_remove_windows_services(self) :
+    def test_windows_services(self) :
         """
-        Make sure every possible Windows service can be installed, started, checked, stopped, and removed
+        Make sure every possible Windows service can be installed, started, checked, stopped, removed, and reinstalled
         """
         self.assertTrue(len(SERVICE_CONST.AVAILABLE_SERVICES)>0)
         for sd in SERVICE_CONST.AVAILABLE_SERVICES :
@@ -64,22 +65,27 @@ class TestServices(unittest.TestCase) :
                                                 interactive=False,
                                                 logger=LOGGER)
                 manager.install_service()
-                for run_mode in ('start','status','stop','remove') :
+                for run_mode in ('start','status','stop','remove','reinstall') :
                     time.sleep(1)
                     manager.run_manage_command(run_mode,False,False)
                 time.sleep(1)
+                error_log_path = pathlib.Path().resolve()/f'{service_name}{SERVICE_CONST.ERROR_LOG_STEM}'
+                self.assertFalse(error_log_path.is_file())
             except Exception as e :
                 raise e
             finally :
-                if (SERVICE_CONST.WORKING_DIR/f'{service_name}_env_vars.txt').exists() :
-                   (SERVICE_CONST.WORKING_DIR/f'{service_name}_env_vars.txt').unlink() 
+                fps_to_unlink = [(SERVICE_CONST.WORKING_DIR/f'{service_name}_env_vars.txt'),
+                                 (SERVICE_CONST.WORKING_DIR/f'{service_name}_install_args.txt')]
+                for fp in fps_to_unlink :
+                    if fp.exists() :
+                        fp.unlink() 
     
     @unittest.skipIf(platform.system()!='Linux' or 
                      check_output(['ps','--no-headers','-o','comm','1']).decode().strip()!='systemd',
                      'test requires systemd running on Linux')
-    def test_install_start_stop_remove_linux_services(self) :
+    def test_linux_services(self) :
         """
-        Make sure every possible Linux service can be installed, started, checked, stopped, and removed
+        Make sure every possible Linux service can be installed, started, checked, stopped, removed, and reinstalled
         """
         self.assertTrue(len(SERVICE_CONST.AVAILABLE_SERVICES)>0)
         for sd in SERVICE_CONST.AVAILABLE_SERVICES :
@@ -97,11 +103,13 @@ class TestServices(unittest.TestCase) :
                                                 interactive=False,
                                                 logger=LOGGER)
                 manager.install_service()
-                for run_mode in ('start','status','stop','remove') :
+                for run_mode in ('start','status','stop','remove','reinstall') :
                     time.sleep(1)
                     manager.run_manage_command(run_mode,False,False)
                 time.sleep(1)
                 self.assertFalse((SERVICE_CONST.DAEMON_SERVICE_DIR/f'{service_name}.service').exists())
+                error_log_path = pathlib.Path().resolve()/f'{service_name}{SERVICE_CONST.ERROR_LOG_STEM}'
+                self.assertFalse(error_log_path.is_file())
             except Exception as e :
                 raise e
             finally :
@@ -110,7 +118,9 @@ class TestServices(unittest.TestCase) :
                                            'rm',
                                            str((SERVICE_CONST.DAEMON_SERVICE_DIR/f'{service_name}.service'))],
                                            logger=LOGGER)
-                if (SERVICE_CONST.WORKING_DIR/f'{service_name}_env_vars.txt').exists() :
-                   (SERVICE_CONST.WORKING_DIR/f'{service_name}_env_vars.txt').unlink() 
-                if (SERVICE_CONST.WORKING_DIR/f'{self.service_name}.service').exists() :
-                   (SERVICE_CONST.WORKING_DIR/f'{self.service_name}.service').unlink() 
+                fps_to_unlink = [(SERVICE_CONST.WORKING_DIR/f'{service_name}_env_vars.txt'),
+                                 (SERVICE_CONST.WORKING_DIR/f'{service_name}_install_args.txt'),
+                                 (SERVICE_CONST.WORKING_DIR/f'{self.service_name}.service')]
+                for fp in fps_to_unlink :
+                    if fp.exists() :
+                        fp.unlink() 

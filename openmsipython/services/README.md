@@ -22,15 +22,17 @@ If the script completes successfully on Windows, you should be able to see the S
 
 ### Starting Services and other interaction
 
-After installing a Service/Daemon, you can use the `ManageService [name_for_service_or_daemon]` command to perform several actions on the program running as a Service:
-1. **start the Service running** with `ManageService [name_for_service_or_daemon] start`. You must do this after installing the Service to get it running.
-1. **check the Service status** with `ManageService [name_for_service_or_daemon] status` to make sure it's running properly
-1. **stop the Service running** with `ManageService [name_for_service_or_daemon] stop`. If you temporarily stop the Service using this command, you can restart it afterward with `ManageService [name_for_service_or_daemon] start`.
-1. **uninstall the Service completely** with `ManageService [name_for_service_or_daemon] stop_and_remove` (or, if the Service is already stopped, simply `ManageService [name_for_service_or_daemon] remove`). If it was the only Service running on the machine, you can also add the `--remove_env_vars` flag to un-set the username/password environment variables.
+After installing a Service/Daemon, you can use the `ManageService [name_for_service_or_daemon] [run_mode]` command to perform several actions on the program running as a Service where `[run_mode]` is a text command telling the ServiceManager what to do:
+1. **start the Service running** with `[run_mode]` given as "`start`". You must do this after installing the Service to get it running.
+1. **check the Service status** with `[run_mode]` given as "`status`" to make sure it's running properly
+1. **stop the Service running** with `[run_mode]` given as "`stop`". If you temporarily stop the Service using this command, you can restart it afterward with `ManageService [name_for_service_or_daemon] start`.
+1. **uninstall the Service completely** with `[run_mode]` given as "`remove`". If it was the only Service running on the machine, you can also add the `--remove_env_vars` flag to un-set the username/password environment variables. You can also remove the NSSM executable by adding the `--remove_nssm` flag, and/or remove the installation arguments file (which allows reinstalling the Service) by adding the `--remove_install_args` flag.
+1. **reinstall the Service using arguments from the most recent install run** with `[run_mode]` given as "`reinstall`". This is a short-hand way to call the last-used version of `InstallService` for a service of this same name.
+1. **do more than one of the above at once with compound run modes**. There are several compoun run modes to do more than one action at once. They are `stop_and_remove` (calls `stop` and then `remove`), `stop_and_reinstall` (calls `stop`, `remove`, and then `reinstall`), and `stop_and_restart` (calls `stop`, `remove`, `reinstall`, and then `start`).
 
 ### Debugging problems
 
-If something goes wrong while the program is running as a Service, a file called `SERVICES_ERROR_LOG.txt` should be created in the directory that you ran the installation command from. That file should contain a traceback for the error that killed the Service. If that file doesn't exist, then there was likely an issue with installing the Service in the first place, and not with the `OpenMSIPython` code that was run.
+If something goes wrong while the program is running as a Service, a file called `[service_name]_ERROR_LOG.txt` should be created in the directory that you ran the installation command from. That file should contain a traceback for the error that killed the Service. If that file doesn't exist, then there was likely an issue with installing the Service in the first place, and not with the `OpenMSIPython` code that was run.
 
 ### Output in the "working directory"
 

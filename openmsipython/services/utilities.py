@@ -93,7 +93,7 @@ def set_env_vars(env_var_names,interactive=True) :
                 if choice.lower() in ('yes','y') :
                     set_env_var_from_user_input(env_var_name)
                     variables_set = True
-    return variables_set
+    return (variables_set and get_os_name()=='Windows')
 
 def test_python_code() :
     """

@@ -1,7 +1,7 @@
 #imports
 import unittest, pathlib, importlib
 from openmsipython.services.config import SERVICE_CONST
-from openmsipython.services.service_manager import LinuxServiceManager
+from openmsipython.services.linux_service_manager import LinuxServiceManager
 from config import TEST_CONST
 
 #constants

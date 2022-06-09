@@ -49,6 +49,9 @@ class ServicesConstants :
     def NSSM_PATH(self) :
         return (self.WORKING_DIR / 'nssm.exe')
     @property
+    def ERROR_LOG_STEM(self) :
+        return '_ERROR_LOG.txt'
+    @property
     def SERVICE_EXECUTABLE_NAME_STEM(self) :
         return '_service_executable.py'
     @property

@@ -140,12 +140,16 @@ class MyArgumentParser(ArgumentParser) :
         'optional_service_name':
             ['optional',{'help':'The customized name of the Service that will be installed to run the chosen class'}],
         'run_mode':
-            ['positional',{'choices':['start','status','stop','remove','stop_and_remove'],
+            ['positional',{'choices':['start','status','stop','remove','stop_and_remove',
+                                      'reinstall','stop_and_reinstall','stop_and_restart'],
                            'help':'What to do with the service'}],
         'remove_env_vars':
             ['optional',{'action':'store_true',
                          'help':'''Add this flag to also remove username/password environment variables 
                                    when removing a Service'''}],
+        'remove_install_args':
+            ['optional',{'action':'store_true',
+                         'help':'Add this flag to also remove the install arguments file when removing a Service'}],
         'remove_nssm':
             ['optional',{'action':'store_true',
                          'help':'Add this flag to also remove the NSSM executable when removing a Service'}],
