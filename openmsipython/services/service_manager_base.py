@@ -190,11 +190,11 @@ class ServiceManagerBase(LogOwner,HasArgumentParser) :
         self.argslist = [line.strip() for line in lines[1:]] if len(lines)>1 else []
         if self.interactive :
             msg = 'Running this reinstall would be like running the following from the command line:\n'
-            msg = f'InstallService {self.service_class_name} '
+            msg+= f'InstallService {self.service_class_name} '
             for arg in self.argslist :
                 msg+=f'{arg} '
             msg+=f'--service_name {self.service_name}\n'
-            msg+='Does everything above look right? (Y/n): '
+            msg+='Does everything above look right? [(y)/n]: '
             check = input(msg)
             if check.lower().startswith('n') :
                 msg = f'{self.service_name} will NOT be reinstalled. You can install it again by rerunning '
