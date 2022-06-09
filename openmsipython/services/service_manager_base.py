@@ -169,7 +169,7 @@ class ServiceManagerBase(LogOwner,HasArgumentParser) :
                 self.logger.info(f'Installation arguments file {self.install_args_filepath} deleted.')
         else :
             if self.install_args_filepath.is_file() :
-                self.logger.info(f'Installatiion arguments file {self.install_args_filepath} will be retained')
+                self.logger.info(f'Installation arguments file {self.install_args_filepath} will be retained')
         self.logger.info(f'Done removing {self.service_name}')
     
     def reinstall_service(self) :
