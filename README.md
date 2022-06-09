@@ -21,51 +21,50 @@ Developed for Open MSI (NSF DMREF award #1921959)
 
 Programs use the Python implementation of the Apache Kafka API, and are designed to run on Windows, Mac or Linux machines.  Data producers typically run on Windows or Linux computers that run collection of data on laboratory instruments; Data consumers and stream processors run on the same computers, on servers with more compute power as needed, or where storage of data is hosted.  In all these cases, Open MSI components are run in Python 3 in virtual environments or sometimes in Docker containers. Open MSI can be used interactively from the command line or run as an always available service (on Windows) or daemon (on Linux).  We recommend using a minimal installation of the conda open source package management system and environment management system. These installation instructions start with installation of conda and outline all the necessary steps to run Open MSI tools.  To run Open MSI usefully, you need to understand that data streams through *topics* served by a *broker*.  In pracitce that means you will need access to a broker running on a server or in the cloud somewhere and you will need to create topics on the broker to hold the streams.  If these concepts are new to you we suggest contacting us for assistance and/or using a simple, managed cloud solution, such as Confluent Cloud, as your broker. 
 
-### Quick start with miniconda3
+### Quick Start 
+####Overview of Installation:
 
-**NOTE** The quick-start instructions below only apply to users working on Windows>7, most Linux distros, and Mac OS machines without M1 chips. Please read the entire installation section to see which steps you'll need to perform for your specific OS.
+Here is an outline of the installation steps that are detailed below: 
 
-The quickest way to get a minimal installation is to use Miniconda3. Miniconda3 installers can be downloaded from [the website here](https://docs.conda.io/en/latest/miniconda.html), and installation instructions can be found on [the website here](https://conda.io/projects/conda/en/latest/user-guide/install/index.html).
+1. Install miniconda3 (if not already installed)
+2. Create and use a conda virtual environment dedicated to openmsipython
+3. Install libsodium in that dedicated environment
+4. Install git (if not already installed)
+5. (Optional: Install librdkafka manually if using a Mac)
+4. Install OpenMSIPython in the dedicated environment
+5. Write environment variables (usually the best choice, but optional)
+6. Provision the KafkaCrypto node that should be used (if encryption is required)
+7. Write a config file to use
+8. Install and start the Service (Windows) or Daemon (Linux) (Usual for production use, but optional when experimenting with OpenMSIPython)
 
-With Miniconda installed, create and switch to a new environment for Open MSI. In a terminal shell window (or Anaconda Prompt in admin mode on Windows) type:
+**NOTE:** Please read the entire installation section below before proceeding.  There are specific difference between instructions for Windows, Linux, Intel-MacOS, and M1-MacOS. 
+
+####1. miniconda3 Installation
+
+We recommend using miniconda3 for the lightest installation. miniconda3 installers can be downloaded from [the website here](https://docs.conda.io/en/latest/miniconda.html), and installation instructions can be found on [the website here](https://conda.io/projects/conda/en/latest/user-guide/install/index.html).
+
+####2. Conda Environment Creation
+With Miniconda installed, create and activate a dedicated virtual environment for OpenMSI. In a terminal shell (or Anaconda Prompt in admin mode on Windows) type:
 
 ```
 conda create -n openmsi python=3.9
 conda activate openmsi
 ```
+#####N.B. Different Conda Step for Older Versions of Windows:
 
-At the time of writing this ReadMe, Python 3.9 is the most recent minor release of Python supported by confluent-kafka on Windows 10, and is recommended for most deployments. 
 
-You'll need to use that second "activate" command every time you open a Terminal window or Anaconda Prompt to switch to the `openmsi` environment. 
-
-Miniconda installs `pip`; if you don't already have git installed, you should do so now with
-
-`conda install -c anaconda git`
-
-(or use the instructions on [the website here](https://github.com/git-guides/install-git).)
-
-Lastly, you will need to install the `libsodium` package through Miniconda as well, using the command
-
-`conda install -c anaconda libsodium`
-
-This step is required to use the [`pysodium` package](https://pypi.org/project/pysodium/), needed for encrypting messages.
-
-#### Extra setup on Windows
-
-##### Older versions of Windows
-
-Python 3.9 is not supported on Windows 7 or earlier. Installations on pre-Windows 10 systems should, therefore, use Python 3.7 instead of Python 3.9, in which case, the above commands are:
+Python 3.9 is not supported on Windows 7 or earlier. Installations on pre-Windows 10 systems should, therefore, use Python 3.7 instead of Python 3.9, in which case, replace the two commands above with:
 
 ```
 conda create -n openmsi python=3.7
 conda activate openmsi
 ```
 
-`OpenMSIPython` code is transparent to the difference between Python 3.7 and 3.9 in principle, but it is recommended to use newer Windows systems that can support Python 3.9
+*In principle* `OpenMSIPython` code is transparent to the difference between Python 3.7 and 3.9, but it is recommended to use newer Windows systems that can support Python 3.9
 
-##### Issues with DLL files
+######Issues with DLL Files:
 
-This environment needs a special variable set to allow the Kafka Python code to find its dependencies on Windows (see [here](https://github.com/ContinuumIO/anaconda-issues/issues/12475) for more details), so after you've activated your Conda environment as above, type the following commands to set the variable and then refresh the environment:
+On Windows, you need to set a special variable in the virtual environment to allow the Kafka Python code to find its dependencies (see [here](https://github.com/ContinuumIO/anaconda-issues/issues/12475) for more details). To do this, activate your Conda environment as above then type the following commands to set the variable and then refresh the environment:
 
 ```
 conda env config vars set CONDA_DLL_SEARCH_MODIFICATION_ENABLE=1
@@ -73,13 +72,40 @@ conda deactivate
 conda activate openmsi
 ```
 
-Due to the wide variety of Windows builds, setting this environment variable may not solve issues stemming from the `librdkafka.dll` file seemingly missing. See [here](https://github.com/confluentinc/confluent-kafka-python/issues/1221) for more context on this problem. A fix for the most common cases is built into `OpenMSIPython` and can be found [here](./openmsipython/my_kafka/__init__.py); referencing that code may be helpful in resolving any remaining `librdkafka`/`confluent-kafka-python` issues.
+Due to the wide variety of Windows builds, setting this environment variable may not solve all issues stemming from the `librdkafka.dll` file seemingly missing. See [here](https://github.com/confluentinc/confluent-kafka-python/issues/1221) for more context on this problem. A fix for the most common cases is built into `OpenMSIPython` and can be found [here](./openmsipython/my_kafka/__init__.py); referencing that code may be helpful in resolving any remaining `librdkafka`/`confluent-kafka-python` issues.
 
-Another common issue with Windows builds is a seemingly "missing" `libsodium.dll` file. If you have trouble importing `pysodium`, make sure the directory containing your `libsodium.dll` is added to your `PATH`, or that the `libsodium.dll` file is properly registered on your system.
+Another common issue with Windows builds is a seemingly missing `libsodium.dll` file. If you encounter errors stating trouble importing `pysodium`, make sure the directory containing your `libsodium.dll` is added to your `PATH`, or that the `libsodium.dll` file is properly registered on your Windows system.
 
-#### Extra setup on Intel-based MacOS
 
-MacOS is not officially supported for `OpenMSIPython`, but works reliably at this time. If you would like to work with MacOS you will need to install `librdkafka` using the package manager homebrew. This may also require installing Xcode command line tools. You can install both of these using the commands below:
+######More Details about Versions:
+At the time of writing this ReadMe, Python 3.9 is the most recent release of Python supported by confluent-kafka on Windows 10, and is recommended for most deployments. 
+
+
+#####General Virtual Environment Note:
+No matter the operating system, you'll need to use the second command to "activate" the openmsi environment every time you open a Terminal window or Anaconda Prompt and want to work with OpenMSIPython. 
+
+####3. Install libsodium
+`libsodium` is a package used for the KakfaCrypto package that provides the end-to-end data encryption capability of OpenMSIPython. Since encryption is a built-in option for OpenMSIPython, you must install `libsodium` even if you don't want to use encryption. Install the `libsodium` package through Miniconda using the shell command:
+
+`conda install -c anaconda libsodium`
+
+####4. Install git if necessary
+
+If your system does not have git installed, you can do so with conda.  If you need to check to see if git is installed use:
+
+`git --version`
+
+If it is not present then install it with 
+
+'conda install -c anaconda git`
+
+####5. Install librdkafka for Macs (this step not required on Windows)
+
+MacOS is not officially supported for `OpenMSIPython`, but works reliably at this time. If you would like to work with MacOS you will, however, need to install `librdkafka` using the package manager homebrew. The process is different on Intel-Chip Macs than on newer Apple-Silicon, M1 Mac.  
+
+##### On Intel MacOS:
+
+This may also require installing Xcode command line tools. You can install both of these using the commands below:
 
 ```
 xcode-select --install
@@ -94,67 +120,51 @@ when the Kafka server is otherwise available and should be fine, especially when
 
 These errors may be due to running out of file descriptors as discussed in [this known `confluent-kafka`/`librdkafka` issue](https://github.com/edenhill/kcat/issues/209): using a broker hosted on Confluent Cloud may increase the likelihood of getting errors like these, because `librdkafka` creates two separate file descriptors for each known broker regardless of whether a connection is established. If you type `ulimit -n` into a Terminal window and get an output like `256`, it's likely this is the cause. To solve this issue, you will need to increase the limit of the number of allowed file descriptors, by running `ulimit -n 4096`. If that makes the errors go away, then you might want to add that line to your shell `.profile` or `.rc` file.
 
-#### Extra setup on M1, Apple-silicon MacOS Monterey
+##### On M1 MacOS (tested on Monterey system):
 
-MacOS on Apple-silicon Macs is not officially supported for `OpenMSIPython`, but works reliably at this time. To install `OpenMSIPython` on an M1 machine use the following steps in the Mac Terminal Shell:
 
 1. Change the default shell to Bash:
  
     `chsh -s /bin/bash`
 
-2. Install miniconda by downloading and running the installer for M1 Macs from the [Anaconda website:
-https://docs.conda.io/en/latest/miniconda.html](https://docs.conda.io/en/latest/miniconda.html)
-3. Create a conda environment and activate it:
- 
-    ```
-    conda create -n openmsi python=3.9
-    conda activate openmsi
-    ```
-
-4. Conda install *libsodium* using the anaconda channel. *It is important that you use the anaconda channel since it has a Mac ARM processor version; The M1 processor has ARM architecture*:
- 
-    `conda install -c anaconda lib sodium`    
-5. Install home-brew:
+2. Install home-brew:
  
     `/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"`
-6. Add homebrew bin and sbin locations to your path:
+3. Add homebrew bin and sbin locations to your path:
  
     `export PATH=/opt/homebrew/bin:$PATH`
     `export PATH=/opt/homebrew/sbin:$PATH`
-7. Use brew to install *librdkafka*:
+4. Use brew to install *librdkafka*:
  
     `brew install librdkafka`
-8.  Clone this `openmsipython` github repo and change directory to openmsipython:
+
+####6. Clone and Install OpenMSIPython from this Repo
+
+**Clone** this `openmsipython` github repo and change directory to openmsipython:
  
     `git clone https://github.com/openmsi/openmsipython.git`
     `cd openmsipython/`
-9. Do some path work to let your system find the GCC compilers while building things. **N.B. You may need to edit these steps because they refer to the specific version number of librdkafka library (1.8.2 as of this writing). If the version of librdkafka your installed in step 7 is not 1.8.2, then edit these commands to refer to the actual version installed.**
+
+##### N.B Extra Steps for M1 Macs:
+*On M1 Macs you need to define system paths to allow your system find the GCC compilers used while building things. You may need to edit these steps because they refer to the specific version number of librdkafka library (1.8.2 as of this writing). If the version of librdkafka your installed in step 7 is not 1.8.2, then edit these commands to refer to the actual version installed.*
  
     `CPATH=/opt/homebrew/Cellar/librdkafka/1.8.2/include pip install confluent-kafka`
      `C_INCLUDE_PATH=/opt/homebrew/Cellar/librdkafka/1.8.2/include LIBRARY_PATH=/opt/homebrew/Cellar/librdkafka/1.8.2/lib pip install confluent_kafka`
-10. Install pymssql which also requires openssl and FreeTDS:
+
+*On M1 Macs you'll also need to manually install `pymssql` which first requires installing openssl and FreeTDS:*
  
     `brew install openssl`   
     `brew install FreeTDS`  
     `pip3 install pymssql`
-12.  Pip install openmsi:
+
+
+**Install** openmsi:
  
-    `pip install -e .`
+    `pip install .`
+    `cd ..`
 
-**This completes installation on an M1 Mac. You may skip to the section about Environmental variables.**
-
-### Cloning this repo and installing the openmsipython package
-
-While in the `openmsi` environment, navigate to wherever you'd like to store this code, and type:
-
-```
-git clone https://github.com/openmsi/openmsipython.git
-cd openmsipython
-pip install .
-cd ..
-```
-
-This will give you access to several new console commands to run openmsipython applications, as well as any of the other modules in the `openmsipython` package. If you'd like to be able to make changes to the `openmsipython` code without reinstalling, you can include the `--editable` flag in the `pip install` command. If you'd like to run the automatic code tests, you can install the optional dependencies needed with `pip install .[all]` with or without the `--editable` flag.
+####Installation Completion Note:
+**This completes installation on an M1 Mac and will give you access to several new console commands to run openmsipython applications, as well as any of the other modules in the `openmsipython` package. If you'd like to be able to make changes to the `openmsipython` code without reinstalling, you can include the `--editable` flag in the `pip install` command. If you'd like to run the automatic code tests, you can install the optional dependencies needed with `pip install .[all]` with or without the `--editable` flag.**
 
 If you like, you can check your installation with:
 
@@ -166,15 +176,26 @@ python
 
 and if that line runs without any problems then the package was installed correctly.
 
-### Environment variables (for Confluent Cloud or S3 Object Stores)
 
-Interacting with the Kafka broker on Confluent Cloud, including running code tests as described [here](./test), requires that some environment variables are set on your system. If you're installing any software to run as a Windows Service or Linux Daemon (as described [here](./openmsipython/services)) then you'll be prompted to enter these variables' values, but you may find it more convenient to set them once. The environment variables are called `KAFKA_TEST_CLUSTER_USERNAME`, `KAFKA_TEST_CLUSTER_PASSWORD`, `KAFKA_PROD_CLUSTER_USERNAME`, and `KAFKA_PROD_CLUSTER_PASSWORD`. The "`TEST`" variables are used to connect to the test cluster, and must be set to successfully run the automatic code tests. The "`PROD`" variables are used to connect to the full production cluster and are only needed for fully deployed code.
+####7. Environment variables (for Confluent Cloud or S3 Object Stores)
+
+Interacting with the Kafka broker on Confluent Cloud, including running code tests as described [here](./test), requires that some environment variables are set on your system. If you're installing any software to run as a Windows Service or Linux Daemon (as described [here](./openmsipython/services)) then you'll be prompted to enter these variables' values, but you may find it more convenient to set them once and save them as environmental variable. The environment variables are called `KAFKA_TEST_CLUSTER_USERNAME`, `KAFKA_TEST_CLUSTER_PASSWORD`, `KAFKA_PROD_CLUSTER_USERNAME`, and `KAFKA_PROD_CLUSTER_PASSWORD`. The "`TEST`" variables are used to connect to the Kafka broker cluster for testing and must be set for developers needing to successfully run the automatic code tests. The "`PROD`" variables are used to connect to a full production cluster and are only needed for fully deployed code.
 
 You can set these environment variables in a shell `.rc` or `.profile` file if running on Linux or Mac OS. On Windows you can set them as machine environment variables using commands like `[Environment]::SetEnvironmentVariable("NAME","VALUE",[EnvironmentVariableTarget]::Machine)`. You can also set them as "User" or "Process" environment variables on Windows if you don't have the necessary permissions to set them for the "Machine". 
 
-Secrets for connecting to S3 object stores should similarly be stored as environment variables and referenced in config files, rather than hard-coded.
+Secret keys for connecting to S3 object stores should similarly be stored as environment variables and referenced in config files, rather than hard-coded.
 
-### Other documentation
+####8. Provision KafkaCrypto Node (optional)
+The [readme file here](./openmsipython/my_kafka) explains how to enable message-layer encryption through [KafkaCrypto](https://github.com/tmcqueen-materials/kafkacrypto).
+
+####9. Write Config File
+The [readme file here](./openmsipython/my_kafka) also explains options for configuration files used to define which kafka cluster(s) the programs interact with and how data are produced to/consumed from topics within them.
+
+####10. Install and Start Service or Daemon (optional)
+The [readme file here](./openmsipython/services) explains options and installation of OpenMSIPython programs continually as Windows Services or Linux Daemons.  
+
+
+## Other documentation
 
 Installing the code provides access to several programs that share a basic scheme for user interaction. These programs share the following attributes:
 1. Their names correspond to names of Python Classes within the code base
