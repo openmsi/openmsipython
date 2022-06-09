@@ -147,7 +147,7 @@ class MyArgumentParser(ArgumentParser) :
             ['optional',{'action':'store_true',
                          'help':'''Add this flag to also remove username/password environment variables 
                                    when removing a Service'''}],
-        'remove_args':
+        'remove_install_args':
             ['optional',{'action':'store_true',
                          'help':'Add this flag to also remove the install arguments file when removing a Service'}],
         'remove_nssm':

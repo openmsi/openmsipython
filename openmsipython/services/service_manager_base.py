@@ -27,7 +27,7 @@ class ServiceManagerBase(LogOwner,HasArgumentParser) :
             for service_dict in SERVICE_CONST.AVAILABLE_SERVICES :
                 parser.add_subparser_arguments_from_class(service_dict['class'],addl_args=['optional_service_name'])
         elif install_or_manage=='manage' :
-            parser.add_arguments('service_name','run_mode','remove_env_vars','remove_args','remove_nssm')
+            parser.add_arguments('service_name','run_mode','remove_env_vars','remove_install_args','remove_nssm')
         else :
             errmsg =  'ERROR: must call get_argument_parser with either "install" or "manage", '
             errmsg+= f'not "{install_or_manage}"!'
