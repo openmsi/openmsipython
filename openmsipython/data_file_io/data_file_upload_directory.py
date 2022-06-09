@@ -93,8 +93,6 @@ class DataFileUploadDirectory(DataFileDirectory,ControlledProcessSingleThread,Ru
         #set the chunk size and topic name
         self.__chunk_size = chunk_size
         self.__topic_name = topic_name
-        #start the producer 
-        self.__producer = MyProducer.from_file(config_path,logger=self.logger)
         #if we're only going to upload new files, exclude what's already in the directory
         if not upload_existing :
             self.__find_new_files(to_upload=False)
@@ -109,9 +107,12 @@ class DataFileUploadDirectory(DataFileDirectory,ControlledProcessSingleThread,Ru
         msg+=f'{self.dirpath} to the {topic_name} topic using {n_threads} threads'
         self.logger.info(msg)
         self.__upload_queue = Queue(max_queue_size)
+        #start the producers and upload threads
+        self.__producers = []
         self.__upload_threads = []
         for _ in range(n_threads) :
-            t = Thread(target=self.__producer.produce_from_queue,
+            self.__producers.append(MyProducer.from_file(config_path,logger=self.logger))
+            t = Thread(target=self.__producers[-1].produce_from_queue,
                        args=(self.__upload_queue,self.__topic_name),
                        kwargs={'callback': self.producer_callback},
                     )
@@ -182,8 +183,14 @@ class DataFileUploadDirectory(DataFileDirectory,ControlledProcessSingleThread,Ru
             # wait here with some slight backoff so that the watched directory isn't just constantly pinged
             time.sleep(self.__wait_time) 
             self.__find_new_files()
-            n_new_callbacks = self.__producer.poll(0)
-            if (not self.have_file_to_upload) and (n_new_callbacks is None or n_new_callbacks==0) :
+            n_new_callbacks = 0
+            for producer in self.__producers :
+                new_callbacks = producer.poll(0)
+                if new_callbacks is not None :
+                    n_new_callbacks+=new_callbacks
+                if n_new_callbacks>0 :
+                    break
+            if (not self.have_file_to_upload) and (n_new_callbacks==0) :
                 if self.__wait_time<self.MAX_WAIT_TIME :
                     self.__wait_time*=1.1
             else :
@@ -199,8 +206,9 @@ class DataFileUploadDirectory(DataFileDirectory,ControlledProcessSingleThread,Ru
         self.__find_new_files()
 
     def _on_check(self) :
-        #poll the producer
-        self.__producer.poll(0)
+        #poll the producers
+        for producer in self.__producers :
+            producer.poll(0)
         #log progress so far
         self.logger.debug(self.progress_msg)
         #reset the wait time
@@ -228,8 +236,9 @@ class DataFileUploadDirectory(DataFileDirectory,ControlledProcessSingleThread,Ru
         for ut in self.__upload_threads :
             ut.join()
         self.logger.info('Waiting for all enqueued messages to be delivered (this may take a moment)....')
-        self.__producer.flush(timeout=-1) #don't move on until all enqueued messages have been sent/received
-        self.__producer.close()
+        for producer in self.__producers :
+            producer.flush(timeout=-1) #don't move on until all enqueued messages have been sent/received
+            producer.close()
 
     def __find_new_files(self,to_upload=True) :
         """
