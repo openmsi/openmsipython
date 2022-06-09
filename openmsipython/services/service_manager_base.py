@@ -187,7 +187,7 @@ class ServiceManagerBase(LogOwner,HasArgumentParser) :
             self.logger.error(errmsg,RuntimeError)
         self.service_class_name = lines[0].strip()
         self.__set_service_dict_from_class_name()
-        self.argslist = [line.strip() for line in self.lines[1:]] if len(lines)>1 else []
+        self.argslist = [line.strip() for line in lines[1:]] if len(lines)>1 else []
         if self.interactive :
             msg = 'Running this reinstall would be like running the following from the command line:\n'
             msg = f'InstallService {self.service_class_name} '
