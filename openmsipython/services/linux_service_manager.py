@@ -86,7 +86,7 @@ class LinuxServiceManager(ServiceManagerBase) :
         with open(self.env_var_filepath,'w') as fp :
             fp.write(code)
         run_cmd_in_subprocess(['chmod','go-rwx',self.env_var_filepath])
-        return False #don't need to rerun on Linux after setting environment variables
+        return True 
 
     def __check_systemd_installed(self) :
         """

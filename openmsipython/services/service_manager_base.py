@@ -210,7 +210,7 @@ class ServiceManagerBase(LogOwner,HasArgumentParser) :
     def _write_env_var_file(self) :
         """
         Write and set permissions for the file holding the values of the environment variables needed by the Service
-        returns True if the code needs to be restarted to pick up values, False if not
+        returns True if there are environment variables referenced, False if not
         not implemented in base class
         """
         pass
