@@ -186,8 +186,6 @@ class UploadDataFile(DataFile,Runnable) :
         n_threads   = the number of threads to run at once during uploading
         chunk_size  = the size of each file chunk in bytes
         """
-        #start the producer
-        producer = MyProducer.from_file(config_path,logger=self.logger)
         startup_msg = f"Uploading entire file {self.filepath} to {topic_name} in {chunk_size} byte chunks "
         startup_msg+=f"using {n_threads} threads...."
         self.logger.info(startup_msg)
@@ -198,16 +196,20 @@ class UploadDataFile(DataFile,Runnable) :
         for ti in range(n_threads) :
             upload_queue.put(None)
         #produce all the messages in the queue using multiple threads
+        producers = []
         upload_threads = []
         for ti in range(n_threads) :
-            t = Thread(target=producer.produce_from_queue, args=(upload_queue,topic_name))
+            producers.append(MyProducer.from_file(config_path,logger=self.logger))
+            t = Thread(target=producers[-1].produce_from_queue, args=(upload_queue,topic_name))
             t.start()
             upload_threads.append(t)
         #join the threads
         for ut in upload_threads :
             ut.join()
         self.logger.info('Waiting for all enqueued messages to be delivered (this may take a moment)....')
-        producer.flush(timeout=-1) #don't leave the function until all messages have been sent/received
+        for producer in producers :
+            producer.flush(timeout=-1) #don't leave the function until all messages have been sent/received
+            producer.close()
         self.logger.info('Done!')
 
     #################### PRIVATE HELPER FUNCTIONS ####################
