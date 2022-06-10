@@ -11,7 +11,7 @@ from utilities import MyThread
 LOGGER = Logger(pathlib.Path(__file__).name.split('.')[0],logging.ERROR)
 TIMEOUT_SECS = 30
 JOIN_TIMEOUT_SECS = 30
-TOPIC_NAME = 'test_data_file_stream_processor'
+TOPIC_NAME = TEST_CONST.TEST_TOPIC_NAMES[pathlib.Path(__file__).name[:-len('.py')]]
 
 class DataFileStreamProcessorForTesting(DataFileStreamProcessor) :
     """

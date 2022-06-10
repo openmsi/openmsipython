@@ -27,15 +27,15 @@ class TestServices(unittest.TestCase) :
                 'DataFileDownloadDirectory':[TEST_CONST.TEST_DIR_SERVICES_TEST,],
                 'LecroyFileUploadDirectory':[TEST_CONST.TEST_DIR_SERVICES_TEST,
                                              '--config',TEST_CONST.TEST_CONFIG_FILE_PATH,
-                                             '--topic_name','test_pdv_plots'],
+                                             '--topic_name',TEST_CONST.TEST_TOPIC_NAMES['test_pdv_plots']],
                 'PDVPlotMaker':[TEST_CONST.TEST_DIR_SERVICES_TEST,
                                 '--config',TEST_CONST.TEST_CONFIG_FILE_PATH,
-                                '--topic_name','test_pdv_plots',
+                                '--topic_name',TEST_CONST.TEST_TOPIC_NAMES['test_pdv_plots'],
                                 '--consumer_group_id','create_new'],
                 'OSNStreamProcessor':['phy210127-bucket01',
                                       '--logger_file',TEST_CONST.TEST_DIR_SERVICES_TEST/'test_osn_stream_processor.log',
                                       '--config',TEST_CONST.TEST_CONFIG_FILE_PATH_OSN,
-                                      '--topic_name','osn_test',
+                                      '--topic_name',TEST_CONST.TEST_TOPIC_NAMES['test_osn'],
                                       '--consumer_group_id','create_new'],
             }
 
@@ -45,7 +45,7 @@ class TestServices(unittest.TestCase) :
                 shutil.rmtree(dirpath)
 
     @unittest.skipIf(platform.system()!='Windows','test can only be run on Windows')
-    def test_windows_services(self) :
+    def test_windows_services_kafka(self) :
         """
         Make sure every possible Windows service can be installed, started, checked, stopped, removed, and reinstalled
         """
@@ -83,7 +83,7 @@ class TestServices(unittest.TestCase) :
     @unittest.skipIf(platform.system()!='Linux' or 
                      check_output(['ps','--no-headers','-o','comm','1']).decode().strip()!='systemd',
                      'test requires systemd running on Linux')
-    def test_linux_services(self) :
+    def test_linux_services_kafka(self) :
         """
         Make sure every possible Linux service can be installed, started, checked, stopped, removed, and reinstalled
         """
