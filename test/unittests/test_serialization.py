@@ -13,7 +13,7 @@ from config import TEST_CONST
 
 #constants
 LOGGER = Logger(pathlib.Path(__file__).name.split('.')[0],logging.ERROR)
-TOPIC_NAME = 'test_encrypted'
+TOPIC_NAME = TEST_CONST.TEST_TOPIC_NAMES[pathlib.Path(__file__).name[:-len('.py')]]
 
 class TestSerialization(unittest.TestCase) :
     """

@@ -8,19 +8,29 @@ class TestRoutineConstants :
     constants used in running tests
     """
     @property
-    def TEST_ENDPOINT_URL(self):  # the endpoint_url for osn connection
+    def TEST_TOPIC_NAMES(self) :
+        return {
+            'test_data_file_directories':'test_data_file_directories',
+            'test_data_file_directories_encrypted':'test_encrypted',
+            'test_data_file_stream_processor':'test_data_file_stream_processor',
+            'test_osn':'osn_test',
+            'test_pdv_plots':'test_pdv_plots',
+            'test_serialization':'test_encrypted',
+        }
+    @property
+    def TEST_ENDPOINT_URL(self) :  # the endpoint_url for osn connection
         return os.environ['ENDPOINT_URL']
     @property
-    def TEST_BUCKET_NAME(self):  # the bucket name to upload data to OSN (S3Client)
+    def TEST_BUCKET_NAME(self) :  # the bucket name to upload data to OSN (S3Client)
         return os.environ['BUCKET_NAME']
     @property
-    def TEST_ASSCESS_KEY_ID(self):  # the access_key_id for OSN Authentication
+    def TEST_ASSCESS_KEY_ID(self) :  # the access_key_id for OSN Authentication
         return os.environ['ACCESS_SECRET_KEY_ID']
     @property
-    def TEST_SECRET_KEY_ID(self):  # the secret_key_id for OSN Authentication
+    def TEST_SECRET_KEY_ID(self) :  # the secret_key_id for OSN Authentication
         return os.environ['SECRET_KEY_ID']
     @property
-    def TEST_REGION(self):  # the region for osn
+    def TEST_REGION(self) :  # the region for osn
         return os.environ['REGION']
     @property
     def TEST_CONFIG_FILE_PATH(self) : # The path to the Kafka config file to use

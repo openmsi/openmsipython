@@ -3,7 +3,7 @@ version: 2.1
 ################# ORB #################
 orbs:
   # See the orb documentation here: https://circleci.com/developer/orbs/orb/circleci/python
-  python: circleci/python@1.5.0
+  python: circleci/python@2.0.3
 
 ################# WORKFLOWS #################
 workflows:
@@ -23,7 +23,7 @@ jobs:
   # Build the repo and check the code using pyflakes 
   build-and-code-check:
     docker:
-      - image: containers.repo.sciserver.org/openmsipython:1.1.0
+      - image: containers.repo.sciserver.org/openmsipython:1.2.0
         auth:
           username: $IDIESDOCKER_USERNAME
           password: $IDIESDOCKER_PASSWORD
@@ -42,7 +42,7 @@ jobs:
   # Run unittests 
   run-tests:
     docker:
-      - image: containers.repo.sciserver.org/openmsipython:1.1.0
+      - image: containers.repo.sciserver.org/openmsipython:1.2.0
         auth:
           username: $IDIESDOCKER_USERNAME
           password: $IDIESDOCKER_PASSWORD
@@ -67,7 +67,7 @@ jobs:
   # Make sure that the repository is clean after all tests have been run
   check-repo:
     docker:
-      - image: containers.repo.sciserver.org/openmsipython:1.1.0
+      - image: containers.repo.sciserver.org/openmsipython:1.2.0
         auth:
           username: $IDIESDOCKER_USERNAME
           password: $IDIESDOCKER_PASSWORD

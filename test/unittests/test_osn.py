@@ -14,7 +14,7 @@ LOGGER = Logger(pathlib.Path(__file__).name.split('.')[0], logging.ERROR)
 UPDATE_SECS = 5
 TIMEOUT_SECS = 90
 JOIN_TIMEOUT_SECS = 60
-TOPIC_NAME = 'osn_test'
+TOPIC_NAME = TEST_CONST.TEST_TOPIC_NAMES[pathlib.Path(__file__).name[:-len('.py')]]
 
 class TestOSN(unittest.TestCase):
     """
@@ -39,7 +39,8 @@ class TestOSN(unittest.TestCase):
         try:
             # wait a second, copy the test file into the watched directory, and wait another second
             time.sleep(1)
-            fp = TEST_CONST.TEST_WATCHED_DIR_PATH_OSN / TEST_CONST.TEST_DATA_FILE_SUB_DIR_NAME / TEST_CONST.TEST_DATA_FILE_NAME
+            fp = TEST_CONST.TEST_WATCHED_DIR_PATH_OSN / TEST_CONST.TEST_DATA_FILE_SUB_DIR_NAME 
+            fp = fp / TEST_CONST.TEST_DATA_FILE_NAME
             if not fp.parent.is_dir():
                 fp.parent.mkdir(parents=True)
             fp.write_bytes(TEST_CONST.TEST_DATA_FILE_PATH.read_bytes())
@@ -200,8 +201,9 @@ class TestOSN(unittest.TestCase):
         for subdir, dirs, files in os.walk(TEST_CONST.TEST_WATCHED_DIR_PATH_OSN):
             for file in files:
                 local_path = str(os.path.join(subdir, file))
-                if local_path.__contains__('files_fully_uploaded_to_osn_test') or \
-                local_path.__contains__('files_to_upload_to_osn_test') or local_path.__contains__('LOGS'):
+                if ( local_path.__contains__(f'files_fully_uploaded_to_{TOPIC_NAME}') or
+                     local_path.__contains__(f'files_to_upload_to_{TOPIC_NAME}') or 
+                     local_path.__contains__('LOGS') ) :
                     continue
 
                 hashed_datafile_stream = self.hash_file(local_path)
