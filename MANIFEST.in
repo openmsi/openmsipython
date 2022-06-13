@@ -1,2 +1,0 @@
-recursive-include openmsipython/my_kafka/config_files *
-recursive-include openmsipython/services/config_files *
