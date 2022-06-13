@@ -158,7 +158,7 @@ name = 'Bulk Modulus'
 ATTR_TEMPL[name] = PropertyTemplate(
     name=name,
     description='The bulk modulus of a material',
-    bounds=RealBounds(0,1e3,'GPa'),
+    bounds=RealBounds(0,50,'GPa'),
 )
 
 name = 'Average Grain Size'
