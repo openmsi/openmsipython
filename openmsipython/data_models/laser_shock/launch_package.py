@@ -140,20 +140,24 @@ class LaserShockLaunchPackageSpec(SpecForRun) :
         if cutting_spacer!=self.spacercutting and 'ObjectType::LaserShockSpacerCuttingProgram' in cutting_spacer.tags :
             cutting_spacer.tags.remove('ObjectType::LaserShockSpacerCuttingProgram')
         # Attach Spacer to Flyer
-        attaching_spacer = ProcessSpec(
-            name='Attaching Spacer',
-            conditions=[
+        attaching_spacer_conditions = []
+        if self.spacer_attachment!='' :
+            attaching_spacer_conditions.append(
                 Condition(name='Spacer Attachment Method',
                           value=NominalCategorical(str(self.spacer_attachment)),
                           template=self.templates.attr('Spacer Attachment Method'),
-                          origin='specified'),
-                ],
-            parameters=[
+                          origin='specified'))
+        attaching_spacer_parameters = []
+        if self.spacer_adhesive!='' :
+            attaching_spacer_parameters.append(
                 Parameter(name='Spacer Adhesive',
                           value=NominalCategorical(str(self.spacer_adhesive)),
                           template=self.templates.attr('Spacer Adhesive'),
-                          origin='specified'),
-                ],
+                          origin='specified'))
+        attaching_spacer = ProcessSpec(
+            name='Attaching Spacer',
+            conditions=attaching_spacer_conditions,
+            parameters=attaching_spacer_parameters,
             template=self.templates.obj('Attaching Spacer')
             )
         IngredientSpec(name='Chosen Flyer',material=choosing_flyer.output_material,process=attaching_spacer)
@@ -394,7 +398,7 @@ class LaserShockLaunchPackage(MaterialRunFromFileMakerRecord) :
                                                                  origin='specified'))
         #add the polishing grit(s) as parameters of the process
         for n,v,tn in zip(ns,vs,tns) :
-            if v!='' and v!='N/A':
+            if v not in ('','N/A','N/') :
                 cutting_and_polishing.parameters.append(Parameter(name=n,
                                                                      value=NominalCategorical(str(v)),
                                                                      template=templates.attr(tn),
