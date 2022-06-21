@@ -1,13 +1,8 @@
 #imports
 import pathlib, logging, shutil, filecmp, os, getpass, requests, fmrest, pickle
-from openmsipython.shared.logging import Logger
-from openmsipython.data_file_io.config import RUN_OPT_CONST
-from openmsipython.data_file_io.upload_data_file import UploadDataFile
-from openmsipython.my_kafka.serialization import DataFileChunkSerializer
-from openmsipython.services.windows_service_manager import WindowsServiceManager
+from openmsistream.shared.logging import Logger
 from openmsipython.data_models.laser_shock.config import LASER_SHOCK_CONST
 from openmsipython.data_models.laser_shock.laser_shock_lab import LaserShockLab
-from openmsipython.services.config import SERVICE_CONST
 from unittests.config import TEST_CONST
 
 #constants
@@ -152,47 +147,6 @@ def rebuild_laser_shock_filemaker_refs() :
         else :
             fp.unlink()
 
-def rebuild_binary_file_chunks_for_serialization_reference() :
-    """
-    Rebuild the binary file chunks to reference for serialization/deserialization tests
-    """
-    #path to the test data file
-    test_data_fp = EXISTING_TEST_DATA_DIR/TEST_CONST.TEST_DATA_FILE_ROOT_DIR_NAME/TEST_CONST.TEST_DATA_FILE_SUB_DIR_NAME
-    test_data_fp = test_data_fp/TEST_CONST.TEST_DATA_FILE_NAME
-    #make the data file and build its list of chunks
-    df = UploadDataFile(test_data_fp,rootdir=EXISTING_TEST_DATA_DIR/TEST_CONST.TEST_DATA_FILE_ROOT_DIR_NAME,
-                        logger=LOGGER)
-    df._build_list_of_file_chunks(RUN_OPT_CONST.DEFAULT_CHUNK_SIZE)
-    df.add_chunks_to_upload()
-    #populate and serialize a few chunks and save them as binary data
-    dfcs = DataFileChunkSerializer()
-    for i in range(3) :
-        df.chunks_to_upload[i].populate_with_file_data(LOGGER)
-        binary_data = dfcs(df.chunks_to_upload[i])
-        fn = f'{TEST_CONST.TEST_DATA_FILE_NAME.split(".")[0]}_test_chunk_{i}.bin'
-        with open(NEW_TEST_DATA_DIR/fn,'wb') as fp :
-            fp.write(binary_data)
-        compare_and_check_old_and_new_files(fn)
-
-def rebuild_test_services_executable() :
-    """
-    Rebuild the executable file used to double-check Services behavior
-    """
-    #some constants
-    TEST_SERVICE_CLASS_NAME = 'DataFileUploadDirectory'
-    TEST_SERVICE_NAME = 'testing_service'
-    TEST_SERVICE_EXECUTABLE_ARGSLIST = ['test_upload']
-    #create the file using the function supplied
-    manager = WindowsServiceManager(TEST_SERVICE_NAME,
-                                    service_class_name=TEST_SERVICE_CLASS_NAME,
-                                    argslist=TEST_SERVICE_EXECUTABLE_ARGSLIST)
-    manager._write_executable_file()
-    #move it to the new test data folder
-    exec_fp = pathlib.Path(__file__).parent.parent/'openmsipython'/'services'/'working_dir'
-    exec_fp = exec_fp/f'{TEST_SERVICE_NAME}{SERVICE_CONST.SERVICE_EXECUTABLE_NAME_STEM}'
-    exec_fp.replace(NEW_TEST_DATA_DIR/exec_fp.name)
-    compare_and_check_old_and_new_files(exec_fp.name)
-
 #################### MAIN SCRIPT ####################
 
 def main() :
@@ -200,10 +154,6 @@ def main() :
     NEW_TEST_DATA_DIR.mkdir()
     #try populating it with all of the necessary new data, checking with the user along the way
     try :
-        LOGGER.info('Rebuilding reference binary file chunks....')
-        rebuild_binary_file_chunks_for_serialization_reference()
-        LOGGER.info('Rebuilding reference Service executable file....')
-        rebuild_test_services_executable()
         LOGGER.info('Rebuilding Laser Shock Lab record file and .json dumps....')
         rebuild_laser_shock_filemaker_refs()
         LOGGER.info(f'Moving new files into {EXISTING_TEST_DATA_DIR}...')

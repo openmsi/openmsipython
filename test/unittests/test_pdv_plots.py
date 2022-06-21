@@ -1,10 +1,10 @@
 #imports
 import unittest, pathlib, logging, time, shutil
 from openmsistream.shared.logging import Logger
+from openmsistream.shared.my_thread import MyThread
 from openmsipython.pdv.lecroy_file_upload_directory import LecroyFileUploadDirectory
 from openmsipython.pdv.pdv_plot_maker import PDVPlotMaker
 from config import TEST_CONST
-from utilities import MyThread
 
 #constants
 LOGGER = Logger(pathlib.Path(__file__).name.split('.')[0],logging.ERROR)
