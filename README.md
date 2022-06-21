@@ -146,14 +146,6 @@ CPATH=/opt/homebrew/Cellar/librdkafka/1.8.2/include pip install confluent-kafka
 C_INCLUDE_PATH=/opt/homebrew/Cellar/librdkafka/1.8.2/include LIBRARY_PATH=/opt/homebrew/Cellar/librdkafka/1.8.2/lib pip install confluent_kafka
 ```
 
-*On M1 Macs you'll also need to manually install `pymssql` which first requires installing openssl and FreeTDS:*
- 
-```
-brew install openssl
-brew install FreeTDS
-pip3 install pymssql
-```
-
 #### 7. **Install** openmsipython:
  
 ```
