@@ -1,7 +1,5 @@
 #imports
-import os, pathlib
-from openmsipython.shared.config import UTIL_CONST
-from openmsipython.data_file_io.config import RUN_OPT_CONST
+import pathlib
 
 class TestRoutineConstants :
     """
@@ -9,95 +7,31 @@ class TestRoutineConstants :
     """
     @property
     def TEST_TOPIC_NAMES(self) :
-        return {
-            'test_data_file_directories':'test_data_file_directories',
-            'test_data_file_directories_encrypted':'test_encrypted',
-            'test_data_file_stream_processor':'test_data_file_stream_processor',
-            'test_osn':'osn_test',
-            'test_pdv_plots':'test_pdv_plots',
-            'test_serialization':'test_encrypted',
-        }
+        return {'test_pdv_plots':'test_pdv_plots',}
     @property
-    def TEST_ENDPOINT_URL(self) :  # the endpoint_url for osn connection
-        return os.environ['ENDPOINT_URL']
-    @property
-    def TEST_BUCKET_NAME(self) :  # the bucket name to upload data to OSN (S3Client)
-        return os.environ['BUCKET_NAME']
-    @property
-    def TEST_ASSCESS_KEY_ID(self) :  # the access_key_id for OSN Authentication
-        return os.environ['ACCESS_SECRET_KEY_ID']
-    @property
-    def TEST_SECRET_KEY_ID(self) :  # the secret_key_id for OSN Authentication
-        return os.environ['SECRET_KEY_ID']
-    @property
-    def TEST_REGION(self) :  # the region for osn
-        return os.environ['REGION']
-    @property
-    def TEST_CONFIG_FILE_PATH(self) : # The path to the Kafka config file to use
-        return (UTIL_CONST.CONFIG_FILE_DIR / f'{RUN_OPT_CONST.DEFAULT_CONFIG_FILE}{UTIL_CONST.CONFIG_FILE_EXT}').resolve()
-    @property
-    def TEST_CONFIG_FILE_PATH_ENCRYPTED(self) : # Same as above except it includes a node_id to test encryption
-        return (UTIL_CONST.CONFIG_FILE_DIR / f'test_encrypted{UTIL_CONST.CONFIG_FILE_EXT}').resolve()
-    @property
-    def TEST_CONFIG_FILE_PATH_ENCRYPTED_2(self) : # Same as above except it includes a node_id to test encryption
-        return (UTIL_CONST.CONFIG_FILE_DIR / f'test_encrypted_2{UTIL_CONST.CONFIG_FILE_EXT}').resolve()
-    @property
-    def TEST_CONFIG_FILE_PATH_OSN(self) : # Same as above except it includes OSN configs
-        return (UTIL_CONST.CONFIG_FILE_DIR / f'test_osn{UTIL_CONST.CONFIG_FILE_EXT}').resolve()
-    @property
-    def PROD_CONFIG_FILE_PATH(self) : # The path to the "prod" Kafka config file to use in making sure that the prod environment variables are not set
-        return (UTIL_CONST.CONFIG_FILE_DIR / f'prod{UTIL_CONST.CONFIG_FILE_EXT}').resolve()
-    @property
-    def FAKE_PROD_CONFIG_FILE_PATH(self) : # The path to the "prod" Kafka config file to use in making sure that the prod environment variables are not set
-        return (self.TEST_DATA_DIR_PATH / f'fake_prod{UTIL_CONST.CONFIG_FILE_EXT}').resolve()
+    def TEST_DIR_PATH(self) :
+        return pathlib.Path(__file__).parent.parent
     @property
     def TEST_DATA_DIR_PATH(self) : #path to the test data directory
-        return pathlib.Path(__file__).parent.parent / 'data'
+        return self.TEST_DIR_PATH / 'data'
     @property
-    def TEST_DATA_FILE_ROOT_DIR_NAME(self) : #path to the test data directory
-        return 'test_file_root_dir'
+    def TEST_CONFIG_FILE_PATH(self) : # The path to the Kafka config file to use
+        return (self.TEST_DATA_DIR_PATH/'test.config').resolve()
     @property
     def TEST_DATA_FILE_SUB_DIR_NAME(self) : #path to the test data directory
-        return 'test_file_sub_dir'
-    @property 
-    def TEST_DATA_FILE_NAME(self) : #name of the test data file
-        return '1a0ceb89-b5f0-45dc-9c12-63d3020e2217.dat'
-    @property 
-    def TEST_DATA_FILE_2_NAME(self) : #name of a second test data file
-        return '4ceee043-0b99-4f49-8527-595d93ddc487.dat'
+        return 'test_file_sub_dir_pdv'
     @property
-    def TEST_DATA_FILE_ROOT_DIR_PATH(self) : # Path to the test data file
-        return self.TEST_DATA_DIR_PATH / self.TEST_DATA_FILE_ROOT_DIR_NAME
-    @property
-    def TEST_DATA_FILE_PATH(self) : # Path to the test data file
-        return self.TEST_DATA_DIR_PATH / self.TEST_DATA_FILE_ROOT_DIR_NAME / self.TEST_DATA_FILE_SUB_DIR_NAME/ self.TEST_DATA_FILE_NAME
-    @property
-    def TEST_DATA_FILE_2_PATH(self) : # Path to the second test data file
-        return self.TEST_DATA_DIR_PATH / self.TEST_DATA_FILE_2_NAME
-    @property
-    def TEST_LECROY_DATA_FILE_NAME(self) : # Name of the test Lecroy data file
+    def TEST_LECROY_DATA_FILE_NAME(self) : # Name of the test Lecroy data file for PDV tests
         return 'F2--20210529--00013.txt'
     @property
     def TEST_LECROY_DATA_FILE_PATH(self) : # Path to the test Lecroy data file
         return self.TEST_DATA_DIR_PATH / self.TEST_LECROY_DATA_FILE_NAME
     @property
-    def TEST_WATCHED_DIR_PATH(self) : #path to the "watched" directory to use in testing DataFileDirectory etc.
-        return pathlib.Path(__file__).parent.parent / 'test_watched_dir'
+    def TEST_WATCHED_DIR_PATH_PDV(self) : #path to the "watched" directory to use in testing PDV plots
+        return pathlib.Path(__file__).parent.parent / 'test_watched_dir_pdv'
     @property
-    def TEST_WATCHED_DIR_PATH_ENCRYPTED(self) : #same as above except for the encrypted tests
-        return pathlib.Path(__file__).parent.parent / 'test_watched_dir_encrypted'
-    @property
-    def TEST_WATCHED_DIR_PATH_OSN(self) : #same as above except for the tests that interact with the object store
-        return pathlib.Path(__file__).parent.parent / 'test_watched_dir_osn'
-    @property
-    def TEST_DIR_SERVICES_TEST(self) : # scrap directory to use for services tests
-        return pathlib.Path(__file__).parent.parent / 'test_dir_services'
-    @property
-    def TEST_RECO_DIR_PATH(self) : # Path to the directory where consumed files should be reconstructed
-        return pathlib.Path(__file__).parent.parent / 'test_reco'
-    @property
-    def TEST_RECO_DIR_PATH_ENCRYPTED(self) : # same as above except for encrypted tests
-        return pathlib.Path(__file__).parent.parent / 'test_reco_encrypted'
+    def TEST_RECO_DIR_PATH_PDV(self) : # Path to the directory where consumed files will be reconstructed for PDV tests
+        return self.TEST_DIR_PATH / 'test_reco'
     @property
     def FILEMAKER_RECORD_PICKLE_FILENAME(self) : # path to the pickle file holding a bunch of mocked FileMaker records
         return 'filemaker_records_for_testing.pickle'
