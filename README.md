@@ -1,5 +1,5 @@
 # <div align="center"> Open MSI Python Code </div>
-#### <div align="center">***v0.9.3.9***</div>
+#### <div align="center">***v0.9.4.0***</div>
 
 #### <div align="center">Maggie Eminizer<sup>2</sup>, Amir Sharifzadeh<sup>2</sup>, Sam Tabrisky<sup>3</sup>, Alakarthika Ulaganathan<sup>4</sup>, David Elbert<sup>1</sup></div>
 
@@ -146,14 +146,6 @@ CPATH=/opt/homebrew/Cellar/librdkafka/1.8.2/include pip install confluent-kafka
 C_INCLUDE_PATH=/opt/homebrew/Cellar/librdkafka/1.8.2/include LIBRARY_PATH=/opt/homebrew/Cellar/librdkafka/1.8.2/lib pip install confluent_kafka
 ```
 
-*On M1 Macs you'll also need to manually install `pymssql` which first requires installing openssl and FreeTDS:*
- 
-```
-brew install openssl
-brew install FreeTDS
-pip3 install pymssql
-```
-
 #### 7. **Install** openmsipython:
  
 ```
@@ -177,35 +169,9 @@ python
 
 and if that line runs without any problems then the package was installed correctly.
 
-#### 8. Environment variables (for Confluent Cloud or S3 Object Stores)
-
-Interacting with the Kafka broker on Confluent Cloud, including running code tests as described [here](./test), requires that some environment variables are set on your system. If you're installing any software to run as a Windows Service or Linux Daemon (as described [here](./openmsipython/services)) then you'll be prompted to enter these variables' values, but you may find it more convenient to set them once and save them as environment variables. 
-
-The environment variables are called `KAFKA_TEST_CLUSTER_USERNAME`, `KAFKA_TEST_CLUSTER_PASSWORD`, `KAFKA_PROD_CLUSTER_USERNAME`, and `KAFKA_PROD_CLUSTER_PASSWORD`. The "`TEST`" variables are used to connect to the Kafka broker cluster for testing and must be set for developers needing to successfully run the automatic code tests. The "`PROD`" variables are used to connect to a full production cluster and are only needed for fully deployed code.
-
-You can set these environment variables in a shell `.rc` or `.profile` file if running on Linux or Mac OS. On Windows you can set them as machine environment variables using commands like:
-
-```
-[Environment]::SetEnvironmentVariable("NAME","VALUE",[EnvironmentVariableTarget]::Machine)
-```
-
-You can also set them as "User" or "Process" environment variables on Windows if you don't have the necessary permissions to set them for the "Machine". 
-
-Secret keys for connecting to S3 object stores should similarly be stored as environment variables and referenced in config files, rather than hard-coded. For running tests, the S3 object store environment variable names are `ACCESS_SECRET_KEY_ID`, `BUCKET_NAME`, `ENDPOINT_URL`, `REGION`, and `SECRET_KEY_ID`.
-
-#### 9. Provision KafkaCrypto Node (optional)
-
-The [readme file here](./openmsipython/my_kafka) explains how to enable message-layer encryption through [KafkaCrypto](https://github.com/tmcqueen-materials/kafkacrypto).
-
-#### 10. Write Config File
-
-The [readme file here](./openmsipython/my_kafka) also explains options for configuration files used to define which kafka cluster(s) the programs interact with and how data are produced to/consumed from topics within them.
-
-#### 11. Install and Start Service or Daemon (optional)
-
-The [readme file here](./openmsipython/services) explains options and installation of OpenMSIPython programs continually as Windows Services or Linux Daemons.  
-
 ## Other documentation
+
+Please refer to [the documentation on the OpenMSIStream](https://github.com/openmsi/openmsistream) package for further instructions on using programs in the OpenMSI ecosystem, including details on configuration files, environment variables, and help troubleshooting.
 
 Installing the code provides access to several programs that share a basic scheme for user interaction. These programs share the following attributes:
 1. Their names correspond to names of Python Classes within the code base
@@ -217,60 +183,11 @@ Installing the code provides access to several programs that share a basic schem
 
 The documentation for specific programs can be found in a few locations within the repo. 
 
-The [readme file here](./openmsipython/data_file_io/) explains programs used to upload entire arbitrary files by breaking them into chunks/producing those chunks as messages to a Kafka topic or download entire files by reading messages from the topic and writing data to disk.
-
-The [readme file here](./openmsipython/my_kafka) explains how to enable message-layer encryption through [KafkaCrypto](https://github.com/tmcqueen-materials/kafkacrypto), and gives more details about options for configuration files used to define which kafka cluster(s) the programs interact with and how data are produced to/consumed from topics within them.
-
-The [readme file here](./openmsipython/osn) explains how to consume files to arbitrary S3 buckets instead of saving them locally.
-
-The [readme file here](./openmsipython/services) details procedures for installing any available command-line program as a Windows Service or Linux Daemon and working with it.
-
 The [readme file here](./openmsipython/data_models) describes how GEMD data structures are used to model data across the different projects in the Open MSI / DMREF project.
 
 The [readme file here](./openmsipython/pdv) explains programs used to upload specific portions of data in Lecroy Oscilloscope files and produce sheets of plots for PDV spall or velocity analyses.
 
 The [readme file here](./test) describes the automatic testing and CI/CD setup for the project, including how to run tests interactively and add additional tests.
-
-## Troubleshooting
-
-#### Missing .dll files on Windows
-
-Due to the wide variety of Windows builds, setting the conda environment variable above may not solve all issues stemming from the `librdkafka.dll` file seemingly missing. See [here](https://github.com/confluentinc/confluent-kafka-python/issues/1221) for more context on this problem. A fix for the most common cases is built into `OpenMSIPython` and can be found [here](./openmsipython/__init__.py); referencing that code may be helpful in resolving any remaining `librdkafka`/`confluent-kafka-python` issues.
-
-Another common issue with Windows builds is a seemingly missing `libsodium.dll` file. If you encounter errors stating trouble importing `pysodium`, make sure the directory containing your `libsodium.dll` is added to your `PATH`, or that the `libsodium.dll` file is properly registered on your Windows system.
-
-##### Missing .dll files running programs as Windows Services
-
-Issues with loading `.dll` files manifest differently when running `OpenMSIPython` code as Windows Services because Services run in `%WinDir%\System32` and don't read the same `PATH` locations as running interactively. Some workarounds are built into `OpenMSIPython` to mitigate these problems, but if you run into trouble with missing `.dll` files while running `OpenMSIPython` programs as Services they can typically be resolved by copying those files into the `%WinDir%\System32` directory.
-
-#### Mac OS "active file descriptors" error
-
-Some Mac machines may run into an esoteric issue related to the number of active file descriptors, which appears as repeated error messages like
-
-`% ERROR: Local: Host resolution failure: kafka-xyz.example.com:9092/42: Failed to resolve 'kafka-xyz.example.com:9092': nodename nor servname provided, or not known (after 0ms in state CONNECT)`
-
-when the Kafka server is otherwise available and should be fine, especially when using relatively large numbers of parallel threads. Instead of the above error, you may get `too many open files` errors.
-
-These errors may be due to running out of file descriptors as discussed in [this known `confluent-kafka`/`librdkafka` issue](https://github.com/edenhill/kcat/issues/209): using a broker hosted on Confluent Cloud may increase the likelihood of getting errors like these, because `librdkafka` creates two separate file descriptors for each known broker regardless of whether a connection is established. If you type `ulimit -n` into a Terminal window and get an output like `256`, it's likely this is the cause. To solve this issue, you will need to increase the limit of the number of allowed file descriptors, by running `ulimit -n 4096`. If that makes the errors go away, then you might want to add that line to your shell `.profile` or `.rc` file.
-
-#### Older operating systems and SSL errors
-
-Some machines may experience errors in connecting to Kafka brokers because their operating systems are old enough to have a set of ca certificates that won't work with new certificates on many sites. If you see repeated errors like
-
-`FAIL|rdkafka#consumer-2| [thrd:ssl://kafka-xyz.example.com:9092/42]: ssl://kafka-xyz.example.com:9092/42: SSL handshake failed: error:1416F086:SSL routines:tls_process_server_certificate:certificate verify failed: broker certificate could not be verified, verify that ssl.ca.location is correctly configured or root CA certificates are installed (install ca-certificates package)`
-
-you should be able to solve this issue by installing "certifi" with pip:
-
-```
-pip install --upgrade certifi
-```
-
-and then adding the location of the CA file it installed to the `[broker]` section of your config file as `ssl.ca.location`. You can find the location of the CA file by running a couple lines in Python:
-
-```
->>> import certifi
->>> certifi.where()
-```
 
 ## To-do list
 

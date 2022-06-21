@@ -1,6 +1,6 @@
 #imports
-from ..data_file_io.upload_data_file import UploadDataFile
-from ..data_file_io.download_data_file import DownloadDataFileToMemory
+from openmsistream.data_file_io.upload_data_file import UploadDataFile
+from openmsistream.data_file_io.download_data_file import DownloadDataFileToMemory
 from .config import LECROY_CONST
 
 class UploadLecroyDataFile(UploadDataFile) :

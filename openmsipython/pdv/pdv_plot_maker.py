@@ -5,9 +5,10 @@ matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import pandas as pd
 from io import BytesIO
-from ..shared.runnable import Runnable
-from ..data_file_io.config import RUN_OPT_CONST
-from ..data_file_io.data_file_stream_processor import DataFileStreamProcessor
+from openmsistream.shared.runnable import Runnable
+from openmsistream.data_file_io.config import RUN_OPT_CONST
+from openmsistream.data_file_io.data_file_stream_processor import DataFileStreamProcessor
+from ..shared.argument_parsing import OpenMSIPythonArgumentParser
 from .pdv_analysis import PDVSpallAnalysis, PDVVelocityAnalysis
 from .lecroy_data_file import DownloadLecroyDataFile
 from .config import LECROY_CONST
@@ -17,6 +18,8 @@ class PDVPlotMaker(DataFileStreamProcessor,Runnable) :
     Class to consume DataFileChunk messages from UploadLecroyDataFiles into memory
     and create spall/velocity plots from them when all of their data are available
     """
+
+    ARGUMENT_PARSER_TYPE = OpenMSIPythonArgumentParser
 
     @property
     def other_datafile_kwargs(self) :

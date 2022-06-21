@@ -1,7 +1,7 @@
 #imports
 import datetime
-from ..data_file_io.config import RUN_OPT_CONST
-from ..data_file_io.data_file_upload_directory import DataFileUploadDirectory
+from openmsistream.data_file_io.config import RUN_OPT_CONST
+from openmsistream.data_file_io.data_file_upload_directory import DataFileUploadDirectory
 from .config import LECROY_CONST
 from .lecroy_data_file import UploadLecroyDataFile
 
@@ -19,7 +19,7 @@ class LecroyFileUploadDirectory(DataFileUploadDirectory) :
                 'filename_append':LECROY_CONST.SKIMMED_FILENAME_APPEND,
                 }
 
-    def __init__(self,dirpath,
+    def __init__(self,*args,
                  header_rows=LECROY_CONST.HEADER_ROWS,
                  rows_to_skip=LECROY_CONST.ROWS_TO_SKIP,
                  rows_to_select=LECROY_CONST.ROWS_TO_SELECT,
@@ -33,7 +33,7 @@ class LecroyFileUploadDirectory(DataFileUploadDirectory) :
         self.__header_rows = header_rows
         self.__rows_to_skip = rows_to_skip
         self.__rows_to_select = rows_to_select
-        super().__init__(dirpath,datafile_type=UploadLecroyDataFile,**kwargs)
+        super().__init__(*args,datafile_type=UploadLecroyDataFile,**kwargs)
 
     @classmethod
     def get_command_line_arguments(cls) :

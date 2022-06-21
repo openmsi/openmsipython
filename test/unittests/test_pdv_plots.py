@@ -1,11 +1,10 @@
 #imports
 import unittest, pathlib, logging, time, shutil
-from openmsipython.shared.logging import Logger
-from openmsipython.data_file_io.config import RUN_OPT_CONST
+from openmsistream.shared.logging import Logger
+from openmsistream.shared.my_thread import MyThread
 from openmsipython.pdv.lecroy_file_upload_directory import LecroyFileUploadDirectory
 from openmsipython.pdv.pdv_plot_maker import PDVPlotMaker
 from config import TEST_CONST
-from utilities import MyThread
 
 #constants
 LOGGER = Logger(pathlib.Path(__file__).name.split('.')[0],logging.ERROR)
@@ -22,23 +21,20 @@ class TestPDVPlots(unittest.TestCase) :
     #called by the test method below
     def run_lecroy_file_upload_directory(self) :
         #make the directory to watch
-        (TEST_CONST.TEST_WATCHED_DIR_PATH/TEST_CONST.TEST_DATA_FILE_SUB_DIR_NAME).mkdir(parents=True)
+        (TEST_CONST.TEST_WATCHED_DIR_PATH_PDV/TEST_CONST.TEST_DATA_FILE_SUB_DIR_NAME).mkdir(parents=True)
         #start up the LecroyFileUploadDirectory
-        lfud = LecroyFileUploadDirectory(TEST_CONST.TEST_WATCHED_DIR_PATH,
+        lfud = LecroyFileUploadDirectory(TEST_CONST.TEST_WATCHED_DIR_PATH_PDV,TEST_CONST.TEST_CONFIG_FILE_PATH,
                                          rows_to_skip=10000,update_secs=UPDATE_SECS,logger=LOGGER)
         #start upload_files_as_added in a separate thread so we can time it out
         upload_thread = MyThread(target=lfud.upload_files_as_added,
-                                 args=(TEST_CONST.TEST_CONFIG_FILE_PATH,TOPIC_NAME),
-                                 kwargs={'n_threads':RUN_OPT_CONST.N_DEFAULT_UPLOAD_THREADS,
-                                         'chunk_size':RUN_OPT_CONST.DEFAULT_CHUNK_SIZE,
-                                         'max_queue_size':RUN_OPT_CONST.DEFAULT_MAX_UPLOAD_QUEUE_SIZE,
-                                         'upload_existing':False}
+                                 args=(TOPIC_NAME,),
+                                 kwargs={'upload_existing':False}
                                 )
         upload_thread.start()
         try :
             #wait a second, copy the test file into the watched directory, and wait another second
             time.sleep(1)
-            fp = TEST_CONST.TEST_WATCHED_DIR_PATH/TEST_CONST.TEST_LECROY_DATA_FILE_NAME
+            fp = TEST_CONST.TEST_WATCHED_DIR_PATH_PDV/TEST_CONST.TEST_LECROY_DATA_FILE_NAME
             fp.write_bytes(TEST_CONST.TEST_LECROY_DATA_FILE_PATH.read_bytes())
             time.sleep(1)
             #put the "check" command into the input queue a couple times to test it
@@ -71,20 +67,19 @@ class TestPDVPlots(unittest.TestCase) :
                 except Exception as e :
                     raise e
                 finally :
-                    shutil.rmtree(TEST_CONST.TEST_WATCHED_DIR_PATH)
-            if TEST_CONST.TEST_WATCHED_DIR_PATH.is_dir() :
-                shutil.rmtree(TEST_CONST.TEST_WATCHED_DIR_PATH)
+                    shutil.rmtree(TEST_CONST.TEST_WATCHED_DIR_PATH_PDV)
+            if TEST_CONST.TEST_WATCHED_DIR_PATH_PDV.is_dir() :
+                shutil.rmtree(TEST_CONST.TEST_WATCHED_DIR_PATH_PDV)
 
     #called by the test method below
     def run_pdv_plot_maker(self) :
         #make the directory to reconstruct files into
-        TEST_CONST.TEST_RECO_DIR_PATH.mkdir()
+        TEST_CONST.TEST_RECO_DIR_PATH_PDV.mkdir()
         #start up the PDVPlotMaker
-        pdvpm = PDVPlotMaker(TEST_CONST.TEST_RECO_DIR_PATH,
+        pdvpm = PDVPlotMaker(TEST_CONST.TEST_RECO_DIR_PATH_PDV,
                              'spall',
                              TEST_CONST.TEST_CONFIG_FILE_PATH,
                              TOPIC_NAME,
-                             n_threads=RUN_OPT_CONST.N_DEFAULT_DOWNLOAD_THREADS,
                              update_secs=UPDATE_SECS,
                              consumer_group_ID='run_pdv_plot_maker',
                              logger=LOGGER,
@@ -127,7 +122,7 @@ class TestPDVPlots(unittest.TestCase) :
                 errmsg = f'ERROR: download thread in run_pdv_plot_maker timed out after {JOIN_TIMEOUT_SECS} seconds!'
                 raise TimeoutError(errmsg)
             #make sure the plot image file exists
-            pfp = TEST_CONST.TEST_RECO_DIR_PATH/f'pdv_spall_plots_{TEST_CONST.TEST_LECROY_DATA_FILE_NAME.rstrip(".txt")}.png'
+            pfp = TEST_CONST.TEST_RECO_DIR_PATH_PDV/f'pdv_spall_plots_{TEST_CONST.TEST_LECROY_DATA_FILE_NAME.rstrip(".txt")}.png'
             self.assertTrue(pfp.is_file())
         except Exception as e :
             raise e
@@ -143,9 +138,9 @@ class TestPDVPlots(unittest.TestCase) :
                 except Exception as e :
                     raise e
                 finally :
-                    shutil.rmtree(TEST_CONST.TEST_RECO_DIR_PATH)
-            if TEST_CONST.TEST_RECO_DIR_PATH.is_dir() :
-                shutil.rmtree(TEST_CONST.TEST_RECO_DIR_PATH)
+                    shutil.rmtree(TEST_CONST.TEST_RECO_DIR_PATH_PDV)
+            if TEST_CONST.TEST_RECO_DIR_PATH_PDV.is_dir() :
+                shutil.rmtree(TEST_CONST.TEST_RECO_DIR_PATH_PDV)
 
     def test_making_pdv_plots_kafka(self) :
         self.run_lecroy_file_upload_directory()
