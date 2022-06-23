@@ -50,7 +50,7 @@ class PDVPlotMaker(DataFileStreamProcessor,Runnable) :
             fn = self.__pdv_analysis_type.plot_file_name_from_input_file_name(pdfp.name,
                                                                               LECROY_CONST.SKIMMED_FILENAME_APPEND)
             created_plot_paths.append(self.__output_dir/fn)
-        return self.n_msgs_read, created_plot_paths
+        return self.n_msgs_read, self.n_msgs_processed, created_plot_paths
 
     def _process_downloaded_data_file(self,datafile,lock) :
         """
@@ -127,7 +127,7 @@ class PDVPlotMaker(DataFileStreamProcessor,Runnable) :
             msg+=' was' if len(plot_filepaths)==1 else 's were'
             msg+=' created'
         else :
-            msg+=f'and {n_processed} messages were successfully processed'
+            msg+=f' and {n_processed} messages were successfully processed'
         msg+=f' from {run_start} to {run_stop}'
         for fn in plot_filepaths :
             msg+=f'\n\t{fn}'
