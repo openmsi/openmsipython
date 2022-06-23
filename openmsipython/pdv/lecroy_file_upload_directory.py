@@ -53,11 +53,11 @@ class LecroyFileUploadDirectory(DataFileUploadDirectory) :
         parser = cls.get_argument_parser()
         args = parser.parse_args(args=args)
         #make the LecroyFileUploadDirectory for the specified directory
-        upload_file_directory = cls(args.upload_dir,update_secs=args.update_seconds)
+        upload_file_directory = cls(args.upload_dir,args.config,update_secs=args.update_seconds)
         #listen for new files in the directory and run uploads as they come in until the process is shut down
         run_start = datetime.datetime.now()
         upload_file_directory.logger.info(f'Listening for Lecroy files to be added to {args.upload_dir}...')
-        uploaded_filepaths = upload_file_directory.upload_files_as_added(args.config,args.topic_name,
+        uploaded_filepaths = upload_file_directory.upload_files_as_added(args.topic_name,
                                                                          n_threads=args.n_threads,
                                                                          chunk_size=args.chunk_size,
                                                                          max_queue_size=args.queue_max_size,
