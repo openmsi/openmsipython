@@ -1,12 +1,12 @@
-class LaserShockConstants :
+class FurnaceConstants :
     """
     Constants for Laser Shock Lab stuff and the associated FileMaker Database
     """
     @property
-    def FILEMAKER_SERVER_IP_ADDRESS(self) :
-        return 'https://10.173.38.223' #IP Address of the FileMaker DB Server within the Hopkins VPN
+    def SPREADSHEET_KEY_FILE(self) :
+        return "C:/Users/cathe/Downloads/furnace-index-card-data-3663bd4611da.json" #private key location for the furnace spreadsheet service account
     @property
-    def DATABASE_NAME(self) :
-        return 'Laser Shock' #Name of the Laser Shock Lab's FileMaker database
+    def SPREADSHEET_NAME(self) :
+        return "Furnace Index Card Form (Responses)" #Name of the particular spreadsheet to access
 
-LASER_SHOCK_CONST = LaserShockConstants()
+FURNACE_CONST = FurnaceConstants()

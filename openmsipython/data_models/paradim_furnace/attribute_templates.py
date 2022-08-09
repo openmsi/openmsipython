@@ -11,8 +11,8 @@ ATTR_TEMPL = {}
 name = 'Sample Name'
 ATTR_TEMPL[name] = PropertyTemplate(
     name=name,
-    description='The name of the sample',
-    bounds=CategoricalBounds(['?????'])
+    description='The key to the name of the sample in the sample name list',
+    bounds=IntegerBounds(0,100)
 )
 
 name = 'Reactants'
@@ -58,7 +58,7 @@ ATTR_TEMPL[name] = ParameterTemplate(
 name = 'Timestamp'
 ATTR_TEMPL[name] = ConditionTemplate(
     name=name,
-    description='The time and date that the form was filled out',
-    bounds=CategoricalBounds(['????????'])
+    description='The time and date that the form was filled out (in seconds from jan 1 1970)',
+    bounds=IntegerBounds([0,1000000000000])
 )
 
