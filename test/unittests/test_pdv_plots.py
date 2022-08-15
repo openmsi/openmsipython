@@ -1,7 +1,7 @@
 #imports
 import unittest, pathlib, logging, time, shutil
-from openmsistream.shared.logging import Logger
-from openmsistream.shared.my_thread import MyThread
+from openmsistream.utilities.logging import Logger
+from openmsistream.utilities.exception_tracking_thread import ExceptionTrackingThread
 from openmsipython.pdv.lecroy_file_upload_directory import LecroyFileUploadDirectory
 from openmsipython.pdv.pdv_plot_maker import PDVPlotMaker
 from config import TEST_CONST
@@ -26,7 +26,7 @@ class TestPDVPlots(unittest.TestCase) :
         lfud = LecroyFileUploadDirectory(TEST_CONST.TEST_WATCHED_DIR_PATH_PDV,TEST_CONST.TEST_CONFIG_FILE_PATH,
                                          rows_to_skip=10000,update_secs=UPDATE_SECS,logger=LOGGER)
         #start upload_files_as_added in a separate thread so we can time it out
-        upload_thread = MyThread(target=lfud.upload_files_as_added,
+        upload_thread = ExceptionTrackingThread(target=lfud.upload_files_as_added,
                                  args=(TOPIC_NAME,),
                                  kwargs={'upload_existing':False}
                                 )
@@ -85,7 +85,7 @@ class TestPDVPlots(unittest.TestCase) :
                              logger=LOGGER,
                             )
         #start make_plots_as_available in a separate thread so we can time it out
-        download_thread = MyThread(target=pdvpm.make_plots_as_available)
+        download_thread = ExceptionTrackingThread(target=pdvpm.make_plots_as_available)
         download_thread.start()
         try :
             #put the "check" command into the input queue a couple times

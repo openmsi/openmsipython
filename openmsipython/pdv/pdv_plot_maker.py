@@ -5,7 +5,7 @@ matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import pandas as pd
 from io import BytesIO
-from openmsistream.shared.runnable import Runnable
+from openmsistream.running.runnable import Runnable
 from openmsistream.data_file_io.config import RUN_OPT_CONST
 from openmsistream.data_file_io.data_file_stream_processor import DataFileStreamProcessor
 from ..shared.argument_parsing import OpenMSIPythonArgumentParser
@@ -132,6 +132,16 @@ class PDVPlotMaker(DataFileStreamProcessor,Runnable) :
         for fn in plot_filepaths :
             msg+=f'\n\t{fn}'
         plot_maker.logger.info(msg)
+
+    def _failed_processing_callback(self, datafile, lock):
+        warnmsg = f'WARNING: failed to make PDV plots for {datafile.full_filepath}! The consumer will need to be rerun '
+        warnmsg+= 'to re-read data from this file.'
+        self.logger.warning(warnmsg)
+
+    def _mismatched_hash_callback(self, datafile, lock):
+        warnmsg = f'WARNING: hash of content for {datafile.full_filepath} is not matched to what was originally '
+        warnmsg+= 'uploaded! The consumer will need to be rerun to re-read data from this file.'
+        self.logger.warning(warnmsg)
 
 #################### MAIN METHOD TO RUN FROM COMMAND LINE ####################
 
