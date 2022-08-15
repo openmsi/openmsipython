@@ -5,7 +5,7 @@ matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import pandas as pd
 from io import BytesIO
-from openmsistream.shared.runnable import Runnable
+from openmsistream.running.runnable import Runnable
 from openmsistream.data_file_io.config import RUN_OPT_CONST
 from openmsistream.data_file_io.data_file_stream_processor import DataFileStreamProcessor
 from ..shared.argument_parsing import OpenMSIPythonArgumentParser
@@ -25,11 +25,8 @@ class PDVPlotMaker(DataFileStreamProcessor,Runnable) :
     def other_datafile_kwargs(self) :
         return {'header_rows':self.__header_rows}
 
-    def __init__(self,output_dir,pdv_plot_type,config_path,topic_name,
+    def __init__(self,pdv_plot_type,config_path,topic_name,
                  header_rows=LECROY_CONST.HEADER_ROWS,**otherkwargs) :
-        self.__output_dir = output_dir
-        if not self.__output_dir.is_dir() :
-            self.__output_dir.mkdir(parents=True)
         super().__init__(config_path,topic_name,datafile_type=DownloadLecroyDataFile,**otherkwargs)
         self.__pdv_analysis_type = None
         if pdv_plot_type=='spall' :
@@ -49,7 +46,7 @@ class PDVPlotMaker(DataFileStreamProcessor,Runnable) :
         for pdfp in processed_data_filepaths :
             fn = self.__pdv_analysis_type.plot_file_name_from_input_file_name(pdfp.name,
                                                                               LECROY_CONST.SKIMMED_FILENAME_APPEND)
-            created_plot_paths.append(self.__output_dir/fn)
+            created_plot_paths.append(self._output_dir/fn)
         return self.n_msgs_read, self.n_msgs_processed, created_plot_paths
 
     def _process_downloaded_data_file(self,datafile,lock) :
@@ -67,7 +64,7 @@ class PDVPlotMaker(DataFileStreamProcessor,Runnable) :
             analysis = self.__pdv_analysis_type(file=datafile.filepath,
                                                 time=time,
                                                 voltage=voltage,
-                                                output_dir=self.__output_dir,
+                                                output_dir=self._output_dir,
                                                 N=512,
                                                 overlap_frac=0.85,
                                                 pyplot_figure=fig)#self.__figure)
@@ -75,16 +72,26 @@ class PDVPlotMaker(DataFileStreamProcessor,Runnable) :
             #save the plot and close the figure
             fn = self.__pdv_analysis_type.plot_file_name_from_input_file_name(datafile.filepath.name,
                                                                               LECROY_CONST.SKIMMED_FILENAME_APPEND)
-            fig.savefig(self.__output_dir/fn,bbox_inches='tight')
+            fig.savefig(self._output_dir/fn,bbox_inches='tight')
             plt.close()
         except Exception as e :
             return e
         return None
 
+    def _failed_processing_callback(self, datafile, lock):
+        warnmsg = f'WARNING: failed to make PDV plots for {datafile.full_filepath}! The consumer will need to be rerun '
+        warnmsg+= 'to re-read data from this file.'
+        self.logger.warning(warnmsg)
+
+    def _mismatched_hash_callback(self, datafile, lock):
+        warnmsg = f'WARNING: hash of content for {datafile.full_filepath} is not matched to what was originally '
+        warnmsg+= 'uploaded! The consumer will need to be rerun to re-read data from this file.'
+        self.logger.warning(warnmsg)
+
     @classmethod
     def get_command_line_arguments(cls) :
         superargs,superkwargs = super().get_command_line_arguments()
-        args = [*superargs,'output_dir','pdv_plot_type','update_seconds']
+        args = [*superargs,'optional_output_dir','pdv_plot_type','update_seconds']
         kwargs = {**superkwargs,
                   'config':RUN_OPT_CONST.PRODUCTION_CONFIG_FILE,
                   'topic_name':LECROY_CONST.TOPIC_NAME,

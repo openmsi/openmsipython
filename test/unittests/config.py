@@ -31,7 +31,7 @@ class TestRoutineConstants :
         return pathlib.Path(__file__).parent.parent / 'test_watched_dir_pdv'
     @property
     def TEST_RECO_DIR_PATH_PDV(self) : # Path to the directory where consumed files will be reconstructed for PDV tests
-        return self.TEST_DIR_PATH / 'test_reco'
+        return self.TEST_DIR_PATH / 'test_reco_pdv'
     @property
     def FILEMAKER_RECORD_PICKLE_FILENAME(self) : # path to the pickle file holding a bunch of mocked FileMaker records
         return 'filemaker_records_for_testing.pickle'
