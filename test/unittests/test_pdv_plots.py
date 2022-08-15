@@ -76,10 +76,10 @@ class TestPDVPlots(unittest.TestCase) :
         #make the directory to reconstruct files into
         TEST_CONST.TEST_RECO_DIR_PATH_PDV.mkdir()
         #start up the PDVPlotMaker
-        pdvpm = PDVPlotMaker(TEST_CONST.TEST_RECO_DIR_PATH_PDV,
-                             'spall',
+        pdvpm = PDVPlotMaker('spall',
                              TEST_CONST.TEST_CONFIG_FILE_PATH,
                              TOPIC_NAME,
+                             output_dir=TEST_CONST.TEST_RECO_DIR_PATH_PDV,
                              update_secs=UPDATE_SECS,
                              consumer_group_ID='run_pdv_plot_maker',
                              logger=LOGGER,
