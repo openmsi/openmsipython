@@ -1,9 +1,9 @@
 #imports
-from openmsistream.shared.argument_parsing import existing_dir,MyArgumentParser
+from openmsistream.running.argument_parsing import existing_dir, OpenMSIStreamArgumentParser
 
-class OpenMSIPythonArgumentParser(MyArgumentParser) :
+class OpenMSIPythonArgumentParser(OpenMSIStreamArgumentParser) :
 
-    ARGUMENTS = {**MyArgumentParser.ARGUMENTS,
+    ARGUMENTS = {**OpenMSIStreamArgumentParser.ARGUMENTS,
         'pdv_plot_type':
             ['optional',{'choices':['spall','velocity'],'default':'spall',
                          'help':'Type of analysis to perform ("spall" or "velocity")'}],

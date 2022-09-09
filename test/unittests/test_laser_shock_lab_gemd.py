@@ -1,6 +1,6 @@
 #imports
 import unittest, pathlib, logging, pickle, shutil
-from openmsistream.shared.logging import Logger
+from openmsistream.utilities.logging import Logger
 from openmsipython.data_models.laser_shock.laser_shock_lab import LaserShockLab
 from config import TEST_CONST
 

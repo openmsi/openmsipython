@@ -1,7 +1,7 @@
 #imports
 import unittest, pathlib, logging, time, shutil
-from openmsistream.shared.logging import Logger
-from openmsistream.shared.my_thread import MyThread
+from openmsistream.utilities.logging import Logger
+from openmsistream.utilities.exception_tracking_thread import ExceptionTrackingThread
 from openmsipython.pdv.lecroy_file_upload_directory import LecroyFileUploadDirectory
 from openmsipython.pdv.pdv_plot_maker import PDVPlotMaker
 from config import TEST_CONST
@@ -9,7 +9,7 @@ from config import TEST_CONST
 #constants
 LOGGER = Logger(pathlib.Path(__file__).name.split('.')[0],logging.ERROR)
 UPDATE_SECS = 5
-TIMEOUT_SECS = 20
+TIMEOUT_SECS = 30
 JOIN_TIMEOUT_SECS = 30
 TOPIC_NAME = TEST_CONST.TEST_TOPIC_NAMES[pathlib.Path(__file__).name[:-len('.py')]]
 
@@ -26,7 +26,7 @@ class TestPDVPlots(unittest.TestCase) :
         lfud = LecroyFileUploadDirectory(TEST_CONST.TEST_WATCHED_DIR_PATH_PDV,TEST_CONST.TEST_CONFIG_FILE_PATH,
                                          rows_to_skip=10000,update_secs=UPDATE_SECS,logger=LOGGER)
         #start upload_files_as_added in a separate thread so we can time it out
-        upload_thread = MyThread(target=lfud.upload_files_as_added,
+        upload_thread = ExceptionTrackingThread(target=lfud.upload_files_as_added,
                                  args=(TOPIC_NAME,),
                                  kwargs={'upload_existing':False}
                                 )
@@ -76,16 +76,16 @@ class TestPDVPlots(unittest.TestCase) :
         #make the directory to reconstruct files into
         TEST_CONST.TEST_RECO_DIR_PATH_PDV.mkdir()
         #start up the PDVPlotMaker
-        pdvpm = PDVPlotMaker(TEST_CONST.TEST_RECO_DIR_PATH_PDV,
-                             'spall',
+        pdvpm = PDVPlotMaker('spall',
                              TEST_CONST.TEST_CONFIG_FILE_PATH,
                              TOPIC_NAME,
+                             output_dir=TEST_CONST.TEST_RECO_DIR_PATH_PDV,
                              update_secs=UPDATE_SECS,
                              consumer_group_ID='run_pdv_plot_maker',
                              logger=LOGGER,
                             )
         #start make_plots_as_available in a separate thread so we can time it out
-        download_thread = MyThread(target=pdvpm.make_plots_as_available)
+        download_thread = ExceptionTrackingThread(target=pdvpm.make_plots_as_available)
         download_thread.start()
         try :
             #put the "check" command into the input queue a couple times
@@ -100,7 +100,8 @@ class TestPDVPlots(unittest.TestCase) :
             msg+= f'(will timeout after {TIMEOUT_SECS} seconds)...'
             LOGGER.info(msg)
             LOGGER.set_stream_level(logging.ERROR)
-            while ( (TEST_CONST.TEST_LECROY_DATA_FILE_PATH not in pdvpm.completely_processed_filepaths) and 
+            recofp = TEST_CONST.TEST_RECO_DIR_PATH_PDV/TEST_CONST.TEST_LECROY_DATA_FILE_PATH.name
+            while ( (recofp not in pdvpm.completely_processed_filepaths) and 
                     time_waited<TIMEOUT_SECS ) :
                 current_messages_read = pdvpm.n_msgs_read
                 LOGGER.set_stream_level(logging.INFO)
