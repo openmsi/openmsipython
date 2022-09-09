@@ -3,7 +3,7 @@ import os, pathlib, json, requests, getpass, fmrest
 from gemd.util.impl import recursive_foreach
 from gemd.entity.util import complete_material_history
 from gemd.json import GEMDJson
-from openmsistream.data_file_io.data_file_directory import DataFileDirectory
+from openmsistream.data_file_io.entity.data_file_directory import DataFileDirectory
 from ..utilities import get_tag_value_from_list, get_json_filename_for_gemd_object
 from ..cached_isinstance_functions import cached_isinstance_generator
 from ..cached_isinstance_functions import isinstance_template, isinstance_spec, isinstance_run, isinstance_material_run
