@@ -5,9 +5,9 @@ matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import pandas as pd
 from io import BytesIO
-from openmsistream.running.runnable import Runnable
+from openmsistream import DataFileStreamProcessor
+from openmsistream.running import Runnable
 from openmsistream.data_file_io.config import RUN_OPT_CONST
-from openmsistream.data_file_io.data_file_stream_processor import DataFileStreamProcessor
 from ..shared.argument_parsing import OpenMSIPythonArgumentParser
 from .pdv_analysis import PDVSpallAnalysis, PDVVelocityAnalysis
 from .lecroy_data_file import DownloadLecroyDataFile

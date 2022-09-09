@@ -9,7 +9,7 @@ from config import TEST_CONST
 #constants
 LOGGER = Logger(pathlib.Path(__file__).name.split('.')[0],logging.ERROR)
 UPDATE_SECS = 5
-TIMEOUT_SECS = 20
+TIMEOUT_SECS = 30
 JOIN_TIMEOUT_SECS = 30
 TOPIC_NAME = TEST_CONST.TEST_TOPIC_NAMES[pathlib.Path(__file__).name[:-len('.py')]]
 
@@ -100,7 +100,8 @@ class TestPDVPlots(unittest.TestCase) :
             msg+= f'(will timeout after {TIMEOUT_SECS} seconds)...'
             LOGGER.info(msg)
             LOGGER.set_stream_level(logging.ERROR)
-            while ( (TEST_CONST.TEST_LECROY_DATA_FILE_PATH not in pdvpm.completely_processed_filepaths) and 
+            recofp = TEST_CONST.TEST_RECO_DIR_PATH_PDV/TEST_CONST.TEST_LECROY_DATA_FILE_PATH.name
+            while ( (recofp not in pdvpm.completely_processed_filepaths) and 
                     time_waited<TIMEOUT_SECS ) :
                 current_messages_read = pdvpm.n_msgs_read
                 LOGGER.set_stream_level(logging.INFO)
