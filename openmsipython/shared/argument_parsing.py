@@ -1,5 +1,5 @@
 #imports
-from openmsistream.running.argument_parsing import existing_dir, OpenMSIStreamArgumentParser
+from openmsistream.workflow.argument_parsing import existing_dir, OpenMSIStreamArgumentParser
 
 class OpenMSIPythonArgumentParser(OpenMSIStreamArgumentParser) :
 
