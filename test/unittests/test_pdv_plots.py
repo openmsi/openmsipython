@@ -81,7 +81,7 @@ class TestPDVPlots(unittest.TestCase) :
                              TOPIC_NAME,
                              output_dir=TEST_CONST.TEST_RECO_DIR_PATH_PDV,
                              update_secs=UPDATE_SECS,
-                             consumer_group_ID='run_pdv_plot_maker',
+                             consumer_group_id='run_pdv_plot_maker',
                              logger=LOGGER,
                             )
         #start make_plots_as_available in a separate thread so we can time it out

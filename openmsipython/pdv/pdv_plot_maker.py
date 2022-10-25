@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 from io import BytesIO
 from openmsistream import DataFileStreamProcessor
-from openmsistream.running import Runnable
+from openmsistream.workflow import Runnable
 from openmsistream.data_file_io.config import RUN_OPT_CONST
 from ..shared.argument_parsing import OpenMSIPythonArgumentParser
 from .pdv_analysis import PDVSpallAnalysis, PDVVelocityAnalysis
@@ -96,7 +96,7 @@ class PDVPlotMaker(DataFileStreamProcessor,Runnable) :
                   'config':RUN_OPT_CONST.PRODUCTION_CONFIG_FILE,
                   'topic_name':LECROY_CONST.TOPIC_NAME,
                   'n_threads':RUN_OPT_CONST.N_DEFAULT_DOWNLOAD_THREADS,
-                  'consumer_group_ID':'pdv_plot_maker_v1'}
+                  'consumer_group_id':'pdv_plot_maker_v1'}
         return args,kwargs
 
     @classmethod
