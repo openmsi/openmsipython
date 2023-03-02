@@ -1,11 +1,9 @@
 #imports
-import setuptools, site
-
-site.ENABLE_USER_SITE = True #https://www.scivision.dev/python-pip-devel-user-install/
+import setuptools
 
 setupkwargs = dict(
     name='openmsipython',
-    version='0.9.4.5',
+    version='0.9.4.6',
     packages=setuptools.find_packages(include=['openmsipython*']),
     include_package_data=True,
     entry_points = {
@@ -17,7 +15,7 @@ setupkwargs = dict(
     install_requires=['gemd>=1.10.2',
                       'matplotlib',
                       'methodtools',
-                      'openmsistream>=0.9.6',
+                      'openmsistream>=1.2.0',
                       'pandas',
                       'python-fmrest>=1.5.2',
                       'scipy; python_version>="3.8"',
