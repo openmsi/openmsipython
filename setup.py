@@ -1,11 +1,9 @@
 #imports
-import setuptools, site
-
-site.ENABLE_USER_SITE = True #https://www.scivision.dev/python-pip-devel-user-install/
+import setuptools
 
 setupkwargs = dict(
     name='openmsipython',
-    version='0.9.4.5',
+    version='0.9.4.6',
     packages=setuptools.find_packages(include=['openmsipython*']),
     include_package_data=True,
     entry_points = {
