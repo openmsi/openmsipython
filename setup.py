@@ -17,7 +17,7 @@ setupkwargs = dict(
     install_requires=['gemd>=1.10.2',
                       'matplotlib',
                       'methodtools',
-                      'openmsistream>=0.9.6',
+                      'openmsistream>=1.2.0',
                       'pandas',
                       'python-fmrest>=1.5.2',
                       'scipy; python_version>="3.8"',

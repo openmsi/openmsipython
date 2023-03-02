@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 from io import BytesIO
 from openmsistream import DataFileStreamProcessor
-from openmsistream.workflow import Runnable
+from openmsistream.utilities import Runnable
 from openmsistream.data_file_io.config import RUN_OPT_CONST
 from ..shared.argument_parsing import OpenMSIPythonArgumentParser
 from .pdv_analysis import PDVSpallAnalysis, PDVVelocityAnalysis
