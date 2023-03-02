@@ -1,9 +1,5 @@
 import pymssql
 import sqlalchemy as sqla
-import getpass
-import glob
-import json
-import os
 import pandas
 
 class MSSQLDatabase():
@@ -63,7 +59,7 @@ class MSSQLDatabase():
         tables=reversed(list(self.sorted_tables(schema).keys()))
         delete_all = "\n".join([f'delete from {schema}.{t}' for t in tables if t not in keep_tables])
         print(delete_all)
-        execPyMSSQL(delete_all)
+        self.execPyMSSQL(delete_all)
         
     def sorted_tables(self,schema):
         # sort tables in a schema according to FK relationship
