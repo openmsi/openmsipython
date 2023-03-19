@@ -1,8 +1,11 @@
 #imports
 import unittest, pathlib, logging, time, shutil
+import hashlib
+from PIL import Image
 from openmsistream.utilities.logging import Logger
 from openmsistream.utilities.exception_tracking_thread import ExceptionTrackingThread
 from openmsipython.pdv.lecroy_file_upload_directory import LecroyFileUploadDirectory
+from openmsipython.pdv.config import LECROY_CONST
 from openmsipython.pdv.pdv_plot_maker import PDVPlotMaker
 from config import TEST_CONST
 
@@ -12,6 +15,7 @@ UPDATE_SECS = 5
 TIMEOUT_SECS = 30
 JOIN_TIMEOUT_SECS = 30
 TOPIC_NAME = TEST_CONST.TEST_TOPIC_NAMES[pathlib.Path(__file__).name[:-len('.py')]]
+NROWS_TO_SKIP = 10000
 
 class TestPDVPlots(unittest.TestCase) :
     """
@@ -24,7 +28,7 @@ class TestPDVPlots(unittest.TestCase) :
         (TEST_CONST.TEST_WATCHED_DIR_PATH_PDV/TEST_CONST.TEST_DATA_FILE_SUB_DIR_NAME).mkdir(parents=True)
         #start up the LecroyFileUploadDirectory
         lfud = LecroyFileUploadDirectory(TEST_CONST.TEST_WATCHED_DIR_PATH_PDV,TEST_CONST.TEST_CONFIG_FILE_PATH,
-                                         rows_to_skip=10000,update_secs=UPDATE_SECS,logger=LOGGER)
+                                         rows_to_skip=NROWS_TO_SKIP,update_secs=UPDATE_SECS,logger=LOGGER)
         #start upload_files_as_added in a separate thread so we can time it out
         upload_thread = ExceptionTrackingThread(target=lfud.upload_files_as_added,
                                  args=(TOPIC_NAME,),
@@ -125,6 +129,16 @@ class TestPDVPlots(unittest.TestCase) :
             #make sure the plot image file exists
             pfp = TEST_CONST.TEST_RECO_DIR_PATH_PDV/f'pdv_spall_plots_{TEST_CONST.TEST_LECROY_DATA_FILE_NAME.rstrip(".txt")}.png'
             self.assertTrue(pfp.is_file())
+            with Image.open(pfp) as im:
+                checksum = hashlib.sha512()
+                with open(TEST_CONST.TEST_LECROY_DATA_FILE_PATH, "rb") as fp:
+                    lines = fp.readlines()
+                    for i in range(LECROY_CONST.HEADER_ROWS):
+                        checksum.update(lines[i])
+                    for i in range(NROWS_TO_SKIP, LECROY_CONST.ROWS_TO_SELECT + NROWS_TO_SKIP):
+                        checksum.update(lines[i])
+                self.assertEqual(im.info["source_sha512"], checksum.hexdigest())
+                self.assertTrue("PDVSpallAnalysis" in im.info["analysis_type"])
         except Exception as e :
             raise e
         finally :
