@@ -183,6 +183,8 @@ class LaserShockLaunchPackageSpec(SpecForRun) :
             template=self.templates.obj('Attaching Sample')
             )
         for ai,a in enumerate(self.samp_attachments_adhesives) :
+            if a=='' :
+                continue
             if ai==0 :
                 attaching_sample.conditions.append(
                     Condition(name='Sample Attachment Method',

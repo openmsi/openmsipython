@@ -394,6 +394,7 @@ class LaserShockLab(DataFileDirectory) :
                             database=LASER_SHOCK_CONST.DATABASE_NAME,
                             layout=layout_name,
                             verify_ssl=False,
+                            api_version='v1',
                            )
         #login
         fms.login()

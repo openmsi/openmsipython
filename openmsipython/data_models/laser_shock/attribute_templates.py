@@ -158,7 +158,7 @@ name = 'Bulk Modulus'
 ATTR_TEMPL[name] = PropertyTemplate(
     name=name,
     description='The bulk modulus of a material',
-    bounds=RealBounds(0,50,'GPa'),
+    bounds=RealBounds(0,10000,'GPa'),
 )
 
 name = 'Average Grain Size'
@@ -242,7 +242,7 @@ name = 'Return Signal Strength'
 ATTR_TEMPL[name] = PropertyTemplate(
     name=name,
     description='Power of the laser return signal (units of decibel-milliwatts, dBm, not recognized by GEMD)',
-    bounds=RealBounds(0.,1.e3,'')
+    bounds=RealBounds(-1.e3,1.e3,'')
 )
 
 name = 'Max Velocity'
@@ -599,7 +599,7 @@ name = 'Current Set Point'
 ATTR_TEMPL[name] = ParameterTemplate(
     name=name,
     description='',
-    bounds=RealBounds(0.,1.,'A_it')
+    bounds=RealBounds(0.,1.e3,'A_it')
 )
 
 name = 'Seed Laser Wavelength'
@@ -741,7 +741,7 @@ name = 'Fluence'
 ATTR_TEMPL[name] = ConditionTemplate(
     name=name,
     description='The calculated fluence of the laser',
-    bounds=RealBounds(0.,100.,'J/cm^2')
+    bounds=RealBounds(0.,1.e3,'J/cm^2')
 )
 
 name = 'Beam Shaper Input Beam Diameter'

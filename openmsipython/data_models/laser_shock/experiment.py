@@ -65,7 +65,7 @@ class LaserShockExperimentSpec(SpecForRun) :
                 continue
             temp = self.templates.attr(name)
             conditions.append(Condition(name=name.replace(' ',''),
-                                        value=NominalCategorical(str(val)),
+                                        value=NominalCategorical(str(val.strip())),
                                         template=temp,
                                         origin='specified'))
         names = [
