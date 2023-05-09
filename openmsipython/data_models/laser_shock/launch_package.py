@@ -264,7 +264,7 @@ class LaserShockLaunchPackage(MaterialRunFromFileMakerRecord) :
                 return
             if self.spacer is None :
                 errmsg = f'ERROR: {key} measurement ({value}) found for a Launch Package with no spacer!'
-                self.logger.error(errmsg,ValueError)
+                self.logger.error(errmsg,exc_type=ValueError)
             name=key.replace(' ','')
             meas = MeasurementRun(name=name,material=self.spacer)
             temp = self.templates.attr('Spacer Diameter')
@@ -280,7 +280,7 @@ class LaserShockLaunchPackage(MaterialRunFromFileMakerRecord) :
                 return
             if self.impactsample is None :
                 errmsg = f'ERROR: {key} measurement ({value}) found for a Launch Package with no impactsample!'
-                self.logger.error(errmsg,ValueError)
+                self.logger.error(errmsg,exc_type=ValueError)
             name=key.replace(' ','')
             meas = MeasurementRun(name=name,material=self.impactsample)
             temp = self.templates.attr(key)

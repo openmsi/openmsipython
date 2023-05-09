@@ -222,7 +222,7 @@ class LaserShockLab(DataFileDirectory) :
                 mod_id = get_tag_value_from_list(obj.tags,'modId')
             except Exception as e :
                 errmsg = f'ERROR: failed to get record/modIds for {obj_type} {obj.name}! Will reraise exception.'
-                self.logger.error(errmsg,exc_obj=e)
+                self.logger.error(errmsg,exc_info=e)
             existing_rec_mod_ids[rec_id]=mod_id
         #make the list of records that are new or have been modified from what's currently in the json
         n_recs_skipped = 0
@@ -331,7 +331,7 @@ class LaserShockLab(DataFileDirectory) :
             errmsg+= f'files in {self.dirpath}:\n'
             for missing_uid in missing_uids :
                 errmsg+=f'\t{missing_uid}\n'
-            self.logger.error(errmsg,RuntimeError)
+            self.logger.error(errmsg,exc_type=RuntimeError)
 
     def __add_referenced_uids(self,item,uids_referenced) :
         if isinstance_link_by_uid(item) :
@@ -360,7 +360,7 @@ class LaserShockLab(DataFileDirectory) :
             #get the UID to only add each object one time
             if self.encoder.scope not in obj.uids.keys() :
                 errmsg = f'ERROR: {type(obj).__name__} {obj.name} is missing a UID for scope "{self.encoder.scope}"!'
-                self.logger.error(errmsg,RuntimeError)
+                self.logger.error(errmsg,exc_type=RuntimeError)
             uid = obj.uids[self.encoder.scope]
             if uid in uids_added :
                 continue
@@ -412,7 +412,7 @@ class LaserShockLab(DataFileDirectory) :
                     else :
                         errmsg = f'ERROR: discovered a {obj.__class__.__name__} object with unrecognized unique value '
                         errmsg+= f'name {uvn}! Recognized names are {unique_vals.keys()}'
-                        self.logger.error(errmsg,RuntimeError)
+                        self.logger.error(errmsg,exc_type=RuntimeError)
                 unique_vals[uvn].append(uv)
         for uvn,uvl in unique_vals.items() :
             done = set()

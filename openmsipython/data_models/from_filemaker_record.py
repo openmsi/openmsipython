@@ -151,14 +151,14 @@ class FromFileMakerRecordBase(LogOwner,HasTemplateAndSpecStores,ABC) :
                 self.add_other_key(key,value,record)
             #if the key hasn't been found anywhere by now, throw an error
             else :
-                self.logger.error(f'ERROR: FileMaker record key {key} is not recognized!',ValueError)
+                self.logger.error(f'ERROR: FileMaker record key {key} is not recognized!',exc_type=ValueError)
         #make sure all the keys in the record were used in some way
         unused_keys = [k for k in record.keys() if k not in self.keys_used]
         if len(unused_keys)>0 :
             errmsg = f'ERROR: the following keys were not used in creating a {self.__class__.__name__} object: '
             for k in unused_keys :
                 errmsg+=f'{k}, '
-            self.logger.error(errmsg[:-2],ValueError)
+            self.logger.error(errmsg[:-2],exc_type=ValueError)
         #make sure the record contained all the expected keys and they were processed
         all_keys = [self.name_key,*self.tags_keys,self.notes_key,
                     *self.file_links_keys,
@@ -169,7 +169,7 @@ class FromFileMakerRecordBase(LogOwner,HasTemplateAndSpecStores,ABC) :
             errmsg+= f'used to create a {self.__class__.__name__} object: '
             for k in missing_keys :
                 errmsg+=f'{k}, '
-            self.logger.error(errmsg[:-2],ValueError)
+            self.logger.error(errmsg[:-2],exc_type=ValueError)
         #add the special tag for the object type that it is
         obj.tags.append(f'ObjectType::{self.__class__.__name__}')
 
@@ -201,7 +201,7 @@ class FromFileMakerRecordBase(LogOwner,HasTemplateAndSpecStores,ABC) :
         """
         errmsg = f'ERROR: add_other_key called for key {key} on the base class for a '
         errmsg+= f'{self.__class__.__name__} object! This key should be processed somewhere other than the base class'
-        self.logger.error(errmsg,NotImplementedError)
+        self.logger.error(errmsg,exc_type=NotImplementedError)
 
     def get_tag_value(self,tag_name) :
         """
@@ -210,4 +210,4 @@ class FromFileMakerRecordBase(LogOwner,HasTemplateAndSpecStores,ABC) :
         try :
             return get_tag_value_from_list(self.gemd_object.tags,tag_name)
         except Exception as e :
-            self.logger.error(f'ERROR: failed to get a value for tag {tag_name}! Will reraise Exception.',exc_obj=e)
+            self.logger.error(f'ERROR: failed to get a value for tag {tag_name}! Will reraise Exception.',exc_info=e)

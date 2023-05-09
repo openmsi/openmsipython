@@ -34,7 +34,7 @@ class PDVPlotMaker(DataFileStreamProcessor,Runnable) :
         elif pdv_plot_type=='velocity' :
             self.__pdv_analysis_type = PDVVelocityAnalysis
         else :
-            self.logger.error(f'ERROR: unrecognized pdv_plot_type {pdv_plot_type}',ValueError)
+            self.logger.error(f'ERROR: unrecognized pdv_plot_type {pdv_plot_type}',exc_type=ValueError)
         self.__header_rows = header_rows
 
     def make_plots_as_available(self) :
