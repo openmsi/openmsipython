@@ -36,7 +36,7 @@ class TestPDVPlots(unittest.TestCase) :
             time.sleep(1)
             fp = TEST_CONST.TEST_WATCHED_DIR_PATH_PDV/TEST_CONST.TEST_LECROY_DATA_FILE_NAME
             fp.write_bytes(TEST_CONST.TEST_LECROY_DATA_FILE_PATH.read_bytes())
-            time.sleep(1)
+            time.sleep(5)
             #put the "check" command into the input queue a couple times to test it
             lfud.control_command_queue.put('c')
             lfud.control_command_queue.put('check')
@@ -101,7 +101,7 @@ class TestPDVPlots(unittest.TestCase) :
             LOGGER.info(msg)
             LOGGER.set_stream_level(logging.ERROR)
             recofp = TEST_CONST.TEST_RECO_DIR_PATH_PDV/TEST_CONST.TEST_LECROY_DATA_FILE_PATH.name
-            while ( (recofp not in pdvpm.completely_processed_filepaths) and 
+            while ( (recofp not in pdvpm.recent_processed_filepaths) and 
                     time_waited<TIMEOUT_SECS ) :
                 current_messages_read = pdvpm.n_msgs_read
                 LOGGER.set_stream_level(logging.INFO)

@@ -21,7 +21,7 @@ class SpecFromFileMakerRecord(FromFileMakerRecordBase) :
         else :
             errmsg = f'ERROR: tried to overwrite specs with mistmatched types! Spec is of type {type(self.__spec)} '
             errmsg+= f'but new spec has type {type(s)}'
-            self.logger.error(errmsg,TypeError)
+            self.logger.error(errmsg,exc_type=TypeError)
 
     @property
     def gemd_object(self):

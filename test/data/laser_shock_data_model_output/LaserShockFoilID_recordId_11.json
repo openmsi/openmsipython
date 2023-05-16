@@ -3,7 +3,7 @@
   "name": "50.4um (0.002\") Hard Al (AluFoil)",
   "notes": "",
   "process": {
-    "id": "8e651393-6052-4122-94b0-10efca0f7af1",
+    "id": "f42684e4-a030-4771-bfe0-9ef656e8dc9a",
     "scope": "auto",
     "type": "link_by_uid"
   },
@@ -16,7 +16,7 @@
         "notes": null,
         "origin": "specified",
         "template": {
-          "id": "54763951-6ebf-4583-91b3-845f3bb03983",
+          "id": "93305f58-d00e-4bdf-97bc-8db812d45db3",
           "scope": "auto",
           "type": "link_by_uid"
         },
@@ -37,7 +37,7 @@
         "notes": null,
         "origin": "specified",
         "template": {
-          "id": "d2668e4e-35c2-48e2-b275-27475d71da4b",
+          "id": "ee924107-e979-434b-b1c3-2a9772bcbd47",
           "scope": "auto",
           "type": "link_by_uid"
         },
@@ -58,7 +58,7 @@
         "notes": null,
         "origin": "specified",
         "template": {
-          "id": "8056faf2-b599-4c59-9e58-a6cf81a181ea",
+          "id": "c8ab3a33-3a2e-40a0-9e83-f525b9a3cd14",
           "scope": "auto",
           "type": "link_by_uid"
         },
@@ -79,7 +79,7 @@
         "notes": null,
         "origin": "specified",
         "template": {
-          "id": "29656a84-382a-4f57-b0cc-03d246ccc65e",
+          "id": "07f89c6f-0496-432b-b22e-2c3323565299",
           "scope": "auto",
           "type": "link_by_uid"
         },
@@ -99,7 +99,7 @@
         "notes": null,
         "origin": "specified",
         "template": {
-          "id": "a8855fe6-8519-4257-9580-0da35470bdf3",
+          "id": "7c4b938d-4687-4f5f-9f1b-7b76c30bb53a",
           "scope": "auto",
           "type": "link_by_uid"
         },
@@ -119,12 +119,12 @@
     "ObjectType::LaserShockFoilID"
   ],
   "template": {
-    "id": "636cee34-9ca1-4e2b-8e84-5242ec82c7a4",
+    "id": "2f363201-23c6-4e68-8404-6b96c3713da0",
     "scope": "auto",
     "type": "link_by_uid"
   },
   "type": "material_spec",
   "uids": {
-    "auto": "8f749035-61e8-499e-876d-e83b8b0ab880"
+    "auto": "3cab796b-d922-4b6f-9592-f1fad267d510"
   }
 }

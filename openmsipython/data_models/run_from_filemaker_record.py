@@ -37,7 +37,7 @@ class RunFromFileMakerRecord(FromFileMakerRecordBase) :
         else :
             errmsg = f'ERROR: tried to overwrite runs with mistmatched types! Run is of type {type(self.__run)} '
             errmsg+= f'but new run has type {type(r)}'
-            self.logger.error(errmsg)
+            self.logger.error(errmsg,exc_type=RuntimeError)
 
     @property
     def gemd_object(self):

@@ -3,7 +3,7 @@ import setuptools
 
 setupkwargs = dict(
     name='openmsipython',
-    version='0.9.4.6',
+    version='0.9.5',
     packages=setuptools.find_packages(include=['openmsipython*']),
     include_package_data=True,
     entry_points = {
@@ -15,9 +15,9 @@ setupkwargs = dict(
     install_requires=['gemd>=1.10.2',
                       'matplotlib',
                       'methodtools',
-                      'openmsistream>=1.2.0',
+                      'openmsistream>=1.5.1',
                       'pandas',
-                      'python-fmrest>=1.5.2',
+                      'python-fmrest>=1.6.0',
                       'scipy; python_version>="3.8"',
                       'scipy==1.4.1; python_version=="3.7"',
                      ],

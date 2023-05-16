@@ -3,7 +3,7 @@
   "name": "Borosilicate, T=0.25\"",
   "notes": "",
   "process": {
-    "id": "c98f870e-279d-43cb-993d-accec824957c",
+    "id": "8a78ef88-afdb-4c77-8082-d0d75d783161",
     "scope": "auto",
     "type": "link_by_uid"
   },
@@ -16,7 +16,7 @@
         "notes": null,
         "origin": "specified",
         "template": {
-          "id": "c173c7bb-d4be-4d2a-a70e-fc75cb287e5e",
+          "id": "dbe76ce1-4acf-47e5-b54b-a8d06ec9b2b8",
           "scope": "auto",
           "type": "link_by_uid"
         },
@@ -37,7 +37,7 @@
         "notes": null,
         "origin": "specified",
         "template": {
-          "id": "e07ebbba-abf0-4886-a676-0109e9753ba2",
+          "id": "498778b2-d234-4a46-8db6-b20a3e427ca8",
           "scope": "auto",
           "type": "link_by_uid"
         },
@@ -58,7 +58,7 @@
         "notes": null,
         "origin": "specified",
         "template": {
-          "id": "e2ec1d62-060b-4cc3-8ef1-449da2fb5af3",
+          "id": "10249f7f-fc51-48d8-a56b-f6e812521332",
           "scope": "auto",
           "type": "link_by_uid"
         },
@@ -79,12 +79,12 @@
     "ObjectType::LaserShockGlassID"
   ],
   "template": {
-    "id": "d6a7a4ff-7253-47c8-808d-24949bf736d9",
+    "id": "30e0be15-66cd-4e1c-9533-57df7bb44d7e",
     "scope": "auto",
     "type": "link_by_uid"
   },
   "type": "material_spec",
   "uids": {
-    "auto": "02d379e1-aa95-487c-913e-b5c66a5e1ae8"
+    "auto": "f0114eb6-badd-4a66-9f58-17b2a2489736"
   }
 }

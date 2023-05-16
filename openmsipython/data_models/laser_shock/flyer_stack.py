@@ -66,7 +66,7 @@ class LaserShockFlyerStackSpec(SpecForRun) :
             elif type(self.mixing_time)==int :
                 val = self.mixing_time
             else :
-                self.logger.error(f'ERROR: receivied a mixing time value of type {type(self.mixing_time)}',TypeError)
+                self.logger.error(f'ERROR: receivied a mixing time value of type {type(self.mixing_time)}',exc_type=TypeError)
             mixing_epoxy_params.append(
                 Parameter(
                     name='Mixing Time',
@@ -81,7 +81,7 @@ class LaserShockFlyerStackSpec(SpecForRun) :
             elif type(self.resting_time)==int :
                 val = self.resting_time
             else :
-                self.logger.error(f'ERROR: receivied a resting time value of type {type(self.resting_time)}',TypeError)
+                self.logger.error(f'ERROR: receivied a resting time value of type {type(self.resting_time)}',exc_type=TypeError)
             mixing_epoxy_params.append(
                 Parameter(
                     name='Resting Time',
@@ -279,7 +279,7 @@ class LaserShockFlyerStack(MaterialRunFromFileMakerRecord) :
         flyer_ID_tags = [t for t in self.run.tags if t.startswith('FlyerID')]
         if len(flyer_ID_tags)!=1 :
             errmsg = f'ERROR: found {len(flyer_ID_tags)} tags specifying a Flyer ID when there should be exactly one'
-            self.logger.error(errmsg,RuntimeError)
+            self.logger.error(errmsg,exc_type=RuntimeError)
         return {**super().unique_values,'Flyer ID':flyer_ID_tags[0]}
 
     #################### PUBLIC FUNCTIONS ####################
