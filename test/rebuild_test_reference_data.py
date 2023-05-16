@@ -1,6 +1,6 @@
 #imports
 import pathlib, logging, shutil, filecmp, os, getpass, requests, fmrest, pickle
-from openmsistream.shared.logging import Logger
+from openmsistream.utilities.logging import Logger
 from openmsipython.data_models.laser_shock.config import LASER_SHOCK_CONST
 from openmsipython.data_models.laser_shock.laser_shock_lab import LaserShockLab
 from unittests.config import TEST_CONST

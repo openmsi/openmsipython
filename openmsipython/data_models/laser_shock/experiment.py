@@ -37,9 +37,9 @@ class LaserShockExperimentSpec(SpecForRun) :
         Helper function to return the conditions for this measurement spec
         """
         conditions = []
-        if self.kwargs.get('Fluence')!='' :
+        if self.kwargs.get('Fluence') not in ('','?') :
             conditions.append(Condition(name='Fluence',
-                                        value=NominalReal(self.kwargs.get('Fluence'),
+                                        value=NominalReal(float(self.kwargs.get('Fluence')),
                                                         self.templates.attr('Fluence').bounds.default_units),
                                         template=self.templates.attr('Fluence'),
                                         origin='computed'))

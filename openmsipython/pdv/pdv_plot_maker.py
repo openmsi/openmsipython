@@ -6,8 +6,8 @@ import matplotlib.pyplot as plt
 import pandas as pd
 from io import BytesIO
 from openmsistream import DataFileStreamProcessor
+from openmsistream.utilities.config import RUN_CONST
 from openmsistream.utilities import Runnable
-from openmsistream.data_file_io.config import RUN_OPT_CONST
 from ..shared.argument_parsing import OpenMSIPythonArgumentParser
 from .pdv_analysis import PDVSpallAnalysis, PDVVelocityAnalysis
 from .lecroy_data_file import DownloadLecroyDataFile
@@ -41,7 +41,7 @@ class PDVPlotMaker(DataFileStreamProcessor,Runnable) :
         """
         When new files are fully available in memory, make plots of the data they contain
         """
-        _,_,processed_data_filepaths = self.process_files_as_read()
+        _,_,_,processed_data_filepaths = self.process_files_as_read()
         created_plot_paths = []
         for pdfp in processed_data_filepaths :
             fn = self.__pdv_analysis_type.plot_file_name_from_input_file_name(pdfp.name,
@@ -93,9 +93,9 @@ class PDVPlotMaker(DataFileStreamProcessor,Runnable) :
         superargs,superkwargs = super().get_command_line_arguments()
         args = [*superargs,'optional_output_dir','pdv_plot_type','update_seconds']
         kwargs = {**superkwargs,
-                  'config':RUN_OPT_CONST.PRODUCTION_CONFIG_FILE,
+                  'config':RUN_CONST.PRODUCTION_CONFIG_FILE,
                   'topic_name':LECROY_CONST.TOPIC_NAME,
-                  'n_threads':RUN_OPT_CONST.N_DEFAULT_DOWNLOAD_THREADS,
+                  'n_threads':RUN_CONST.N_DEFAULT_DOWNLOAD_THREADS,
                   'consumer_group_id':'pdv_plot_maker_v1'}
         return args,kwargs
 

@@ -20,6 +20,10 @@
 !/openmsipython/my_kafka/config_files/testing_node_2/testing_node_2.seed
 !/openmsipython/my_kafka/config_files/testing_node_2/testing_node_2.crypto
 
+# VSCode hidden subdirectory
+.vscode
+.vscode/*
+
 # Misc. other stuff I don't like
 __pycache__/
 *.pyc

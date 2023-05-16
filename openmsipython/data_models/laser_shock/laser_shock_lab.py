@@ -3,7 +3,7 @@ import os, pathlib, json, requests, getpass, fmrest
 from gemd.util.impl import recursive_foreach
 from gemd.entity.util import complete_material_history
 from gemd.json import GEMDJson
-from openmsistream.data_file_io.entity.data_file_directory import DataFileDirectory
+from openmsistream.utilities import LogOwner
 from ..utilities import get_tag_value_from_list, get_json_filename_for_gemd_object
 from ..cached_isinstance_functions import cached_isinstance_generator
 from ..cached_isinstance_functions import isinstance_template, isinstance_spec, isinstance_run, isinstance_material_run
@@ -32,7 +32,7 @@ isinstance_run_from_filemaker_record = cached_isinstance_generator(RunFromFileMa
 isinstance_material_run_from_filemaker_record = cached_isinstance_generator(MaterialRunFromFileMakerRecord)
 COMPLETE_MODEL_JSON_FILE_NAME = 'complete_data_model.json'
 
-class LaserShockLab(DataFileDirectory) :
+class LaserShockLab(LogOwner) :
     """
     Representation of all the information in the Laser Shock Lab's FileMaker database in GEMD language
     """
@@ -75,13 +75,14 @@ class LaserShockLab(DataFileDirectory) :
         """
         dirpath = path to the directory that should hold the log file and any other output (like the JSON dumps)
         """
+        self.dirpath = dirpath
         #define the output location
-        if not dirpath.is_dir() :
-            dirpath.mkdir(parents=True)
+        if not self.dirpath.is_dir() :
+            self.dirpath.mkdir(parents=True)
         #start up the logger
         if kwargs.get('logger_file') is None :
-            kwargs['logger_file'] = dirpath
-        super().__init__(dirpath,*args,**kwargs)
+            kwargs['logger_file'] = self.dirpath
+        super().__init__(*args,**kwargs)
         #initialize empty username/password
         self.__username = None; self.__password = None
         #JSON encoder
@@ -128,42 +129,42 @@ class LaserShockLab(DataFileDirectory) :
         self.logger.info(msg)
         #add all the information to the lab object based on entries in the FileMaker DB
         #"Inventory" pages (create Specs)
-        self.logger.debug('Creating Inventory objects...')
+        self.logger.info('Creating Inventory objects...')
         self.get_objects_from_records(LaserShockGlassID,self.glass_IDs,'Glass ID',**extra_kwargs)
-        self.logger.debug(f'There are {len(self.glass_IDs)} Glass ID objects')
+        self.logger.info(f'There are {len(self.glass_IDs)} Glass ID objects')
         self.get_objects_from_records(LaserShockFoilID,self.foil_IDs,'Foil ID',**extra_kwargs)
-        self.logger.debug(f'There are {len(self.foil_IDs)} Foil ID objects')
+        self.logger.info(f'There are {len(self.foil_IDs)} Foil ID objects')
         self.get_objects_from_records(LaserShockEpoxyID,self.epoxy_IDs,'Epoxy ID',**extra_kwargs)
-        self.logger.debug(f'There are {len(self.epoxy_IDs)} Epoxy ID objects')
+        self.logger.info(f'There are {len(self.epoxy_IDs)} Epoxy ID objects')
         self.get_objects_from_records(LaserShockSpacerID,self.spacer_IDs,'Spacer ID',**extra_kwargs)
-        self.logger.debug(f'There are {len(self.spacer_IDs)} Spacer ID objects')
+        self.logger.info(f'There are {len(self.spacer_IDs)} Spacer ID objects')
         self.get_objects_from_records(LaserShockFlyerCuttingProgram,self.flyer_cutting_programs,
                                       'Flyer Cutting Program',**extra_kwargs)
-        self.logger.debug(f'There are {len(self.flyer_cutting_programs)} Flyer Cutting Program objects')
+        self.logger.info(f'There are {len(self.flyer_cutting_programs)} Flyer Cutting Program objects')
         self.get_objects_from_records(LaserShockSpacerCuttingProgram,self.spacer_cutting_programs,
                                       'Spacer Cutting Program',**extra_kwargs)
-        self.logger.debug(f'There are {len(self.spacer_cutting_programs)} Spacer Cutting Program objects')
+        self.logger.info(f'There are {len(self.spacer_cutting_programs)} Spacer Cutting Program objects')
         #Flyer Stacks (Materials)
-        self.logger.debug('Creating Flyer Stacks...')
+        self.logger.info('Creating Flyer Stacks...')
         self.get_objects_from_records(LaserShockFlyerStack,self.flyer_stacks,'Flyer Stack',
                                       self.glass_IDs,self.foil_IDs,self.epoxy_IDs,self.flyer_cutting_programs,
                                       **extra_kwargs)
-        self.logger.debug(f'There are {len(self.flyer_stacks)} Flyer Stack objects')
+        self.logger.info(f'There are {len(self.flyer_stacks)} Flyer Stack objects')
         #Samples (Materials)
-        self.logger.debug('Creating Samples...')
+        self.logger.info('Creating Samples...')
         self.get_objects_from_records(LaserShockSample,self.samples,'Sample',**extra_kwargs)
-        self.logger.debug(f'There are {len(self.samples)} Sample objects')
+        self.logger.info(f'There are {len(self.samples)} Sample objects')
         #Launch packages (Materials)
-        self.logger.debug('Creating Launch Packages...')
+        self.logger.info('Creating Launch Packages...')
         self.get_objects_from_records(LaserShockLaunchPackage,self.launch_packages,'Launch Package',
                                       self.flyer_stacks,self.spacer_IDs,self.spacer_cutting_programs,self.samples,
                                       **extra_kwargs)
-        self.logger.debug(f'There are {len(self.launch_packages)} Launch Package objects')
+        self.logger.info(f'There are {len(self.launch_packages)} Launch Package objects')
         #Experiments (Measurements)
-        self.logger.debug('Creating Experiments...')
+        self.logger.info('Creating Experiments...')
         self.get_objects_from_records(LaserShockExperiment,self.experiments,'Experiment',self.launch_packages,
                                       **extra_kwargs)
-        self.logger.debug(f'There are {len(self.experiments)} Experiment objects')
+        self.logger.info(f'There are {len(self.experiments)} Experiment objects')
         #remove any abandoned specs from the store
         n_specs_removed = 0
         to_remove = []
@@ -181,8 +182,8 @@ class LaserShockLab(DataFileDirectory) :
             self._spec_store.remove_unneeded_spec(spec)
             n_specs_removed+=1
         if n_specs_removed>0 :
-            self.logger.debug(f'Removed {n_specs_removed} unneeded Specs from the store')
-        self.logger.debug(f'{self._spec_store.n_specs} total unique Specs stored')
+            self.logger.info(f'Removed {n_specs_removed} unneeded Specs from the store')
+        self.logger.info(f'{self._spec_store.n_specs} total unique Specs stored')
         self.logger.info('Done creating GEMD objects')
 
     def find_needed_uids(self,item) :
@@ -239,7 +240,7 @@ class LaserShockLab(DataFileDirectory) :
         created_objs = []
         for ir,record in enumerate(records_to_use) :
             if ir>0 and ir%25==0 :
-                self.logger.debug(f'\tCreating {obj_type.__name__} {ir} of {len(records_to_use)}...')
+                self.logger.info(f'\tCreating {obj_type.__name__} {ir} of {len(records_to_use)}...')
             created_obj = obj_type(record,*args,
                                          templates=self._template_store,
                                          specs=self._spec_store,

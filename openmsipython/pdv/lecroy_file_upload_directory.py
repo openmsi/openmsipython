@@ -1,7 +1,7 @@
 #imports
 import datetime
 from openmsistream import DataFileUploadDirectory
-from openmsistream.data_file_io.config import RUN_OPT_CONST
+from openmsistream.utilities.config import RUN_CONST
 from .config import LECROY_CONST
 from .lecroy_data_file import UploadLecroyDataFile
 
@@ -40,7 +40,7 @@ class LecroyFileUploadDirectory(DataFileUploadDirectory) :
         superargs,superkwargs = super().get_command_line_arguments()
         args = [*superargs]
         kwargs = superkwargs
-        kwargs['config']=RUN_OPT_CONST.PRODUCTION_CONFIG_FILE
+        kwargs['config']=RUN_CONST.PRODUCTION_CONFIG_FILE
         kwargs['topic_name']=LECROY_CONST.TOPIC_NAME
         kwargs['n_threads']=1
         return args, kwargs

@@ -6,7 +6,7 @@
       "notes": null,
       "origin": "specified",
       "template": {
-        "id": "d90c8e00-5a3c-4a75-b454-6bcf8f6d3d24",
+        "id": "0fe7ed79-abed-4806-a1ee-866ec0072b93",
         "scope": "auto",
         "type": "link_by_uid"
       },
@@ -22,7 +22,7 @@
       "notes": null,
       "origin": "specified",
       "template": {
-        "id": "6b2ef65f-3236-408d-a539-0dace47c5639",
+        "id": "802cc591-b13a-4753-9f53-76c080246a20",
         "scope": "auto",
         "type": "link_by_uid"
       },
@@ -39,7 +39,7 @@
       "notes": null,
       "origin": "specified",
       "template": {
-        "id": "ba7100d2-2d41-43bf-9f02-0bb54656a1e4",
+        "id": "43b49d55-30d3-4598-a2db-b38fea0609f6",
         "scope": "auto",
         "type": "link_by_uid"
       },
@@ -66,7 +66,7 @@
       "notes": null,
       "origin": "specified",
       "template": {
-        "id": "44debc28-1ef9-4c8f-98f6-ff95580c058b",
+        "id": "eb993d02-d60b-43c1-9e7c-64c680f3e1cb",
         "scope": "auto",
         "type": "link_by_uid"
       },
@@ -83,7 +83,7 @@
       "notes": null,
       "origin": "specified",
       "template": {
-        "id": "b70280a0-9908-43df-b8e2-f0369d951a9c",
+        "id": "e7adef43-366d-4333-b712-1d4960b0b1d4",
         "scope": "auto",
         "type": "link_by_uid"
       },
@@ -99,7 +99,7 @@
       "notes": null,
       "origin": "specified",
       "template": {
-        "id": "dbe74513-78b2-4f2d-9453-cde9a7a4721b",
+        "id": "adf68190-92f7-45a0-bbfb-0510a84aee51",
         "scope": "auto",
         "type": "link_by_uid"
       },
@@ -115,7 +115,7 @@
       "notes": null,
       "origin": "specified",
       "template": {
-        "id": "7bd4dd4f-56e7-462c-b98f-24d2cf6003b5",
+        "id": "46fd32b1-ead5-4290-977b-e349d6d97dfd",
         "scope": "auto",
         "type": "link_by_uid"
       },
@@ -134,12 +134,12 @@
     "ObjectType::LaserShockFlyerCuttingProgram"
   ],
   "template": {
-    "id": "a8396a76-85d4-4f22-b044-7f1fbbe569ea",
+    "id": "f2e211da-097b-454c-8331-98e32cc38b62",
     "scope": "auto",
     "type": "link_by_uid"
   },
   "type": "process_spec",
   "uids": {
-    "auto": "067b1007-352a-4750-a80a-d3d8e85b79a4"
+    "auto": "75fce5d2-f1fa-430c-9206-316579a5948c"
   }
 }
