@@ -22,10 +22,14 @@ class MSSQLDatabase():
         return r
 
     def execute_query(self,sql):
+        if type(sql) == str:
+            sql = sqla.text(sql)
         with self.ENGINE.connect() as conn:
             return pandas.read_sql(sql,conn)
             
     def execute_update(self,statement):
+        if type(statement) == str:
+            statement = sqla.text(statement)
         with self.ENGINE.connect() as conn:
 #         r=self.ENGINE.execute(statement)
             trans = conn.begin()
