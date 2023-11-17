@@ -1,7 +1,7 @@
 #imports
 import inspect
 from gemd.entity.template import MaterialTemplate, ProcessTemplate, MeasurementTemplate
-from .attribute_templates import ATTR_TEMPL
+from attribute_templates import ATTR_TEMPL
 
 OBJ_TEMPL = {}
 

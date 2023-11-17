@@ -1,6 +1,6 @@
 #imports
 from gemd.entity.value import NominalCategorical, NominalReal
-from ..spec_from_filemaker_record import MaterialSpecFromFileMakerRecord
+from openmsipython.data_models.spec_from_filemaker_record import MaterialSpecFromFileMakerRecord
 
 class LaserShockGlassID(MaterialSpecFromFileMakerRecord) :
     """
