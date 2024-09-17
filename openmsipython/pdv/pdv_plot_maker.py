@@ -1,8 +1,13 @@
 #imports
+import binascii
 import datetime
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
+try:
+    import importlib_metadata as metadata
+except ModuleNotFoundError:
+    import importlib.metadata as metadata
 import pandas as pd
 from io import BytesIO
 from openmsistream import DataFileStreamProcessor
@@ -72,7 +77,17 @@ class PDVPlotMaker(DataFileStreamProcessor,Runnable) :
             #save the plot and close the figure
             fn = self.__pdv_analysis_type.plot_file_name_from_input_file_name(datafile.filepath.name,
                                                                               LECROY_CONST.SKIMMED_FILENAME_APPEND)
-            fig.savefig(self._output_dir/fn,bbox_inches='tight')
+            # Store basic information about source data and genarator used for the plot.
+            # source_sha512 looks a little bit complicated, because openmsistream
+            # uses .digest(), but we need a string
+            meta = {
+                "source_sha512": binascii.hexlify(datafile.check_file_hash).decode(),
+                "openmsistream": metadata.version("openmsistream"),
+                "openmsipython": metadata.version("openmsipython"),
+                "analysis_type": str(self.__pdv_analysis_type),
+            }
+
+            fig.savefig(self._output_dir/fn,bbox_inches='tight',metadata=meta)
             plt.close()
         except Exception as e :
             return e
